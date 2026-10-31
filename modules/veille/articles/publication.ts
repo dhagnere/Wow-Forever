@@ -1,0 +1,25 @@
+import { SLUGS_RUBRIQUES } from "@/config/taxonomie";
+import type { Article } from "../types";
+
+/** Longueur minimale de l'avis de Silfax pour autoriser la publication. */
+export const AVIS_MINIMUM = 80;
+
+/** Texte à remplacer, du type « [Votre ressenti de joueur…] » (un lien Markdown « [texte](url) » n'est pas concerné). */
+const TEXTE_A_REMPLACER = /\[[^\]]{12,}\](?!\()/;
+
+/**
+ * Règles de publication. Garde-fou à ne jamais affaiblir (voir CLAUDE.md) :
+ * sans avis de Silfax, pas de publication. La base de données applique la même règle.
+ */
+export function verifierPublication(a: Pick<Article, "titre" | "corps" | "avisSilfax" | "rubrique" | "description">): string[] {
+  const erreurs: string[] = [];
+  if (a.titre.trim().length < 10) erreurs.push("Le titre est trop court.");
+  if (a.corps.trim().length < 300) erreurs.push("Le corps de l'article est trop court (300 caractères minimum).");
+  if (a.avisSilfax.trim().length < AVIS_MINIMUM)
+    erreurs.push(`« L'avis de Silfax » est vide ou trop court (${AVIS_MINIMUM} caractères minimum) : la publication est refusée.`);
+  if (TEXTE_A_REMPLACER.test(a.avisSilfax)) erreurs.push("« L'avis de Silfax » contient encore un texte à remplacer entre crochets.");
+  if (TEXTE_A_REMPLACER.test(a.corps)) erreurs.push("Le corps contient encore un texte à remplacer entre crochets.");
+  if (!(SLUGS_RUBRIQUES as string[]).includes(a.rubrique)) erreurs.push("Rubrique inconnue.");
+  if (a.description.trim().length < 50) erreurs.push("La description pour Google est trop courte (50 caractères minimum).");
+  return erreurs;
+}

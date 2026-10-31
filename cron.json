@@ -1,0 +1,6 @@
+{
+  "jobs": [
+    { "command": "37 5 * * * npm run veille:quotidien", "size": "M" },
+    { "command": "5 * * * * npm run veille:facebook" }
+  ]
+}
