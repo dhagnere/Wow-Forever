@@ -5,7 +5,7 @@
 
 export type { Article, SourceCitee, Statut } from "./types";
 export type { Modifications } from "./articles/depot";
-export type { Revue, BilanPassage } from "./passage";
+export type { Revue, BilanPassage, EtatRedaction } from "./passage";
 
 export {
   lirePublie,
@@ -23,6 +23,8 @@ export {
 export { verifierPublication, AVIS_MINIMUM } from "./articles/publication";
 export { markdownVersHtml } from "./rendu/html";
 export { lienFrancais, nomLangue, type LienSource, type ModeLien } from "./rendu/liens";
-export { derniereRevue } from "./passage";
+export { derniereRevue, etatRedaction, preparerRedaction, redigerSujets, MAX_PAR_LANCEMENT } from "./passage";
 export { urlArticle, messageFacebook } from "./facebook/relais";
+import { config as configVeille } from "./config";
+export const brouillonsParJour = (): number => configVeille.brouillonsParJour();
 export { COOKIE_SESSION, DUREE_SESSION_S, creerJeton, jetonValide, motDePasseCorrect } from "./auth/session";

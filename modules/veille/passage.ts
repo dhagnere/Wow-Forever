@@ -2,7 +2,7 @@ import { SOURCES, FENETRE_HEURES } from "@/config/sources";
 import { pool } from "./db/pool";
 import { lireToutes } from "./collecte/flux";
 import { classer } from "./collecte/tri";
-import { rediger } from "./redaction/redacteur";
+import { ErreurConfiguration, rediger } from "./redaction/redacteur";
 import * as depot from "./articles/depot";
 import { config } from "./config";
 import type { Sujet } from "./types";
@@ -23,7 +23,10 @@ function resumeSujet(s: Sujet) {
     titre: s.titre,
     score: s.score,
     detail: s.detailScore,
-    elements: s.elements.map((e) => ({ source: e.sourceNom, langue: e.langue, titre: e.titre, url: e.url, publieLe: e.publieLe })),
+    elements: s.elements.map((e) => ({
+      sourceId: e.sourceId, source: e.sourceNom, langue: e.langue, poids: e.poids, video: e.video,
+      titre: e.titre, url: e.url, publieLe: e.publieLe, resume: e.resume.slice(0, 800),
+    })),
   };
 }
 
@@ -74,19 +77,126 @@ export async function passage(mode: "essai" | "quotidien", journal: (m: string) 
   return bilan;
 }
 
+type SujetRevue = ReturnType<typeof resumeSujet> & { dejaTraite: boolean };
+
 export interface Revue {
   id: number;
   jour: string;
   creeLe: Date;
   mode: "essai" | "quotidien";
   bilan: BilanPassage;
-  sujets: (ReturnType<typeof resumeSujet> & { dejaTraite: boolean })[];
+  sujets: SujetRevue[];
 }
 
-export async function derniereRevue(): Promise<Revue | null> {
+async function lireRevue(id?: number): Promise<Revue | null> {
   const { rows } = await pool().query(
-    "SELECT id, to_char(jour, 'YYYY-MM-DD') AS jour, cree_le, mode, bilan, sujets FROM veille_revues ORDER BY cree_le DESC LIMIT 1",
+    `SELECT id, to_char(jour, 'YYYY-MM-DD') AS jour, cree_le, mode, bilan, sujets FROM veille_revues
+     WHERE ($1::int IS NULL OR id = $1) ORDER BY cree_le DESC LIMIT 1`,
+    [id ?? null],
   );
   const l = rows[0];
-  return l ? { id: l.id, jour: l.jour, creeLe: l.cree_le, mode: l.mode, bilan: l.bilan, sujets: l.sujets } : null;
+  if (!l) return null;
+  // « Déjà traité » est recalculé : un sujet rédigé depuis la revue n'est plus proposé.
+  const sujets = l.sujets as SujetRevue[];
+  const traites = await depot.sujetsDejaTraites(sujets.map((x) => x.cle));
+  return { id: l.id, jour: l.jour, creeLe: l.cree_le, mode: l.mode, bilan: l.bilan, sujets: sujets.map((x) => ({ ...x, dejaTraite: traites.has(x.cle) })) };
+}
+
+export function derniereRevue(): Promise<Revue | null> {
+  return lireRevue();
+}
+
+/* ---------- Rédaction à la demande, à partir d'une revue ---------- */
+
+export const MAX_PAR_LANCEMENT = 30;
+
+export interface EtatRedaction {
+  enCours: boolean;
+  total: number;
+  faits: number;
+  brouillons: { titre: string; id: number }[];
+  echecs: { sujet: string; raison: string }[];
+  debut: Date | null;
+  fin: Date | null;
+}
+
+// État en mémoire du processus web : une seule rédaction à la fois.
+const etat: EtatRedaction = { enCours: false, total: 0, faits: 0, brouillons: [], echecs: [], debut: null, fin: null };
+
+export function etatRedaction(): EtatRedaction {
+  return { ...etat, brouillons: [...etat.brouillons], echecs: [...etat.echecs] };
+}
+
+function versSujet(x: SujetRevue): Sujet {
+  return {
+    cle: x.cle,
+    titre: x.titre,
+    score: x.score,
+    detailScore: x.detail,
+    elements: x.elements.map((e) => ({
+      sourceId: e.sourceId ?? "revue",
+      sourceNom: e.source,
+      langue: e.langue,
+      poids: e.poids ?? 1,
+      video: !!e.video,
+      titre: e.titre,
+      url: e.url,
+      resume: e.resume ?? "",
+      publieLe: new Date(e.publieLe),
+    })),
+  };
+}
+
+export type Preparation = { ok: true; sujets: Sujet[] } | { ok: false; erreur: string };
+
+/**
+ * Réserve la rédaction des sujets choisis dans une revue (non encore traités, dans l'ordre du classement).
+ * Sans `cles`, prend les meilleurs sujets non traités, dans la limite du nombre de brouillons par jour.
+ */
+export async function preparerRedaction(revueId?: number, cles?: string[]): Promise<Preparation> {
+  if (etat.enCours) return { ok: false, erreur: `Une rédaction est déjà en cours (${etat.faits}/${etat.total}).` };
+  if (!process.env.ANTHROPIC_API_KEY) return { ok: false, erreur: "ANTHROPIC_API_KEY n'est pas renseignée : la rédaction par IA est impossible." };
+  const revue = await lireRevue(revueId);
+  if (!revue) return { ok: false, erreur: "Aucune revue enregistrée. Lancer d'abord npm run veille:essai." };
+
+  const libres = revue.sujets.filter((x) => !x.dejaTraite);
+  const choisis = cles ? libres.filter((x) => cles.includes(x.cle)) : libres.slice(0, config.brouillonsParJour());
+  if (!choisis.length) return { ok: false, erreur: "Aucun sujet à rédiger : rien de coché, ou sujets déjà traités." };
+  if (choisis.length > MAX_PAR_LANCEMENT) return { ok: false, erreur: `${MAX_PAR_LANCEMENT} sujets au plus par lancement.` };
+
+  Object.assign(etat, { enCours: true, total: choisis.length, faits: 0, brouillons: [], echecs: [], debut: new Date(), fin: null });
+  return { ok: true, sujets: choisis.map(versSujet) };
+}
+
+/** Rédige les sujets réservés par preparerRedaction. Chaque brouillon est enregistré dès qu'il est prêt. */
+export async function redigerSujets(sujets: Sujet[], journal: (m: string) => void = console.log): Promise<EtatRedaction> {
+  try {
+    for (const sujet of sujets) {
+      journal(`Rédaction : ${sujet.titre} (score ${sujet.score})`);
+      try {
+        const r = await rediger(sujet);
+        if (r.ok) {
+          const a = await depot.creerBrouillon(r.brouillon, sujet.cle);
+          etat.brouillons.push({ titre: a.titre, id: a.id });
+        } else {
+          etat.echecs.push({ sujet: sujet.titre, raison: r.raison });
+          journal(`  échec : ${r.raison}`);
+        }
+      } catch (e) {
+        const raison = e instanceof Error ? e.message : String(e);
+        etat.echecs.push({ sujet: sujet.titre, raison });
+        journal(`  échec : ${raison}`);
+        if (e instanceof ErreurConfiguration) {
+          etat.faits++;
+          journal("Rédaction interrompue : corriger le réglage avant de relancer.");
+          break;
+        }
+      }
+      etat.faits++;
+    }
+  } finally {
+    etat.enCours = false;
+    etat.fin = new Date();
+  }
+  return etatRedaction();
 }

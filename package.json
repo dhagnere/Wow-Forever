@@ -17,6 +17,7 @@
     "veille:sources": "tsx modules/veille/scripts/sources.ts",
     "veille:essai": "tsx modules/veille/scripts/essai.ts",
     "veille:quotidien": "tsx modules/veille/scripts/quotidien.ts",
+    "veille:revue": "tsx modules/veille/scripts/revue.ts",
     "veille:facebook": "tsx modules/veille/scripts/facebook.ts"
   },
   "dependencies": {

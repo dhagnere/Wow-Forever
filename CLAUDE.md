@@ -37,6 +37,7 @@ npm run db:migrate       # schéma de la base
 npm run veille:sources   # vérifie chaque flux de config/sources.ts
 npm run veille:essai     # classement du jour, sans rédaction ni coût d'API
 npm run veille:quotidien # passage complet : brouillons rédigés par l'IA
+npm run veille:revue     # rédige les meilleurs sujets de la dernière revue, sans refaire la collecte
 npm run veille:facebook  # relais Facebook
 ```
 

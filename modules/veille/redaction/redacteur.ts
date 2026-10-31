@@ -23,6 +23,9 @@ const SchemaBrouillon = z.object({
   titres_sources_fr: z.array(z.string()),
 });
 
+/** Erreur de réglage (clé d'API absente ou refusée) : inutile de poursuivre avec les autres sujets. */
+export class ErreurConfiguration extends Error {}
+
 export type ResultatRedaction =
   | { ok: true; brouillon: NouveauBrouillon }
   | { ok: false; raison: string };
@@ -87,7 +90,7 @@ export async function rediger(sujet: Sujet): Promise<ResultatRedaction> {
     });
   } catch (e) {
     if (e instanceof Anthropic.RateLimitError) return { ok: false, raison: "Limite de débit de l'API atteinte." };
-    if (e instanceof Anthropic.AuthenticationError) throw new Error("Clé ANTHROPIC_API_KEY invalide ou absente.");
+    if (e instanceof Anthropic.AuthenticationError) throw new ErreurConfiguration("Clé ANTHROPIC_API_KEY invalide ou absente.");
     if (e instanceof Anthropic.APIError) return { ok: false, raison: `Erreur API ${e.status ?? ""} : ${e.message}` };
     throw e;
   }
