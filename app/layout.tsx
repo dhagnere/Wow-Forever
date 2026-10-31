@@ -9,6 +9,8 @@ export const metadata: Metadata = {
     "Classes, quêtes, donjons et nouvelles terres de World of Warcraft: Forever, racontés en français par Silfax, de 1 à 60.",
   openGraph: { siteName: SITE.nom, locale: "fr_FR", type: "website" },
   alternates: { canonical: "/" },
+  // Validation Google Search Console (méthode « Balise HTML ») : contenu de l'attribut content, sans guillemets.
+  verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

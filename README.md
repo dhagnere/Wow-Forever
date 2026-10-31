@@ -32,7 +32,8 @@ Score d'un sujet : poids des sources qui en parlent + fraîcheur (3 points au pl
    scalingo --app azeroth-forever run npm run veille:quotidien
    ```
 7. Créer l'application Meta, obtenir un jeton de Page longue durée avec la permission `pages_manage_posts`, saisir `FACEBOOK_PAGE_ID` et `FACEBOOK_PAGE_TOKEN`. Le relais horaire s'active seul.
-8. Contrôler l'aperçu d'un article avec le Débogueur de partage de Meta, puis déclarer `/sitemap.xml` dans Google Search Console.
+8. Contrôler l'aperçu d'un article avec le Débogueur de partage de Meta.
+9. Google Search Console : ajouter une propriété de type **Préfixe de l'URL** (adresse exacte du site, avec `https://`), choisir la validation **Balise HTML**, copier la valeur de `content="…"` dans la variable `GOOGLE_SITE_VERIFICATION`, attendre le redémarrage de l'application, puis cliquer sur « Valider ». Envoyer ensuite `sitemap.xml` dans la rubrique Sitemaps. La propriété de type **Domaine** n'est possible qu'avec un nom de domaine à vous (validation par un enregistrement DNS), pas avec l'adresse `scalingo.io`.
 
 ### Tâches planifiées (`cron.json`)
 
