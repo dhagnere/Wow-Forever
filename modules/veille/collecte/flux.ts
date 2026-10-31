@@ -5,7 +5,16 @@ import { texteBrut } from "../rendu/html";
 
 // Le téléchargement passe par fetch (délai maximal, erreurs réseau interceptées) ;
 // rss-parser ne sert qu'à analyser le XML.
-const parser = new Parser();
+// « source » : éditeur réel d'un lien Google News (<source url="…">Nom</source>).
+const parser = new Parser<Record<string, unknown>, { source?: string | { _?: string } }>({ customFields: { item: ["source"] } });
+
+/** Nom de l'éditeur d'un lien Google News, et titre débarrassé du suffixe « - Éditeur ». */
+export function editeurGoogleNews(titre: string, source: unknown): { editeur?: string; titre: string } {
+  const editeur = (typeof source === "string" ? source : (source as { _?: string } | undefined)?._)?.trim();
+  if (!editeur) return { titre };
+  const suffixe = ` - ${editeur}`;
+  return { editeur, titre: titre.endsWith(suffixe) ? titre.slice(0, -suffixe.length) : titre };
+}
 
 async function telecharger(url: string): Promise<string> {
   const r = await fetch(url, {
@@ -42,14 +51,16 @@ export async function lireFlux(source: Source): Promise<ResultatFlux> {
     const elements: Element[] = [];
     for (const item of flux.items ?? []) {
       const publieLe = dateDe(item);
-      if (!item.title || !item.link || !publieLe) continue;
+      if (!item.title || !item.link || !publieLe || !/^https?:\/\//i.test(item.link)) continue;
+      const { editeur, titre } = editeurGoogleNews(texteBrut(item.title), item.source);
       elements.push({
         sourceId: source.id,
-        sourceNom: source.nom,
+        // Lien Google News : on crédite le site qui a publié l'article, pas l'agrégateur.
+        sourceNom: editeur ?? source.nom,
         langue: source.langue,
         poids: source.poids,
         video: !!source.video,
-        titre: texteBrut(item.title).slice(0, 300),
+        titre: titre.slice(0, 300),
         url: item.link,
         resume: texteBrut(item.content ?? item.summary ?? item.contentSnippet ?? "").slice(0, 1500),
         publieLe,

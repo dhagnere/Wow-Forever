@@ -5,7 +5,9 @@ export type Statut = "brouillon" | "publie" | "supprime";
 export interface SourceCitee {
   nom: string;
   url: string;
-  titre: string;
+  titre: string; // titre d'origine
+  titreFr?: string; // titre traduit en français (absent sur les articles antérieurs)
+  langue?: string; // code ISO de la page d'origine
 }
 
 export interface Article {

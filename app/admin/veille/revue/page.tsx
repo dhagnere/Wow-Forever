@@ -1,4 +1,4 @@
-import { derniereRevue } from "@/modules/veille";
+import { derniereRevue, lienFrancais, nomLangue } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
 import { dateLongue } from "@/lib/site";
 
@@ -39,9 +39,17 @@ export default async function Revue() {
                 <td title={`sources ${s.detail.sources} · fraîcheur ${s.detail.fraicheur} · vidéo ${s.detail.video} · étranger ${s.detail.etranger}`}>{s.score}</td>
                 <td>{s.titre}{s.dejaTraite ? <span className="doux"> · déjà traité</span> : null}</td>
                 <td>
-                  {s.elements.map((e) => (
-                    <div key={e.url}><a href={e.url} target="_blank" rel="noopener noreferrer nofollow">{e.source}</a> <span className="doux">({e.langue})</span></div>
-                  ))}
+                  {s.elements.map((e) => {
+                    const fr = lienFrancais(e.url, e.langue);
+                    return (
+                      <div key={e.url}>
+                        <a href={fr.url} target="_blank" rel="noopener noreferrer nofollow">{e.source}</a>{" "}
+                        <span className="doux">
+                          ({fr.mode === "original" ? nomLangue(e.langue) : <>en français · <a href={e.url} target="_blank" rel="noopener noreferrer nofollow">original</a></>})
+                        </span>
+                      </div>
+                    );
+                  })}
                 </td>
               </tr>
             ))}

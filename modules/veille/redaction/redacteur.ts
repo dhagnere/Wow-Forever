@@ -20,6 +20,7 @@ const SchemaBrouillon = z.object({
   description: z.string(),
   accroche_facebook: z.string(),
   texte_facebook: z.string(),
+  titres_sources_fr: z.array(z.string()),
 });
 
 export type ResultatRedaction =
@@ -96,7 +97,16 @@ export async function rediger(sujet: Sujet): Promise<ResultatRedaction> {
   const sortie = reponse.parsed_output;
   if (!sortie) return { ok: false, raison: "Réponse illisible." };
 
-  const sources: SourceCitee[] = elements.map((e) => ({ nom: e.sourceNom, url: e.url, titre: e.titre }));
+  const sources: SourceCitee[] = elements.map((e, i) => {
+    const traduit = sortie.titres_sources_fr[i]?.trim();
+    return {
+      nom: e.sourceNom,
+      url: e.url,
+      titre: e.titre,
+      titreFr: e.langue === "fr" ? e.titre : traduit ? couper(traduit, 300) : undefined,
+      langue: e.langue,
+    };
+  });
   const etiquettes = [...new Set(sortie.etiquettes.map((t) => t.trim().toLowerCase()).filter(Boolean))].slice(0, 6);
 
   return {

@@ -5,6 +5,7 @@ import { lirePublie, listerPublies, markdownVersHtml } from "@/modules/veille";
 import { CarteArticle, nomRubrique } from "@/components/Articles";
 import { Ariane } from "@/components/Ariane";
 import { JsonLd } from "@/components/JsonLd";
+import { LigneSource } from "@/components/Sources";
 import { SITE, dateLongue, tempsDeLecture } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -98,11 +99,7 @@ export default async function PageArticle({ params }: Props) {
             <section className="sources" aria-labelledby="t-sources">
               <h2 id="t-sources">Sources</h2>
               <ul>
-                {article.sources.map((s) => (
-                  <li key={s.url}>
-                    <a href={s.url} rel="noopener noreferrer nofollow" target="_blank">{s.nom} — {s.titre}</a>
-                  </li>
-                ))}
+                {article.sources.map((s) => <LigneSource key={s.url} source={s} />)}
               </ul>
             </section>
           ) : null}

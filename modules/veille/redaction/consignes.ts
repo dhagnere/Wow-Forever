@@ -26,4 +26,5 @@ Classement :
 - etiquettes : 3 à 6 mots-clés courts en français, en minuscules.
 - description : 120 à 155 caractères pour Google, avec « WoW Forever » si naturel.
 - accroche_facebook : une phrase de 90 caractères maximum, un emoji au plus.
-- texte_facebook : 2 à 3 phrases simples qui donnent envie de cliquer sans tout dévoiler. Pas de lien, pas de mots-dièse.`;
+- texte_facebook : 2 à 3 phrases simples qui donnent envie de cliquer sans tout dévoiler. Pas de lien, pas de mots-dièse.
+- titres_sources_fr : la traduction française fidèle du titre de chaque source, dans l'ordre des numéros de source (un titre par source, même s'il est déjà en français). Traduction littérale, sans reformulation ni ajout.`;

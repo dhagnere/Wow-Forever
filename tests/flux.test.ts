@@ -50,3 +50,27 @@ describe("diagnostic des sources", () => {
     expect(r.entrees).toBe(1);
   });
 });
+
+describe("liens Google News", () => {
+  it("crédite l'éditeur réel et retire le suffixe du titre", async () => {
+    const { editeurGoogleNews } = await import("@/modules/veille/collecte/flux");
+    expect(editeurGoogleNews("WoW Forever : la date de sortie - JudgeHype", { _: "JudgeHype" })).toEqual({ editeur: "JudgeHype", titre: "WoW Forever : la date de sortie" });
+    expect(editeurGoogleNews("Titre", undefined)).toEqual({ titre: "Titre" });
+  });
+
+  it("lit la balise <source> d'un flux Google News", async () => {
+    const xml = `<?xml version="1.0"?><rss version="2.0"><channel><title>g</title><item><title>WoW Forever: Skyborne abilities - Wowhead</title><link>https://news.google.com/rss/articles/abc?oc=5</link><pubDate>Sat, 31 Oct 2026 10:00:00 GMT</pubDate><source url="https://www.wowhead.com">Wowhead</source></item></channel></rss>`;
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(xml, { status: 200 })));
+    const r = await lireFlux(source);
+    expect(r.elements[0].sourceNom).toBe("Wowhead");
+    expect(r.elements[0].titre).toBe("WoW Forever: Skyborne abilities");
+  });
+});
+
+describe("liens dangereux", () => {
+  it("écarte les éléments dont le lien n'est pas en http(s)", async () => {
+    const xml = `<?xml version="1.0"?><rss version="2.0"><channel><title>t</title><item><title>WoW Forever piège</title><link>javascript:alert(1)</link><pubDate>Sat, 31 Oct 2026 10:00:00 GMT</pubDate></item></channel></rss>`;
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(xml, { status: 200 })));
+    expect((await lireFlux(source)).elements).toHaveLength(0);
+  });
+});

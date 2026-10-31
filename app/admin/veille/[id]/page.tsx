@@ -5,6 +5,7 @@ import { PILIERS, RUBRIQUES } from "@/config/taxonomie";
 import { exigerAdmin } from "@/lib/admin";
 import { dateLongue } from "@/lib/site";
 import { Editeur } from "./Editeur";
+import { LigneSource } from "@/components/Sources";
 import { depublier, enregistrer, restaurer, supprimer } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -45,7 +46,7 @@ export default async function EditerArticle({ params }: { params: Promise<{ id: 
             <h2>Sources</h2>
             {a.sources.length ? (
               <ul style={{ margin: 0, paddingLeft: 20, fontSize: 15 }}>
-                {a.sources.map((s) => <li key={s.url}><a href={s.url} target="_blank" rel="noopener noreferrer nofollow">{s.nom}</a> — {s.titre}</li>)}
+                {a.sources.map((s) => <LigneSource key={s.url} source={s} />)}
               </ul>
             ) : <p className="doux" style={{ margin: 0, fontSize: 15 }}>Article écrit à la main.</p>}
           </div>

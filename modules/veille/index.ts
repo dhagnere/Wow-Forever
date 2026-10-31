@@ -22,6 +22,7 @@ export {
 } from "./articles/depot";
 export { verifierPublication, AVIS_MINIMUM } from "./articles/publication";
 export { markdownVersHtml } from "./rendu/html";
+export { lienFrancais, nomLangue, type LienSource, type ModeLien } from "./rendu/liens";
 export { derniereRevue } from "./passage";
 export { urlArticle, messageFacebook } from "./facebook/relais";
 export { COOKIE_SESSION, DUREE_SESSION_S, creerJeton, jetonValide, motDePasseCorrect } from "./auth/session";
