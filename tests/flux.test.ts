@@ -35,3 +35,18 @@ describe("lecture des flux", () => {
     expect((await lireFlux(source)).erreur).toBe("HTTP 404");
   });
 });
+
+describe("diagnostic des sources", () => {
+  it("signale clairement une adresse qui renvoie une page web", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("<!DOCTYPE html><html><body><a href>x</a></body></html>", { status: 200 })));
+    expect((await lireFlux(source)).erreur).toMatch(/page web, pas un flux RSS/);
+  });
+
+  it("compte les entrées du flux, même écartées", async () => {
+    const sansDate = `<?xml version="1.0"?><rss version="2.0"><channel><title>t</title><item><title>a</title><link>https://x.org/a</link></item></channel></rss>`;
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(sansDate, { status: 200 })));
+    const r = await lireFlux(source);
+    expect(r.elements).toHaveLength(0);
+    expect(r.entrees).toBe(1);
+  });
+});

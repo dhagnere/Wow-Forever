@@ -30,9 +30,11 @@ export const SOURCES: Source[] = [
   { id: "wowhead", nom: "Wowhead", url: "https://www.wowhead.com/news/rss/classic", langue: "en", poids: 3, filtrer: true },
   { id: "youtube-wow", nom: "World of Warcraft (YouTube officiel)", url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCbLj9QP9FAaHs_647QckGtg", langue: "en", poids: 3, filtrer: true, video: true },
   { id: "blizzard-watch", nom: "Blizzard Watch", url: "https://blizzardwatch.com/feed/", langue: "en", poids: 2, filtrer: true },
-  { id: "warcraft-tavern", nom: "Warcraft Tavern", url: "https://www.warcrafttavern.com/feed/", langue: "en", poids: 2, filtrer: true },
+  // Le flux direct de Warcraft Tavern ne livrait aucun élément exploitable (31/10/2026) : passage par Google News, limité au site.
+  { id: "warcraft-tavern", nom: "Warcraft Tavern", url: googleNews("site:warcrafttavern.com Forever", "en-US", "US", "US:en"), langue: "en", poids: 2, filtrer: true },
   { id: "reddit-classicwow", nom: "Reddit r/classicwow", url: "https://www.reddit.com/r/classicwow/.rss", langue: "en", poids: 1, filtrer: true },
-  { id: "judgehype", nom: "JudgeHype", url: "https://www.judgehype.com/rss/news/", langue: "fr", poids: 2, filtrer: true },
+  // L'adresse https://www.judgehype.com/rss/news/ renvoie une page web, pas un flux (31/10/2026) : passage par Google News, limité au site.
+  { id: "judgehype", nom: "JudgeHype", url: googleNews("site:judgehype.com Forever", "fr", "FR", "FR:fr"), langue: "fr", poids: 2, filtrer: true },
   { id: "gamewave", nom: "Gamewave", url: "https://www.gamewave.fr/rss/", langue: "fr", poids: 2, filtrer: true },
   { id: "mein-mmo", nom: "Mein-MMO", url: "https://mein-mmo.de/feed/", langue: "de", poids: 2, filtrer: true },
   { id: "gnews-fr", nom: "Google News (français)", url: googleNews('"WoW Forever" OR "Warcraft: Forever"', "fr", "FR", "FR:fr"), langue: "fr", poids: 1, filtrer: true },

@@ -14,12 +14,18 @@ async function telecharger(url: string): Promise<string> {
     redirect: "follow",
   });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  return r.text();
+  const texte = await r.text();
+  if (/^\s*(<!doctype html|<html)/i.test(texte)) {
+    throw new Error("L'adresse renvoie une page web, pas un flux RSS : chercher la bonne adresse du flux sur le site.");
+  }
+  return texte;
 }
 
 export interface ResultatFlux {
   source: Source;
   elements: Element[];
+  /** Nombre d'entrées présentes dans le flux, avant tri (sans titre, lien ou date, une entrée est écartée). */
+  entrees: number;
   erreur?: string;
 }
 
@@ -49,10 +55,10 @@ export async function lireFlux(source: Source): Promise<ResultatFlux> {
         publieLe,
       });
     }
-    return { source, elements };
+    return { source, elements, entrees: flux.items?.length ?? 0 };
   } catch (e) {
     const cause = e instanceof Error && e.cause instanceof Error ? ` (${e.cause.message})` : "";
-    return { source, elements: [], erreur: `${e instanceof Error ? e.message : String(e)}${cause}` };
+    return { source, elements: [], entrees: 0, erreur: `${e instanceof Error ? e.message : String(e)}${cause}` };
   }
 }
 
