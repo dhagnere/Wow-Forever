@@ -9,7 +9,7 @@ interface Valeurs {
 }
 
 export function Editeur({
-  action, valeurs, rubriques, piliers, publie, avisMinimum,
+  action, valeurs, rubriques, piliers, publie, avisMinimum, programmeLe, programmeParDefaut,
 }: {
   action: (etat: EtatEdition, form: FormData) => Promise<EtatEdition>;
   valeurs: Valeurs;
@@ -17,6 +17,9 @@ export function Editeur({
   piliers: readonly string[];
   publie: boolean;
   avisMinimum: number;
+  /** Date programmée (heure de Paris, « AAAA-MM-JJTHH:MM »), ou "" si l'article n'est pas programmé. */
+  programmeLe: string;
+  programmeParDefaut: string;
 }) {
   const [etat, envoyer, enCours] = useActionState(action, { erreurs: [] });
   return (
@@ -88,10 +91,31 @@ export function Editeur({
         </div>
       </fieldset>
 
+      {!publie ? (
+        <fieldset className="encadre" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <legend className="surtitre" style={{ padding: "0 6px" }}>Programmer la publication</legend>
+          <p className="doux" style={{ margin: 0, fontSize: 15 }}>
+            {programmeLe
+              ? "Publication programmée. Vous pouvez changer l'heure ou annuler. Tant qu'il est programmé, l'article doit rester complet à chaque enregistrement."
+              : "L'article sera mis en ligne automatiquement à l'heure choisie (heure de Paris), au passage horaire suivant, avec les mêmes contrôles qu'une publication immédiate."}
+          </p>
+          <div className="actions-ligne">
+            <label htmlFor="programmeLe" className="sr-only">Date et heure de publication</label>
+            <input id="programmeLe" name="programmeLe" type="datetime-local" defaultValue={programmeLe || programmeParDefaut} />
+            <button type="submit" name="intention" value="programmer" className="btn btn-contour" disabled={enCours}>
+              {programmeLe ? "Changer l'heure" : "Programmer"}
+            </button>
+            {programmeLe ? (
+              <button type="submit" name="intention" value="annuler-programmation" className="btn btn-danger" disabled={enCours}>Annuler la programmation</button>
+            ) : null}
+          </div>
+        </fieldset>
+      ) : null}
+
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
         <button type="submit" name="intention" value="enregistrer" className="btn btn-contour" disabled={enCours}>Enregistrer</button>
         {!publie ? (
-          <button type="submit" name="intention" value="publier" className="btn btn-or" disabled={enCours}>Enregistrer et publier</button>
+          <button type="submit" name="intention" value="publier" className="btn btn-or" disabled={enCours}>Enregistrer et publier maintenant</button>
         ) : null}
       </div>
     </form>

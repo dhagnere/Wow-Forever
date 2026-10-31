@@ -1,7 +1,8 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { verifierPublication } from "@/modules/veille/articles/publication";
 import { markdownVersHtml, nettoyerHtml } from "@/modules/veille/rendu/html";
-import { creerJeton, jetonValide, motDePasseCorrect } from "@/modules/veille/auth/session";
+import { creerJeton, jetonValide, lireJeton, motDePasseCorrect } from "@/modules/veille/auth/session";
+import { controlerNouveauMotDePasse, hacher, verifierEmpreinte } from "@/modules/veille/auth/comptes";
 import { dansLaPlageHoraire, messageFacebook } from "@/modules/veille/facebook/relais";
 import { slugifier } from "@/modules/veille/articles/slug";
 
@@ -48,12 +49,27 @@ describe("session d'administration", () => {
     process.env.ADMIN_PASSWORD = "mot-de-passe-de-test-long";
   });
   it("valide un jeton signé et refuse un jeton altéré ou expiré", async () => {
-    const jeton = await creerJeton(1_000_000);
+    const jeton = await creerJeton({ id: 1, version: 1 }, 1_000_000);
     expect(await jetonValide(jeton, 1_000_001)).toBe(true);
+    expect(await lireJeton(jeton, 1_000_001)).toEqual({ id: 1, version: 1 });
     expect(await jetonValide(jeton.replace(/.$/, (c) => (c === "A" ? "B" : "A")), 1_000_001)).toBe(false);
-    expect(await jetonValide(`9999999999.${jeton.split(".")[1]}`, 1_000_001)).toBe(false);
+    const [, , , signature] = jeton.split(".");
+    expect(await jetonValide(`1.1.9999999999.${signature}`, 1_000_001)).toBe(false); // expiration falsifiée
+    expect(await jetonValide(`2.1.${jeton.split(".")[2]}.${signature}`, 1_000_001)).toBe(false); // autre compte
+    expect(await jetonValide(`1.2.${jeton.split(".")[2]}.${signature}`, 1_000_001)).toBe(false); // ancienne version de mot de passe
     expect(await jetonValide(jeton, 1_000_000 + 13 * 3600)).toBe(false);
     expect(await jetonValide(undefined)).toBe(false);
+    expect(await jetonValide("n.importe.quoi")).toBe(false);
+  });
+  it("hache les mots de passe et refuse les mots de passe faibles", async () => {
+    const empreinte = await hacher("une phrase de passe assez longue");
+    expect(empreinte).not.toContain("une phrase");
+    expect(await verifierEmpreinte("une phrase de passe assez longue", empreinte)).toBe(true);
+    expect(await verifierEmpreinte("une phrase de passe assez longuE", empreinte)).toBe(false);
+    expect(await hacher("x".repeat(20))).not.toBe(await hacher("x".repeat(20))); // sel aléatoire
+    expect(controlerNouveauMotDePasse("trop-court", "silfax")).toMatch(/16 caractères/);
+    expect(controlerNouveauMotDePasse("silfax-et-encore-des-mots", "silfax")).toMatch(/identifiant/);
+    expect(controlerNouveauMotDePasse("quatre mots bien choisis", "silfax")).toBeNull();
   });
   it("vérifie le mot de passe", async () => {
     expect(await motDePasseCorrect("mot-de-passe-de-test-long")).toBe(true);

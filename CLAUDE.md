@@ -7,7 +7,7 @@ Site de fans francophone non officiel consacré à World of Warcraft: Forever. N
 | Dossier | Rôle | Liberté |
 |---|---|---|
 | `app/(site)/`, `components/`, `app/globals.css`, `content/` | Pages publiques, habillage, contenu des pages piliers | Libre |
-| `app/admin/` | Espace de relecture `/admin/veille` | Libre sur l'ergonomie, garde-fous intacts |
+| `app/admin/` | Administration : tableau de bord `/admin/`, articles `/admin/veille/`, sources, compte | Libre sur l'ergonomie, garde-fous intacts |
 | `modules/veille/` | Collecte, classement, rédaction IA, articles, relais Facebook, sessions | Module cloisonné |
 | `config/sources.ts` | Sources surveillées | Libre |
 | `config/taxonomie.ts` | Rubriques et pages piliers | Ajouter librement ; ne pas renommer un slug déjà publié |
@@ -22,9 +22,10 @@ Site de fans francophone non officiel consacré à World of Warcraft: Forever. N
 
 1. **Avis obligatoire.** Aucun article ne se publie sans « L'avis de Silfax » rédigé (80 caractères minimum, sans texte à remplacer entre crochets). La règle est appliquée deux fois : `articles/publication.ts` et la contrainte `avis_obligatoire` de la base. Ne pas retirer, assouplir ni contourner l'une ou l'autre, ni publier par une requête SQL directe.
 2. **Filtrage du HTML.** Tout contenu affiché passe par `markdownVersHtml` / `nettoyerHtml` (`rendu/html.ts`). Pas de `dangerouslySetInnerHTML` sur du contenu non filtré. Seules les vidéos YouTube sont intégrables.
-3. **Accès réservé.** Tout `/admin` exige une session signée : `proxy.ts` à l'entrée, `exigerAdmin()` en tête de chaque page et de chaque action serveur. Une nouvelle page ou action d'administration appelle `exigerAdmin()`.
+3. **Accès réservé.** Tout `/admin` exige une session signée : `proxy.ts` à l'entrée, `exigerAdmin()` en tête de chaque page et de chaque action serveur. Une nouvelle page ou action d'administration appelle `exigerAdmin()`. Comptes en base (`auth/comptes.ts`) : mots de passe hachés par scrypt, jamais en clair ni dans les journaux ; blocage après 5 échecs ; un changement de mot de passe invalide les sessions (`version_session`).
 4. **Droit d'auteur.** Les consignes de rédaction (`redaction/consignes.ts`) imposent un article neuf, une seule citation courte, des sources créditées et aucune image copiée. Le ton peut être ajusté ; ces règles, non.
 5. **Facebook suit le site.** Le relais ne publie que des articles déjà en ligne, avec un lien vers le site (jamais vers la source), entre 8h et 22h (Paris), trois posts par heure au plus.
+6. **Programmation = publication.** Un article programmé est publié par `publier()`, avec les mêmes contrôles qu'une publication immédiate. Ne pas mettre en ligne par un autre chemin.
 
 ## Commandes
 
@@ -37,7 +38,8 @@ npm run db:migrate       # schéma de la base
 npm run veille:sources   # vérifie chaque flux de config/sources.ts
 npm run veille:essai     # classement du jour, sans rédaction ni coût d'API
 npm run veille:quotidien # passage complet : brouillons rédigés par l'IA
-npm run veille:facebook  # relais Facebook
+npm run veille:facebook  # publications programmées échues, puis relais Facebook
+npm run admin:compte -- <identifiant>  # créer un compte ou remplacer son mot de passe
 ```
 
 Avant tout envoi : `npm run lint && npm test && npm run build`.

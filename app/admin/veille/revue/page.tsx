@@ -11,7 +11,7 @@ export default async function Revue() {
     return (
       <>
         <h1 className="titre">Revue du jour</h1>
-        <p className="doux">Aucun passage de veille pour l&apos;instant. Lancer <code>npm run veille:essai</code> pour un premier classement sans coût d&apos;API.</p>
+        <p className="doux">Aucun passage de veille pour l&apos;instant. Depuis le <a href="/admin/">tableau de bord</a>, « Classement seul, sans IA » donne un premier classement sans coût d&apos;API.</p>
       </>
     );
   }

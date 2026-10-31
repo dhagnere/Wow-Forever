@@ -28,6 +28,8 @@ export interface Article {
   creeLe: Date;
   modifieLe: Date;
   publieLe: Date | null;
+  /** Brouillon programmé : publication automatique à cette date (passage horaire). */
+  programmeLe: Date | null;
   facebookPostId: string | null;
   facebookPublieLe: Date | null;
   facebookTentatives: number;

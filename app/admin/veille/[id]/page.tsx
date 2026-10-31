@@ -5,12 +5,23 @@ import { PILIERS, RUBRIQUES } from "@/config/taxonomie";
 import { exigerAdmin } from "@/lib/admin";
 import { dateLongue } from "@/lib/site";
 import { Editeur } from "./Editeur";
-import { depublier, enregistrer, restaurer, supprimer } from "../actions";
+import { depublier, enregistrer, relancer, restaurer, supprimer } from "../actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function EditerArticle({ params }: { params: Promise<{ id: string }> }) {
+/** Date au format du champ datetime-local, en heure de Paris. */
+function champDate(d: Date): string {
+  return new Date(d).toLocaleString("sv-SE", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).replace(" ", "T");
+}
+
+/** Proposition par défaut : demain à 8h, heure de Paris. */
+function demainHuitHeures(): string {
+  return `${champDate(new Date(Date.now() + 24 * 3600_000)).slice(0, 10)}T08:00`;
+}
+
+export default async function EditerArticle({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ message?: string }> }) {
   await exigerAdmin();
+  const { message } = await searchParams;
   const id = Number((await params).id);
   if (!Number.isInteger(id)) notFound();
   const a = await lireParId(id);
@@ -21,9 +32,14 @@ export default async function EditerArticle({ params }: { params: Promise<{ id: 
       <p><Link href="/admin/veille/">← Retour à la liste</Link></p>
       <h1 className="titre" style={{ fontSize: 30 }}>{a.titre}</h1>
       <p className="doux">
-        {a.statut === "publie" ? <>En ligne depuis le {a.publieLe ? dateLongue(a.publieLe) : "—"} · <Link href={`/articles/${a.slug}/`} target="_blank">voir l&apos;article</Link></> : a.statut === "supprime" ? "Dans la corbeille" : "Brouillon"}
+        {a.statut === "publie" ? <>En ligne depuis le {a.publieLe ? dateLongue(a.publieLe) : "—"} · <Link href={`/articles/${a.slug}/`} target="_blank">voir l&apos;article</Link></>
+          : a.statut === "supprime" ? "Dans la corbeille"
+          : a.programmeLe ? <strong style={{ color: "var(--or)" }}>Publication programmée le {new Date(a.programmeLe).toLocaleString("fr-FR", { dateStyle: "full", timeStyle: "short", timeZone: "Europe/Paris" })}</strong>
+          : "Brouillon"}
         {a.score !== null ? ` · score ${a.score}` : ""}
       </p>
+
+      {message ? <p className="info" role="status">{message}</p> : null}
 
       <div className="colonnes">
         <div className="colonne-principale">
@@ -38,6 +54,8 @@ export default async function EditerArticle({ params }: { params: Promise<{ id: 
             piliers={PILIERS}
             publie={a.statut === "publie"}
             avisMinimum={AVIS_MINIMUM}
+            programmeLe={a.programmeLe ? champDate(a.programmeLe) : ""}
+            programmeParDefaut={demainHuitHeures()}
           />
         </div>
         <aside className="colonne-laterale">
@@ -52,7 +70,19 @@ export default async function EditerArticle({ params }: { params: Promise<{ id: 
           <div className="encadre">
             <h2>Aperçu du post Facebook</h2>
             <p style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: 15 }}>{messageFacebook(a)}</p>
+            {a.statut === "publie" ? (
+              <p style={{ marginTop: 12, marginBottom: 0 }}>
+                {a.facebookPostId ? <span className="pastille pastille-ok">Relayé sur la Page</span>
+                  : a.facebookTentatives >= 3 ? <span className="pastille pastille-ko">Abandonné après 3 échecs</span>
+                  : <span className="pastille pastille-attente">En attente du passage horaire</span>}
+              </p>
+            ) : null}
             {a.facebookErreur ? <p className="alerte" style={{ marginTop: 12, fontSize: 14 }}>Dernier échec : {a.facebookErreur}</p> : null}
+            {a.statut === "publie" && !a.facebookPostId && a.facebookErreur ? (
+              <form action={relancer.bind(null, a.id)} style={{ marginTop: 12 }}>
+                <button type="submit" className="btn btn-contour btn-petit">Relancer sur Facebook</button>
+              </form>
+            ) : null}
           </div>
           <div className="encadre" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <h2>Actions</h2>

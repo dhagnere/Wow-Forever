@@ -64,3 +64,26 @@ export async function lireToutes(sources: Source[]): Promise<ResultatFlux[]> {
   }
   return resultats;
 }
+
+export interface EtatSource {
+  id: string;
+  nom: string;
+  url: string;
+  langue: string;
+  elements: number;
+  plusRecent: Date | null;
+  erreur?: string;
+}
+
+/** Test de chaque source, pour l'administration (aucune écriture en base, aucun coût d'API). */
+export async function testerSources(sources: Source[]): Promise<EtatSource[]> {
+  return (await lireToutes(sources)).map((r) => ({
+    id: r.source.id,
+    nom: r.source.nom,
+    url: r.source.url,
+    langue: r.source.langue,
+    elements: r.elements.length,
+    plusRecent: r.elements.reduce<Date | null>((max, e) => (!max || e.publieLe > max ? e.publieLe : max), null),
+    erreur: r.erreur,
+  }));
+}

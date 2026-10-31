@@ -19,6 +19,7 @@ export const config = {
     const n = Number(lire("VEILLE_BROUILLONS_PAR_JOUR") ?? 12);
     return Number.isFinite(n) && n > 0 ? Math.min(Math.floor(n), 30) : 12;
   },
+  anthropicConfigure: () => Boolean(lire("ANTHROPIC_API_KEY")),
   facebook: () => {
     const pageId = lire("FACEBOOK_PAGE_ID");
     const jeton = lire("FACEBOOK_PAGE_TOKEN");
@@ -26,3 +27,14 @@ export const config = {
     return { pageId, jeton, version: lire("FACEBOOK_GRAPH_VERSION") ?? "v21.0" };
   },
 };
+
+/** État des réglages, pour le tableau de bord. Aucune valeur secrète n'est renvoyée. */
+export function etatConfiguration() {
+  return {
+    siteUrl: lire("SITE_URL") ?? null,
+    redaction: Boolean(lire("ANTHROPIC_API_KEY")),
+    facebook: config.facebook() !== null,
+    modele: config.modele(),
+    brouillonsParJour: config.brouillonsParJour(),
+  };
+}

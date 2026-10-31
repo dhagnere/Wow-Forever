@@ -8,15 +8,15 @@ Le site publie trois familles de pages : le fil d'actualité alimenté chaque ma
 
 1. **Chaque matin**, la veille parcourt les sources de `config/sources.ts`, garde les sujets des dernières 36 heures qui parlent de Forever, écarte les doublons et classe le reste.
 2. Les douze meilleurs sujets deviennent des **brouillons** rédigés en français par l'API Anthropic, rangés dans leur rubrique et rattachés à leur page pilier.
-3. Silfax **relit** dans `/admin/veille`, écrit son avis, publie ou supprime. Sans avis, la publication est refusée.
-4. **Chaque heure**, entre 8h et 22h, les articles publiés partent sur la Page Facebook avec leur image d'ouverture.
+3. Silfax **relit** dans `/admin/veille`, écrit son avis, puis publie tout de suite, **programme** la publication à une date et une heure, ou supprime. Sans avis, la publication comme la programmation sont refusées.
+4. **Chaque heure**, à la 5e minute, les articles programmés arrivés à échéance sont mis en ligne ; puis, entre 8h et 22h, les articles publiés partent sur la Page Facebook avec leur image d'ouverture.
 
 Score d'un sujet : poids des sources qui en parlent + fraîcheur (3 points au plus) + 1,5 point si une vidéo existe + 1 point par source en langue étrangère (2 au plus). La revue complète de chaque passage est conservée dans la table `veille_revues` et consultable dans `/admin/veille/revue`.
 
 ## Mise en service sur Scalingo
 
 1. Créer l'application (région Paris) et ajouter l'extension **PostgreSQL**.
-2. Saisir les variables listées dans `.env.example` : `SITE_URL`, `ADMIN_PASSWORD`, `SESSION_SECRET` d'abord ; `ANTHROPIC_API_KEY` et les variables Facebook ensuite.
+2. Saisir les variables listées dans `.env.example` : `SITE_URL`, `ADMIN_IDENTIFIANT`, `ADMIN_PASSWORD`, `SESSION_SECRET` d'abord ; `ANTHROPIC_API_KEY` et les variables Facebook ensuite.
 3. Relier le dépôt GitHub à l'application. Chaque envoi déclenche un déploiement ; la base est créée ou mise à jour par la commande `postdeploy` du `Procfile`.
 4. Vérifier les sources :
    ```bash
@@ -35,12 +35,37 @@ Score d'un sujet : poids des sources qui en parlent + fraîcheur (3 points au pl
 8. Contrôler l'aperçu d'un article avec le Débogueur de partage de Meta.
 9. Google Search Console : ajouter une propriété de type **Préfixe de l'URL** (adresse exacte du site, avec `https://`), choisir la validation **Balise HTML**, copier la valeur de `content="…"` dans la variable `GOOGLE_SITE_VERIFICATION`, attendre le redémarrage de l'application, puis cliquer sur « Valider ». Envoyer ensuite `sitemap.xml` dans la rubrique Sitemaps. La propriété de type **Domaine** n'est possible qu'avec un nom de domaine à vous (validation par un enregistrement DNS), pas avec l'adresse `scalingo.io`.
 
+### Espace d'administration
+
+Adresse : `/admin/connexion/` (aucun lien public n'y mène ; `/admin/` y renvoie si l'on n'est pas connecté).
+
+| Écran | Rôle |
+|---|---|
+| `/admin/` | Tableau de bord : brouillons, publications programmées, publiés de la semaine, échecs Facebook ; derniers passages de la veille ; réglages manquants ; boutons « Lancer la veille maintenant » et « Classement seul, sans IA » |
+| `/admin/veille/` | Articles : onglets Brouillons, Programmés, Publiés, Corbeille ; « Écrire un article » |
+| `/admin/veille/<n>/` | Éditeur : enregistrer, publier maintenant, programmer (heure de Paris), annuler la programmation, retirer du site, relancer le relais Facebook après échec |
+| `/admin/veille/revue/` | Revue complète du dernier passage |
+| `/admin/sources/` | Sources surveillées, test de chacune |
+| `/admin/compte/` | Changement de mot de passe |
+
+**Premier accès.** Tant qu'aucun compte n'existe en base, l'identifiant `ADMIN_IDENTIFIANT` (par défaut `silfax`) et le mot de passe `ADMIN_PASSWORD` créent le compte à la première connexion. L'écran « Mon compte » s'ouvre alors pour choisir un mot de passe personnel ; `ADMIN_PASSWORD` n'est plus lu ensuite.
+
+**Sécurité.** Mots de passe hachés (scrypt, 16 caractères minimum). Session signée de 12 heures, cookie `HttpOnly` et `SameSite=Strict`. Changer le mot de passe ferme toutes les sessions ouvertes. Cinq essais manqués bloquent l'identifiant et l'adresse IP pendant 15 minutes (compteur en base, conservé aux redémarrages).
+
+**Mot de passe perdu, ou second compte :**
+```bash
+scalingo --app azeroth-forever run npm run admin:compte -- silfax
+```
+Le mot de passe est demandé au clavier sans s'afficher. Si l'identifiant existe, son mot de passe est remplacé.
+
+**Lancer la veille depuis le tableau de bord.** Le passage tourne dans le conteneur web (même commande que le planificateur, sortie visible dans les journaux Scalingo). Un verrou empêche deux passages simultanés ; chaque passage, planifié ou manuel, est consigné dans la table `veille_passages`.
+
 ### Tâches planifiées (`cron.json`)
 
 | Tâche | Horaire | Remarque |
 |---|---|---|
 | `veille:quotidien` | `37 5 * * *` | Le planificateur Scalingo tourne en UTC : 6h37 à Paris en hiver, 7h37 en été. |
-| `veille:facebook` | toutes les heures, à la 5e minute | La plage 8h-22h (heure de Paris) est contrôlée par le code, changement d'heure compris. |
+| `veille:facebook` | toutes les heures, à la 5e minute | Met d'abord en ligne les articles programmés arrivés à échéance (à toute heure). Relais Facebook : la plage 8h-22h (heure de Paris) est contrôlée par le code, changement d'heure compris. |
 
 Fixer un plafond mensuel de dépense dans la console Anthropic dès le départ.
 
@@ -48,7 +73,7 @@ Fixer un plafond mensuel de dépense dans la console Anthropic dès le départ.
 
 ```bash
 npm install
-cp .env.example .env.local   # renseigner DATABASE_URL, ADMIN_PASSWORD, SESSION_SECRET
+cp .env.example .env.local   # renseigner DATABASE_URL, ADMIN_IDENTIFIANT, ADMIN_PASSWORD, SESSION_SECRET
 npm run db:migrate
 npm run dev
 ```
@@ -59,7 +84,7 @@ Avant tout envoi : `npm run lint && npm test && npm run build`. Les règles à r
 
 ```
 app/(site)/          pages publiques (accueil, actualités, articles, classes, races, zones, donjons, carnet…)
-app/admin/           espace de relecture /admin/veille
+app/admin/           espace d'administration (tableau de bord, articles, revue, sources, compte)
 components/          composants d'affichage
 content/             contenu des pages piliers (classes, race Skyborne, zones, donjons)
 config/              sources surveillées, rubriques et pages piliers

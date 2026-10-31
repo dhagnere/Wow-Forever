@@ -10,7 +10,7 @@ interface Ligne {
   rubrique: string; etiquettes: string[]; pilier: string | null; description: string;
   accroche_facebook: string; texte_facebook: string; sources: SourceCitee[]; statut: Statut;
   score: number | null; origine: "veille" | "manuel"; cree_le: Date; modifie_le: Date;
-  publie_le: Date | null; facebook_post_id: string | null; facebook_publie_le: Date | null;
+  publie_le: Date | null; programme_le: Date | null; facebook_post_id: string | null; facebook_publie_le: Date | null;
   facebook_tentatives: number; facebook_erreur: string | null;
 }
 
@@ -20,7 +20,7 @@ function versArticle(l: Ligne): Article {
     rubrique: l.rubrique as SlugRubrique, etiquettes: l.etiquettes, pilier: estPilier(l.pilier) ? l.pilier : null,
     description: l.description, accrocheFacebook: l.accroche_facebook, texteFacebook: l.texte_facebook,
     sources: l.sources, statut: l.statut, score: l.score, origine: l.origine, creeLe: l.cree_le,
-    modifieLe: l.modifie_le, publieLe: l.publie_le, facebookPostId: l.facebook_post_id,
+    modifieLe: l.modifie_le, publieLe: l.publie_le, programmeLe: l.programme_le, facebookPostId: l.facebook_post_id,
     facebookPublieLe: l.facebook_publie_le, facebookTentatives: l.facebook_tentatives, facebookErreur: l.facebook_erreur,
   };
 }
@@ -75,7 +75,8 @@ export async function modifier(id: number, m: Modifications): Promise<Article> {
     const actuel = await client.query<Ligne>("SELECT * FROM articles WHERE id = $1", [id]);
     if (!actuel.rows[0]) throw new Error("Article introuvable.");
     const art = actuel.rows[0];
-    if (art.statut === "publie") {
+    // Un article en ligne ou programmé doit rester publiable à chaque enregistrement.
+    if (art.statut === "publie" || art.programme_le) {
       const erreurs = verifierPublication(m);
       if (erreurs.length) throw new ErreurPublication(erreurs);
     }
@@ -106,14 +107,14 @@ export async function publier(id: number): Promise<Article> {
   const erreurs = verifierPublication(a);
   if (erreurs.length) throw new ErreurPublication(erreurs);
   const { rows } = await pool().query<Ligne>(
-    "UPDATE articles SET statut='publie', publie_le=COALESCE(publie_le, now()), modifie_le=now() WHERE id=$1 RETURNING *",
+    "UPDATE articles SET statut='publie', publie_le=COALESCE(publie_le, now()), programme_le=NULL, modifie_le=now() WHERE id=$1 RETURNING *",
     [id],
   );
   return versArticle(rows[0]);
 }
 
 export async function changerStatut(id: number, statut: Exclude<Statut, "publie">): Promise<void> {
-  await pool().query("UPDATE articles SET statut=$2, modifie_le=now() WHERE id=$1", [id, statut]);
+  await pool().query("UPDATE articles SET statut=$2, programme_le=NULL, modifie_le=now() WHERE id=$1", [id, statut]);
 }
 
 export async function lireParId(id: number): Promise<Article | null> {
@@ -152,10 +153,107 @@ export async function compterPublies(rubrique?: string): Promise<number> {
   return Number(rows[0].n);
 }
 
-export async function listerPourAdmin(statut: Statut): Promise<Article[]> {
-  const ordre = statut === "brouillon" ? "score DESC NULLS LAST, cree_le DESC" : "COALESCE(publie_le, modifie_le) DESC";
-  const { rows } = await pool().query<Ligne>(`SELECT * FROM articles WHERE statut=$1 ORDER BY ${ordre} LIMIT 200`, [statut]);
+/** Liste de l'administration. « programme » = brouillons dont la publication est programmée. */
+export async function listerPourAdmin(statut: Statut | "programme"): Promise<Article[]> {
+  const requetes: Record<Statut | "programme", string> = {
+    brouillon: "statut='brouillon' AND programme_le IS NULL ORDER BY score DESC NULLS LAST, cree_le DESC",
+    programme: "statut='brouillon' AND programme_le IS NOT NULL ORDER BY programme_le ASC",
+    publie: "statut='publie' ORDER BY publie_le DESC",
+    supprime: "statut='supprime' ORDER BY modifie_le DESC",
+  };
+  const { rows } = await pool().query<Ligne>(`SELECT * FROM articles WHERE ${requetes[statut]} LIMIT 200`);
   return rows.map(versArticle);
+}
+
+// --- Programmation ------------------------------------------------------------------------------
+
+/**
+ * Programme la publication d'un brouillon. Les règles de publication sont vérifiées dès maintenant
+ * (avis de Silfax compris), puis de nouveau au moment de la mise en ligne.
+ */
+export async function programmer(id: number, quand: Date, maintenant = new Date()): Promise<Article> {
+  const a = await lireParId(id);
+  if (!a) throw new Error("Article introuvable.");
+  if (a.statut !== "brouillon") throw new ErreurPublication(["Seul un brouillon peut être programmé."]);
+  if (Number.isNaN(quand.getTime()) || quand.getTime() <= maintenant.getTime())
+    throw new ErreurPublication(["Choisissez une date et une heure à venir."]);
+  const erreurs = verifierPublication(a);
+  if (erreurs.length) throw new ErreurPublication(erreurs);
+  const { rows } = await pool().query<Ligne>(
+    "UPDATE articles SET programme_le=$2, modifie_le=now() WHERE id=$1 AND statut='brouillon' RETURNING *",
+    [id, quand],
+  );
+  return versArticle(rows[0]);
+}
+
+export async function annulerProgrammation(id: number): Promise<void> {
+  await pool().query("UPDATE articles SET programme_le=NULL, modifie_le=now() WHERE id=$1", [id]);
+}
+
+/**
+ * Met en ligne les brouillons programmés arrivés à échéance, par la voie normale (publier()).
+ * Un article devenu impubliable entre-temps reste en brouillon et perd sa programmation.
+ */
+export async function publierProgrammes(maintenant = new Date()): Promise<{ publies: string[]; echecs: { id: number; erreur: string }[] }> {
+  const { rows } = await pool().query<{ id: number }>(
+    "SELECT id FROM articles WHERE statut='brouillon' AND programme_le IS NOT NULL AND programme_le <= $1 ORDER BY programme_le",
+    [maintenant],
+  );
+  const bilan = { publies: [] as string[], echecs: [] as { id: number; erreur: string }[] };
+  for (const { id } of rows) {
+    try {
+      bilan.publies.push((await publier(id)).slug);
+    } catch (e) {
+      await annulerProgrammation(id);
+      bilan.echecs.push({ id, erreur: e instanceof Error ? e.message : String(e) });
+    }
+  }
+  return bilan;
+}
+
+// --- Facebook et tableau de bord ---------------------------------------------------------------
+
+/**
+ * Remet un article publié dans la file du relais Facebook après trois échecs (jeton expiré, par exemple).
+ * Le relais garde ses règles : articles publiés depuis moins de 7 jours, de 8h à 22h, 3 posts par heure.
+ */
+export async function relancerFacebook(id: number): Promise<boolean> {
+  const { rowCount } = await pool().query(
+    `UPDATE articles SET facebook_tentatives=0, facebook_erreur=NULL
+     WHERE id=$1 AND statut='publie' AND facebook_post_id IS NULL AND publie_le > now() - interval '7 days'`,
+    [id],
+  );
+  return (rowCount ?? 0) > 0;
+}
+
+export interface Statistiques {
+  brouillons: number;
+  programmes: number;
+  publies: number;
+  publies7j: number;
+  facebookAttente: number;
+  facebookEchecs: number;
+  prochaineProgrammation: Date | null;
+}
+
+export async function statistiques(): Promise<Statistiques> {
+  const { rows } = await pool().query(`
+    SELECT
+      count(*) FILTER (WHERE statut='brouillon' AND programme_le IS NULL)                AS brouillons,
+      count(*) FILTER (WHERE statut='brouillon' AND programme_le IS NOT NULL)            AS programmes,
+      count(*) FILTER (WHERE statut='publie')                                            AS publies,
+      count(*) FILTER (WHERE statut='publie' AND publie_le > now() - interval '7 days')  AS publies7j,
+      count(*) FILTER (WHERE statut='publie' AND facebook_post_id IS NULL AND facebook_tentatives < 3
+                         AND publie_le > now() - interval '7 days')                      AS facebook_attente,
+      count(*) FILTER (WHERE statut='publie' AND facebook_post_id IS NULL AND facebook_tentatives >= 3)  AS facebook_echecs,
+      min(programme_le) FILTER (WHERE statut='brouillon')                                AS prochaine
+    FROM articles`);
+  const r = rows[0];
+  return {
+    brouillons: Number(r.brouillons), programmes: Number(r.programmes), publies: Number(r.publies),
+    publies7j: Number(r.publies7j), facebookAttente: Number(r.facebook_attente), facebookEchecs: Number(r.facebook_echecs),
+    prochaineProgrammation: r.prochaine,
+  };
 }
 
 /** Pour le plan du site : slugs et dates de tous les articles publiés. */

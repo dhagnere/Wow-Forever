@@ -9,10 +9,14 @@ export function FormulaireConnexion() {
     <form action={action} className="formulaire" style={{ maxWidth: 420 }}>
       {erreur ? <p className="alerte" role="alert">{erreur}</p> : null}
       <div className="champ">
+        <label htmlFor="identifiant">Identifiant</label>
+        <input id="identifiant" name="identifiant" type="text" autoComplete="username" autoCapitalize="none" spellCheck={false} required autoFocus />
+      </div>
+      <div className="champ">
         <label htmlFor="motdepasse">Mot de passe</label>
         <input id="motdepasse" name="motdepasse" type="password" autoComplete="current-password" required />
       </div>
-      <button type="submit" className="btn btn-or" disabled={enCours}>Se connecter</button>
+      <button type="submit" className="btn btn-or" disabled={enCours}>{enCours ? "Vérification…" : "Se connecter"}</button>
     </form>
   );
 }

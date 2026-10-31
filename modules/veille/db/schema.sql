@@ -51,3 +51,40 @@ CREATE TABLE IF NOT EXISTS veille_revues (
 );
 
 CREATE INDEX IF NOT EXISTS veille_revues_jour ON veille_revues (jour DESC, cree_le DESC);
+
+-- Programmation : un brouillon dont programme_le est renseigné sera publié par le passage horaire
+-- (publication normale, donc soumise aux mêmes contrôles et à la contrainte avis_obligatoire).
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS programme_le TIMESTAMPTZ;
+CREATE INDEX IF NOT EXISTS articles_programme_le ON articles (programme_le) WHERE programme_le IS NOT NULL;
+
+-- Comptes d'administration. version_session augmente à chaque changement de mot de passe :
+-- toutes les sessions ouvertes deviennent alors invalides.
+CREATE TABLE IF NOT EXISTS admins (
+  id                  SERIAL PRIMARY KEY,
+  identifiant         TEXT NOT NULL UNIQUE,
+  empreinte           TEXT NOT NULL,
+  version_session     INTEGER NOT NULL DEFAULT 1,
+  cree_le             TIMESTAMPTZ NOT NULL DEFAULT now(),
+  derniere_connexion  TIMESTAMPTZ
+);
+
+-- Essais de connexion manqués, par identifiant et par adresse IP (blocage temporaire).
+CREATE TABLE IF NOT EXISTS admin_echecs (
+  cle     TEXT PRIMARY KEY,
+  n       INTEGER NOT NULL DEFAULT 0,
+  depuis  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Journal des passages de veille (planifiés ou lancés depuis le tableau de bord).
+CREATE TABLE IF NOT EXISTS veille_passages (
+  id           SERIAL PRIMARY KEY,
+  mode         TEXT NOT NULL CHECK (mode IN ('essai', 'quotidien')),
+  declencheur  TEXT NOT NULL DEFAULT 'planificateur',
+  debut        TIMESTAMPTZ NOT NULL DEFAULT now(),
+  fin          TIMESTAMPTZ,
+  statut       TEXT NOT NULL DEFAULT 'en_cours' CHECK (statut IN ('en_cours', 'termine', 'echec')),
+  resume       TEXT,
+  erreur       TEXT
+);
+
+CREATE INDEX IF NOT EXISTS veille_passages_debut ON veille_passages (debut DESC);
