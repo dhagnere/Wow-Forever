@@ -1,4 +1,5 @@
-import { SOURCES, FENETRE_HEURES } from "@/config/sources";
+import { SOURCES, FENETRE_HEURES, type Source } from "@/config/sources";
+import { DOSSIERS, FENETRE_DOSSIERS_HEURES } from "@/config/dossiers";
 import { pool } from "./db/pool";
 import { lireToutes } from "./collecte/flux";
 import { classer } from "./collecte/tri";
@@ -8,8 +9,12 @@ import * as depot from "./articles/depot";
 import { config } from "./config";
 import type { Sujet } from "./types";
 
+export type ModePassage = "essai" | "quotidien" | "dossier";
+
 export interface BilanPassage {
-  mode: "essai" | "quotidien";
+  mode: ModePassage;
+  /** Dossiers recherchés (mode dossier). */
+  dossiers?: string[];
   sources: { id: string; nom: string; elements: number; erreur?: string }[];
   elementsLus: number;
   sujetsRetenus: number;
@@ -39,15 +44,20 @@ function resumeSujet(s: Sujet) {
  *  - quotidien : rédige les meilleurs sujets non encore traités en brouillons.
  * La revue complète est enregistrée dans veille_revues.
  */
-export async function passage(mode: "essai" | "quotidien", journal: (m: string) => void = console.log): Promise<BilanPassage> {
+export async function passage(
+  mode: ModePassage,
+  journal: (m: string) => void = console.log,
+  options: { sources?: Source[]; fenetreHeures?: number; dossiers?: string[] } = {},
+): Promise<BilanPassage> {
   const maintenant = new Date();
-  const lus = await lireToutes(SOURCES);
+  const lus = await lireToutes(options.sources ?? SOURCES);
   const elements = lus.flatMap((r) => r.elements);
-  const sujets = classer(elements, maintenant, FENETRE_HEURES);
+  const sujets = classer(elements, maintenant, options.fenetreHeures ?? FENETRE_HEURES);
   const traites = await depot.sujetsDejaTraites(sujets.map((s) => s.cle));
 
   const bilan: BilanPassage = {
     mode,
+    dossiers: options.dossiers,
     sources: lus.map((r) => ({ id: r.source.id, nom: r.source.nom, elements: r.elements.length, erreur: r.erreur })),
     elementsLus: elements.length,
     sujetsRetenus: sujets.length,
@@ -87,7 +97,7 @@ export interface Revue {
   id: number;
   jour: string;
   creeLe: Date;
-  mode: "essai" | "quotidien";
+  mode: ModePassage;
   bilan: BilanPassage;
   sujets: SujetRevue[];
 }
@@ -206,4 +216,33 @@ export async function redigerSujets(sujets: Sujet[], journal: (m: string) => voi
     etat.fin = new Date();
   }
   return etatRedaction();
+}
+
+/* ---------- Dossiers de référence ---------- */
+
+let dossierEnCours: { depuis: Date; dossiers: string[] } | null = null;
+
+export function etatDossier() {
+  return dossierEnCours ? { ...dossierEnCours } : null;
+}
+
+/**
+ * Recherche les dossiers demandés (tous par défaut) sur 60 jours, sans rédaction ni coût d'API.
+ * Le résultat est enregistré comme une revue : on y coche les sujets à rédiger.
+ */
+export async function rechercherDossiers(ids?: string[], journal: (m: string) => void = console.log): Promise<BilanPassage> {
+  const choisis = DOSSIERS.filter((d) => !ids?.length || ids.includes(d.id));
+  if (!choisis.length) throw new Error(`Dossier inconnu. Dossiers possibles : ${DOSSIERS.map((d) => d.id).join(", ")}.`);
+  if (dossierEnCours) throw new Error("Une recherche de dossiers est déjà en cours.");
+  dossierEnCours = { depuis: new Date(), dossiers: choisis.map((d) => d.nom) };
+  try {
+    journal(`Dossiers : ${choisis.map((d) => d.nom).join(", ")}`);
+    return await passage("dossier", journal, {
+      sources: choisis.flatMap((d) => d.sources),
+      fenetreHeures: FENETRE_DOSSIERS_HEURES,
+      dossiers: choisis.map((d) => d.nom),
+    });
+  } finally {
+    dossierEnCours = null;
+  }
 }

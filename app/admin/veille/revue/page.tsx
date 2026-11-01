@@ -1,12 +1,14 @@
 import Link from "next/link";
 import {
-  brouillonsParJour, derniereRevue, etatRedaction, lienFrancais, MAX_PAR_LANCEMENT, nomLangue, selectionVariee, themeDe,
+  brouillonsParJour, derniereRevue, DOSSIERS, etatDossier, etatRedaction, lienFrancais, MAX_PAR_LANCEMENT, nomLangue,
+  selectionVariee, themeDe,
 } from "@/modules/veille";
+import { RechercheDossiers } from "./Dossiers";
 import { RUBRIQUES, trouverRubrique } from "@/config/taxonomie";
 import { exigerAdmin } from "@/lib/admin";
 import { dateLongue } from "@/lib/site";
 import { SelectionRevue, type LigneRevue } from "./Selection";
-import { redigerSelection } from "./actions";
+import { lancerDossiers, redigerSelection } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +19,18 @@ export default async function Revue({ searchParams }: { searchParams: Promise<{ 
   const demande = (await searchParams).theme;
   const filtre = demande && trouverRubrique(demande) ? demande : undefined;
   const [revue, redaction] = await Promise.all([derniereRevue(), Promise.resolve(etatRedaction())]);
+  const dossierEnCours = etatDossier();
+  const blocDossiers = (
+    <>
+      {dossierEnCours ? (
+        <>
+          <meta httpEquiv="refresh" content="20" />
+          <p className="info" role="status">Recherche des dossiers en cours : {dossierEnCours.dossiers.join(", ")}. La page se met à jour toute seule.</p>
+        </>
+      ) : null}
+      <RechercheDossiers action={lancerDossiers} dossiers={DOSSIERS.map((d) => ({ id: d.id, nom: d.nom }))} enCours={!!dossierEnCours} />
+    </>
+  );
 
   const bandeau = redaction.enCours ? (
     <>
@@ -39,6 +53,7 @@ export default async function Revue({ searchParams }: { searchParams: Promise<{ 
     return (
       <>
         <h1 className="titre">Revue du jour</h1>
+        {blocDossiers}
         <p className="doux">Aucun passage de veille pour l&apos;instant. Lancer <code>npm run veille:essai</code> pour un premier classement sans coût d&apos;API.</p>
       </>
     );
@@ -72,10 +87,11 @@ export default async function Revue({ searchParams }: { searchParams: Promise<{ 
 
   return (
     <>
-      <h1 className="titre">Revue du {dateLongue(revue.creeLe)}</h1>
+      <h1 className="titre">{revue.mode === "dossier" ? "Dossiers" : "Revue"} du {dateLongue(revue.creeLe)}</h1>
       {bandeau}
+      {blocDossiers}
       <p className="doux">
-        Passage « {revue.mode} » de {HEURE.format(revue.creeLe)} : {b.elementsLus} éléments lus, {b.sujetsRetenus} sujets retenus,{" "}
+        {revue.mode === "dossier" ? `Recherche « ${(b.dossiers ?? []).join(", ")} » sur 60 jours` : `Passage « ${revue.mode} »`} de {HEURE.format(revue.creeLe)} : {b.elementsLus} éléments lus, {b.sujetsRetenus} sujets retenus,{" "}
         {revue.sujets.filter((s) => s.dejaTraite).length} déjà rédigés. {aCocher.size} sujets cochés
         {filtre ? " : les meilleurs de ce thème." : " : les meilleurs, variés entre les thèmes."}
       </p>

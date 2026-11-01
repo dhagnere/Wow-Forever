@@ -19,7 +19,8 @@
     "veille:quotidien": "tsx modules/veille/scripts/quotidien.ts",
     "veille:revue": "tsx modules/veille/scripts/revue.ts",
     "veille:facebook": "tsx modules/veille/scripts/facebook.ts",
-    "icones:generer": "node scripts/generer-icones-classes.mjs"
+    "icones:generer": "node scripts/generer-icones-classes.mjs",
+    "veille:dossier": "tsx modules/veille/scripts/dossier.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

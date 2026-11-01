@@ -24,7 +24,8 @@ export {
 export { verifierPublication, sourcesPubliees, AVIS_MINIMUM } from "./articles/publication";
 export { markdownVersHtml } from "./rendu/html";
 export { lienFrancais, nomLangue, type LienSource, type ModeLien } from "./rendu/liens";
-export { themeDe } from "./passage";
+export { themeDe, rechercherDossiers, etatDossier } from "./passage";
+export { DOSSIERS } from "@/config/dossiers";
 export { selectionVariee } from "./collecte/themes";
 export { derniereRevue, etatRedaction, preparerRedaction, redigerSujets, MAX_PAR_LANCEMENT } from "./passage";
 export { urlArticle, messageFacebook, requeteFacebook, urlMedia } from "./facebook/relais";

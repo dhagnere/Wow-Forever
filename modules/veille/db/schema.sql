@@ -69,3 +69,7 @@ ALTER TABLE articles ADD COLUMN IF NOT EXISTS image_facebook_id INTEGER REFERENC
 
 -- Avis proposé par l'IA : une suggestion que Silfax relit et reprend. L'avis publié reste avis_silfax.
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS avis_propose TEXT NOT NULL DEFAULT '';
+
+-- Mode « dossier » (recherches de référence sur 60 jours). Contrainte recréée à chaque déploiement : idempotent.
+ALTER TABLE veille_revues DROP CONSTRAINT IF EXISTS veille_revues_mode_check;
+ALTER TABLE veille_revues ADD CONSTRAINT veille_revues_mode_check CHECK (mode IN ('essai', 'quotidien', 'dossier'));
