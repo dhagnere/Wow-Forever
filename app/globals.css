@@ -1,13 +1,15 @@
-/* Charte Azeroth Forever — reprise de la maquette « Azeroth Forever — maquette du site ». */
+/* Charte Azeroth Forever : ambiance « cuir et acier », titres en Cinzel, or et laiton. */
 
 :root {
-  --fond: #0b1020;
-  --fond-nuit: #070b16;
-  --surface: #121a2e;
-  --surface-2: #16243f;
-  --surface-chaude: #2a2320;
-  --bordure: #5a4318;
+  /* Palette « cuir et acier » : anthracite chaud, cuir, laiton et or. */
+  --fond: #1c1b1a;
+  --fond-nuit: #141312;
+  --surface: #262423;
+  --surface-2: #2f2c2a;
+  --surface-chaude: #33281f;
+  --bordure: #4a3d2c;
   --bordure-vive: #8a6418;
+  --acier: #5b5853;
   --or: #d9a94a;
   --or-clair: #e8c06a;
   --or-pale: #f6dc9a;
@@ -16,6 +18,10 @@
   --texte-doux: #b8ae99;
   --texte-chaud: #d6cebd;
   --sur-or: #1a1406;
+  --parchemin: #efe6d2;
+  --parchemin-bord: #cdbb94;
+  --encre: #2b2118;
+  --encre-douce: #5e4f3d;
   --facebook: #1f5fbf;
   --danger: #e07a6a;
   --succes: #7fbf7a;
@@ -47,19 +53,46 @@ h1, h2, h3 { color: var(--texte-titre); line-height: 1.2; }
 .doux { color: var(--texte-doux); }
 .surtitre { margin: 0 0 6px; font-family: var(--police-titre); font-size: 13px; font-weight: 700; letter-spacing: 0.14em; color: var(--or-clair); text-transform: uppercase; }
 
-/* En-tête */
-.entete { background: var(--fond-nuit); border-bottom: 1px solid var(--bordure); }
-.entete .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px 32px; flex-wrap: wrap; padding-top: 16px; padding-bottom: 16px; }
+/* En-tête : barre haute (compte à rebours, logo centré, recherche) puis menu centré */
+.entete { position: relative; z-index: 20; background: linear-gradient(180deg, #2a2826, #1f1e1c); }
+.entete-haut { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding-top: 12px; padding-bottom: 12px; }
+.entete-menu { border-top: 1px solid #34312e; border-bottom: 1px solid var(--bordure); background: #222120; }
 .logo { display: inline-flex; align-items: center; gap: 12px; font-family: var(--police-titre); font-weight: 800; font-size: 26px; letter-spacing: 0.06em; color: #f4efe3; text-decoration: none; }
+.logo-pile { flex-direction: column; gap: 4px; font-size: 17px; letter-spacing: 0.16em; text-align: center; line-height: 1.1; }
 .logo-texte span { color: var(--or); }
 .logo-medaillon { display: block; flex: none; border-radius: 50%; filter: drop-shadow(0 0 6px rgba(217, 169, 74, 0.35)); }
 a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(232, 192, 106, 0.6)); }
-@media (max-width: 600px) { .entete .logo { font-size: 21px; gap: 10px; } .entete .logo-medaillon { width: 42px; height: 42px; } }
-.nav { display: flex; gap: 8px 22px; flex-wrap: wrap; font-size: 15px; font-weight: 600; font-family: var(--police-titre); letter-spacing: 0.03em; }
-.nav a { color: #e9e2d0; text-decoration: none; padding: 6px 0; }
-.nav a:hover { color: #fff; }
-.nav a[aria-current="page"] { color: #fff; border-bottom: 2px solid var(--or); }
-.nav a.nav-silfax { color: var(--or-clair); }
+.decompte { display: flex; flex-direction: column; font-size: 13px; line-height: 1.25; color: var(--texte-doux); }
+.decompte strong { font-family: var(--police-titre); font-size: 22px; color: var(--or-clair); }
+.decompte .pastille { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #7fbf7a; margin-right: 6px; box-shadow: 0 0 6px #7fbf7a; }
+.outils-entete { display: flex; justify-content: flex-end; align-items: center; gap: 14px; }
+.outils-entete a { color: var(--texte); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; }
+.outils-entete a:hover { color: var(--or-pale); }
+.nav { display: flex; justify-content: center; align-items: stretch; gap: 4px 6px; flex-wrap: wrap; font-size: 15px; font-weight: 600; }
+.nav-groupe { display: flex; }
+.nav > a, .nav-groupe > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; color: #e9e2d0; text-decoration: none; cursor: pointer; list-style: none; border-bottom: 2px solid transparent; }
+.nav-groupe > summary::-webkit-details-marker { display: none; }
+.nav > a:hover, .nav-groupe > summary:hover { color: #fff; }
+.nav > a[aria-current="page"], .nav-groupe[data-actif] > summary { color: var(--or-clair); border-bottom-color: var(--or); }
+.nav > a.nav-silfax { color: var(--or-clair); }
+.nav-groupe { position: relative; }
+.nav-groupe > summary::after { content: ""; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); opacity: 0.7; }
+.nav-groupe[open] > summary::after { transform: translateY(2px) rotate(-135deg); }
+.nav-sousmenu { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); min-width: 240px; padding: 8px; background: #262423; border: 1px solid var(--bordure); border-radius: 6px; box-shadow: 0 16px 32px rgba(0, 0, 0, 0.55); display: flex; flex-direction: column; }
+.nav-sousmenu a { padding: 10px 14px; border-radius: 4px; color: var(--texte); text-decoration: none; font-weight: 600; }
+.nav-sousmenu a small { display: block; font-weight: 400; font-size: 13px; color: var(--texte-doux); }
+.nav-sousmenu a:hover, .nav-sousmenu a[aria-current="page"] { background: #33302d; color: var(--or-pale); }
+@media (max-width: 760px) {
+  .entete-haut { grid-template-columns: 1fr auto; }
+  .decompte { display: none; }
+  .logo-pile { flex-direction: row; font-size: 16px; text-align: left; }
+  .nav { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; }
+  .nav-sousmenu { position: fixed; top: auto; left: 16px; right: 16px; transform: none; }
+}
+
+/* Rivets : bande d'acier entre deux matières */
+.rivets { height: 12px; border-top: 1px solid #0d0c0b; border-bottom: 1px solid #0d0c0b;
+  background: radial-gradient(circle at 50% 50%, #a19b92 0 1.4px, #4d4943 1.6px 2.4px, transparent 2.6px) 0 50% / 26px 12px repeat-x, linear-gradient(180deg, #46423d, #2b2926); }
 
 /* Boutons */
 .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 12px 22px; border-radius: 4px; font-family: var(--police-titre); font-weight: 700; letter-spacing: 0.04em; text-decoration: none; border: 1px solid transparent; cursor: pointer; font-size: 15px; }
@@ -76,17 +109,17 @@ a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(232, 192, 106, 
   background:
     radial-gradient(ellipse at 22% 30%, rgba(232, 192, 106, 0.18), transparent 45%),
     radial-gradient(circle at 78% 18%, rgba(246, 220, 154, 0.35) 0 3%, transparent 3.4%),
-    radial-gradient(ellipse at 50% 120%, #1d3355, transparent 60%),
-    linear-gradient(180deg, #070b16 0%, #0f1a2e 60%, #182a48 100%);
+    radial-gradient(ellipse at 50% 120%, #4a3524, transparent 60%),
+    linear-gradient(180deg, #141312 0%, #211f1d 60%, #3a2e24 100%);
 }
 .heros .wrap { position: relative; padding-top: 112px; padding-bottom: 112px; display: flex; justify-content: flex-start; }
 /* Capture d'écran en fond : la carte se place à gauche, sur la montagne sombre, et laisse voir le soleil et l'épave. */
 .heros-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 55% 50%; }
 .heros::after { content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(90deg, rgba(7, 11, 22, 0.45) 0%, rgba(7, 11, 22, 0) 45%), linear-gradient(0deg, rgba(7, 11, 22, 0.5), transparent 25%); }
+  background: linear-gradient(90deg, rgba(20, 19, 18, 0.45) 0%, rgba(20, 19, 18, 0) 45%), linear-gradient(0deg, rgba(20, 19, 18, 0.5), transparent 25%); }
 .heros .wrap { z-index: 1; }
 .heros-credit { position: absolute; right: 16px; bottom: 8px; z-index: 1; margin: 0; font-size: 12px; color: rgba(244, 239, 227, 0.85); text-shadow: 0 1px 2px #000; }
-.heros-carte { max-width: 440px; background: rgba(7, 11, 22, 0.8); border: 1px solid var(--bordure-vive); border-radius: 4px; padding: 34px 32px; text-align: center; }
+.heros-carte { max-width: 440px; background: rgba(20, 19, 18, 0.8); border: 1px solid var(--bordure-vive); border-radius: 4px; padding: 34px 32px; text-align: center; }
 .heros-carte h1 { margin: 0 0 12px; font-family: var(--police-titre); font-size: 44px; line-height: 1.08; font-weight: 800; }
 .heros-carte p { margin: 0 0 28px; font-size: 19px; color: var(--texte-chaud); }
 .ornement { display: block; width: 280px; max-width: 80%; height: 14px; margin: 0 auto 16px; background:
@@ -94,9 +127,12 @@ a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(232, 192, 106, 
   radial-gradient(circle, var(--or-clair) 0 4px, transparent 5px) center / 14px 14px no-repeat; }
 .boutons { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 
-.bandeau-page { background: var(--surface); border-bottom: 2px solid var(--bordure-vive); }
-.bandeau-page .wrap { padding-top: 48px; padding-bottom: 48px; }
-.bandeau-page h1 { margin: 0 0 10px; font-family: var(--police-titre); font-size: 44px; font-weight: 800; }
+.bandeau-page { position: relative; overflow: hidden; border-bottom: 1px solid #34312e;
+  background: linear-gradient(90deg, rgba(20, 19, 18, 0.96) 0%, rgba(20, 19, 18, 0.82) 45%, rgba(20, 19, 18, 0.55) 100%), var(--image-bandeau, url("/images/heros-accueil-1920.jpg")) center 40% / cover no-repeat, var(--surface); }
+.bandeau-page::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 40%; background: linear-gradient(0deg, var(--fond), transparent); pointer-events: none; }
+.bandeau-page .wrap { position: relative; z-index: 1; padding-top: 56px; padding-bottom: 64px; }
+.bandeau-page h1 { margin: 0 0 12px; font-family: var(--police-titre); font-size: 48px; font-weight: 700; letter-spacing: 0.01em; }
+.bandeau-page h1 .accent, .section-titre .accent { color: var(--or-clair); }
 .bandeau-page .chapo { margin: 0; max-width: 720px; font-size: 19px; color: var(--texte-chaud); }
 
 .ariane { margin: 0 0 10px; font-size: 14px; color: var(--texte-doux); }
@@ -134,15 +170,15 @@ a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(232, 192, 106, 
 .encadre { background: var(--surface); border: 1px solid var(--bordure); border-radius: 4px; padding: 20px 22px; }
 .encadre h2 { margin: 0 0 8px; font-size: 16px; }
 .encadre-chaud { background: var(--surface-chaude); border: 1px solid var(--bordure-vive); border-radius: 4px; padding: 28px; }
-.encadre-nuit { background: #0f1a2e; border-radius: 12px; padding: 24px; }
+.encadre-nuit { background: #211f1d; border-radius: 12px; padding: 24px; }
 
 /* Visuels générés (remplacent les illustrations tant qu'elles ne sont pas fournies) */
 .visuel { position: relative; display: block; width: 100%; background:
   radial-gradient(ellipse at 30% 20%, rgba(232, 192, 106, 0.25), transparent 55%),
-  radial-gradient(ellipse at 80% 90%, rgba(63, 127, 191, 0.25), transparent 55%),
-  linear-gradient(160deg, #182a48, #0b1020 70%); }
+  radial-gradient(ellipse at 80% 90%, rgba(138, 100, 24, 0.25), transparent 55%),
+  linear-gradient(160deg, #3a2e24, #1c1b1a 70%); }
 .visuel::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.35)); }
-.visuel-texte { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 18px; background: rgba(7, 11, 22, 0.78); font-family: var(--police-titre); font-weight: 700; color: var(--texte-titre); z-index: 1; }
+.visuel-texte { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 18px; background: rgba(20, 19, 18, 0.78); font-family: var(--police-titre); font-weight: 700; color: var(--texte-titre); z-index: 1; }
 
 .icone-classe { display: block; flex: none; max-width: 100%; height: auto; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5)); }
 a:hover > .icone-classe { filter: drop-shadow(0 0 8px rgba(232, 192, 106, 0.55)); }
@@ -193,9 +229,21 @@ td { padding: 12px 16px; border-top: 1px solid var(--bordure); }
 .partage { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 32px; }
 
 /* Pied de page */
-.pied { background: var(--fond-nuit); color: var(--texte-doux); font-size: 14px; border-top: 1px solid var(--bordure); }
-.pied .wrap { padding-top: 40px; padding-bottom: 40px; display: flex; flex-wrap: wrap; gap: 24px 48px; justify-content: space-between; }
-.pied nav { display: flex; flex-direction: column; gap: 6px; }
+.pied { color: #cdbfa6; font-size: 14px; background-color: #2a1c12;
+  background-image: radial-gradient(rgba(255, 236, 200, 0.035) 1px, transparent 1.2px), radial-gradient(rgba(0, 0, 0, 0.28) 1px, transparent 1.4px), radial-gradient(ellipse at 50% 0%, rgba(120, 78, 40, 0.35), transparent 70%), linear-gradient(180deg, #33231a, #1f150e);
+  background-size: 3px 3px, 5px 5px, 100% 100%, 100% 100%; }
+.pied a { color: #e7dcc4; }
+.pied a:hover { color: var(--or-pale); }
+.pied-ornement { display: flex; align-items: center; justify-content: center; gap: 18px; padding-top: 28px; }
+.pied-ornement::before, .pied-ornement::after { content: ""; flex: 0 1 180px; height: 1px; background: linear-gradient(90deg, transparent, rgba(217, 169, 74, 0.6), transparent); }
+.pied-corps { display: flex; flex-wrap: wrap; align-items: center; gap: 24px 40px; padding-top: 28px; padding-bottom: 28px; }
+.pied-marque { flex: 1 1 260px; }
+.pied-marque p { margin: 8px 0 0; color: #b9a98c; }
+.pied-liens { flex: 3 1 480px; display: flex; flex-wrap: wrap; gap: 8px 22px; }
+.pied-liens a { text-decoration: none; font-weight: 600; }
+.pied-bas { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; padding-top: 18px; padding-bottom: 28px; border-top: 1px solid rgba(217, 169, 74, 0.18); font-size: 13px; color: #a8987b; }
+.pied-bas p { margin: 0; }
+.pied-devise { font-family: var(--police-titre); letter-spacing: 0.18em; text-transform: uppercase; color: #c9b48a; }
 
 /* Bannière de consentement */
 .bandeau-cookies { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; background: var(--fond-nuit); border-top: 2px solid var(--bordure-vive); box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.45); font-size: 15px; }
@@ -203,6 +251,55 @@ td { padding: 12px 16px; border-top: 1px solid var(--bordure); }
 .bandeau-cookies .wrap > p { flex: 1 1 420px; }
 .lien-bouton { background: none; border: 0; padding: 0; font: inherit; color: var(--or-clair); text-decoration: underline; cursor: pointer; text-align: left; }
 .lien-bouton:hover { color: var(--or-pale); }
+
+/* Fiches parchemin (articles et guides) */
+.parchemin { display: flex; flex-direction: column; background: var(--parchemin); color: var(--encre); border: 1px solid var(--parchemin-bord); border-radius: 4px; overflow: hidden; text-decoration: none; box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35); transition: transform 0.15s ease, box-shadow 0.15s ease; }
+.parchemin:hover { color: var(--encre); transform: translateY(-2px); box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45); }
+.parchemin-image { position: relative; display: block; height: 170px; background: var(--surface); }
+.parchemin-image img, .parchemin-image .visuel { width: 100%; height: 100%; object-fit: cover; display: block; }
+.parchemin-badge { position: absolute; left: 12px; bottom: 12px; z-index: 2; background: rgba(20, 19, 18, 0.88); color: var(--or-clair); border: 1px solid var(--bordure-vive); border-radius: 3px; padding: 3px 9px; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.parchemin-corps { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px 18px; flex: 1; }
+.parchemin-meta { margin: 0; font-size: 13px; color: var(--encre-douce); }
+.parchemin h3 { margin: 0; font-family: var(--police-titre); font-size: 18px; line-height: 1.3; color: var(--encre); }
+.parchemin-resume { margin: 0; font-size: 15px; color: var(--encre-douce); }
+.parchemin-lien { margin-top: auto; font-weight: 700; font-size: 14px; color: #8a5a12; }
+.parchemin-grand .parchemin-image { height: auto; min-height: 300px; flex: 1; }
+.parchemin-grand .parchemin-corps { flex: none; }
+.parchemin-grand h3 { font-size: 26px; }
+
+/* Répertoire : catégories à gauche, liste à droite */
+.repertoire { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 32px; align-items: start; }
+.repertoire-categories { position: sticky; top: 16px; background: var(--surface); border: 1px solid var(--bordure); border-radius: 6px; padding: 10px; }
+.repertoire-categories p { margin: 6px 8px 10px; }
+.repertoire-categories a { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 4px; color: var(--texte); text-decoration: none; font-size: 15px; }
+.repertoire-categories a span { font-size: 13px; color: var(--texte-doux); }
+.repertoire-categories a:hover { background: var(--surface-2); }
+.repertoire-categories a[aria-current="page"] { background: #3a3128; color: var(--or-pale); box-shadow: inset 3px 0 0 var(--or); }
+.lignes { list-style: none; margin: 0; padding: 0; border: 1px solid var(--bordure); border-radius: 6px; overflow: hidden; }
+.lignes li { border-top: 1px solid #34312e; }
+.lignes li:first-child { border-top: 0; }
+.lignes a { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; padding: 14px 18px; text-decoration: none; color: var(--texte); background: var(--surface); }
+.lignes a:hover { background: var(--surface-2); }
+.lignes .ligne-titre { font-weight: 700; color: var(--texte-titre); }
+.lignes .ligne-resume { grid-column: 1; font-size: 14px; color: var(--texte-doux); }
+.lignes .ligne-meta { grid-row: 1 / span 2; grid-column: 2; align-self: center; text-align: right; font-size: 13px; color: var(--texte-doux); }
+.etiquette { display: inline-block; border: 1px solid var(--bordure-vive); border-radius: 3px; padding: 1px 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: var(--or-clair); text-transform: uppercase; }
+.recherche { display: flex; gap: 10px; margin-bottom: 20px; }
+.recherche input[type="search"] { flex: 1; background: var(--parchemin); color: var(--encre); border-color: var(--parchemin-bord); }
+.recherche input[type="search"]::placeholder { color: var(--encre-douce); }
+
+/* Sélecteur de classes */
+.cartes-classes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.carte-classe { display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: #232120; border: 1px solid var(--couleur, var(--bordure)); border-radius: 4px; text-decoration: none; color: var(--texte); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4); }
+.carte-classe:hover { background: #2c2927; color: var(--texte-titre); }
+.carte-classe strong { display: block; font-size: 17px; color: var(--texte-titre); }
+.carte-classe span { font-size: 13px; color: var(--texte-doux); }
+.onglets-classes { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px; margin-top: 32px; border-bottom: 1px solid var(--bordure); }
+.onglets-classes button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 2px 12px; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--texte-doux); font: inherit; font-size: 13px; cursor: pointer; }
+.onglets-classes button[aria-selected="true"] { color: var(--texte-titre); border-bottom-color: var(--or); }
+.onglets-classes button:hover { color: var(--texte); }
+.panneau-classe { display: flex; flex-wrap: wrap; gap: 20px 28px; align-items: center; padding: 28px; background: linear-gradient(135deg, #2c2724, #232120); border: 1px solid var(--bordure); border-top: 0; }
+.panneau-classe h2 { margin: 2px 0 8px; font-family: var(--police-titre); font-size: 30px; }
 
 /* Pagination */
 .pagination { display: flex; gap: 12px; justify-content: space-between; margin-top: 32px; }
@@ -224,7 +321,8 @@ textarea.grand { min-height: 420px; font-family: ui-monospace, SFMono-Regular, M
 .onglets a { padding: 8px 16px; border: 1px solid var(--bordure); border-radius: 4px; text-decoration: none; color: var(--texte); }
 .onglets a[aria-current="page"] { background: var(--or); color: var(--sur-or); border-color: var(--or); font-weight: 700; }
 
-@media (max-width: 1000px) { .g9 { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@media (max-width: 1000px) { .g9 { grid-template-columns: repeat(5, minmax(0, 1fr)); } .onglets-classes { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@media (max-width: 860px) { .repertoire { grid-template-columns: minmax(0, 1fr); } .repertoire-categories { position: static; } .cartes-classes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 900px) {
   .g3, .g4, .une { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .une-grand { grid-column: span 2; grid-row: auto; }
@@ -239,5 +337,9 @@ textarea.grand { min-height: 420px; font-family: ui-monospace, SFMono-Regular, M
   .heros-carte { padding: 28px 22px; }
   .heros-carte h1 { font-size: 36px; }
   .bandeau-page h1, .article h1 { font-size: 32px; }
+  .cartes-classes { grid-template-columns: minmax(0, 1fr); }
+  .onglets-classes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lignes a { grid-template-columns: minmax(0, 1fr); }
+  .lignes .ligne-meta { grid-row: auto; grid-column: 1; text-align: left; }
   .carte-grande h3 { font-size: 22px; }
 }

@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { compterPublies, listerPublies } from "@/modules/veille";
 import { trouverRubrique } from "@/config/taxonomie";
 import { Ariane } from "@/components/Ariane";
-import { ListePaginee, PAR_PAGE, pageDemandee } from "@/components/ListePaginee";
+import { Repertoire } from "@/components/Repertoire";
+import { pageDemandee } from "@/components/ListePaginee";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!r) return {};
   return { title: `${r.nom} — WoW Forever`, description: r.description, alternates: { canonical: `/rubriques/${r.slug}/` } };
 }
+
+const PAR_PAGE = 20;
 
 export default async function PageRubrique({ params, searchParams }: Props) {
   const r = trouverRubrique((await params).rubrique);
@@ -28,12 +31,13 @@ export default async function PageRubrique({ params, searchParams }: Props) {
       <section className="bandeau-page">
         <div className="wrap">
           <Ariane etapes={[{ nom: "Actualités", href: "/actualites/" }, { nom: r.nom }]} />
+          <p className="surtitre">Rubrique</p>
           <h1>{r.nom}</h1>
           <p className="chapo">{r.description}</p>
         </div>
       </section>
       <div className="wrap contenu">
-        <ListePaginee articles={articles} total={total} page={page} base={`/rubriques/${r.slug}/`} />
+        <Repertoire actif={r.slug} articles={articles} total={total} page={page} base={`/rubriques/${r.slug}/`} />
       </div>
     </>
   );

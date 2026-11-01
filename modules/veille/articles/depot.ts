@@ -206,6 +206,21 @@ export async function listerPublies(f: FiltrePublies = {}): Promise<Article[]> {
   return rows.map(versArticle);
 }
 
+/** Recherche plein texte simple dans les articles en ligne (titre, chapô, corps, étiquettes). */
+export async function rechercherPublies(requete: string, limite = 30): Promise<Article[]> {
+  const mots = requete.trim().split(/\s+/).filter((m) => m.length >= 2).slice(0, 6);
+  if (!mots.length) return [];
+  // Chaque mot doit apparaître ; les caractères spéciaux de LIKE sont neutralisés.
+  const motifs = mots.map((m) => `%${m.replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
+  const conditions = motifs.map((_, i) => `(titre ILIKE $${i + 1} OR chapo ILIKE $${i + 1} OR corps ILIKE $${i + 1} OR array_to_string(etiquettes, ' ') ILIKE $${i + 1})`);
+  const { rows } = await pool().query<Ligne>(
+    `SELECT * FROM articles WHERE statut='publie' AND ${conditions.join(" AND ")}
+     ORDER BY (titre ILIKE $1) DESC, publie_le DESC LIMIT ${Math.min(Math.max(limite, 1), 100)}`,
+    motifs,
+  );
+  return rows.map(versArticle);
+}
+
 export async function compterPublies(rubrique?: string): Promise<number> {
   const { rows } = await pool().query<{ n: string }>(
     "SELECT count(*) AS n FROM articles WHERE statut='publie' AND ($1::text IS NULL OR rubrique=$1)",

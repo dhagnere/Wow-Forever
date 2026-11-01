@@ -7,7 +7,7 @@ import type { CSSProperties } from "react";
 export function Visuel({ hauteur, texte, teinte }: { hauteur: number | string; texte?: string; teinte?: string }) {
   const style: CSSProperties = { height: hauteur };
   if (teinte) {
-    style.background = `radial-gradient(ellipse at 30% 25%, ${teinte}55, transparent 55%), linear-gradient(160deg, #182a48, #0b1020 70%)`;
+    style.background = `radial-gradient(ellipse at 30% 25%, ${teinte}55, transparent 55%), linear-gradient(160deg, #3a2e24, #1c1b1a 70%)`;
   }
   return (
     <span className="visuel" style={style} aria-hidden={texte ? undefined : true}>

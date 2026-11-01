@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 const PAGE = (titre: string, texte: string) =>
   new Response(
     `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${titre}</title>
-<style>body{margin:0;background:#0b1020;color:#ece4d2;font:17px/1.6 system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;padding:16px}main{max-width:520px;text-align:center}a{display:inline-block;margin-top:16px;background:#d9a94a;color:#1a1406;font-weight:700;padding:12px 22px;border-radius:4px;text-decoration:none}</style>
+<style>body{margin:0;background:#1c1b1a;color:#ece4d2;font:17px/1.6 system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;padding:16px}main{max-width:520px;text-align:center}a{display:inline-block;margin-top:16px;background:#d9a94a;color:#1a1406;font-weight:700;padding:12px 22px;border-radius:4px;text-decoration:none}</style>
 </head><body><main><h1>${titre}</h1><p>${texte}</p><a href="/admin/reseaux/">Retour à l'administration</a></main></body></html>`,
     { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } },
   );

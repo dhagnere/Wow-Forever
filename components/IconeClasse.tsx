@@ -27,8 +27,8 @@ export function IconeClasse({ slug, couleur, taille = 64, nom }: { slug: string;
         </linearGradient>
         <radialGradient id={`${id}f`} cx=".35" cy=".3" r=".9">
           <stop offset="0" stopColor={couleur} stopOpacity=".75" />
-          <stop offset=".55" stopColor="#1a2440" />
-          <stop offset="1" stopColor="#05080f" />
+          <stop offset=".55" stopColor="#2a2522" />
+          <stop offset="1" stopColor="#0f0e0d" />
         </radialGradient>
         <linearGradient id={`${id}g`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#fffaf0" />
@@ -39,7 +39,7 @@ export function IconeClasse({ slug, couleur, taille = 64, nom }: { slug: string;
         </filter>
       </defs>
       <rect x="0" y="0" width="64" height="64" rx="7" fill={`url(#${id}c)`} />
-      <rect x="3.5" y="3.5" width="57" height="57" rx="4.5" fill="#05080f" />
+      <rect x="3.5" y="3.5" width="57" height="57" rx="4.5" fill="#0f0e0d" />
       <rect x="5" y="5" width="54" height="54" rx="3.5" fill={`url(#${id}f)`} />
       {icone ? (
         <g transform={`translate(11 11) scale(${echelle})`} filter={`url(#${id}o)`} fill={`url(#${id}g)`}>

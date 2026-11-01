@@ -12,6 +12,7 @@ export {
   lireParSlug,
   listerPublies,
   compterPublies,
+  rechercherPublies,
   listerPourPlan,
   listerPourAdmin,
   compterParRubrique,

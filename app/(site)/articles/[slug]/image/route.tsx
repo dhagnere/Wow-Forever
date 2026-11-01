@@ -18,7 +18,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
         style={{
           width: "100%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between",
           padding: "64px 72px", color: "#f8f2e2",
-          background: "radial-gradient(ellipse at 20% 15%, rgba(232,192,106,0.28), transparent 50%), linear-gradient(160deg, #182a48 0%, #0b1020 65%, #070b16 100%)",
+          background: "radial-gradient(ellipse at 20% 15%, rgba(232,192,106,0.28), transparent 50%), linear-gradient(160deg, #3a2e24 0%, #1c1b1a 65%, #141312 100%)",
           border: "12px solid #8a6418",
         }}
       >
