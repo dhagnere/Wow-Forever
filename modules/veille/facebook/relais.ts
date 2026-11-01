@@ -29,18 +29,38 @@ export function messageFacebook(a: Pick<Article, "accrocheFacebook" | "texteFace
     .join("\n\n");
 }
 
+export function urlMedia(id: number, variante: "une" | "og" = "une"): string {
+  return `${config.siteUrl()}/medias/${id}/${variante === "og" ? "og/" : ""}`;
+}
+
+/**
+ * Forme du post :
+ *  - image Facebook fournie : post photo (l'image en grand, le lien vers l'article dans le texte) ;
+ *  - sinon : post lien, dont Facebook tire l'aperçu des balises Open Graph de l'article
+ *    (image d'en-tête recadrée, ou image générée par le site).
+ */
+export function requeteFacebook(a: Pick<Article, "accrocheFacebook" | "texteFacebook" | "slug" | "titre" | "imageFacebookId">): {
+  chemin: "photos" | "feed";
+  params: Record<string, string>;
+} {
+  const message = messageFacebook(a);
+  if (a.imageFacebookId) return { chemin: "photos", params: { url: urlMedia(a.imageFacebookId), message } };
+  return { chemin: "feed", params: { message, link: urlArticle(a.slug) } };
+}
+
 async function publierSurPage(a: Article): Promise<string> {
   const fb = config.facebook();
   if (!fb) throw new Error("FACEBOOK_PAGE_ID ou FACEBOOK_PAGE_TOKEN manquant.");
-  const corps = new URLSearchParams({ message: messageFacebook(a), link: urlArticle(a.slug), access_token: fb.jeton });
-  const r = await fetch(`https://graph.facebook.com/${fb.version}/${fb.pageId}/feed`, {
+  const { chemin, params } = requeteFacebook(a);
+  const r = await fetch(`https://graph.facebook.com/${fb.version}/${fb.pageId}/${chemin}`, {
     method: "POST",
-    body: corps,
-    signal: AbortSignal.timeout(20_000),
+    body: new URLSearchParams({ ...params, access_token: fb.jeton }),
+    signal: AbortSignal.timeout(30_000),
   });
-  const json = (await r.json().catch(() => ({}))) as { id?: string; error?: { message?: string } };
-  if (!r.ok || !json.id) throw new Error(json.error?.message ?? `HTTP ${r.status}`);
-  return json.id;
+  const json = (await r.json().catch(() => ({}))) as { id?: string; post_id?: string; error?: { message?: string } };
+  const postId = json.post_id ?? json.id;
+  if (!r.ok || !postId) throw new Error(json.error?.message ?? `HTTP ${r.status}`);
+  return postId;
 }
 
 export interface BilanRelais {

@@ -24,6 +24,10 @@ export interface Article {
   accrocheFacebook: string;
   texteFacebook: string;
   sources: SourceCitee[];
+  /** Image d'en-tête envoyée par Silfax (absente : visuel généré par le site). */
+  image: { id: number; alt: string; credit: string } | null;
+  /** Image propre au post Facebook (absente : l'image d'en-tête sert d'aperçu du lien). */
+  imageFacebookId: number | null;
   statut: Statut;
   score: number | null;
   origine: "veille" | "manuel";

@@ -12,6 +12,11 @@ export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ slug: string }> };
 
+/** Image d'aperçu (Facebook, Google) : l'image d'en-tête recadrée si elle existe, sinon l'image générée par le site. */
+function imageOuverture(article: { image: { id: number } | null }, urlArticle: string): string {
+  return article.image ? `${SITE.url}/medias/${article.image.id}/og/` : `${urlArticle}image/`;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = await lirePublie((await params).slug);
   if (!article) return { title: "Article introuvable" };
@@ -29,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       modifiedTime: article.modifieLe.toISOString(),
       authors: [SITE.auteur],
       tags: article.etiquettes,
-      images: [{ url: `${url}image/`, width: 1200, height: 630, alt: article.titre }],
+      images: [{ url: imageOuverture(article, url), width: 1200, height: 630, alt: article.image?.alt || article.titre }],
     },
     twitter: { card: "summary_large_image" },
   };
@@ -54,7 +59,7 @@ export default async function PageArticle({ params }: Props) {
           dateModified: article.modifieLe.toISOString(),
           author: { "@type": "Person", name: SITE.auteur, url: `${SITE.url}/a-propos/` },
           publisher: { "@type": "Organization", name: SITE.nom, url: SITE.url },
-          image: [`${url}image/`],
+          image: article.image ? [`${SITE.url}/medias/${article.image.id}/`, imageOuverture(article, url)] : [imageOuverture(article, url)],
           mainEntityOfPage: url,
           inLanguage: "fr-FR",
           keywords: article.etiquettes.join(", "),
@@ -73,6 +78,14 @@ export default async function PageArticle({ params }: Props) {
               {tempsDeLecture(article.corps)} min de lecture
             </span>
           </div>
+
+          {article.image ? (
+            <figure className="image-une">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={`/medias/${article.image.id}/`} alt={article.image.alt} fetchPriority="high" />
+              {article.image.credit ? <figcaption>{article.image.credit}</figcaption> : null}
+            </figure>
+          ) : null}
 
           {article.chapo ? <p className="chapo-article">{article.chapo}</p> : null}
           <div className="corps" dangerouslySetInnerHTML={{ __html: markdownVersHtml(article.corps) }} />

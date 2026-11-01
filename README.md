@@ -70,7 +70,7 @@ tests/               tests unitaires
 
 ## Reste à faire
 
-- **Illustrations** : la maquette utilisait des visuels qui n'ont pas pu être récupérés. Ils sont remplacés par des fonds et emblèmes générés en CSS (`components/Visuels.tsx`). Déposer les images dans `public/images/` et remplacer `<Visuel>` / `<Embleme>` par des balises `<img>`.
+- **Illustrations** : chaque article peut recevoir une image d'en-tête et une image propre au post Facebook, envoyées depuis `/admin/veille` (stockées en base). Les visuels des pages fixes (accueil, classes, zones) restent générés en CSS (`components/Visuels.tsx`) : déposer les images dans `public/images/` et remplacer `<Visuel>` / `<Embleme>` par des balises `<img>`.
 - **Textes entre crochets** : avis de Silfax sur les pages piliers, conseils de classe, fiche du personnage, mentions légales (éditeur, données personnelles).
 - **Adresses des flux** : à confirmer avec `npm run veille:sources` une fois en ligne.
 - **Outils** (calculateur de talents, quiz) : prévus dans la maquette, à développer quand Blizzard publiera les arbres de talents de Forever.

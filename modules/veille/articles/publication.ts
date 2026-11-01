@@ -11,7 +11,9 @@ const TEXTE_A_REMPLACER = /\[[^\]]{12,}\](?!\()/;
  * Règles de publication. Garde-fou à ne jamais affaiblir (voir CLAUDE.md) :
  * sans avis de Silfax, pas de publication. La base de données applique la même règle.
  */
-export function verifierPublication(a: Pick<Article, "titre" | "corps" | "avisSilfax" | "rubrique" | "description">): string[] {
+export function verifierPublication(
+  a: Pick<Article, "titre" | "corps" | "avisSilfax" | "rubrique" | "description"> & { image?: Article["image"] },
+): string[] {
   const erreurs: string[] = [];
   if (a.titre.trim().length < 10) erreurs.push("Le titre est trop court.");
   if (a.corps.trim().length < 300) erreurs.push("Le corps de l'article est trop court (300 caractères minimum).");
@@ -21,5 +23,7 @@ export function verifierPublication(a: Pick<Article, "titre" | "corps" | "avisSi
   if (TEXTE_A_REMPLACER.test(a.corps)) erreurs.push("Le corps contient encore un texte à remplacer entre crochets.");
   if (!(SLUGS_RUBRIQUES as string[]).includes(a.rubrique)) erreurs.push("Rubrique inconnue.");
   if (a.description.trim().length < 50) erreurs.push("La description pour Google est trop courte (50 caractères minimum).");
+  if (a.image && a.image.alt.trim().length < 5)
+    erreurs.push("Décrivez l'image d'en-tête en quelques mots (texte alternatif), pour les lecteurs malvoyants et pour Google.");
   return erreurs;
 }

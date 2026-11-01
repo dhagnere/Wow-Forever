@@ -3,7 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { estPilier, SLUGS_RUBRIQUES, type SlugRubrique } from "@/config/taxonomie";
-import { changerStatut, creerBrouillon, ErreurPublication, modifier, publier, type Modifications } from "@/modules/veille";
+import {
+  changerStatut, creerBrouillon, definirImage, enregistrerImage, ErreurImage, ErreurPublication, modifier, publier,
+  TAILLE_MAX_OCTETS, type Modifications,
+} from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
 
 export interface EtatEdition {
@@ -26,7 +29,44 @@ function lireFormulaire(form: FormData): Modifications {
     description: texte("description"),
     accrocheFacebook: texte("accrocheFacebook"),
     texteFacebook: texte("texteFacebook"),
+    imageAlt: texte("imageAlt"),
+    imageCredit: texte("imageCredit"),
   };
+}
+
+function fichier(form: FormData, nom: string): File | null {
+  const f = form.get(nom);
+  return f instanceof File && f.size > 0 ? f : null;
+}
+
+/** Enregistre les images envoyées ou retire celles demandées. Renvoie les erreurs éventuelles. */
+async function traiterImages(id: number, form: FormData, m: Modifications): Promise<string[]> {
+  const une = fichier(form, "image");
+  const facebook = fichier(form, "imageFacebook");
+  const erreurs: string[] = [];
+  if ((une || facebook) && form.get("droitsImages") !== "on") {
+    return ["Cochez la case confirmant que les images envoyées vous appartiennent ou sont utilisées avec autorisation."];
+  }
+  if (une && m.imageAlt.length < 5) {
+    return ["Décrivez l'image d'en-tête en quelques mots (texte alternatif) avant de l'envoyer."];
+  }
+  for (const [f, emplacement] of [[une, "une"], [facebook, "facebook"]] as const) {
+    if (!f) continue;
+    if (f.size > TAILLE_MAX_OCTETS) {
+      erreurs.push(`« ${f.name} » : image trop lourde, 8 Mo au maximum.`);
+      continue;
+    }
+    try {
+      const mediaId = await enregistrerImage(Buffer.from(await f.arrayBuffer()));
+      await definirImage(id, emplacement, mediaId);
+    } catch (e) {
+      if (e instanceof ErreurImage) erreurs.push(`« ${f.name} » : ${e.message}`);
+      else throw e;
+    }
+  }
+  if (!une && form.get("retirerImage") === "on") await definirImage(id, "une", null);
+  if (!facebook && form.get("retirerImageFacebook") === "on") await definirImage(id, "facebook", null);
+  return erreurs;
 }
 
 export async function enregistrer(id: number, _etat: EtatEdition, form: FormData): Promise<EtatEdition> {
@@ -35,7 +75,13 @@ export async function enregistrer(id: number, _etat: EtatEdition, form: FormData
   try {
     const m = lireFormulaire(form);
     if (m.titre.length < 3) return { erreurs: ["Le titre est obligatoire."] };
+    // Le texte est enregistré d'abord : une image refusée ne fait pas perdre les modifications.
     await modifier(id, m);
+    const erreursImages = await traiterImages(id, form, m);
+    if (erreursImages.length) {
+      revalidatePath("/", "layout");
+      return { erreurs: erreursImages, message: "Texte enregistré, mais l'image n'a pas été prise en compte." };
+    }
     if (intention === "publier") {
       const a = await publier(id);
       revalidatePath("/", "layout");

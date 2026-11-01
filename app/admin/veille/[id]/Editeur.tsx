@@ -6,7 +6,10 @@ import type { EtatEdition } from "../actions";
 interface Valeurs {
   titre: string; chapo: string; corps: string; avisSilfax: string; rubrique: string; etiquettes: string;
   pilier: string; description: string; accrocheFacebook: string; texteFacebook: string;
+  imageId: number | null; imageAlt: string; imageCredit: string; imageFacebookId: number | null;
 }
+
+const TYPES_IMAGES = "image/jpeg,image/png,image/webp";
 
 export function Editeur({
   action, valeurs, rubriques, piliers, publie, avisMinimum,
@@ -23,11 +26,41 @@ export function Editeur({
     <form action={envoyer} className="formulaire">
       {etat.erreurs.length ? (
         <div className="alerte" role="alert">
-          <strong>Publication impossible :</strong>
+          <strong>À corriger :</strong>
           <ul>{etat.erreurs.map((e) => <li key={e}>{e}</li>)}</ul>
         </div>
       ) : null}
       {etat.message ? <p className="info" role="status">{etat.message}</p> : null}
+
+      <fieldset className="encadre" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <legend className="surtitre" style={{ padding: "0 6px" }}>Image d&apos;en-tête</legend>
+        {valeurs.imageId ? (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "flex-start" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/medias/${valeurs.imageId}/`} alt={valeurs.imageAlt} style={{ width: 280, maxWidth: "100%", borderRadius: 6, display: "block" }} />
+            <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input type="checkbox" name="retirerImage" style={{ width: 20, height: 20 }} /> Retirer cette image
+            </label>
+          </div>
+        ) : (
+          <small className="doux">Aucune image : le site affiche un visuel généré, et Facebook une image aux couleurs du site.</small>
+        )}
+        <div className="champ">
+          <label htmlFor="image">{valeurs.imageId ? "Remplacer par une autre image" : "Envoyer une image"}</label>
+          <small>JPEG, PNG ou WebP, 8 Mo au maximum, 1200 px de large conseillés. L&apos;image est recadrée automatiquement pour Facebook.</small>
+          <input id="image" name="image" type="file" accept={TYPES_IMAGES} />
+        </div>
+        <div className="champ">
+          <label htmlFor="imageAlt">Description de l&apos;image</label>
+          <small>Obligatoire avec une image : ce qu&apos;elle montre, en une phrase (lue aux malvoyants et par Google).</small>
+          <input id="imageAlt" name="imageAlt" type="text" defaultValue={valeurs.imageAlt} maxLength={200} />
+        </div>
+        <div className="champ">
+          <label htmlFor="imageCredit">Crédit</label>
+          <small>Affiché sous l&apos;image. Exemple : « Capture de Silfax · © Blizzard Entertainment ».</small>
+          <input id="imageCredit" name="imageCredit" type="text" defaultValue={valeurs.imageCredit} maxLength={160} />
+        </div>
+      </fieldset>
 
       <div className="champ">
         <label htmlFor="titre">Titre</label>
@@ -86,7 +119,32 @@ export function Editeur({
           <small>2 à 3 phrases simples. Le lien « La suite ici » et les mots-dièse sont ajoutés automatiquement.</small>
           <textarea id="texteFacebook" name="texteFacebook" defaultValue={valeurs.texteFacebook} style={{ minHeight: 90 }} />
         </div>
+        {valeurs.imageFacebookId ? (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "flex-start" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/medias/${valeurs.imageFacebookId}/`} alt="Image du post Facebook" style={{ width: 200, maxWidth: "100%", borderRadius: 6, display: "block" }} />
+            <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input type="checkbox" name="retirerImageFacebook" style={{ width: 20, height: 20 }} /> Retirer cette image
+            </label>
+          </div>
+        ) : null}
+        <div className="champ">
+          <label htmlFor="imageFacebook">{valeurs.imageFacebookId ? "Remplacer l'image du post" : "Image propre au post (facultatif)"}</label>
+          <small>
+            Avec une image ici, le post Facebook devient un post photo : l&apos;image en grand, le lien vers l&apos;article dans le texte.
+            Sans image, Facebook affiche l&apos;aperçu du lien avec l&apos;image d&apos;en-tête.
+          </small>
+          <input id="imageFacebook" name="imageFacebook" type="file" accept={TYPES_IMAGES} />
+        </div>
       </fieldset>
+
+      <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 15 }}>
+        <input type="checkbox" name="droitsImages" style={{ width: 20, height: 20, flex: "none", marginTop: 2 }} />
+        <span>
+          Les images que j&apos;envoie sont les miennes (captures d&apos;écran, créations) ou utilisées avec l&apos;accord de leur auteur.
+          Aucune image copiée sur un autre site. <span className="doux">(Obligatoire pour envoyer une image.)</span>
+        </span>
+      </label>
 
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
         <button type="submit" name="intention" value="enregistrer" className="btn btn-contour" disabled={enCours}>Enregistrer</button>

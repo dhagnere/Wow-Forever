@@ -51,3 +51,18 @@ CREATE TABLE IF NOT EXISTS veille_revues (
 );
 
 CREATE INDEX IF NOT EXISTS veille_revues_jour ON veille_revues (jour DESC, cree_le DESC);
+
+-- Images envoyées depuis l'espace de relecture (en-tête d'article, post Facebook).
+CREATE TABLE IF NOT EXISTS medias (
+  id          SERIAL PRIMARY KEY,
+  largeur     INTEGER NOT NULL,
+  hauteur     INTEGER NOT NULL,
+  donnees     BYTEA NOT NULL,     -- en-tête, JPEG, 1600 px de large au plus
+  donnees_og  BYTEA NOT NULL,     -- recadrage 1200 × 630 (Facebook, Google)
+  cree_le     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS image_id INTEGER REFERENCES medias(id) ON DELETE SET NULL;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS image_alt TEXT NOT NULL DEFAULT '';
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS image_credit TEXT NOT NULL DEFAULT '';
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS image_facebook_id INTEGER REFERENCES medias(id) ON DELETE SET NULL;

@@ -4,6 +4,7 @@ import { pool } from "../db/pool";
 import type { Article, SourceCitee, Statut } from "../types";
 import { slugifier } from "./slug";
 import { verifierPublication } from "./publication";
+import { supprimerSiOrpheline } from "../medias/images";
 
 interface Ligne {
   id: number; slug: string; titre: string; chapo: string; corps: string; avis_silfax: string;
@@ -12,6 +13,7 @@ interface Ligne {
   score: number | null; origine: "veille" | "manuel"; cree_le: Date; modifie_le: Date;
   publie_le: Date | null; facebook_post_id: string | null; facebook_publie_le: Date | null;
   facebook_tentatives: number; facebook_erreur: string | null;
+  image_id: number | null; image_alt: string; image_credit: string; image_facebook_id: number | null;
 }
 
 function versArticle(l: Ligne): Article {
@@ -19,7 +21,10 @@ function versArticle(l: Ligne): Article {
     id: l.id, slug: l.slug, titre: l.titre, chapo: l.chapo, corps: l.corps, avisSilfax: l.avis_silfax,
     rubrique: l.rubrique as SlugRubrique, etiquettes: l.etiquettes, pilier: estPilier(l.pilier) ? l.pilier : null,
     description: l.description, accrocheFacebook: l.accroche_facebook, texteFacebook: l.texte_facebook,
-    sources: l.sources, statut: l.statut, score: l.score, origine: l.origine, creeLe: l.cree_le,
+    sources: l.sources,
+    image: l.image_id ? { id: l.image_id, alt: l.image_alt, credit: l.image_credit } : null,
+    imageFacebookId: l.image_facebook_id,
+    statut: l.statut, score: l.score, origine: l.origine, creeLe: l.cree_le,
     modifieLe: l.modifie_le, publieLe: l.publie_le, facebookPostId: l.facebook_post_id,
     facebookPublieLe: l.facebook_publie_le, facebookTentatives: l.facebook_tentatives, facebookErreur: l.facebook_erreur,
   };
@@ -67,7 +72,10 @@ export async function creerBrouillon(b: NouveauBrouillon, cleSujet?: string): Pr
   }
 }
 
-export type Modifications = Pick<Article, "titre" | "chapo" | "corps" | "avisSilfax" | "rubrique" | "etiquettes" | "pilier" | "description" | "accrocheFacebook" | "texteFacebook">;
+export type Modifications = Pick<Article, "titre" | "chapo" | "corps" | "avisSilfax" | "rubrique" | "etiquettes" | "pilier" | "description" | "accrocheFacebook" | "texteFacebook"> & {
+  imageAlt: string;
+  imageCredit: string;
+};
 
 export async function modifier(id: number, m: Modifications): Promise<Article> {
   const client = await pool().connect();
@@ -76,17 +84,18 @@ export async function modifier(id: number, m: Modifications): Promise<Article> {
     if (!actuel.rows[0]) throw new Error("Article introuvable.");
     const art = actuel.rows[0];
     if (art.statut === "publie") {
-      const erreurs = verifierPublication(m);
+      const erreurs = verifierPublication({ ...m, image: art.image_id ? { id: art.image_id, alt: m.imageAlt, credit: m.imageCredit } : null });
       if (erreurs.length) throw new ErreurPublication(erreurs);
     }
     // Le slug d'un article publié ne change plus : les liens partagés doivent rester valides.
     const slug = art.statut === "publie" ? art.slug : await slugLibre(client, m.titre, id);
     const { rows } = await client.query<Ligne>(
       `UPDATE articles SET slug=$2, titre=$3, chapo=$4, corps=$5, avis_silfax=$6, rubrique=$7, etiquettes=$8,
-         pilier=$9, description=$10, accroche_facebook=$11, texte_facebook=$12, modifie_le=now()
+         pilier=$9, description=$10, accroche_facebook=$11, texte_facebook=$12, image_alt=$13, image_credit=$14,
+         modifie_le=now()
        WHERE id=$1 RETURNING *`,
       [id, slug, m.titre, m.chapo, m.corps, m.avisSilfax, m.rubrique, m.etiquettes, m.pilier,
-       m.description, m.accrocheFacebook, m.texteFacebook],
+       m.description, m.accrocheFacebook, m.texteFacebook, m.imageAlt.trim(), m.imageCredit.trim()],
     );
     return versArticle(rows[0]);
   } finally {
@@ -110,6 +119,22 @@ export async function publier(id: number): Promise<Article> {
     [id],
   );
   return versArticle(rows[0]);
+}
+
+/**
+ * Associe une image (déjà enregistrée) à un article, ou la retire (null).
+ * L'image remplacée est supprimée si plus aucun article ne l'utilise.
+ */
+export async function definirImage(id: number, emplacement: "une" | "facebook", mediaId: number | null): Promise<void> {
+  const colonne = emplacement === "une" ? "image_id" : "image_facebook_id";
+  const { rows } = await pool().query<{ ancien: number | null }>(
+    `UPDATE articles a SET ${colonne} = $2, modifie_le = now()
+     FROM (SELECT ${colonne} AS ancien FROM articles WHERE id = $1) avant
+     WHERE a.id = $1 RETURNING avant.ancien`,
+    [id, mediaId],
+  );
+  const ancien = rows[0]?.ancien ?? null;
+  if (ancien && ancien !== mediaId) await supprimerSiOrpheline(ancien);
 }
 
 export async function changerStatut(id: number, statut: Exclude<Statut, "publie">): Promise<void> {

@@ -23,7 +23,7 @@ Site de fans francophone non officiel consacré à World of Warcraft: Forever. N
 1. **Avis obligatoire.** Aucun article ne se publie sans « L'avis de Silfax » rédigé (80 caractères minimum, sans texte à remplacer entre crochets). La règle est appliquée deux fois : `articles/publication.ts` et la contrainte `avis_obligatoire` de la base. Ne pas retirer, assouplir ni contourner l'une ou l'autre, ni publier par une requête SQL directe.
 2. **Filtrage du HTML.** Tout contenu affiché passe par `markdownVersHtml` / `nettoyerHtml` (`rendu/html.ts`). Pas de `dangerouslySetInnerHTML` sur du contenu non filtré. Seules les vidéos YouTube sont intégrables.
 3. **Accès réservé.** Tout `/admin` exige une session signée : `proxy.ts` à l'entrée, `exigerAdmin()` en tête de chaque page et de chaque action serveur. Une nouvelle page ou action d'administration appelle `exigerAdmin()`.
-4. **Droit d'auteur.** Les consignes de rédaction (`redaction/consignes.ts`) imposent un article neuf, une seule citation courte, des sources créditées et aucune image copiée. Le ton peut être ajusté ; ces règles, non.
+4. **Droit d'auteur.** Les consignes de rédaction (`redaction/consignes.ts`) imposent un article neuf, une seule citation courte, des sources créditées et aucune image copiée. Le ton peut être ajusté ; ces règles, non. Une image ne s'envoie qu'avec la case de déclaration des droits cochée, et passe toujours par `enregistrerImage` (réencodage, métadonnées retirées). Une image d'en-tête exige sa description.
 5. **Facebook suit le site.** Le relais ne publie que des articles déjà en ligne, avec un lien vers le site (jamais vers la source), entre 8h et 22h (Paris), trois posts par heure au plus.
 
 ## Commandes

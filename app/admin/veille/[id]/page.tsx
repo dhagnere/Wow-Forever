@@ -34,6 +34,8 @@ export default async function EditerArticle({ params }: { params: Promise<{ id: 
               titre: a.titre, chapo: a.chapo, corps: a.corps, avisSilfax: a.avisSilfax, rubrique: a.rubrique,
               etiquettes: a.etiquettes.join(", "), pilier: a.pilier ?? "", description: a.description,
               accrocheFacebook: a.accrocheFacebook, texteFacebook: a.texteFacebook,
+              imageId: a.image?.id ?? null, imageAlt: a.image?.alt ?? "", imageCredit: a.image?.credit ?? "",
+              imageFacebookId: a.imageFacebookId,
             }}
             rubriques={RUBRIQUES.map((r) => ({ slug: r.slug, nom: r.nom }))}
             piliers={PILIERS}
@@ -52,6 +54,15 @@ export default async function EditerArticle({ params }: { params: Promise<{ id: 
           </div>
           <div className="encadre">
             <h2>Aperçu du post Facebook</h2>
+            <p className="doux" style={{ margin: "0 0 8px", fontSize: 14 }}>
+              {a.imageFacebookId ? "Post photo, avec l'image propre au post." : a.image ? "Post lien, avec l'image d'en-tête recadrée." : "Post lien, avec l'image générée par le site."}
+            </p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={a.imageFacebookId ? `/medias/${a.imageFacebookId}/` : a.image ? `/medias/${a.image.id}/og/` : `/articles/${a.slug}/image/`}
+              alt=""
+              style={{ width: "100%", borderRadius: 6, display: "block", marginBottom: 10 }}
+            />
             <p style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: 15 }}>{messageFacebook(a)}</p>
             {a.facebookErreur ? <p className="alerte" style={{ marginTop: 12, fontSize: 14 }}>Dernier échec : {a.facebookErreur}</p> : null}
           </div>
