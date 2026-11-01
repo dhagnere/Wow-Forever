@@ -1,20 +1,81 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useState, useTransition } from "react";
 import type { EtatEdition } from "../actions";
 
 interface Valeurs {
   titre: string; chapo: string; corps: string; avisSilfax: string; rubrique: string; etiquettes: string;
   pilier: string; description: string; accrocheFacebook: string; texteFacebook: string;
   imageId: number | null; imageAlt: string; imageCredit: string; imageFacebookId: number | null;
+  avisPropose: string;
 }
 
 const TYPES_IMAGES = "image/jpeg,image/png,image/webp";
 
+function champ(form: HTMLFormElement | null, nom: string): string {
+  const el = form?.elements.namedItem(nom);
+  return el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el.value : "";
+}
+
+/** Proposition d'avis par l'IA : affichée à côté du champ, reprise seulement sur un clic de Silfax. */
+function PropositionAvis({
+  initiale, proposer, avisRef,
+}: {
+  initiale: string;
+  proposer: (contenu: { titre: string; chapo: string; corps: string }) => Promise<{ avis?: string; erreur?: string }>;
+  avisRef: React.RefObject<HTMLTextAreaElement | null>;
+}) {
+  const [proposition, setProposition] = useState(initiale);
+  const [erreur, setErreur] = useState("");
+  const [enCours, demarrer] = useTransition();
+  const boite = useRef<HTMLDivElement>(null);
+
+  function demander() {
+    const form = boite.current?.closest("form") ?? null;
+    setErreur("");
+    demarrer(async () => {
+      const r = await proposer({ titre: champ(form, "titre"), chapo: champ(form, "chapo"), corps: champ(form, "corps") });
+      if (r.avis) setProposition(r.avis);
+      else setErreur(r.erreur ?? "Proposition impossible.");
+    });
+  }
+
+  function reprendre() {
+    const zone = avisRef.current;
+    if (!zone) return;
+    zone.value = proposition;
+    zone.focus();
+  }
+
+  return (
+    <div ref={boite} className="encadre" style={{ display: "flex", flexDirection: "column", gap: 10 }} aria-live="polite">
+      <p className="surtitre" style={{ margin: 0 }}>Proposition de l&apos;IA</p>
+      {proposition ? (
+        <p style={{ margin: 0, fontStyle: "italic", color: "var(--texte-chaud)" }}>{proposition}</p>
+      ) : (
+        <p className="doux" style={{ margin: 0, fontSize: 15 }}>Aucune proposition pour l&apos;instant.</p>
+      )}
+      {erreur ? <p className="alerte" role="alert" style={{ margin: 0 }}>{erreur}</p> : null}
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        {proposition ? (
+          <button type="button" className="btn btn-or" onClick={reprendre} disabled={enCours}>Reprendre dans mon avis</button>
+        ) : null}
+        <button type="button" className="btn btn-contour" onClick={demander} disabled={enCours}>
+          {enCours ? "Rédaction…" : proposition ? "Une autre proposition" : "Proposer un avis"}
+        </button>
+      </div>
+      <small className="doux">
+        Une suggestion, rédigée d&apos;après le texte de l&apos;article. Relisez-la : une fois reprise et publiée, c&apos;est votre avis.
+      </small>
+    </div>
+  );
+}
+
 export function Editeur({
-  action, valeurs, rubriques, piliers, publie, avisMinimum,
+  action, proposerAvis, valeurs, rubriques, piliers, publie, avisMinimum,
 }: {
   action: (etat: EtatEdition, form: FormData) => Promise<EtatEdition>;
+  proposerAvis: (contenu: { titre: string; chapo: string; corps: string }) => Promise<{ avis?: string; erreur?: string }>;
   valeurs: Valeurs;
   rubriques: { slug: string; nom: string }[];
   piliers: readonly string[];
@@ -22,6 +83,7 @@ export function Editeur({
   avisMinimum: number;
 }) {
   const [etat, envoyer, enCours] = useActionState(action, { erreurs: [] });
+  const avisRef = useRef<HTMLTextAreaElement>(null);
   return (
     <form action={envoyer} className="formulaire">
       {etat.erreurs.length ? (
@@ -78,8 +140,9 @@ export function Editeur({
       <div className="champ">
         <label htmlFor="avisSilfax">L&apos;avis de Silfax</label>
         <small>Obligatoire pour publier ({avisMinimum} caractères minimum) : ressenti de joueur, ce qui donne envie, ce qui inquiète.</small>
-        <textarea id="avisSilfax" name="avisSilfax" defaultValue={valeurs.avisSilfax} style={{ minHeight: 140 }} />
+        <textarea id="avisSilfax" name="avisSilfax" ref={avisRef} defaultValue={valeurs.avisSilfax} style={{ minHeight: 140 }} />
       </div>
+      <PropositionAvis initiale={valeurs.avisPropose} proposer={proposerAvis} avisRef={avisRef} />
 
       <div className="g2">
         <div className="champ">

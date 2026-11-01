@@ -1,6 +1,22 @@
 import { RUBRIQUES, PILIERS } from "@/config/taxonomie";
 
 /**
+ * Consignes de l'avis proposé à Silfax. Ce n'est qu'une proposition : il la relit, la reprend ou la réécrit
+ * dans l'éditeur. L'avis publié reste le sien (garde-fou « Avis obligatoire », voir CLAUDE.md).
+ */
+export const CONSIGNES_AVIS = `Tu proposes « L'avis de Silfax », l'encadré qui conclut chaque article d'Azeroth Forever, site de fans francophone de World of Warcraft: Forever. Silfax relira ta proposition avant toute publication.
+
+Silfax est un joueur passionné, de retour sur l'Azeroth d'origine. Son ton : humoristique, complice, avec l'autodérision du joueur qui a déjà trop attendu en file d'attente, raté un pull ou vendu un objet épique au marchand. Il parle à la première personne et tutoie volontiers la communauté.
+
+Règles :
+- Analyse l'article : ce qu'il annonce vraiment, ce que ça change pour les joueurs, ce qui donne envie, ce qui inquiète.
+- 2 à 4 phrases, 300 à 600 caractères, un seul paragraphe.
+- De l'humour, au service d'un vrai avis : une prise de position claire (enthousiaste, sceptique, prudente…) et, si c'est utile, un conseil concret.
+- Références de joueur bienvenues (wipe, loot, files d'attente, montures, hôtel des ventes), sans vulgarité, sans moquerie envers d'autres joueurs, Blizzard compris.
+- N'invente aucun fait absent de l'article et aucune expérience vécue : Silfax n'a pas encore joué à ce qui est annoncé, il ne « l'a pas testé ».
+- Pas de crochets, pas d'émoji, pas de mots-dièse, pas de titre.`;
+
+/**
  * Consignes de rédaction. À ajuster après relecture des premiers brouillons si le ton ne convient pas.
  * Les règles de droit d'auteur (article neuf, une seule citation courte, sources créditées) ne doivent pas être assouplies.
  */
@@ -27,4 +43,6 @@ Classement :
 - description : 120 à 155 caractères pour Google, avec « WoW Forever » si naturel.
 - accroche_facebook : une phrase de 90 caractères maximum, un emoji au plus.
 - texte_facebook : 2 à 3 phrases simples qui donnent envie de cliquer sans tout dévoiler. Pas de lien, pas de mots-dièse.
+- avis_propose : une proposition d'avis de Silfax sur ce que tu viens d'écrire, en suivant ces règles :
+${CONSIGNES_AVIS.split("Règles :")[1]}
 - titres_sources_fr : la traduction française fidèle du titre de chaque source, dans l'ordre des numéros de source (un titre par source, même s'il est déjà en français). Traduction littérale, sans reformulation ni ajout.`;

@@ -6,7 +6,7 @@ import { exigerAdmin } from "@/lib/admin";
 import { dateLongue } from "@/lib/site";
 import { Editeur } from "./Editeur";
 import { LigneSource } from "@/components/Sources";
-import { depublier, enregistrer, restaurer, supprimer } from "../actions";
+import { depublier, enregistrer, proposerAvisPour, restaurer, supprimer } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +36,9 @@ export default async function EditerArticle({ params }: { params: Promise<{ id: 
               accrocheFacebook: a.accrocheFacebook, texteFacebook: a.texteFacebook,
               imageId: a.image?.id ?? null, imageAlt: a.image?.alt ?? "", imageCredit: a.image?.credit ?? "",
               imageFacebookId: a.imageFacebookId,
+              avisPropose: a.avisPropose,
             }}
+            proposerAvis={proposerAvisPour.bind(null, a.id)}
             rubriques={RUBRIQUES.map((r) => ({ slug: r.slug, nom: r.nom }))}
             piliers={PILIERS}
             publie={a.statut === "publie"}

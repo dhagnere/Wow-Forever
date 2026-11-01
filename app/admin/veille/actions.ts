@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { estPilier, SLUGS_RUBRIQUES, type SlugRubrique } from "@/config/taxonomie";
 import {
-  changerStatut, creerBrouillon, definirImage, enregistrerImage, ErreurImage, ErreurPublication, modifier, publier,
+  changerStatut, creerBrouillon, definirImage, enregistrerAvisPropose, enregistrerImage, ErreurImage, ErreurPublication, modifier,
+  proposerAvis, publier,
   TAILLE_MAX_OCTETS, type Modifications,
 } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
@@ -131,4 +132,24 @@ export async function ecrireArticle(): Promise<void> {
     origine: "manuel",
   });
   redirect(`/admin/veille/${a.id}/`);
+}
+
+/**
+ * Demande à l'IA une proposition d'avis de Silfax, à partir du texte en cours d'édition.
+ * La proposition est conservée à part : elle n'entre dans l'avis que si Silfax la reprend.
+ */
+export async function proposerAvisPour(
+  id: number,
+  contenu: { titre: string; chapo: string; corps: string },
+): Promise<{ avis?: string; erreur?: string }> {
+  await exigerAdmin();
+  if (!process.env.ANTHROPIC_API_KEY) return { erreur: "ANTHROPIC_API_KEY n'est pas renseignée : proposition impossible." };
+  const r = await proposerAvis({
+    titre: String(contenu.titre ?? "").slice(0, 300),
+    chapo: String(contenu.chapo ?? "").slice(0, 1000),
+    corps: String(contenu.corps ?? "").slice(0, 20000),
+  });
+  if (!r.ok) return { erreur: r.raison };
+  await enregistrerAvisPropose(id, r.avis);
+  return { avis: r.avis };
 }

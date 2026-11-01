@@ -66,3 +66,6 @@ ALTER TABLE articles ADD COLUMN IF NOT EXISTS image_id INTEGER REFERENCES medias
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS image_alt TEXT NOT NULL DEFAULT '';
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS image_credit TEXT NOT NULL DEFAULT '';
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS image_facebook_id INTEGER REFERENCES medias(id) ON DELETE SET NULL;
+
+-- Avis proposé par l'IA : une suggestion que Silfax relit et reprend. L'avis publié reste avis_silfax.
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS avis_propose TEXT NOT NULL DEFAULT '';

@@ -17,6 +17,8 @@ export interface Article {
   chapo: string;
   corps: string; // Markdown
   avisSilfax: string;
+  /** Avis proposé par l'IA, à relire et reprendre par Silfax. Jamais publié tel quel. */
+  avisPropose: string;
   rubrique: SlugRubrique;
   etiquettes: string[];
   pilier: Pilier | null;

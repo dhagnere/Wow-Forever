@@ -7,7 +7,7 @@ import { verifierPublication } from "./publication";
 import { supprimerSiOrpheline } from "../medias/images";
 
 interface Ligne {
-  id: number; slug: string; titre: string; chapo: string; corps: string; avis_silfax: string;
+  id: number; slug: string; titre: string; chapo: string; corps: string; avis_silfax: string; avis_propose: string;
   rubrique: string; etiquettes: string[]; pilier: string | null; description: string;
   accroche_facebook: string; texte_facebook: string; sources: SourceCitee[]; statut: Statut;
   score: number | null; origine: "veille" | "manuel"; cree_le: Date; modifie_le: Date;
@@ -18,7 +18,7 @@ interface Ligne {
 
 function versArticle(l: Ligne): Article {
   return {
-    id: l.id, slug: l.slug, titre: l.titre, chapo: l.chapo, corps: l.corps, avisSilfax: l.avis_silfax,
+    id: l.id, slug: l.slug, titre: l.titre, chapo: l.chapo, corps: l.corps, avisSilfax: l.avis_silfax, avisPropose: l.avis_propose,
     rubrique: l.rubrique as SlugRubrique, etiquettes: l.etiquettes, pilier: estPilier(l.pilier) ? l.pilier : null,
     description: l.description, accrocheFacebook: l.accroche_facebook, texteFacebook: l.texte_facebook,
     sources: l.sources,
@@ -42,7 +42,10 @@ async function slugLibre(client: PoolClient, titre: string, sauf?: number): Prom
   for (let i = 2; ; i++) if (!pris.has(`${base}-${i}`)) return `${base}-${i}`;
 }
 
-export type NouveauBrouillon = Pick<Article, "titre" | "chapo" | "corps" | "rubrique" | "etiquettes" | "pilier" | "description" | "accrocheFacebook" | "texteFacebook" | "sources" | "origine"> & { score?: number | null };
+export type NouveauBrouillon = Pick<Article, "titre" | "chapo" | "corps" | "rubrique" | "etiquettes" | "pilier" | "description" | "accrocheFacebook" | "texteFacebook" | "sources" | "origine"> & {
+  score?: number | null;
+  avisPropose?: string;
+};
 
 export async function creerBrouillon(b: NouveauBrouillon, cleSujet?: string): Promise<Article> {
   const client = await pool().connect();
@@ -51,10 +54,10 @@ export async function creerBrouillon(b: NouveauBrouillon, cleSujet?: string): Pr
     const slug = await slugLibre(client, b.titre);
     const { rows } = await client.query<Ligne>(
       `INSERT INTO articles (slug, titre, chapo, corps, rubrique, etiquettes, pilier, description,
-         accroche_facebook, texte_facebook, sources, score, origine)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
+         accroche_facebook, texte_facebook, sources, score, origine, avis_propose)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
       [slug, b.titre, b.chapo, b.corps, b.rubrique, b.etiquettes, b.pilier, b.description,
-       b.accrocheFacebook, b.texteFacebook, JSON.stringify(b.sources), b.score ?? null, b.origine],
+       b.accrocheFacebook, b.texteFacebook, JSON.stringify(b.sources), b.score ?? null, b.origine, b.avisPropose ?? ""],
     );
     if (cleSujet) {
       await client.query(
@@ -135,6 +138,11 @@ export async function definirImage(id: number, emplacement: "une" | "facebook", 
   );
   const ancien = rows[0]?.ancien ?? null;
   if (ancien && ancien !== mediaId) await supprimerSiOrpheline(ancien);
+}
+
+/** Conserve la dernière proposition d'avis de l'IA (n'écrit jamais dans l'avis de Silfax). */
+export async function enregistrerAvisPropose(id: number, avis: string): Promise<void> {
+  await pool().query("UPDATE articles SET avis_propose = $2 WHERE id = $1", [id, avis]);
 }
 
 export async function changerStatut(id: number, statut: Exclude<Statut, "publie">): Promise<void> {
