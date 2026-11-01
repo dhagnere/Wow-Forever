@@ -15,15 +15,3 @@ export function Visuel({ hauteur, texte, teinte }: { hauteur: number | string; t
     </span>
   );
 }
-
-export function Embleme({ nom, couleur }: { nom: string; couleur: string }) {
-  return (
-    <span
-      className="embleme"
-      aria-hidden="true"
-      style={{ background: `linear-gradient(180deg, ${couleur}, ${couleur}cc 60%, #1a1406)` }}
-    >
-      {nom.charAt(0)}
-    </span>
-  );
-}

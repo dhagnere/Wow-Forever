@@ -2,7 +2,8 @@ import Link from "next/link";
 import { listerPublies } from "@/modules/veille";
 import { CLASSES } from "@/content/classes";
 import { CarteArticle, FilArticles } from "@/components/Articles";
-import { Embleme, Visuel } from "@/components/Visuels";
+import { Visuel } from "@/components/Visuels";
+import { IconeClasse } from "@/components/IconeClasse";
 import { JsonLd } from "@/components/JsonLd";
 import { SITE } from "@/lib/site";
 
@@ -67,7 +68,7 @@ export default async function Accueil() {
           <div className="g9">
             {CLASSES.map((c) => (
               <Link key={c.slug} href={`/classes/${c.slug}/`} className="lien-classe">
-                <Embleme nom={c.nom} couleur={c.couleur} />
+                <IconeClasse slug={c.slug} couleur={c.couleur} taille="100%" />
                 {c.nom}
               </Link>
             ))}

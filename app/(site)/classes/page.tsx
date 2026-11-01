@@ -3,7 +3,7 @@ import Link from "next/link";
 import { CLASSES } from "@/content/classes";
 import { listerPublies } from "@/modules/veille";
 import { Ariane } from "@/components/Ariane";
-import { Embleme } from "@/components/Visuels";
+import { IconeClasse } from "@/components/IconeClasse";
 import { FilArticles } from "@/components/Articles";
 
 export const dynamic = "force-dynamic";
@@ -31,7 +31,7 @@ export default async function Classes() {
           <div className="g3">
             {CLASSES.map((c) => (
               <Link key={c.slug} href={`/classes/${c.slug}/`} className="carte cadre" style={{ flexDirection: "row", alignItems: "center", gap: 18, padding: 18 }}>
-                <span style={{ width: 72, flex: "none" }}><Embleme nom={c.nom} couleur={c.couleur} /></span>
+                <IconeClasse slug={c.slug} couleur={c.couleur} taille={72} />
                 <span>
                   <span className="titre" style={{ display: "block", fontSize: 21, fontWeight: 700, color: "var(--texte-titre)" }}>{c.nom}</span>
                   <span className="doux" style={{ display: "block", fontSize: 15 }}>{c.resume}</span>
@@ -42,6 +42,7 @@ export default async function Classes() {
           </div>
           <p className="doux" style={{ marginTop: 20, fontSize: 15 }}>
             Rôles hérités de l&apos;Azeroth d&apos;origine. Les nouvelles techniques et combinaisons race et classe de Forever seront ajoutées dès leur confirmation.
+            Icônes : <a href="https://game-icons.net" rel="noopener noreferrer">game-icons.net</a>, licence CC BY 3.0.
           </p>
         </section>
         <section aria-labelledby="t-derniers">

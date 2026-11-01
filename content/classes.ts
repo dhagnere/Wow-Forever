@@ -6,7 +6,7 @@
 export interface Classe {
   slug: string;
   nom: string;
-  couleur: string; // couleur d'emblème
+  couleur: string; // couleur de classe, reprise du code couleur que les joueurs connaissent
   roles: string[];
   resume: string; // une ligne pour les listes
   presentation: string;
@@ -29,7 +29,7 @@ const A_COMPLETER = "[Conseil de Silfax à compléter après les premières heur
 
 export const CLASSES: Classe[] = [
   {
-    slug: "guerrier", nom: "Guerrier", couleur: "#a8794f", roles: ["Tank", "Dégâts"],
+    slug: "guerrier", nom: "Guerrier", couleur: "#c69b6d", roles: ["Tank", "Dégâts"],
     resume: "Tank · Dégâts au corps à corps",
     presentation: "Le pilier des groupes : il encaisse les coups, tient les ennemis et frappe fort une fois bien équipé. Exigeant en solo, incontournable en donjon.",
     armure: "Mailles, puis plaques au niveau 40",
@@ -47,7 +47,7 @@ export const CLASSES: Classe[] = [
     misAJour: "2026-10-31",
   },
   {
-    slug: "paladin", nom: "Paladin", couleur: "#d9a94a", roles: ["Tank", "Soins", "Dégâts"],
+    slug: "paladin", nom: "Paladin", couleur: "#f48cba", roles: ["Tank", "Soins", "Dégâts"],
     resume: "Tank · Soins · Dégâts",
     presentation: "Guerrier de la Lumière, il soigne, protège et renforce ses alliés par ses bénédictions. Solide en solo grâce à ses soins.",
     armure: "Mailles, puis plaques au niveau 40",
@@ -65,7 +65,7 @@ export const CLASSES: Classe[] = [
     misAJour: "2026-10-31",
   },
   {
-    slug: "chasseur", nom: "Chasseur", couleur: "#7c9a48", roles: ["Dégâts"],
+    slug: "chasseur", nom: "Chasseur", couleur: "#aad372", roles: ["Dégâts"],
     resume: "Dégâts à distance · Familier",
     presentation: "Tireur accompagné d'un familier apprivoisé, il frappe de loin et laisse sa bête tenir l'ennemi. La classe la plus confortable pour monter de niveau.",
     armure: "Cuir, puis mailles au niveau 40",
@@ -83,7 +83,7 @@ export const CLASSES: Classe[] = [
     misAJour: "2026-10-31",
   },
   {
-    slug: "voleur", nom: "Voleur", couleur: "#c9c25a", roles: ["Dégâts"],
+    slug: "voleur", nom: "Voleur", couleur: "#fff468", roles: ["Dégâts"],
     resume: "Dégâts au corps à corps · Furtivité",
     presentation: "Maître de la furtivité et des poisons, il choisit ses combats et frappe le premier. Redoutable en JcJ.",
     armure: "Cuir",
@@ -101,7 +101,7 @@ export const CLASSES: Classe[] = [
     misAJour: "2026-10-31",
   },
   {
-    slug: "pretre", nom: "Prêtre", couleur: "#e3ddd0", roles: ["Soins", "Dégâts"],
+    slug: "pretre", nom: "Prêtre", couleur: "#ffffff", roles: ["Soins", "Dégâts"],
     resume: "Soins · Dégâts à distance",
     presentation: "Le soigneur par excellence, capable aussi de basculer dans l'Ombre pour infliger de lourds dégâts. Toujours recherché pour les donjons.",
     armure: "Tissu",
@@ -119,7 +119,7 @@ export const CLASSES: Classe[] = [
     misAJour: "2026-10-31",
   },
   {
-    slug: "chaman", nom: "Chaman", couleur: "#3f7fbf", roles: ["Soins", "Dégâts"],
+    slug: "chaman", nom: "Chaman", couleur: "#0070dd", roles: ["Soins", "Dégâts"],
     resume: "Soins · Dégâts · Totems",
     presentation: "Lié aux éléments, il pose des totems qui renforcent le groupe, soigne et frappe au corps à corps comme à distance.",
     armure: "Cuir, puis mailles au niveau 40",
@@ -137,7 +137,7 @@ export const CLASSES: Classe[] = [
     misAJour: "2026-10-31",
   },
   {
-    slug: "mage", nom: "Mage", couleur: "#5fb8d6", roles: ["Dégâts"],
+    slug: "mage", nom: "Mage", couleur: "#3fc7eb", roles: ["Dégâts"],
     resume: "Dégâts à distance · Contrôle",
     presentation: "Maître des arcanes, du feu et du givre. Dégâts élevés, contrôle des foules, et nourriture et eau à volonté pour le groupe.",
     armure: "Tissu",
@@ -155,7 +155,7 @@ export const CLASSES: Classe[] = [
     misAJour: "2026-10-31",
   },
   {
-    slug: "demoniste", nom: "Démoniste", couleur: "#8a62c4", roles: ["Dégâts"],
+    slug: "demoniste", nom: "Démoniste", couleur: "#8788ee", roles: ["Dégâts"],
     resume: "Dégâts à distance · Serviteurs",
     presentation: "Il invoque des démons et ronge ses ennemis par des malédictions. Solide en solo grâce à ses serviteurs.",
     armure: "Tissu",
@@ -173,7 +173,7 @@ export const CLASSES: Classe[] = [
     misAJour: "2026-10-31",
   },
   {
-    slug: "druide", nom: "Druide", couleur: "#d9822b", roles: ["Tank", "Soins", "Dégâts"],
+    slug: "druide", nom: "Druide", couleur: "#ff7c0a", roles: ["Tank", "Soins", "Dégâts"],
     resume: "Tank · Soins · Dégâts · Formes",
     presentation: "La classe qui sait tout faire : protéger le groupe sous forme d'ours, soigner, frapper au corps à corps ou à distance. Le prix de cette polyvalence : beaucoup de formes à maîtriser.",
     armure: "Cuir",

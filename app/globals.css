@@ -144,7 +144,9 @@ a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(232, 192, 106, 
 .visuel::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.35)); }
 .visuel-texte { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 18px; background: rgba(7, 11, 22, 0.78); font-family: var(--police-titre); font-weight: 700; color: var(--texte-titre); z-index: 1; }
 
-.embleme { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; aspect-ratio: 300 / 420; width: 100%; border: 1px solid var(--bordure-vive); border-radius: 4px 4px 40% 40% / 4px 4px 18% 18%; color: var(--sur-or); font-family: var(--police-titre); font-weight: 800; font-size: 34px; box-shadow: inset 0 0 0 3px rgba(7, 11, 22, 0.35); }
+.icone-classe { display: block; flex: none; max-width: 100%; height: auto; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5)); }
+a:hover > .icone-classe { filter: drop-shadow(0 0 8px rgba(232, 192, 106, 0.55)); }
+.lien-icone { display: inline-flex; align-items: center; gap: 10px; }
 .lien-classe { display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; color: var(--texte); font-family: var(--police-titre); font-weight: 700; font-size: 15px; }
 
 /* Étiquettes */

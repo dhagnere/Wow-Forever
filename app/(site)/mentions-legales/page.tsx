@@ -29,6 +29,12 @@ export default function MentionsLegales() {
           [À compléter : outils réellement activés dans le conteneur Google Tag Manager (par exemple Google Analytics), durée de conservation
           des données, destinataires (Google), transferts hors Union européenne, droits des personnes et adresse de contact.]
         </p>
+        <h2>Crédits</h2>
+        <p>
+          Icônes de classes : dessins des contributeurs de <a href="https://game-icons.net" rel="noopener noreferrer">game-icons.net</a>,
+          sous licence <a href="https://creativecommons.org/licenses/by/3.0/deed.fr" rel="noopener noreferrer">Creative Commons BY 3.0</a>,
+          recolorés et encadrés pour Azeroth Forever.
+        </p>
         <h2>Liens affiliés</h2>
         <p>Certains liens sont signalés comme affiliés : ils peuvent rapporter une commission au site, sans surcoût pour vous.</p>
       </article>

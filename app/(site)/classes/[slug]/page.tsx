@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { CLASSES, trouverClasse } from "@/content/classes";
 import { estPilier } from "@/config/taxonomie";
 import { Ariane } from "@/components/Ariane";
-import { Embleme } from "@/components/Visuels";
+import { IconeClasse } from "@/components/IconeClasse";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { dateLongue } from "@/lib/site";
 
@@ -31,7 +31,7 @@ export default async function PageClasse({ params }: Props) {
     <>
       <section className="bandeau-page">
         <div className="wrap" style={{ display: "flex", flexWrap: "wrap", gap: 36, alignItems: "center" }}>
-          <span style={{ width: 150, flex: "none" }}><Embleme nom={c.nom} couleur={c.couleur} /></span>
+          <IconeClasse slug={c.slug} couleur={c.couleur} taille={150} />
           <div style={{ flex: "1 1 480px" }}>
             <Ariane etapes={[{ nom: "Classes", href: "/classes/" }, { nom: c.nom }]} />
             <h1>Le {c.nom}</h1>
@@ -96,8 +96,15 @@ export default async function PageClasse({ params }: Props) {
           <aside className="colonne-laterale">
             <div className="encadre cadre">
               <h2>Autres classes</h2>
-              <ul style={{ margin: 0, paddingLeft: 20, fontSize: 15 }}>
-                {CLASSES.filter((x) => x.slug !== c.slug).map((x) => <li key={x.slug}><Link href={`/classes/${x.slug}/`}>{x.nom}</Link></li>)}
+              <ul style={{ margin: 0, padding: 0, listStyle: "none", fontSize: 15, display: "flex", flexDirection: "column", gap: 6 }}>
+                {CLASSES.filter((x) => x.slug !== c.slug).map((x) => (
+                  <li key={x.slug}>
+                    <Link href={`/classes/${x.slug}/`} className="lien-icone">
+                      <IconeClasse slug={x.slug} couleur={x.couleur} taille={28} />
+                      {x.nom}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
             <p className="doux" style={{ margin: 0, fontSize: 14 }}>Guide mis à jour le {dateLongue(c.misAJour)} par Silfax.</p>
