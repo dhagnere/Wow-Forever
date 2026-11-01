@@ -185,10 +185,23 @@ export async function compterPublies(rubrique?: string): Promise<number> {
   return Number(rows[0].n);
 }
 
-export async function listerPourAdmin(statut: Statut): Promise<Article[]> {
+export async function listerPourAdmin(statut: Statut, rubrique?: string): Promise<Article[]> {
   const ordre = statut === "brouillon" ? "score DESC NULLS LAST, cree_le DESC" : "COALESCE(publie_le, modifie_le) DESC";
-  const { rows } = await pool().query<Ligne>(`SELECT * FROM articles WHERE statut=$1 ORDER BY ${ordre} LIMIT 200`, [statut]);
+  const { rows } = await pool().query<Ligne>(
+    `SELECT * FROM articles WHERE statut=$1 AND ($2::text IS NULL OR rubrique=$2) ORDER BY ${ordre} LIMIT 200`,
+    [statut, rubrique ?? null],
+  );
   return rows.map(versArticle);
+}
+
+/** Nombre d'articles par rubrique et par statut : montre les pages de thème à alimenter. */
+export async function compterParRubrique(): Promise<Record<string, Partial<Record<Statut, number>>>> {
+  const { rows } = await pool().query<{ rubrique: string; statut: Statut; n: string }>(
+    "SELECT rubrique, statut, count(*) AS n FROM articles GROUP BY rubrique, statut",
+  );
+  const r: Record<string, Partial<Record<Statut, number>>> = {};
+  for (const l of rows) (r[l.rubrique] ??= {})[l.statut] = Number(l.n);
+  return r;
 }
 
 /** Pour le plan du site : slugs et dates de tous les articles publiés. */

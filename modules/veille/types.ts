@@ -53,12 +53,18 @@ export interface Element {
   url: string;
   resume: string;
   publieLe: Date;
+  /** Thème suggéré par la source (recherche ciblée). */
+  theme?: SlugRubrique;
 }
 
 /** Un sujet du jour : un ou plusieurs éléments qui parlent de la même chose. */
 export interface Sujet {
   cle: string; // empreinte stable du sujet (URL de l'élément principal)
   titre: string;
+  /** Thème détecté par mots-clés : sert au filtrage de la revue et oriente la rédaction. */
+  theme: SlugRubrique;
+  /** Page pilier probable, si le sujet en désigne une nettement. */
+  pilier: Pilier | null;
   elements: Element[];
   score: number;
   detailScore: { sources: number; fraicheur: number; video: number; etranger: number };

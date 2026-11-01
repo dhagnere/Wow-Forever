@@ -2,6 +2,7 @@ import { SOURCES, FENETRE_HEURES } from "@/config/sources";
 import { pool } from "./db/pool";
 import { lireToutes } from "./collecte/flux";
 import { classer } from "./collecte/tri";
+import { detecterTheme, selectionVariee } from "./collecte/themes";
 import { ErreurConfiguration, rediger } from "./redaction/redacteur";
 import * as depot from "./articles/depot";
 import { config } from "./config";
@@ -21,6 +22,8 @@ function resumeSujet(s: Sujet) {
   return {
     cle: s.cle,
     titre: s.titre,
+    theme: s.theme,
+    pilier: s.pilier,
     score: s.score,
     detail: s.detailScore,
     elements: s.elements.map((e) => ({
@@ -55,7 +58,8 @@ export async function passage(mode: "essai" | "quotidien", journal: (m: string) 
   journal(`${elements.length} éléments lus, ${sujets.length} sujets retenus, ${bilan.dejaTraites} déjà traités.`);
 
   if (mode === "quotidien") {
-    const aRediger = sujets.filter((s) => !traites.has(s.cle)).slice(0, config.brouillonsParJour());
+    // Sélection variée : plafond par thème, pour alimenter toutes les pages de thème.
+    const aRediger = selectionVariee(sujets.filter((s) => !traites.has(s.cle)), config.brouillonsParJour());
     for (const sujet of aRediger) {
       journal(`Rédaction : ${sujet.titre} (score ${sujet.score})`);
       const r = await rediger(sujet);
@@ -102,6 +106,12 @@ async function lireRevue(id?: number): Promise<Revue | null> {
   return { id: l.id, jour: l.jour, creeLe: l.cree_le, mode: l.mode, bilan: l.bilan, sujets: sujets.map((x) => ({ ...x, dejaTraite: traites.has(x.cle) })) };
 }
 
+/** Thème et pilier d'un sujet de revue (recalculés pour les revues antérieures au classement par thème). */
+export function themeDe(x: SujetRevue): { theme: Sujet["theme"]; pilier: Sujet["pilier"] } {
+  const s = versSujet(x);
+  return { theme: s.theme, pilier: s.pilier };
+}
+
 export function derniereRevue(): Promise<Revue | null> {
   return lireRevue();
 }
@@ -128,12 +138,7 @@ export function etatRedaction(): EtatRedaction {
 }
 
 function versSujet(x: SujetRevue): Sujet {
-  return {
-    cle: x.cle,
-    titre: x.titre,
-    score: x.score,
-    detailScore: x.detail,
-    elements: x.elements.map((e) => ({
+  const elements: Sujet["elements"] = x.elements.map((e) => ({
       sourceId: e.sourceId ?? "revue",
       sourceNom: e.source,
       langue: e.langue,
@@ -143,8 +148,10 @@ function versSujet(x: SujetRevue): Sujet {
       url: e.url,
       resume: e.resume ?? "",
       publieLe: new Date(e.publieLe),
-    })),
-  };
+  }));
+  // Les revues enregistrées avant le classement par thème n'ont ni thème ni pilier : on les recalcule.
+  const theme = x.theme ? { rubrique: x.theme, pilier: x.pilier ?? null } : detecterTheme({ titre: x.titre, texte: elements.map((e) => `${e.titre} ${e.resume}`).join(" ") });
+  return { cle: x.cle, titre: x.titre, theme: theme.rubrique, pilier: theme.pilier, score: x.score, detailScore: x.detail, elements };
 }
 
 export type Preparation = { ok: true; sujets: Sujet[] } | { ok: false; erreur: string };
@@ -159,8 +166,8 @@ export async function preparerRedaction(revueId?: number, cles?: string[]): Prom
   const revue = await lireRevue(revueId);
   if (!revue) return { ok: false, erreur: "Aucune revue enregistrée. Lancer d'abord npm run veille:essai." };
 
-  const libres = revue.sujets.filter((x) => !x.dejaTraite);
-  const choisis = cles ? libres.filter((x) => cles.includes(x.cle)) : libres.slice(0, config.brouillonsParJour());
+  const libres = revue.sujets.filter((x) => !x.dejaTraite).map((x) => ({ ...x, ...themeDe(x) }));
+  const choisis = cles ? libres.filter((x) => cles.includes(x.cle)) : selectionVariee(libres, config.brouillonsParJour());
   if (!choisis.length) return { ok: false, erreur: "Aucun sujet à rédiger : rien de coché, ou sujets déjà traités." };
   if (choisis.length > MAX_PAR_LANCEMENT) return { ok: false, erreur: `${MAX_PAR_LANCEMENT} sujets au plus par lancement.` };
 

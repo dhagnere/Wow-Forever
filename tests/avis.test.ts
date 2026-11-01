@@ -67,7 +67,7 @@ describe("brouillon du matin", () => {
       },
     });
     const r = await rediger({
-      cle: "x", titre: "Hall of Thanes", score: 5, detailScore: { sources: 3, fraicheur: 1, video: 0, etranger: 1 },
+      cle: "x", titre: "Hall of Thanes", theme: "donjons-raids", pilier: "donjons/salle-des-thanes", score: 5, detailScore: { sources: 3, fraicheur: 1, video: 0, etranger: 1 },
       elements: [{ sourceId: "w", sourceNom: "Wowhead", langue: "en", poids: 3, video: false, titre: "Hall of Thanes", url: "https://wowhead.com/x", resume: "", publieLe: new Date() }],
     });
     expect(r.ok).toBe(true);

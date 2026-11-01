@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { brouillonsParJour, derniereRevue, etatRedaction, lienFrancais, MAX_PAR_LANCEMENT, nomLangue } from "@/modules/veille";
+import {
+  brouillonsParJour, derniereRevue, etatRedaction, lienFrancais, MAX_PAR_LANCEMENT, nomLangue, selectionVariee, themeDe,
+} from "@/modules/veille";
+import { RUBRIQUES, trouverRubrique } from "@/config/taxonomie";
 import { exigerAdmin } from "@/lib/admin";
 import { dateLongue } from "@/lib/site";
 import { SelectionRevue, type LigneRevue } from "./Selection";
@@ -9,8 +12,10 @@ export const dynamic = "force-dynamic";
 
 const HEURE = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
 
-export default async function Revue() {
+export default async function Revue({ searchParams }: { searchParams: Promise<{ theme?: string }> }) {
   await exigerAdmin();
+  const demande = (await searchParams).theme;
+  const filtre = demande && trouverRubrique(demande) ? demande : undefined;
   const [revue, redaction] = await Promise.all([derniereRevue(), Promise.resolve(etatRedaction())]);
 
   const bandeau = redaction.enCours ? (
@@ -40,11 +45,19 @@ export default async function Revue() {
   }
 
   const b = revue.bilan;
-  const aCocher = new Set(revue.sujets.filter((s) => !s.dejaTraite).slice(0, brouillonsParJour()).map((s) => s.cle));
-  const lignes: LigneRevue[] = revue.sujets.map((s, i) => ({
+  const sujets = revue.sujets.map((s, i) => ({ ...s, ...themeDe(s), rang: i + 1 }));
+  const parTheme = new Map<string, number>();
+  for (const s of sujets) if (!s.dejaTraite) parTheme.set(s.theme, (parTheme.get(s.theme) ?? 0) + 1);
+  const affiches = filtre ? sujets.filter((s) => s.theme === filtre) : sujets;
+  // Présélection : les meilleurs sujets non rédigés, variés entre les thèmes (ou les meilleurs du thème filtré).
+  const libres = affiches.filter((s) => !s.dejaTraite);
+  const aCocher = new Set((filtre ? libres.slice(0, brouillonsParJour()) : selectionVariee(libres, brouillonsParJour())).map((s) => s.cle));
+  const lignes: LigneRevue[] = affiches.map((s) => ({
     cle: s.cle,
-    rang: i + 1,
+    rang: s.rang,
     titre: s.titre,
+    theme: trouverRubrique(s.theme)?.nom ?? s.theme,
+    pilier: s.pilier,
     score: s.score,
     detail: `sources ${s.detail.sources} · fraîcheur ${s.detail.fraicheur} · vidéo ${s.detail.video} · étranger ${s.detail.etranger}`,
     dejaTraite: s.dejaTraite,
@@ -63,8 +76,17 @@ export default async function Revue() {
       {bandeau}
       <p className="doux">
         Passage « {revue.mode} » de {HEURE.format(revue.creeLe)} : {b.elementsLus} éléments lus, {b.sujetsRetenus} sujets retenus,{" "}
-        {revue.sujets.filter((s) => s.dejaTraite).length} déjà rédigés. Les {aCocher.size} meilleurs sujets non rédigés sont cochés.
+        {revue.sujets.filter((s) => s.dejaTraite).length} déjà rédigés. {aCocher.size} sujets cochés
+        {filtre ? " : les meilleurs de ce thème." : " : les meilleurs, variés entre les thèmes."}
       </p>
+      <nav className="onglets" aria-label="Thèmes">
+        <Link href="/admin/veille/revue/" aria-current={!filtre ? "page" : undefined}>Tous ({sujets.filter((s) => !s.dejaTraite).length})</Link>
+        {RUBRIQUES.filter((r) => parTheme.has(r.slug)).map((r) => (
+          <Link key={r.slug} href={`/admin/veille/revue/?theme=${r.slug}`} aria-current={filtre === r.slug ? "page" : undefined}>
+            {r.nom} ({parTheme.get(r.slug)})
+          </Link>
+        ))}
+      </nav>
       {b.sources.some((s) => s.erreur) ? (
         <div className="alerte" style={{ marginBottom: 24 }}>
           <strong>Sources en échec :</strong>

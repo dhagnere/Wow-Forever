@@ -7,6 +7,8 @@ export interface LigneRevue {
   cle: string;
   rang: number;
   titre: string;
+  theme: string;
+  pilier: string | null;
   score: number;
   detail: string;
   dejaTraite: boolean;
@@ -38,7 +40,7 @@ export function SelectionRevue({
       <div className="tableau-boite">
         <table className="admin-table">
           <thead>
-            <tr><th scope="col">Rédiger</th><th scope="col">#</th><th scope="col">Score</th><th scope="col">Sujet</th><th scope="col">Sources</th></tr>
+            <tr><th scope="col">Rédiger</th><th scope="col">#</th><th scope="col">Score</th><th scope="col">Sujet</th><th scope="col">Thème</th><th scope="col">Sources</th></tr>
           </thead>
           <tbody>
             {lignes.map((l) => (
@@ -53,6 +55,10 @@ export function SelectionRevue({
                 <td>{l.rang}</td>
                 <td title={l.detail}>{l.score}</td>
                 <td>{l.titre}</td>
+                <td>
+                  {l.theme}
+                  {l.pilier ? <div className="doux" style={{ fontSize: 13 }}>/{l.pilier}/</div> : null}
+                </td>
                 <td>
                   {l.sources.map((s) => (
                     <div key={s.url}>

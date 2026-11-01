@@ -64,6 +64,7 @@ export async function lireFlux(source: Source): Promise<ResultatFlux> {
         url: item.link,
         resume: texteBrut(item.content ?? item.summary ?? item.contentSnippet ?? "").slice(0, 1500),
         publieLe,
+        theme: source.theme,
       });
     }
     return { source, elements, entrees: flux.items?.length ?? 0 };

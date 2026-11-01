@@ -1,15 +1,10 @@
 import { MOTS_CLES } from "@/config/sources";
 import type { Element, Sujet } from "../types";
 
-/** Minuscules, sans accents ni ponctuation. */
-export function normaliser(texte: string): string {
-  return texte
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/\p{M}/gu, "")
-    .replace(/[^\p{L}\p{N}]+/gu, " ")
-    .trim();
-}
+import { normaliser } from "./texte";
+import { detecterTheme } from "./themes";
+
+export { normaliser };
 
 function contientUn(texte: string, termes: string[]): boolean {
   const mots = ` ${normaliser(texte)} `;
@@ -85,9 +80,14 @@ export function regrouper(elements: Element[], seuil = 0.5): Element[][] {
  *  - étranger : 1 point par source en langue étrangère (max 2), pour devancer les sites français.
  */
 export function noter(groupe: Element[], maintenant: Date, fenetreHeures: number): Sujet {
-  const parSource = new Map<string, Element>();
-  for (const e of groupe) if (!parSource.has(e.sourceId)) parSource.set(e.sourceId, e);
-  const distincts = [...parSource.values()];
+  // Un site éditeur compte une fois, même s'il remonte par plusieurs flux (son flux direct et des recherches Google News).
+  const parSite = new Map<string, Element>();
+  for (const e of groupe) {
+    const cle = normaliser(e.sourceNom);
+    const deja = parSite.get(cle);
+    if (!deja || e.poids > deja.poids) parSite.set(cle, e);
+  }
+  const distincts = [...parSite.values()];
 
   const sources = distincts.reduce((s, e) => s + e.poids, 0);
   const plusRecent = Math.max(...groupe.map((e) => e.publieLe.getTime()));
@@ -98,9 +98,17 @@ export function noter(groupe: Element[], maintenant: Date, fenetreHeures: number
 
   const principal = [...groupe].sort((a, b) => b.poids - a.poids)[0];
   const arrondi = (n: number) => Math.round(n * 100) / 100;
+  const theme = detecterTheme({
+    titre: principal.titre,
+    texte: groupe.map((e) => `${e.titre} ${e.resume}`).join(" "),
+    themesSources: groupe.flatMap((e) => (e.theme ? [e.theme] : [])),
+    video: groupe.some((e) => e.video),
+  });
   return {
     cle: cleUrl(principal.url),
     titre: principal.titre,
+    theme: theme.rubrique,
+    pilier: theme.pilier,
     elements: groupe,
     score: arrondi(sources + fraicheur + video + etranger),
     detailScore: { sources, fraicheur: arrondi(fraicheur), video, etranger },
