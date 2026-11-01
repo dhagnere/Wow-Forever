@@ -36,12 +36,18 @@ Score d'un sujet : poids des sites qui en parlent (un site compte une fois, mêm
 8. Contrôler l'aperçu d'un article avec le Débogueur de partage de Meta.
 9. Google Search Console : ajouter une propriété de type **Préfixe de l'URL** (adresse exacte du site, avec `https://`), choisir la validation **Balise HTML**, copier la valeur de `content="…"` dans la variable `GOOGLE_SITE_VERIFICATION`, attendre le redémarrage de l'application, puis cliquer sur « Valider ». Envoyer ensuite `sitemap.xml` dans la rubrique Sitemaps. La propriété de type **Domaine** n'est possible qu'avec un nom de domaine à vous (validation par un enregistrement DNS), pas avec l'adresse `scalingo.io`.
 
+10. Base d'objets : premier import, icônes comprises (5 minutes environ), puis la tâche quotidienne suit les nouvelles versions du jeu :
+   ```bash
+   scalingo --app azeroth-forever run npm run base:importer -- --icones
+   ```
+
 ### Tâches planifiées (`cron.json`)
 
 | Tâche | Horaire | Remarque |
 |---|---|---|
 | `veille:quotidien` | `37 5 * * *` | Le planificateur Scalingo tourne en UTC : 6h37 à Paris en hiver, 7h37 en été. |
 | `veille:facebook` | toutes les heures, à la 5e minute | La plage 8h-22h (heure de Paris) est contrôlée par le code, changement d'heure compris. |
+| `base:importer` | `17 4 * * *` | Réimporte la base d'objets seulement si une nouvelle version de Forever est sortie. |
 
 Fixer un plafond mensuel de dépense dans la console Anthropic dès le départ.
 
@@ -64,7 +70,7 @@ app/admin/           espace de relecture /admin/veille
 components/          composants d'affichage
 content/             contenu des pages piliers (classes, race Skyborne, zones, donjons)
 config/              sources surveillées, rubriques et pages piliers
-modules/veille/      module autonome : collecte, classement, rédaction, articles, relais Facebook, sessions
+modules/veille/      module autonome : collecte, classement, rédaction, articles, relais Facebook, sessions, base d'objets
 tests/               tests unitaires
 ```
 

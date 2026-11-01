@@ -107,3 +107,59 @@ CREATE TABLE IF NOT EXISTS jetons_reseaux (
   rafraichissement_expire_le  TIMESTAMPTZ,
   modifie_le                  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Base d'objets de WoW Forever, importée des fichiers du jeu (wago.tools) par npm run base:importer.
+-- Les tables sont vidées puis remplies à chaque nouvelle version du jeu ; les icônes, converties à la demande, restent en cache.
+CREATE TABLE IF NOT EXISTS objets_import (
+  id          SMALLINT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  version     TEXT NOT NULL,
+  nombre      INTEGER NOT NULL,
+  importe_le  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Catégories (classe d'objet) et sous-catégories ; sous_classe = -1 désigne la catégorie elle-même.
+CREATE TABLE IF NOT EXISTS objets_categories (
+  classe       INTEGER NOT NULL,
+  sous_classe  INTEGER NOT NULL,
+  nom          TEXT NOT NULL,
+  nom_long     TEXT NOT NULL DEFAULT '',
+  PRIMARY KEY (classe, sous_classe)
+);
+
+CREATE TABLE IF NOT EXISTS objets_ensembles (
+  id   INTEGER PRIMARY KEY,
+  nom  TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS objets (
+  id                  INTEGER PRIMARY KEY,
+  nom                 TEXT NOT NULL,
+  nom_recherche       TEXT NOT NULL,
+  description         TEXT NOT NULL DEFAULT '',
+  classe              INTEGER NOT NULL,
+  sous_classe         INTEGER NOT NULL,
+  qualite             SMALLINT NOT NULL,
+  niveau_objet        INTEGER NOT NULL,
+  niveau_requis       INTEGER NOT NULL,
+  emplacement         SMALLINT NOT NULL,
+  lien                SMALLINT NOT NULL,
+  classes_autorisees  INTEGER NOT NULL,
+  prix_vente          BIGINT NOT NULL,
+  prix_achat          BIGINT NOT NULL,
+  pile                INTEGER NOT NULL,
+  exemplaires_max     INTEGER NOT NULL,
+  vitesse_ms          INTEGER NOT NULL,
+  cases_sac           INTEGER NOT NULL,
+  ensemble            INTEGER,
+  icone               INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS objets_categorie_idx ON objets (classe, sous_classe);
+CREATE INDEX IF NOT EXISTS objets_icone_idx ON objets (icone);
+CREATE INDEX IF NOT EXISTS objets_ensemble_idx ON objets (ensemble);
+
+-- Icônes converties en PNG à la première demande.
+CREATE TABLE IF NOT EXISTS objets_icones (
+  id       INTEGER PRIMARY KEY,
+  png      BYTEA NOT NULL,
+  cree_le  TIMESTAMPTZ NOT NULL DEFAULT now()
+);

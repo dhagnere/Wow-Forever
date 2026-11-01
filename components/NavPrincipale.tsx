@@ -23,12 +23,13 @@ const MENU: Entree[] = [
   },
   {
     label: "Explorer",
-    prefixe: ["/classes", "/races", "/zones", "/donjons"],
+    prefixe: ["/classes", "/races", "/zones", "/donjons", "/base-de-donnees"],
     liens: [
       { href: "/classes/", label: "Classes", detail: "Rôles, races possibles, conseils" },
       { href: "/races/", label: "Races", detail: "Dont les Skyborne" },
       { href: "/zones/", label: "Zones", detail: "Les nouvelles terres de Forever" },
       { href: "/donjons/", label: "Donjons et raids", detail: "Repérés en bêta, annoncés" },
+      { href: "/base-de-donnees/", label: "Base de données", detail: "Tous les objets du jeu, en français" },
     ],
   },
   { href: "/carnet/", label: "Carnet de Silfax", prefixe: ["/carnet"], silfax: true },

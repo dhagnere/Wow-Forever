@@ -309,7 +309,7 @@ td { padding: 12px 16px; border-top: 1px solid var(--bordure); }
 .champ { display: flex; flex-direction: column; gap: 6px; }
 .champ label { font-weight: 700; font-size: 15px; }
 .champ small { color: var(--texte-doux); }
-input[type="text"], input[type="password"], input[type="search"], select, textarea {
+input[type="text"], input[type="password"], input[type="search"], input[type="number"], select, textarea {
   font: inherit; font-size: 16px; color: var(--texte-titre); background: var(--fond-nuit); border: 1px solid var(--bordure); border-radius: 6px; padding: 10px 12px; width: 100%; }
 textarea { min-height: 120px; resize: vertical; line-height: 1.5; }
 textarea.grand { min-height: 420px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px; }
@@ -342,4 +342,64 @@ textarea.grand { min-height: 420px; font-family: ui-monospace, SFMono-Regular, M
   .lignes a { grid-template-columns: minmax(0, 1fr); }
   .lignes .ligne-meta { grid-row: auto; grid-column: 1; text-align: left; }
   .carte-grande h3 { font-size: 22px; }
+}
+
+/* Base de données des objets */
+.icone-objet { flex: none; display: block; border: 1px solid var(--bordure); border-radius: 4px; background: #0d0c0b; box-shadow: 0 0 0 1px #000; }
+.nom-objet { font-weight: 700; text-decoration: none; }
+.nom-objet:hover { text-decoration: underline; }
+.cellule-objet { display: flex; align-items: center; gap: 12px; }
+.table-objets td { padding: 8px 16px; vertical-align: middle; }
+.table-objets .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.table-objets abbr { text-decoration: none; }
+.prix { display: inline-flex; gap: 8px; font-variant-numeric: tabular-nums; }
+.piece abbr { margin-left: 2px; text-decoration: none; font-size: 0.85em; }
+.piece-or abbr { color: #f2c94c; }
+.piece-argent abbr { color: #c9ced6; }
+.piece-cuivre abbr { color: #d58a5a; }
+.filtres-qualite { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0 0 28px; font-weight: 700; }
+.filtres-qualite a { text-decoration: none; }
+.filtres-qualite a:hover { text-decoration: underline; }
+.categories-objets { columns: 3 280px; column-gap: 20px; }
+.categorie-objets { break-inside: avoid; margin: 0 0 20px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--bordure); border-radius: 6px; }
+.categorie-objets h2 { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 0; font-family: var(--police-titre); font-size: 20px; }
+.categorie-objets h2 a { color: var(--texte-titre); text-decoration: none; }
+.categorie-objets h2 a:hover { color: var(--or-pale); }
+.categorie-objets h2 span, .categorie-objets li span { font-family: var(--police-texte); font-size: 13px; font-weight: 400; color: var(--texte-doux); }
+.categorie-objets ul { list-style: none; margin: 10px 0 0; padding: 10px 0 0; border-top: 1px solid var(--bordure); }
+.categorie-objets li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; font-size: 15px; }
+.categorie-objets li a { color: var(--texte); text-decoration: none; }
+.categorie-objets li a:hover { color: var(--or-pale); }
+.sous-categories { margin: 2px 0 6px 12px; padding-left: 8px; border-left: 1px solid var(--bordure); }
+.sous-categories a { font-size: 14px; padding: 6px 10px; }
+.filtres-objets { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin-bottom: 20px; }
+.filtres-objets label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--texte-doux); }
+.filtres-objets .filtre-texte { flex: 1 1 220px; }
+.filtres-objets input[type="search"] { background: var(--parchemin); color: var(--encre); border-color: var(--parchemin-bord); }
+.filtres-objets input[type="number"] { width: 84px; }
+.note-donnees { margin-top: 40px; font-size: 14px; max-width: 820px; }
+.bandeau-objet .wrap { padding-top: 32px; padding-bottom: 8px; }
+.colonnes-objet { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 40px; align-items: start; }
+.fiche-objet { padding: 18px 20px; background: linear-gradient(180deg, #10131c, #0a0c12); border: 1px solid; border-radius: 6px; box-shadow: 0 0 0 1px #000, 0 18px 40px rgba(0, 0, 0, 0.5); color: #fff; }
+.fiche-objet-tete { display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
+.fiche-objet h1 { margin: 0; font-family: var(--police-titre); font-size: 26px; line-height: 1.2; }
+.fiche-qualite { margin: 2px 0 0; font-size: 14px; opacity: 0.85; }
+.fiche-lignes { list-style: none; margin: 0; padding: 0; font-size: 16px; line-height: 1.55; }
+.fiche-lignes a { color: inherit; }
+.fiche-or { color: #ffd100; }
+.fiche-double { display: flex; justify-content: space-between; gap: 16px; }
+.fiche-description { margin-top: 6px; color: #ffd100; }
+.details-objet { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 20px; margin: 0 0 20px; }
+.details-objet dt { color: var(--texte-doux); }
+.details-objet dd { margin: 0; font-weight: 600; }
+@media (max-width: 860px) {
+  .colonnes-objet { grid-template-columns: minmax(0, 1fr); }
+  /* Sur petit écran, les résultats d'abord, les catégories ensuite. */
+  .repertoire-objets > nav { order: 2; }
+}
+@media (max-width: 600px) {
+  .table-objets { min-width: 0; }
+  .table-objets .masque-mobile { display: none; }
+  .table-objets td, .table-objets th { padding-left: 10px; padding-right: 10px; }
+  .fiche-objet h1 { font-size: 22px; }
 }

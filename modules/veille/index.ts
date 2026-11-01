@@ -43,3 +43,10 @@ export { enregistrerImage, lireImage, ErreurImage, TAILLE_MAX_OCTETS, LARGEUR_MI
 import { config as configVeille } from "./config";
 export const brouillonsParJour = (): number => configVeille.brouillonsParJour();
 export { COOKIE_SESSION, DUREE_SESSION_S, creerJeton, jetonValide, motDePasseCorrect } from "./auth/session";
+
+// Base d'objets (wago.tools).
+export type { Objet, ObjetResume, Categorie, FiltresObjets, EtatBase } from "./objets/depot";
+export { categoriesObjets, chercherObjets, lireObjet, iconeObjet, etatBase, listerObjetsPourPlan, OBJETS_PAR_PAGE } from "./objets/depot";
+export {
+  qualite, QUALITES, emplacement, lien as lienObjet, classesAutorisees, decouperPrix, prixEnTexte, vitesse as vitesseArme, nomCategorie,
+} from "./objets/libelles";

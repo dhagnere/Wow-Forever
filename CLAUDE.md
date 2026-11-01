@@ -8,7 +8,7 @@ Site de fans francophone non officiel consacré à World of Warcraft: Forever. N
 |---|---|---|
 | `app/(site)/`, `components/`, `app/globals.css`, `content/` | Pages publiques, habillage, contenu des pages piliers | Libre |
 | `app/admin/` | Espace de relecture `/admin/veille` | Libre sur l'ergonomie, garde-fous intacts |
-| `modules/veille/` | Collecte, classement, rédaction IA, articles, relais Facebook, sessions | Module cloisonné |
+| `modules/veille/` | Collecte, classement, rédaction IA, articles, relais Facebook, sessions, base d'objets (`objets/`) | Module cloisonné |
 | `config/sources.ts` | Sources surveillées | Libre |
 | `config/taxonomie.ts` | Rubriques et pages piliers | Ajouter librement ; ne pas renommer un slug déjà publié |
 
@@ -26,6 +26,10 @@ Site de fans francophone non officiel consacré à World of Warcraft: Forever. N
 4. **Droit d'auteur.** Les consignes de rédaction (`redaction/consignes.ts`) imposent un article neuf, une seule citation courte, des sources créditées et aucune image copiée. Le ton peut être ajusté ; ces règles, non. Une image ne s'envoie qu'avec la case de déclaration des droits cochée, et passe toujours par `enregistrerImage` (réencodage, métadonnées retirées). Une image d'en-tête exige sa description.
 5. **Les réseaux suivent le site.** Le relais (Facebook, Reels, Instagram, TikTok) ne publie que des articles déjà en ligne, avec un lien ou un renvoi vers le site (jamais vers la source), entre 8h et 22h (Paris), trois publications par heure et par réseau au plus. Les jetons d'accès restent en base ou dans les variables d'environnement, jamais affichés ni journalisés. Tout texte destiné à un réseau social passe par `texteReseau` (`reseaux/textes.ts`), qui ajoute la phrase d'appel unique de `config/reseaux.ts` : ne pas la dupliquer ni la contourner.
 
+## Base d'objets
+
+Importée des fichiers du jeu par wago.tools (`objets/wago.ts`, produit `wowf`), en français. L'import remplace tout en une transaction et s'arrête si moins de 1 000 objets sont lus. Les objets internes (tests, équipement des monstres, objets périmés, niveau requis au-delà de 60) sont écartés par `objetInterne` (`objets/conversion.ts`). Les icônes ne sont demandées à wago.tools que pour un objet connu de la base, puis gardées en cache dans `objets_icones`. Garder le crédit wago.tools et la mention Blizzard (pages de la base et mentions légales).
+
 ## Commandes
 
 ```bash
@@ -40,6 +44,7 @@ npm run veille:quotidien # passage complet : brouillons rédigés par l'IA
 npm run veille:revue     # rédige les meilleurs sujets de la dernière revue, sans refaire la collecte
 npm run veille:dossier   # dossiers de référence sur 60 jours (zones-depart, donjons, zones-niveaux), sans coût d'API
 npm run veille:facebook  # relais Facebook
+npm run base:importer    # base d'objets depuis wago.tools (si nouvelle version du jeu ; --forcer, --icones)
 npm run icones:generer   # régénère content/icones-classes.ts (game-icons.net, CC BY 3.0 : garder le crédit des mentions légales)
 ```
 

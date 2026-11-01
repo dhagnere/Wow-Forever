@@ -35,6 +35,11 @@ export default function MentionsLegales() {
           sous licence <a href="https://creativecommons.org/licenses/by/3.0/deed.fr" rel="noopener noreferrer">Creative Commons BY 3.0</a>,
           recolorés et encadrés pour Azeroth Forever.
         </p>
+        <p>
+          Base de données des objets : noms, descriptions, niveaux, prix et icônes proviennent des fichiers du jeu World of Warcraft: Forever,
+          lus grâce au service <a href="https://wago.tools" rel="noopener noreferrer">wago.tools</a>. Ils restent la propriété de Blizzard Entertainment
+          et sont reproduits à titre informatif, dans le cadre d&apos;un site de fans non commercial.
+        </p>
         <h2>Liens affiliés</h2>
         <p>Certains liens sont signalés comme affiliés : ils peuvent rapporter une commission au site, sans surcoût pour vous.</p>
       </article>
