@@ -7,7 +7,10 @@ export function Entete() {
     <header className="entete">
       <div className="wrap">
         <Link href="/" className="logo">
-          AZEROTH <span>FOREVER</span>
+          <img src="/images/blason.webp" alt="" width={133} height={160} className="logo-blason" />
+          <span className="logo-texte">
+            AZEROTH <span>FOREVER</span>
+          </span>
         </Link>
         <NavPrincipale />
       </div>

@@ -52,6 +52,10 @@ h1, h2, h3 { color: var(--texte-titre); line-height: 1.2; }
 .entete .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px 32px; flex-wrap: wrap; padding-top: 16px; padding-bottom: 16px; }
 .logo { font-family: var(--police-titre); font-weight: 800; font-size: 26px; letter-spacing: 0.06em; color: #f4efe3; text-decoration: none; }
 .logo span { color: var(--or); }
+.logo .logo-texte { color: inherit; }
+.entete .logo { display: inline-flex; align-items: center; gap: 12px; }
+.logo-blason { display: block; height: 56px; width: auto; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5)); }
+@media (max-width: 600px) { .logo-blason { height: 44px; } .entete .logo { font-size: 22px; } }
 .nav { display: flex; gap: 8px 22px; flex-wrap: wrap; font-size: 15px; font-weight: 600; font-family: var(--police-titre); letter-spacing: 0.03em; }
 .nav a { color: #e9e2d0; text-decoration: none; padding: 6px 0; }
 .nav a:hover { color: #fff; }
