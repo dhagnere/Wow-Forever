@@ -62,6 +62,9 @@ export const PILIERS = [
   "donjons/excavations-les-paluns",
   "donjons/cite-de-dalaran",
   "guides/bien-demarrer",
+  "guides/zones-de-depart",
+  "guides/zones-par-niveau",
+  "guides/liste-des-donjons",
 ] as const;
 
 export type Pilier = (typeof PILIERS)[number];

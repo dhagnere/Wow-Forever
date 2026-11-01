@@ -14,11 +14,12 @@ const FORMAT_JOUR = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "l
 const FORMAT_COURT = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", timeZone: "Europe/Paris" });
 
 export function dateLongue(d: Date | string): string {
-  return FORMAT_JOUR.format(new Date(d));
+  // « 1er novembre » et non « 1 novembre ».
+  return FORMAT_JOUR.format(new Date(d)).replace(/^1 /, "1er ");
 }
 
 export function dateCourte(d: Date | string): string {
-  return FORMAT_COURT.format(new Date(d));
+  return FORMAT_COURT.format(new Date(d)).replace(/^1 /, "1er ");
 }
 
 export function tempsDeLecture(markdown: string): number {

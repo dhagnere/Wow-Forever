@@ -43,6 +43,7 @@ export default async function Donjons() {
                   </tbody>
                 </table>
               </div>
+              <p style={{ fontSize: 15 }}><Link href="/guides/liste-des-donjons/">Voir aussi la liste complète, avec les donjons de l&apos;Azeroth d&apos;origine</Link></p>
             </section>
             <section id="raids" aria-labelledby="t-raids" className="encadre cadre" style={{ padding: 24 }}>
               <p className="surtitre">10 et 20 joueurs</p>

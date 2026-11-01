@@ -38,6 +38,12 @@ export default function BienDemarrer() {
               <li>De nouvelles zones : <Link href="/zones/mont-hyjal/">Mont Hyjal</Link>, <Link href="/zones/rives-claires/">Rives Claires</Link>, <Link href="/zones/ile-de-zephras/">île de Zéphras</Link> et <Link href="/zones/shendralar/">Shen&apos;dralar</Link>.</li>
               <li>Une nouvelle race jouable, les Skyborne, et de nouvelles combinaisons race et classe.</li>
             </ul>
+            <h2>Où commencer, où aller ensuite ?</h2>
+            <p>
+              Chaque race a sa <Link href="/guides/zones-de-depart/">zone de départ</Link>. Pour la suite du voyage, les{" "}
+              <Link href="/guides/zones-par-niveau/">zones par niveau</Link> et la <Link href="/guides/liste-des-donjons/">liste des donjons</Link>{" "}
+              donnent les étapes de 1 à 60.
+            </p>
             <h2>Choisir son serveur</h2>
             <p>[Types de serveurs proposés au lancement et conseils de Silfax : à compléter à l&apos;ouverture.]</p>
             <div style={{ marginTop: 32 }}><ArticlesLies pilier="guides/bien-demarrer" titre="Articles pour bien démarrer" /></div>

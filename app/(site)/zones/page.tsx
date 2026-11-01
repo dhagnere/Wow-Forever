@@ -39,7 +39,11 @@ export default function Zones() {
         <section className="encadre-chaud cadre">
           <h2 className="titre" style={{ margin: "0 0 8px", fontSize: 24, color: "var(--or-clair)" }}>Donjons et raids</h2>
           <p style={{ margin: "0 0 14px", color: "var(--texte-chaud)" }}>Les nouveaux donjons repérés en bêta, leur niveau d&apos;accès et les raids annoncés.</p>
-          <Link href="/donjons/" className="btn btn-or">Voir les donjons</Link>
+          <div className="boutons" style={{ justifyContent: "flex-start" }}>
+            <Link href="/donjons/" className="btn btn-or">Voir les donjons</Link>
+            <Link href="/guides/zones-par-niveau/" className="btn btn-contour">Toutes les zones par niveau</Link>
+            <Link href="/guides/zones-de-depart/" className="btn btn-contour">Zones de départ</Link>
+          </div>
         </section>
       </div>
     </>
