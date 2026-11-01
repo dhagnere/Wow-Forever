@@ -58,7 +58,12 @@ export default async function PageArticle({ params }: Props) {
           datePublished: article.publieLe?.toISOString(),
           dateModified: article.modifieLe.toISOString(),
           author: { "@type": "Person", name: SITE.auteur, url: `${SITE.url}/a-propos/` },
-          publisher: { "@type": "Organization", name: SITE.nom, url: SITE.url },
+          publisher: {
+            "@type": "Organization",
+            name: SITE.nom,
+            url: SITE.url,
+            logo: { "@type": "ImageObject", url: `${SITE.url}/images/logo-silfax-192.png`, width: 192, height: 192 },
+          },
           image: article.image ? [`${SITE.url}/medias/${article.image.id}/`, imageOuverture(article, url)] : [imageOuverture(article, url)],
           mainEntityOfPage: url,
           inLanguage: "fr-FR",

@@ -3,12 +3,28 @@ import { NavPrincipale } from "./NavPrincipale";
 import { SITE } from "@/lib/site";
 import { GererCookies } from "./BandeauCookies";
 
+/** Médaillon Silfax, décoratif : le nom du site est écrit à côté. */
+export function Medaillon({ taille }: { taille: number }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/images/logo-silfax-96.png"
+      srcSet="/images/logo-silfax-96.png 1x, /images/logo-silfax-192.png 2x"
+      width={taille}
+      height={taille}
+      alt=""
+      className="logo-medaillon"
+    />
+  );
+}
+
 export function Entete() {
   return (
     <header className="entete">
       <div className="wrap">
-        <Link href="/" className="logo">
-          AZEROTH <span>FOREVER</span>
+        <Link href="/" className="logo" aria-label="Azeroth Forever, accueil">
+          <Medaillon taille={52} />
+          <span className="logo-texte">AZEROTH <span>FOREVER</span></span>
         </Link>
         <NavPrincipale />
       </div>
@@ -22,7 +38,8 @@ export function Pied() {
       <div className="wrap">
         <div style={{ flex: "1 1 320px" }}>
           <p className="logo" style={{ fontSize: 20, margin: "0 0 8px" }}>
-            AZEROTH <span>FOREVER</span>
+            <Medaillon taille={40} />
+            <span className="logo-texte">AZEROTH <span>FOREVER</span></span>
           </p>
           <p style={{ margin: 0 }}>
             {SITE.mentionBlizzard} Les captures d&apos;écran du jeu restent la propriété de Blizzard Entertainment. Certains

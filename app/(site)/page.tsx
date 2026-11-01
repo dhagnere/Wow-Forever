@@ -24,6 +24,16 @@ export default async function Accueil() {
     <>
       <JsonLd donnees={{ "@context": "https://schema.org", "@type": "WebSite", name: SITE.nom, url: SITE.url, inLanguage: "fr-FR" }} />
       <section className="heros">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="heros-image"
+          src="/images/heros-accueil-1920.jpg"
+          srcSet="/images/heros-accueil-960.jpg 960w, /images/heros-accueil-1920.jpg 1920w"
+          sizes="100vw"
+          alt="Coucher de soleil sur une plage d'Azeroth, une épave échouée sur le sable"
+          fetchPriority="high"
+        />
+        <p className="heros-credit">Capture de Silfax · © Blizzard Entertainment</p>
         <div className="wrap">
           <div className="heros-carte cadre">
             <p className="surtitre" style={{ fontSize: 15, letterSpacing: "0.22em", marginBottom: 14 }}>5 novembre · minuit</p>

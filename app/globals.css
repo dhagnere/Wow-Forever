@@ -50,8 +50,11 @@ h1, h2, h3 { color: var(--texte-titre); line-height: 1.2; }
 /* En-tête */
 .entete { background: var(--fond-nuit); border-bottom: 1px solid var(--bordure); }
 .entete .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px 32px; flex-wrap: wrap; padding-top: 16px; padding-bottom: 16px; }
-.logo { font-family: var(--police-titre); font-weight: 800; font-size: 26px; letter-spacing: 0.06em; color: #f4efe3; text-decoration: none; }
-.logo span { color: var(--or); }
+.logo { display: inline-flex; align-items: center; gap: 12px; font-family: var(--police-titre); font-weight: 800; font-size: 26px; letter-spacing: 0.06em; color: #f4efe3; text-decoration: none; }
+.logo-texte span { color: var(--or); }
+.logo-medaillon { display: block; flex: none; border-radius: 50%; filter: drop-shadow(0 0 6px rgba(217, 169, 74, 0.35)); }
+a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(232, 192, 106, 0.6)); }
+@media (max-width: 600px) { .entete .logo { font-size: 21px; gap: 10px; } .entete .logo-medaillon { width: 42px; height: 42px; } }
 .nav { display: flex; gap: 8px 22px; flex-wrap: wrap; font-size: 15px; font-weight: 600; font-family: var(--police-titre); letter-spacing: 0.03em; }
 .nav a { color: #e9e2d0; text-decoration: none; padding: 6px 0; }
 .nav a:hover { color: #fff; }
@@ -76,9 +79,15 @@ h1, h2, h3 { color: var(--texte-titre); line-height: 1.2; }
     radial-gradient(ellipse at 50% 120%, #1d3355, transparent 60%),
     linear-gradient(180deg, #070b16 0%, #0f1a2e 60%, #182a48 100%);
 }
-.heros .wrap { position: relative; padding-top: 112px; padding-bottom: 112px; display: flex; justify-content: flex-end; }
-.heros-carte { max-width: 600px; background: rgba(7, 11, 22, 0.82); border: 1px solid var(--bordure-vive); border-radius: 4px; padding: 40px 44px; text-align: center; }
-.heros-carte h1 { margin: 0 0 12px; font-family: var(--police-titre); font-size: 52px; line-height: 1.08; font-weight: 800; }
+.heros .wrap { position: relative; padding-top: 112px; padding-bottom: 112px; display: flex; justify-content: flex-start; }
+/* Capture d'écran en fond : la carte se place à gauche, sur la montagne sombre, et laisse voir le soleil et l'épave. */
+.heros-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 55% 50%; }
+.heros::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, rgba(7, 11, 22, 0.45) 0%, rgba(7, 11, 22, 0) 45%), linear-gradient(0deg, rgba(7, 11, 22, 0.5), transparent 25%); }
+.heros .wrap { z-index: 1; }
+.heros-credit { position: absolute; right: 16px; bottom: 8px; z-index: 1; margin: 0; font-size: 12px; color: rgba(244, 239, 227, 0.85); text-shadow: 0 1px 2px #000; }
+.heros-carte { max-width: 440px; background: rgba(7, 11, 22, 0.8); border: 1px solid var(--bordure-vive); border-radius: 4px; padding: 34px 32px; text-align: center; }
+.heros-carte h1 { margin: 0 0 12px; font-family: var(--police-titre); font-size: 44px; line-height: 1.08; font-weight: 800; }
 .heros-carte p { margin: 0 0 28px; font-size: 19px; color: var(--texte-chaud); }
 .ornement { display: block; width: 280px; max-width: 80%; height: 14px; margin: 0 auto 16px; background:
   linear-gradient(90deg, transparent, var(--or) 30%, var(--or) 45%, transparent 45% 55%, var(--or) 55%, var(--or) 70%, transparent) center / 100% 1px no-repeat,
@@ -223,7 +232,8 @@ textarea.grand { min-height: 420px; font-family: ui-monospace, SFMono-Regular, M
   .g2, .g3, .g4, .une { grid-template-columns: minmax(0, 1fr); }
   .g9 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .une-grand { grid-column: auto; }
-  .heros .wrap { padding-top: 56px; padding-bottom: 56px; }
+  .heros .wrap { padding-top: 56px; padding-bottom: 72px; }
+  .heros-image { object-position: 70% 50%; }
   .heros-carte { padding: 28px 22px; }
   .heros-carte h1 { font-size: 36px; }
   .bandeau-page h1, .article h1 { font-size: 32px; }
