@@ -1,5 +1,7 @@
-import { MOTS_DIESE_FACEBOOK } from "@/config/taxonomie";
 import { config } from "../config";
+import { texteReseau, urlArticle } from "../reseaux/textes";
+import { videoReel } from "../reels/video";
+import { publierReel } from "../reels/publication";
 import type { Article } from "../types";
 import * as depot from "../articles/depot";
 
@@ -17,16 +19,11 @@ export function dansLaPlageHoraire(d = new Date()): boolean {
   return h >= 8 && h < 22;
 }
 
-export function urlArticle(slug: string): string {
-  return `${config.siteUrl()}/articles/${slug}/`;
-}
+export { urlArticle } from "../reseaux/textes";
 
-/** Texte du post : accroche, présentation, lien vers le site (jamais vers la source), mots-dièse. */
+/** Texte du post Facebook : accroche, présentation, lien vers le site (jamais vers la source), phrase d'appel, mots-dièse. */
 export function messageFacebook(a: Pick<Article, "accrocheFacebook" | "texteFacebook" | "slug" | "titre">): string {
-  const accroche = a.accrocheFacebook.trim() || a.titre;
-  return [accroche, a.texteFacebook.trim(), `La suite ici : ${urlArticle(a.slug)}`, MOTS_DIESE_FACEBOOK]
-    .filter(Boolean)
-    .join("\n\n");
+  return texteReseau("facebook", a);
 }
 
 export function urlMedia(id: number, variante: "une" | "og" = "une"): string {
@@ -67,15 +64,39 @@ export interface BilanRelais {
   statut: "hors-plage" | "non-configure" | "quota-atteint" | "termine";
   publies: string[];
   echecs: { slug: string; erreur: string }[];
+  reels: string[];
+  echecsReels: { slug: string; erreur: string }[];
+}
+
+/** Publie les Reels des articles déjà relayés : 3 par heure au plus. */
+async function relayerReels(bilan: BilanRelais): Promise<void> {
+  if (!config.reels()) return;
+  const restant = MAX_PAR_HEURE - (await depot.reelsCetteHeure());
+  if (restant <= 0) return;
+  for (const a of await depot.reelsEnAttente(restant)) {
+    try {
+      const video = await videoReel(`${config.siteUrl()}/articles/${a.slug}/reel/`);
+      const reelId = await publierReel(video, texteReseau("reel", a));
+      await depot.reelReussi(a.id, reelId);
+      bilan.reels.push(a.slug);
+    } catch (e) {
+      const erreur = e instanceof Error ? e.message : String(e);
+      await depot.reelEchoue(a.id, erreur);
+      bilan.echecsReels.push({ slug: a.slug, erreur });
+    }
+  }
 }
 
 export async function relayer(maintenant = new Date()): Promise<BilanRelais> {
-  const bilan: BilanRelais = { statut: "termine", publies: [], echecs: [] };
+  const bilan: BilanRelais = { statut: "termine", publies: [], echecs: [], reels: [], echecsReels: [] };
   if (!config.facebook()) return { ...bilan, statut: "non-configure" };
   if (!dansLaPlageHoraire(maintenant)) return { ...bilan, statut: "hors-plage" };
 
   const restant = MAX_PAR_HEURE - (await depot.relaisFacebookCetteHeure());
-  if (restant <= 0) return { ...bilan, statut: "quota-atteint" };
+  if (restant <= 0) {
+    await relayerReels(bilan);
+    return { ...bilan, statut: "quota-atteint" };
+  }
 
   for (const a of await depot.enAttenteFacebook(restant)) {
     try {
@@ -88,5 +109,6 @@ export async function relayer(maintenant = new Date()): Promise<BilanRelais> {
       bilan.echecs.push({ slug: a.slug, erreur });
     }
   }
+  await relayerReels(bilan);
   return bilan;
 }

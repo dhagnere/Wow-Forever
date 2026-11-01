@@ -9,7 +9,7 @@ Le site publie trois familles de pages : le fil d'actualité alimenté chaque ma
 1. **Chaque matin**, la veille parcourt les sources de `config/sources.ts`, garde les sujets des dernières 36 heures qui parlent de Forever, écarte les doublons et classe le reste.
 2. Les douze meilleurs sujets deviennent des **brouillons** rédigés en français par l'API Anthropic, rangés dans leur rubrique et rattachés à leur page pilier.
 3. Silfax **relit** dans `/admin/veille`, écrit son avis, publie ou supprime. Sans avis, la publication est refusée.
-4. **Chaque heure**, entre 8h et 22h, les articles publiés partent sur la Page Facebook avec leur image d'ouverture.
+4. **Chaque heure**, entre 8h et 22h, les articles publiés partent sur la Page Facebook avec leur image d'ouverture, puis en Reel (vidéo verticale de 10 secondes fabriquée par le site). Chaque post se termine par la même phrase d'appel à l'action, définie dans `config/reseaux.ts`. Les textes pour X, Instagram et TikTok sont prêts à copier dans l'éditeur, avec la vidéo à télécharger.
 
 Score d'un sujet : poids des sites qui en parlent (un site compte une fois, même s'il remonte par plusieurs flux) + fraîcheur (3 points au plus) + 1,5 point si une vidéo existe + 1 point par source en langue étrangère (2 au plus). Chaque sujet est aussi classé par thème (rubrique) et, quand il en désigne une nettement, par page pilier, à partir de mots-clés français et anglais, sans coût d'API. La sélection quotidienne plafonne chaque thème pour alimenter toutes les pages. La revue complète de chaque passage est conservée dans la table `veille_revues` et consultable dans `/admin/veille/revue`, avec un filtre par thème ; la liste des articles montre le remplissage de chaque page de thème.
 

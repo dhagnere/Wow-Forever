@@ -9,6 +9,7 @@ export type { Revue, BilanPassage, EtatRedaction } from "./passage";
 
 export {
   lirePublie,
+  lireParSlug,
   listerPublies,
   compterPublies,
   listerPourPlan,
@@ -29,6 +30,8 @@ export { DOSSIERS } from "@/config/dossiers";
 export { selectionVariee } from "./collecte/themes";
 export { derniereRevue, etatRedaction, preparerRedaction, redigerSujets, MAX_PAR_LANCEMENT } from "./passage";
 export { urlArticle, messageFacebook, requeteFacebook, urlMedia } from "./facebook/relais";
+export { texteReseau, longueurX } from "./reseaux/textes";
+export { videoReel, ErreurVideo, DUREE_REEL_S } from "./reels/video";
 export { definirImage, enregistrerAvisPropose } from "./articles/depot";
 export { proposerAvis } from "./redaction/redacteur";
 export { enregistrerImage, lireImage, ErreurImage, TAILLE_MAX_OCTETS, LARGEUR_MIN } from "./medias/images";

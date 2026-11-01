@@ -4,7 +4,7 @@ const config: NextConfig = {
   // Adresses en « /classes/druide/ », comme prévu dans le plan de lancement.
   trailingSlash: true,
   poweredByHeader: false,
-  serverExternalPackages: ["pg", "rss-parser", "sanitize-html", "sharp"],
+  serverExternalPackages: ["pg", "rss-parser", "sanitize-html", "sharp", "@ffmpeg-installer/ffmpeg"],
   experimental: {
     // Envoi d'images depuis l'espace de relecture : 8 Mo par image, deux images au plus par envoi.
     serverActions: { bodySizeLimit: "18mb" },

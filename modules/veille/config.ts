@@ -19,6 +19,8 @@ export const config = {
     const n = Number(lire("VEILLE_BROUILLONS_PAR_JOUR") ?? 12);
     return Number.isFinite(n) && n > 0 ? Math.min(Math.floor(n), 30) : 12;
   },
+  /** Reels Facebook : actifs par défaut, FACEBOOK_REELS=off pour les couper. */
+  reels: () => lire("FACEBOOK_REELS") !== "off",
   facebook: () => {
     const pageId = lire("FACEBOOK_PAGE_ID");
     const jeton = lire("FACEBOOK_PAGE_TOKEN");

@@ -6,4 +6,6 @@ lancer("veille:facebook", async () => {
   const bilan = await relayer();
   console.log(`Statut : ${bilan.statut}. Publiés : ${bilan.publies.length}. Échecs : ${bilan.echecs.length}.`);
   for (const e of bilan.echecs) console.log(`  ${e.slug} : ${e.erreur}`);
+  console.log(`Reels publiés : ${bilan.reels.length}. Échecs : ${bilan.echecsReels.length}.`);
+  for (const e of bilan.echecsReels) console.log(`  ${e.slug} : ${e.erreur}`);
 });

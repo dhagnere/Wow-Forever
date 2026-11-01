@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AVIS_MINIMUM, lienFrancais, lireParId, messageFacebook, nomLangue } from "@/modules/veille";
+import { AVIS_MINIMUM, DUREE_REEL_S, lienFrancais, lireParId, longueurX, messageFacebook, nomLangue, texteReseau } from "@/modules/veille";
+import { TexteACopier } from "./Copier";
 import { PILIERS, RUBRIQUES } from "@/config/taxonomie";
 import { exigerAdmin } from "@/lib/admin";
 import { dateLongue } from "@/lib/site";
@@ -72,6 +73,20 @@ export default async function EditerArticle({ params }: { params: Promise<{ id: 
             />
             <p style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: 15 }}>{messageFacebook(a)}</p>
             {a.facebookErreur ? <p className="alerte" style={{ marginTop: 12, fontSize: 14 }}>Dernier échec : {a.facebookErreur}</p> : null}
+          </div>
+          <div className="encadre" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <h2>Reel et autres réseaux</h2>
+            <p className="doux" style={{ margin: 0, fontSize: 14 }}>
+              Vidéo verticale de {DUREE_REEL_S} secondes, publiée sur la Page après le post.{" "}
+              {a.facebookReelId ? "Reel publié ✓" : a.facebookReelErreur ? `Dernier échec : ${a.facebookReelErreur}` : a.statut === "publie" ? "Reel en attente." : "Partira après publication."}
+            </p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/articles/${a.slug}/reel/`} alt="Image du Reel" style={{ width: 160, borderRadius: 8, display: "block" }} />
+            <a href={`/admin/veille/${a.id}/reel/`} className="btn btn-contour" style={{ alignSelf: "flex-start" }}>Télécharger la vidéo (MP4)</a>
+            <TexteACopier titre="Texte du Reel" texte={texteReseau("reel", a)} />
+            <TexteACopier titre="Texte pour X" texte={texteReseau("x", a)} note={`${longueurX(texteReseau("x", a))} caractères sur 280 (un lien compte pour 23).`} />
+            <TexteACopier titre="Texte pour Instagram" texte={texteReseau("instagram", a)} note="Lien non cliquable sur Instagram : mettre l'adresse du site dans la bio." />
+            <TexteACopier titre="Texte pour TikTok" texte={texteReseau("tiktok", a)} note="À poster avec la vidéo téléchargée ci-dessus." />
           </div>
           <div className="encadre" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <h2>Actions</h2>

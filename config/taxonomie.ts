@@ -73,4 +73,3 @@ export function estPilier(valeur: string | null | undefined): valeur is Pilier {
   return !!valeur && (PILIERS as readonly string[]).includes(valeur);
 }
 
-export const MOTS_DIESE_FACEBOOK = "#WoWForever #WorldofWarcraft";

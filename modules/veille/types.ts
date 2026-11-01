@@ -42,6 +42,9 @@ export interface Article {
   facebookPublieLe: Date | null;
   facebookTentatives: number;
   facebookErreur: string | null;
+  /** Reel Facebook publié après le post. */
+  facebookReelId: string | null;
+  facebookReelErreur: string | null;
 }
 
 /** Un élément brut lu dans un flux. */

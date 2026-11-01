@@ -14,6 +14,7 @@ interface Ligne {
   publie_le: Date | null; facebook_post_id: string | null; facebook_publie_le: Date | null;
   facebook_tentatives: number; facebook_erreur: string | null;
   image_id: number | null; image_alt: string; image_credit: string; image_facebook_id: number | null;
+  facebook_reel_id: string | null; facebook_reel_erreur: string | null;
 }
 
 function versArticle(l: Ligne): Article {
@@ -24,6 +25,8 @@ function versArticle(l: Ligne): Article {
     sources: l.sources,
     image: l.image_id ? { id: l.image_id, alt: l.image_alt, credit: l.image_credit } : null,
     imageFacebookId: l.image_facebook_id,
+    facebookReelId: l.facebook_reel_id,
+    facebookReelErreur: l.facebook_reel_erreur,
     statut: l.statut, score: l.score, origine: l.origine, creeLe: l.cree_le,
     modifieLe: l.modifie_le, publieLe: l.publie_le, facebookPostId: l.facebook_post_id,
     facebookPublieLe: l.facebook_publie_le, facebookTentatives: l.facebook_tentatives, facebookErreur: l.facebook_erreur,
@@ -164,6 +167,12 @@ export async function lireParId(id: number): Promise<Article | null> {
   return rows[0] ? versArticle(rows[0]) : null;
 }
 
+/** Article par son adresse, quel que soit son statut (aperçus de l'administration). */
+export async function lireParSlug(slug: string): Promise<Article | null> {
+  const { rows } = await pool().query<Ligne>("SELECT * FROM articles WHERE slug=$1", [slug]);
+  return rows[0] ? versArticle(rows[0]) : null;
+}
+
 export async function lirePublie(slug: string): Promise<Article | null> {
   const { rows } = await pool().query<Ligne>("SELECT * FROM articles WHERE slug=$1 AND statut='publie'", [slug]);
   return rows[0] ? versArticle(rows[0]) : null;
@@ -250,6 +259,32 @@ export async function relaisFacebookEchoue(id: number, erreur: string): Promise<
     "UPDATE articles SET facebook_tentatives=facebook_tentatives+1, facebook_erreur=$2 WHERE id=$1",
     [id, erreur.slice(0, 1000)],
   );
+}
+
+/** Articles dont le post est parti et dont le Reel reste à publier (7 derniers jours, 3 tentatives au plus). */
+export async function reelsEnAttente(limite: number): Promise<Article[]> {
+  const { rows } = await pool().query<Ligne>(
+    `SELECT * FROM articles WHERE statut='publie' AND facebook_post_id IS NOT NULL AND facebook_reel_id IS NULL
+       AND facebook_reel_tentatives < 3 AND publie_le > now() - interval '7 days' ORDER BY publie_le ASC LIMIT $1`,
+    [limite],
+  );
+  return rows.map(versArticle);
+}
+
+export async function reelReussi(id: number, reelId: string): Promise<void> {
+  await pool().query("UPDATE articles SET facebook_reel_id=$2, facebook_reel_le=now(), facebook_reel_erreur=NULL WHERE id=$1", [id, reelId]);
+}
+
+export async function reelEchoue(id: number, erreur: string): Promise<void> {
+  await pool().query(
+    "UPDATE articles SET facebook_reel_tentatives=facebook_reel_tentatives+1, facebook_reel_erreur=$2 WHERE id=$1",
+    [id, erreur.slice(0, 1000)],
+  );
+}
+
+export async function reelsCetteHeure(): Promise<number> {
+  const { rows } = await pool().query<{ n: string }>("SELECT count(*) AS n FROM articles WHERE facebook_reel_le > now() - interval '1 hour'");
+  return Number(rows[0].n);
 }
 
 export async function relaisFacebookCetteHeure(): Promise<number> {

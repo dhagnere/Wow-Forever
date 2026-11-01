@@ -73,3 +73,9 @@ ALTER TABLE articles ADD COLUMN IF NOT EXISTS avis_propose TEXT NOT NULL DEFAULT
 -- Mode « dossier » (recherches de référence sur 60 jours). Contrainte recréée à chaque déploiement : idempotent.
 ALTER TABLE veille_revues DROP CONSTRAINT IF EXISTS veille_revues_mode_check;
 ALTER TABLE veille_revues ADD CONSTRAINT veille_revues_mode_check CHECK (mode IN ('essai', 'quotidien', 'dossier'));
+
+-- Reels Facebook : vidéo verticale publiée après le post de chaque article.
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS facebook_reel_id TEXT;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS facebook_reel_le TIMESTAMPTZ;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS facebook_reel_tentatives INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS facebook_reel_erreur TEXT;
