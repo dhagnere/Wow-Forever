@@ -12,6 +12,16 @@ interface Valeurs {
 
 const TYPES_IMAGES = "image/jpeg,image/png,image/webp";
 
+/** Source telle qu'affichée dans l'éditeur (liens calculés côté serveur). */
+export interface SourceEditeur {
+  nom: string;
+  titre: string;
+  url: string;
+  mention: string;
+  urlOriginal?: string;
+  publiee: boolean;
+}
+
 function champ(form: HTMLFormElement | null, nom: string): string {
   const el = form?.elements.namedItem(nom);
   return el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el.value : "";
@@ -72,8 +82,9 @@ function PropositionAvis({
 }
 
 export function Editeur({
-  action, proposerAvis, valeurs, rubriques, piliers, publie, avisMinimum,
+  action, proposerAvis, valeurs, rubriques, piliers, publie, avisMinimum, sources,
 }: {
+  sources: SourceEditeur[];
   action: (etat: EtatEdition, form: FormData) => Promise<EtatEdition>;
   proposerAvis: (contenu: { titre: string; chapo: string; corps: string }) => Promise<{ avis?: string; erreur?: string }>;
   valeurs: Valeurs;
@@ -143,6 +154,29 @@ export function Editeur({
         <textarea id="avisSilfax" name="avisSilfax" ref={avisRef} defaultValue={valeurs.avisSilfax} style={{ minHeight: 140 }} />
       </div>
       <PropositionAvis initiale={valeurs.avisPropose} proposer={proposerAvis} avisRef={avisRef} />
+
+      {sources.length ? (
+        <fieldset className="encadre" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <legend className="surtitre" style={{ padding: "0 6px" }}>Sources</legend>
+          <small className="doux">
+            Cochées : affichées en bas de l&apos;article. L&apos;IA a coché celles dont elle a repris une information.
+            Au moins une source doit rester affichée.
+          </small>
+          <input type="hidden" name="sourcesPresentes" value="1" />
+          {sources.map((s, i) => (
+            <label key={s.url} style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 15 }}>
+              <input type="checkbox" name="sourceAffichee" value={i} defaultChecked={s.publiee} style={{ width: 20, height: 20, flex: "none", marginTop: 2 }} />
+              <span>
+                <a href={s.url} target="_blank" rel="noopener noreferrer nofollow">{s.nom} — {s.titre}</a>{" "}
+                <span className="doux">
+                  ({s.mention}
+                  {s.urlOriginal ? <> · <a href={s.urlOriginal} target="_blank" rel="noopener noreferrer nofollow">original</a></> : null})
+                </span>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+      ) : null}
 
       <div className="g2">
         <div className="champ">

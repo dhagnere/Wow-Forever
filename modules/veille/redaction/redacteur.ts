@@ -21,6 +21,7 @@ const SchemaBrouillon = z.object({
   accroche_facebook: z.string(),
   texte_facebook: z.string(),
   titres_sources_fr: z.array(z.string()),
+  sources_utilisees: z.array(z.number()),
   avis_propose: z.string(),
 });
 
@@ -103,6 +104,8 @@ export async function rediger(sujet: Sujet): Promise<ResultatRedaction> {
   const sortie = reponse.parsed_output;
   if (!sortie) return { ok: false, raison: "Réponse illisible." };
 
+  // Sources réellement reprises dans le texte (numéros à partir de 1) ; réponse vide ou incohérente : toutes affichées.
+  const utilisees = new Set(sortie.sources_utilisees.filter((n) => Number.isInteger(n) && n >= 1 && n <= elements.length));
   const sources: SourceCitee[] = elements.map((e, i) => {
     const traduit = sortie.titres_sources_fr[i]?.trim();
     return {
@@ -111,6 +114,7 @@ export async function rediger(sujet: Sujet): Promise<ResultatRedaction> {
       titre: e.titre,
       titreFr: e.langue === "fr" ? e.titre : traduit ? couper(traduit, 300) : undefined,
       langue: e.langue,
+      publiee: utilisees.size ? utilisees.has(i + 1) : true,
     };
   });
   const etiquettes = [...new Set(sortie.etiquettes.map((t) => t.trim().toLowerCase()).filter(Boolean))].slice(0, 6);

@@ -62,18 +62,24 @@ describe("brouillon du matin", () => {
       stop_reason: "end_turn",
       parsed_output: {
         titre: "La salle des Thanes", chapo: "c", corps_markdown: "corps", rubrique: "donjons-raids", pilier: null,
-        etiquettes: ["donjon"], description: "d", accroche_facebook: "a", texte_facebook: "t", titres_sources_fr: ["Titre FR"],
+        etiquettes: ["donjon"], description: "d", accroche_facebook: "a", texte_facebook: "t", titres_sources_fr: ["Titre FR", "Titre FR 2"],
+        sources_utilisees: [2],
         avis_propose: avis,
       },
     });
     const r = await rediger({
       cle: "x", titre: "Hall of Thanes", theme: "donjons-raids", pilier: "donjons/salle-des-thanes", score: 5, detailScore: { sources: 3, fraicheur: 1, video: 0, etranger: 1 },
-      elements: [{ sourceId: "w", sourceNom: "Wowhead", langue: "en", poids: 3, video: false, titre: "Hall of Thanes", url: "https://wowhead.com/x", resume: "", publieLe: new Date() }],
+      elements: [
+        { sourceId: "w", sourceNom: "Wowhead", langue: "en", poids: 3, video: false, titre: "Hall of Thanes", url: "https://wowhead.com/x", resume: "", publieLe: new Date() },
+        { sourceId: "r", sourceNom: "Reddit r/wow", langue: "en", poids: 1, video: false, titre: "Thanes?", url: "https://reddit.com/y", resume: "", publieLe: new Date() },
+      ],
     });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.brouillon.avisPropose).toBe(avis);
     expect("avisSilfax" in r.brouillon).toBe(false);
+    // Seule la source réellement utilisée (n° 2) est affichée par défaut.
+    expect(r.brouillon.sources.map((s) => s.publiee)).toEqual([false, true]);
   });
 
   it("borne la longueur de l'avis proposé", () => {

@@ -45,4 +45,5 @@ Classement :
 - texte_facebook : 2 à 3 phrases simples qui donnent envie de cliquer sans tout dévoiler. Pas de lien, pas de mots-dièse.
 - avis_propose : une proposition d'avis de Silfax sur ce que tu viens d'écrire, en suivant ces règles :
 ${CONSIGNES_AVIS.split("Règles :")[1]}
+- sources_utilisees : les numéros des sources dont tu as réellement repris une information dans l'article (au moins une). Les autres ne seront pas citées.
 - titres_sources_fr : la traduction française fidèle du titre de chaque source, dans l'ordre des numéros de source (un titre par source, même s'il est déjà en français). Traduction littérale, sans reformulation ni ajout.`;

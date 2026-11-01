@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { lirePublie, listerPublies, markdownVersHtml } from "@/modules/veille";
+import { lirePublie, listerPublies, markdownVersHtml, sourcesPubliees } from "@/modules/veille";
 import { CarteArticle, nomRubrique } from "@/components/Articles";
 import { Ariane } from "@/components/Ariane";
 import { JsonLd } from "@/components/JsonLd";
@@ -108,11 +108,11 @@ export default async function PageArticle({ params }: Props) {
             </ul>
           ) : null}
 
-          {article.sources.length ? (
+          {sourcesPubliees(article.sources).length ? (
             <section className="sources" aria-labelledby="t-sources">
               <h2 id="t-sources">Sources</h2>
               <ul>
-                {article.sources.map((s) => <LigneSource key={s.url} source={s} />)}
+                {sourcesPubliees(article.sources).map((s) => <LigneSource key={s.url} source={s} />)}
               </ul>
             </section>
           ) : null}

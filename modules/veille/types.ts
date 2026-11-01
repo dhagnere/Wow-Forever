@@ -8,6 +8,8 @@ export interface SourceCitee {
   titre: string; // titre d'origine
   titreFr?: string; // titre traduit en français (absent sur les articles antérieurs)
   langue?: string; // code ISO de la page d'origine
+  /** Affichée en bas de l'article publié (absente sur les articles antérieurs : affichée). */
+  publiee?: boolean;
 }
 
 export interface Article {

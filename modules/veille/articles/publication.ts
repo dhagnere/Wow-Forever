@@ -11,8 +11,17 @@ const TEXTE_A_REMPLACER = /\[[^\]]{12,}\](?!\()/;
  * Règles de publication. Garde-fou à ne jamais affaiblir (voir CLAUDE.md) :
  * sans avis de Silfax, pas de publication. La base de données applique la même règle.
  */
+/** Sources affichées sur le site. */
+export function sourcesPubliees<T extends { publiee?: boolean }>(sources: T[]): T[] {
+  return sources.filter((s) => s.publiee !== false);
+}
+
 export function verifierPublication(
-  a: Pick<Article, "titre" | "corps" | "avisSilfax" | "rubrique" | "description"> & { image?: Article["image"] },
+  a: Pick<Article, "titre" | "corps" | "avisSilfax" | "rubrique" | "description"> & {
+    image?: Article["image"];
+    sources?: Article["sources"];
+    origine?: Article["origine"];
+  },
 ): string[] {
   const erreurs: string[] = [];
   if (a.titre.trim().length < 10) erreurs.push("Le titre est trop court.");
@@ -23,6 +32,9 @@ export function verifierPublication(
   if (TEXTE_A_REMPLACER.test(a.corps)) erreurs.push("Le corps contient encore un texte à remplacer entre crochets.");
   if (!(SLUGS_RUBRIQUES as string[]).includes(a.rubrique)) erreurs.push("Rubrique inconnue.");
   if (a.description.trim().length < 50) erreurs.push("La description pour Google est trop courte (50 caractères minimum).");
+  // Droit d'auteur : un article tiré de la veille crédite au moins une des sources dont il reprend l'information.
+  if (a.origine === "veille" && a.sources?.length && !sourcesPubliees(a.sources).length)
+    erreurs.push("Affichez au moins une source : l'article reprend des informations d'autres sites, il doit les créditer.");
   if (a.image && a.image.alt.trim().length < 5)
     erreurs.push("Décrivez l'image d'en-tête en quelques mots (texte alternatif), pour les lecteurs malvoyants et pour Google.");
   return erreurs;

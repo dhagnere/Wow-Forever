@@ -78,6 +78,8 @@ export async function creerBrouillon(b: NouveauBrouillon, cleSujet?: string): Pr
 export type Modifications = Pick<Article, "titre" | "chapo" | "corps" | "avisSilfax" | "rubrique" | "etiquettes" | "pilier" | "description" | "accrocheFacebook" | "texteFacebook"> & {
   imageAlt: string;
   imageCredit: string;
+  /** Rangs (à partir de 0) des sources à afficher sur le site ; absent : choix inchangé. */
+  sourcesAffichees?: number[];
 };
 
 export async function modifier(id: number, m: Modifications): Promise<Article> {
@@ -86,8 +88,16 @@ export async function modifier(id: number, m: Modifications): Promise<Article> {
     const actuel = await client.query<Ligne>("SELECT * FROM articles WHERE id = $1", [id]);
     if (!actuel.rows[0]) throw new Error("Article introuvable.");
     const art = actuel.rows[0];
+    const sources = m.sourcesAffichees
+      ? art.sources.map((s, i) => ({ ...s, publiee: m.sourcesAffichees!.includes(i) }))
+      : art.sources;
     if (art.statut === "publie") {
-      const erreurs = verifierPublication({ ...m, image: art.image_id ? { id: art.image_id, alt: m.imageAlt, credit: m.imageCredit } : null });
+      const erreurs = verifierPublication({
+        ...m,
+        sources,
+        origine: art.origine,
+        image: art.image_id ? { id: art.image_id, alt: m.imageAlt, credit: m.imageCredit } : null,
+      });
       if (erreurs.length) throw new ErreurPublication(erreurs);
     }
     // Le slug d'un article publié ne change plus : les liens partagés doivent rester valides.
@@ -95,10 +105,10 @@ export async function modifier(id: number, m: Modifications): Promise<Article> {
     const { rows } = await client.query<Ligne>(
       `UPDATE articles SET slug=$2, titre=$3, chapo=$4, corps=$5, avis_silfax=$6, rubrique=$7, etiquettes=$8,
          pilier=$9, description=$10, accroche_facebook=$11, texte_facebook=$12, image_alt=$13, image_credit=$14,
-         modifie_le=now()
+         sources=$15, modifie_le=now()
        WHERE id=$1 RETURNING *`,
       [id, slug, m.titre, m.chapo, m.corps, m.avisSilfax, m.rubrique, m.etiquettes, m.pilier,
-       m.description, m.accrocheFacebook, m.texteFacebook, m.imageAlt.trim(), m.imageCredit.trim()],
+       m.description, m.accrocheFacebook, m.texteFacebook, m.imageAlt.trim(), m.imageCredit.trim(), JSON.stringify(sources)],
     );
     return versArticle(rows[0]);
   } finally {

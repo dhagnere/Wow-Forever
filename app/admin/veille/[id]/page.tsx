@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AVIS_MINIMUM, lireParId, messageFacebook } from "@/modules/veille";
+import { AVIS_MINIMUM, lienFrancais, lireParId, messageFacebook, nomLangue } from "@/modules/veille";
 import { PILIERS, RUBRIQUES } from "@/config/taxonomie";
 import { exigerAdmin } from "@/lib/admin";
 import { dateLongue } from "@/lib/site";
 import { Editeur } from "./Editeur";
-import { LigneSource } from "@/components/Sources";
+import type { SourceEditeur } from "./Editeur";
 import { depublier, enregistrer, proposerAvisPour, restaurer, supprimer } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +39,18 @@ export default async function EditerArticle({ params }: { params: Promise<{ id: 
               avisPropose: a.avisPropose,
             }}
             proposerAvis={proposerAvisPour.bind(null, a.id)}
+            sources={a.sources.map((s): SourceEditeur => {
+              const fr = lienFrancais(s.url, s.langue);
+              const traduite = fr.mode !== "original";
+              return {
+                nom: s.nom,
+                titre: s.titreFr || s.titre,
+                url: fr.url,
+                mention: traduite ? (fr.mode === "officiel" ? "version française officielle" : "traduction automatique") : nomLangue(s.langue),
+                urlOriginal: traduite ? s.url : undefined,
+                publiee: s.publiee !== false,
+              };
+            })}
             rubriques={RUBRIQUES.map((r) => ({ slug: r.slug, nom: r.nom }))}
             piliers={PILIERS}
             publie={a.statut === "publie"}
@@ -46,14 +58,7 @@ export default async function EditerArticle({ params }: { params: Promise<{ id: 
           />
         </div>
         <aside className="colonne-laterale">
-          <div className="encadre">
-            <h2>Sources</h2>
-            {a.sources.length ? (
-              <ul style={{ margin: 0, paddingLeft: 20, fontSize: 15 }}>
-                {a.sources.map((s) => <LigneSource key={s.url} source={s} />)}
-              </ul>
-            ) : <p className="doux" style={{ margin: 0, fontSize: 15 }}>Article écrit à la main.</p>}
-          </div>
+
           <div className="encadre">
             <h2>Aperçu du post Facebook</h2>
             <p className="doux" style={{ margin: "0 0 8px", fontSize: 14 }}>

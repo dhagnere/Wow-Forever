@@ -21,7 +21,7 @@ export {
   changerStatut,
   ErreurPublication,
 } from "./articles/depot";
-export { verifierPublication, AVIS_MINIMUM } from "./articles/publication";
+export { verifierPublication, sourcesPubliees, AVIS_MINIMUM } from "./articles/publication";
 export { markdownVersHtml } from "./rendu/html";
 export { lienFrancais, nomLangue, type LienSource, type ModeLien } from "./rendu/liens";
 export { themeDe } from "./passage";

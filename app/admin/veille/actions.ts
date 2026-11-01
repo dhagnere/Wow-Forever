@@ -32,6 +32,8 @@ function lireFormulaire(form: FormData): Modifications {
     texteFacebook: texte("texteFacebook"),
     imageAlt: texte("imageAlt"),
     imageCredit: texte("imageCredit"),
+    // Le formulaire signale la présence des cases par un champ caché : sans lui, le choix des sources reste inchangé.
+    sourcesAffichees: form.has("sourcesPresentes") ? form.getAll("sourceAffichee").map(Number).filter(Number.isInteger) : undefined,
   };
 }
 
