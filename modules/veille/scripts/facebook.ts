@@ -8,4 +8,6 @@ lancer("veille:facebook", async () => {
   for (const e of bilan.echecs) console.log(`  ${e.slug} : ${e.erreur}`);
   console.log(`Reels publiés : ${bilan.reels.length}. Échecs : ${bilan.echecsReels.length}.`);
   for (const e of bilan.echecsReels) console.log(`  ${e.slug} : ${e.erreur}`);
+  console.log(`Instagram : ${bilan.instagram.length}. TikTok : ${bilan.tiktok.length}. Échecs : ${bilan.echecsReseaux.length}.`);
+  for (const e of bilan.echecsReseaux) console.log(`  [${e.reseau}] ${e.slug} : ${e.erreur}`);
 });

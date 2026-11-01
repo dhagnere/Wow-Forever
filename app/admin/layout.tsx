@@ -16,6 +16,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <nav className="nav" aria-label="Administration">
             <Link href="/admin/veille/">Articles</Link>
             <Link href="/admin/veille/revue/">Revue du jour</Link>
+            <Link href="/admin/reseaux/">Réseaux</Link>
             <Link href="/" target="_blank">Voir le site</Link>
           </nav>
         </div>

@@ -32,6 +32,10 @@ export { derniereRevue, etatRedaction, preparerRedaction, redigerSujets, MAX_PAR
 export { urlArticle, messageFacebook, requeteFacebook, urlMedia } from "./facebook/relais";
 export { texteReseau, longueurX } from "./reseaux/textes";
 export { videoReel, ErreurVideo, DUREE_REEL_S } from "./reels/video";
+export { obtenirVideo, lireVideoStockee } from "./reels/stockage";
+export { urlAutorisationTiktok, connecterTiktok, urlRetourTiktok } from "./reseaux/tiktok";
+export { lireJeton, supprimerJeton } from "./reseaux/jetons";
+export { compteInstagram } from "./reseaux/instagram";
 export { definirImage, enregistrerAvisPropose } from "./articles/depot";
 export { proposerAvis } from "./redaction/redacteur";
 export { enregistrerImage, lireImage, ErreurImage, TAILLE_MAX_OCTETS, LARGEUR_MIN } from "./medias/images";

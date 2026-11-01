@@ -79,3 +79,31 @@ ALTER TABLE articles ADD COLUMN IF NOT EXISTS facebook_reel_id TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS facebook_reel_le TIMESTAMPTZ;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS facebook_reel_tentatives INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS facebook_reel_erreur TEXT;
+
+-- Vidéo de Reel de chaque article, fabriquée une fois puis réutilisée (Facebook, Instagram, TikTok).
+CREATE TABLE IF NOT EXISTS reels_videos (
+  article_id  INTEGER PRIMARY KEY REFERENCES articles(id) ON DELETE CASCADE,
+  donnees     BYTEA NOT NULL,
+  cree_le     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Publication sur Instagram et TikTok.
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS instagram_media_id TEXT;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS instagram_le TIMESTAMPTZ;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS instagram_tentatives INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS instagram_erreur TEXT;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS tiktok_publish_id TEXT;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS tiktok_le TIMESTAMPTZ;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS tiktok_tentatives INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS tiktok_erreur TEXT;
+
+-- Jetons d'accès des réseaux qui les renouvellent (TikTok : jeton de 24 h, renouvelable pendant un an).
+CREATE TABLE IF NOT EXISTS jetons_reseaux (
+  reseau                      TEXT PRIMARY KEY,
+  compte                      TEXT,
+  acces                       TEXT NOT NULL,
+  rafraichissement            TEXT,
+  expire_le                   TIMESTAMPTZ NOT NULL,
+  rafraichissement_expire_le  TIMESTAMPTZ,
+  modifie_le                  TIMESTAMPTZ NOT NULL DEFAULT now()
+);

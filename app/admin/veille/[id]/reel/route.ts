@@ -1,4 +1,4 @@
-import { ErreurVideo, lireParId, videoReel } from "@/modules/veille";
+import { ErreurVideo, lireParId, obtenirVideo } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +11,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   if (!a) return new Response("Article introuvable", { status: 404 });
   try {
     const origine = new URL(req.url).origin;
-    const video = await videoReel(`${origine}/articles/${a.slug}/reel/`, req.headers.get("cookie") ?? undefined);
+    const video = await obtenirVideo(a, { origine, cookie: req.headers.get("cookie") ?? undefined });
     return new Response(new Uint8Array(video), {
       headers: {
         "Content-Type": "video/mp4",

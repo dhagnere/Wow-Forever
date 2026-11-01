@@ -26,6 +26,6 @@ export const RESEAUX: Record<Reseau, { nom: string; limite: number; lienCliquabl
   facebook: { nom: "Facebook", limite: 63206, lienCliquable: true, actif: true },
   reel: { nom: "Reel Facebook", limite: 2200, lienCliquable: false, actif: true },
   x: { nom: "X", limite: 280, lienCliquable: true, actif: false },
-  instagram: { nom: "Instagram", limite: 2200, lienCliquable: false, actif: false },
-  tiktok: { nom: "TikTok", limite: 2200, lienCliquable: false, actif: false },
+  instagram: { nom: "Instagram", limite: 2200, lienCliquable: false, actif: true },
+  tiktok: { nom: "TikTok", limite: 2200, lienCliquable: false, actif: true },
 };

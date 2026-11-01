@@ -1,6 +1,8 @@
 import { config } from "../config";
 import { texteReseau, urlArticle } from "../reseaux/textes";
-import { videoReel } from "../reels/video";
+import { obtenirVideo } from "../reels/stockage";
+import { publierReelInstagram } from "../reseaux/instagram";
+import { etatTiktok, publierTiktok } from "../reseaux/tiktok";
 import { publierReel } from "../reels/publication";
 import type { Article } from "../types";
 import * as depot from "../articles/depot";
@@ -66,6 +68,45 @@ export interface BilanRelais {
   echecs: { slug: string; erreur: string }[];
   reels: string[];
   echecsReels: { slug: string; erreur: string }[];
+  instagram: string[];
+  tiktok: string[];
+  echecsReseaux: { reseau: string; slug: string; erreur: string }[];
+}
+
+/** Instagram puis TikTok : chacun son quota de 3 publications par heure, mêmes articles, même phrase d'appel. */
+async function relayerReseaux(bilan: BilanRelais): Promise<void> {
+  if (config.instagram()) {
+    const restant = MAX_PAR_HEURE - (await depot.relaisCetteHeure("instagram"));
+    for (const a of restant > 0 ? await depot.aRelayer("instagram", restant) : []) {
+      try {
+        await obtenirVideo(a); // Instagram télécharge la vidéo à son adresse publique : elle doit exister.
+        const id = await publierReelInstagram(`${config.siteUrl()}/articles/${a.slug}/video/`, texteReseau("instagram", a));
+        await depot.relaiReussi("instagram", a.id, id);
+        bilan.instagram.push(a.slug);
+      } catch (e) {
+        const erreur = e instanceof Error ? e.message : String(e);
+        await depot.relaiEchoue("instagram", a.id, erreur);
+        bilan.echecsReseaux.push({ reseau: "instagram", slug: a.slug, erreur });
+      }
+    }
+  }
+  if (config.tiktok()) {
+    const restant = MAX_PAR_HEURE - (await depot.relaisCetteHeure("tiktok"));
+    for (const a of restant > 0 ? await depot.aRelayer("tiktok", restant) : []) {
+      try {
+        const { publishId } = await publierTiktok(await obtenirVideo(a), texteReseau("tiktok", a));
+        // Un refus immédiat de TikTok compte comme un échec (nouvel essai à l'heure suivante).
+        const etat = await etatTiktok(publishId).catch(() => null);
+        if (etat?.status === "FAILED") throw new Error(`TikTok : ${etat.raison ?? "traitement refusé"}`);
+        await depot.relaiReussi("tiktok", a.id, publishId);
+        bilan.tiktok.push(a.slug);
+      } catch (e) {
+        const erreur = e instanceof Error ? e.message : String(e);
+        await depot.relaiEchoue("tiktok", a.id, erreur);
+        bilan.echecsReseaux.push({ reseau: "tiktok", slug: a.slug, erreur });
+      }
+    }
+  }
 }
 
 /** Publie les Reels des articles déjà relayés : 3 par heure au plus. */
@@ -75,7 +116,7 @@ async function relayerReels(bilan: BilanRelais): Promise<void> {
   if (restant <= 0) return;
   for (const a of await depot.reelsEnAttente(restant)) {
     try {
-      const video = await videoReel(`${config.siteUrl()}/articles/${a.slug}/reel/`);
+      const video = await obtenirVideo(a);
       const reelId = await publierReel(video, texteReseau("reel", a));
       await depot.reelReussi(a.id, reelId);
       bilan.reels.push(a.slug);
@@ -88,13 +129,17 @@ async function relayerReels(bilan: BilanRelais): Promise<void> {
 }
 
 export async function relayer(maintenant = new Date()): Promise<BilanRelais> {
-  const bilan: BilanRelais = { statut: "termine", publies: [], echecs: [], reels: [], echecsReels: [] };
-  if (!config.facebook()) return { ...bilan, statut: "non-configure" };
+  const bilan: BilanRelais = { statut: "termine", publies: [], echecs: [], reels: [], echecsReels: [], instagram: [], tiktok: [], echecsReseaux: [] };
   if (!dansLaPlageHoraire(maintenant)) return { ...bilan, statut: "hors-plage" };
+  if (!config.facebook()) {
+    await relayerReseaux(bilan);
+    return { ...bilan, statut: "non-configure" };
+  }
 
   const restant = MAX_PAR_HEURE - (await depot.relaisFacebookCetteHeure());
   if (restant <= 0) {
     await relayerReels(bilan);
+    await relayerReseaux(bilan);
     return { ...bilan, statut: "quota-atteint" };
   }
 
@@ -110,5 +155,6 @@ export async function relayer(maintenant = new Date()): Promise<BilanRelais> {
     }
   }
   await relayerReels(bilan);
+  await relayerReseaux(bilan);
   return bilan;
 }

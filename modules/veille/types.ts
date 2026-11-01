@@ -45,6 +45,10 @@ export interface Article {
   /** Reel Facebook publié après le post. */
   facebookReelId: string | null;
   facebookReelErreur: string | null;
+  instagramMediaId: string | null;
+  instagramErreur: string | null;
+  tiktokPublishId: string | null;
+  tiktokErreur: string | null;
 }
 
 /** Un élément brut lu dans un flux. */

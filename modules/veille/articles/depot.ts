@@ -5,6 +5,7 @@ import type { Article, SourceCitee, Statut } from "../types";
 import { slugifier } from "./slug";
 import { verifierPublication } from "./publication";
 import { supprimerSiOrpheline } from "../medias/images";
+import { oublierVideo } from "../reels/stockage";
 
 interface Ligne {
   id: number; slug: string; titre: string; chapo: string; corps: string; avis_silfax: string; avis_propose: string;
@@ -15,6 +16,8 @@ interface Ligne {
   facebook_tentatives: number; facebook_erreur: string | null;
   image_id: number | null; image_alt: string; image_credit: string; image_facebook_id: number | null;
   facebook_reel_id: string | null; facebook_reel_erreur: string | null;
+  instagram_media_id: string | null; instagram_erreur: string | null;
+  tiktok_publish_id: string | null; tiktok_erreur: string | null;
 }
 
 function versArticle(l: Ligne): Article {
@@ -27,6 +30,10 @@ function versArticle(l: Ligne): Article {
     imageFacebookId: l.image_facebook_id,
     facebookReelId: l.facebook_reel_id,
     facebookReelErreur: l.facebook_reel_erreur,
+    instagramMediaId: l.instagram_media_id,
+    instagramErreur: l.instagram_erreur,
+    tiktokPublishId: l.tiktok_publish_id,
+    tiktokErreur: l.tiktok_erreur,
     statut: l.statut, score: l.score, origine: l.origine, creeLe: l.cree_le,
     modifieLe: l.modifie_le, publieLe: l.publie_le, facebookPostId: l.facebook_post_id,
     facebookPublieLe: l.facebook_publie_le, facebookTentatives: l.facebook_tentatives, facebookErreur: l.facebook_erreur,
@@ -113,6 +120,8 @@ export async function modifier(id: number, m: Modifications): Promise<Article> {
       [id, slug, m.titre, m.chapo, m.corps, m.avisSilfax, m.rubrique, m.etiquettes, m.pilier,
        m.description, m.accrocheFacebook, m.texteFacebook, m.imageAlt.trim(), m.imageCredit.trim(), JSON.stringify(sources)],
     );
+    // Titre, accroche ou rubrique ont pu changer : la vidéo du Reel sera refabriquée au prochain besoin.
+    await oublierVideo(id);
     return versArticle(rows[0]);
   } finally {
     client.release();
@@ -151,6 +160,7 @@ export async function definirImage(id: number, emplacement: "une" | "facebook", 
   );
   const ancien = rows[0]?.ancien ?? null;
   if (ancien && ancien !== mediaId) await supprimerSiOrpheline(ancien);
+  if (emplacement === "une") await oublierVideo(id);
 }
 
 /** Conserve la dernière proposition d'avis de l'IA (n'écrit jamais dans l'avis de Silfax). */
@@ -284,6 +294,40 @@ export async function reelEchoue(id: number, erreur: string): Promise<void> {
 
 export async function reelsCetteHeure(): Promise<number> {
   const { rows } = await pool().query<{ n: string }>("SELECT count(*) AS n FROM articles WHERE facebook_reel_le > now() - interval '1 hour'");
+  return Number(rows[0].n);
+}
+
+/** Colonnes de suivi par réseau (liste fermée : jamais de nom de colonne venu de l'extérieur). */
+const COLONNES_RESEAU = {
+  instagram: { id: "instagram_media_id", le: "instagram_le", tentatives: "instagram_tentatives", erreur: "instagram_erreur" },
+  tiktok: { id: "tiktok_publish_id", le: "tiktok_le", tentatives: "tiktok_tentatives", erreur: "tiktok_erreur" },
+} as const;
+export type ReseauSuivi = keyof typeof COLONNES_RESEAU;
+
+/** Articles en ligne à publier sur un réseau (7 derniers jours, 3 tentatives au plus). */
+export async function aRelayer(reseau: ReseauSuivi, limite: number): Promise<Article[]> {
+  const c = COLONNES_RESEAU[reseau];
+  const { rows } = await pool().query<Ligne>(
+    `SELECT * FROM articles WHERE statut='publie' AND ${c.id} IS NULL AND ${c.tentatives} < 3
+       AND publie_le > now() - interval '7 days' ORDER BY publie_le ASC LIMIT $1`,
+    [limite],
+  );
+  return rows.map(versArticle);
+}
+
+export async function relaiReussi(reseau: ReseauSuivi, id: number, identifiant: string): Promise<void> {
+  const c = COLONNES_RESEAU[reseau];
+  await pool().query(`UPDATE articles SET ${c.id}=$2, ${c.le}=now(), ${c.erreur}=NULL WHERE id=$1`, [id, identifiant]);
+}
+
+export async function relaiEchoue(reseau: ReseauSuivi, id: number, erreur: string): Promise<void> {
+  const c = COLONNES_RESEAU[reseau];
+  await pool().query(`UPDATE articles SET ${c.tentatives}=${c.tentatives}+1, ${c.erreur}=$2 WHERE id=$1`, [id, erreur.slice(0, 1000)]);
+}
+
+export async function relaisCetteHeure(reseau: ReseauSuivi): Promise<number> {
+  const c = COLONNES_RESEAU[reseau];
+  const { rows } = await pool().query<{ n: string }>(`SELECT count(*) AS n FROM articles WHERE ${c.le} > now() - interval '1 hour'`);
   return Number(rows[0].n);
 }
 

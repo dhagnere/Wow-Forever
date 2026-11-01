@@ -19,6 +19,28 @@ export const config = {
     const n = Number(lire("VEILLE_BROUILLONS_PAR_JOUR") ?? 12);
     return Number.isFinite(n) && n > 0 ? Math.min(Math.floor(n), 30) : 12;
   },
+  /**
+   * Instagram : compte professionnel relié à la Page. Jeton : INSTAGRAM_TOKEN, ou à défaut le jeton de Page
+   * (permissions instagram_basic et instagram_content_publish). INSTAGRAM_USER_ID facultatif (retrouvé depuis la Page).
+   */
+  instagram: () => {
+    if (lire("INSTAGRAM_PUBLICATION") === "off") return null;
+    const jeton = lire("INSTAGRAM_TOKEN") ?? lire("FACEBOOK_PAGE_TOKEN");
+    if (!jeton) return null;
+    return { jeton, userId: lire("INSTAGRAM_USER_ID"), pageId: lire("FACEBOOK_PAGE_ID"), version: lire("FACEBOOK_GRAPH_VERSION") ?? "v21.0" };
+  },
+  /**
+   * TikTok : application développeur (TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET) et compte relié depuis /admin/reseaux/.
+   * TIKTOK_MODE : « brouillon » (par défaut, vidéo envoyée dans la boîte de réception TikTok) ou « direct » (publication
+   * immédiate, réservée aux applications auditées par TikTok ; sinon les vidéos restent privées).
+   */
+  tiktok: () => {
+    if (lire("TIKTOK_PUBLICATION") === "off") return null;
+    const clientKey = lire("TIKTOK_CLIENT_KEY");
+    const clientSecret = lire("TIKTOK_CLIENT_SECRET");
+    if (!clientKey || !clientSecret) return null;
+    return { clientKey, clientSecret, mode: lire("TIKTOK_MODE") === "direct" ? ("direct" as const) : ("brouillon" as const) };
+  },
   /** Reels Facebook : actifs par défaut, FACEBOOK_REELS=off pour les couper. */
   reels: () => lire("FACEBOOK_REELS") !== "off",
   facebook: () => {
