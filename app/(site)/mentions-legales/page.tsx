@@ -18,8 +18,17 @@ export default function MentionsLegales() {
         <h2>Propriété intellectuelle</h2>
         <p>{SITE.mentionBlizzard} Les captures d&apos;écran du jeu sont utilisées dans le cadre de la tolérance accordée par Blizzard aux sites de fans et restent la propriété de Blizzard Entertainment.</p>
         <p>Les textes du site sont la propriété de leur auteur. Les informations reprises d&apos;autres sites sont reformulées et leurs sources sont citées avec un lien.</p>
-        <h2>Données personnelles et cookies</h2>
-        <p>[À compléter avant l&apos;activation de la publicité : mesure d&apos;audience, cookies publicitaires, bannière de consentement, droits des personnes et contact.]</p>
+        <h2 id="cookies">Données personnelles et cookies</h2>
+        <p>
+          Le site utilise Google Tag Manager pour la mesure d&apos;audience. Aucun cookie de mesure ou de publicité n&apos;est déposé sans
+          votre accord : à votre première visite, une bannière vous permet d&apos;accepter ou de refuser. Votre choix est conservé six mois
+          dans votre navigateur, puis la question vous est reposée. Vous pouvez le modifier à tout moment avec le lien « Gérer les cookies »
+          en bas de page.
+        </p>
+        <p>
+          [À compléter : outils réellement activés dans le conteneur Google Tag Manager (par exemple Google Analytics), durée de conservation
+          des données, destinataires (Google), transferts hors Union européenne, droits des personnes et adresse de contact.]
+        </p>
         <h2>Liens affiliés</h2>
         <p>Certains liens sont signalés comme affiliés : ils peuvent rapporter une commission au site, sans surcoût pour vous.</p>
       </article>

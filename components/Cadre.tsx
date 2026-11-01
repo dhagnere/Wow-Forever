@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { NavPrincipale } from "./NavPrincipale";
 import { SITE } from "@/lib/site";
+import { GererCookies } from "./BandeauCookies";
 
 export function Entete() {
   return (
@@ -33,6 +34,7 @@ export function Pied() {
           <Link href="/plan-du-site/">Plan du site</Link>
           <Link href="/mentions-legales/">Mentions légales</Link>
           <a href={SITE.facebook} rel="noopener noreferrer">Page Facebook</a>
+          {SITE.gtmId ? <GererCookies /> : null}
         </nav>
       </div>
     </footer>

@@ -186,6 +186,13 @@ td { padding: 12px 16px; border-top: 1px solid var(--bordure); }
 .pied .wrap { padding-top: 40px; padding-bottom: 40px; display: flex; flex-wrap: wrap; gap: 24px 48px; justify-content: space-between; }
 .pied nav { display: flex; flex-direction: column; gap: 6px; }
 
+/* Bannière de consentement */
+.bandeau-cookies { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; background: var(--fond-nuit); border-top: 2px solid var(--bordure-vive); box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.45); font-size: 15px; }
+.bandeau-cookies .wrap { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; justify-content: space-between; padding-top: 16px; padding-bottom: 16px; }
+.bandeau-cookies .wrap > p { flex: 1 1 420px; }
+.lien-bouton { background: none; border: 0; padding: 0; font: inherit; color: var(--or-clair); text-decoration: underline; cursor: pointer; text-align: left; }
+.lien-bouton:hover { color: var(--or-pale); }
+
 /* Pagination */
 .pagination { display: flex; gap: 12px; justify-content: space-between; margin-top: 32px; }
 
