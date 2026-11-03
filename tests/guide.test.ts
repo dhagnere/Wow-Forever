@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { combinaisons, guidePour, planifier, raceGuide, cleGuide, libelleGuide, BITS_CLASSES } from "@/lib/guide";
-import { segment } from "@/components/GuideParcours";
+import { courbe, segment } from "@/components/GuideParcours";
 import { carte } from "@/lib/cartes";
 import { cleGuideValide } from "@/modules/veille/joueurs/validation";
 
@@ -86,5 +86,13 @@ describe("guide de 1 à 60", () => {
     expect(s[0]).toBeCloseTo(12.2);
     expect(s[2]).toBeCloseTo(47.8);
     expect(segment({ x: 10, y: 10 }, { x: 11, y: 10 })).toBeNull();
+  });
+
+  it("écarte l'aller et le retour entre deux mêmes points", () => {
+    const aller = courbe({ x: 10, y: 10 }, { x: 50, y: 10 })!;
+    const retour = courbe({ x: 50, y: 10 }, { x: 10, y: 10 })!;
+    const cy = (d: string) => Number(d.split("Q")[1].split(" ")[0].split(",")[1]);
+    expect(cy(aller)).not.toBeCloseTo(cy(retour));
+    expect(aller.startsWith("M")).toBe(true);
   });
 });
