@@ -5,6 +5,7 @@ import { CLASSES, trouverClasse } from "@/content/classes";
 import { estPilier } from "@/config/taxonomie";
 import { Ariane } from "@/components/Ariane";
 import { IconeClasse } from "@/components/IconeClasse";
+import { IconeRace } from "@/components/IconeRace";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { dateLongue } from "@/lib/site";
 
@@ -71,7 +72,7 @@ export default async function PageClasse({ params }: Props) {
                   <tbody>
                     {c.races.map((r) => (
                       <tr key={r.race}>
-                        <td style={{ fontWeight: 600 }}>{r.lien ? <Link href={r.lien}>{r.race}</Link> : r.race}</td>
+                        <td style={{ fontWeight: 600 }}><span className="lien-icone"><IconeRace race={r.race} taille={32} />{r.lien ? <Link href={r.lien}>{r.race}</Link> : r.race}</span></td>
                         <td>{r.faction}</td>
                         <td className="doux">{r.statut}</td>
                       </tr>

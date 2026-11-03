@@ -34,9 +34,9 @@ export default function MentionsLegales() {
         </p>
         <h2>Crédits</h2>
         <p>
-          Icônes de classes : dessins des contributeurs de <a href="https://game-icons.net" rel="noopener noreferrer">game-icons.net</a>,
-          sous licence <a href="https://creativecommons.org/licenses/by/3.0/deed.fr" rel="noopener noreferrer">Creative Commons BY 3.0</a>,
-          recolorés et encadrés pour la Taverne Éternelle.
+          Icônes des classes, des races et des objets : fichiers du jeu World of Warcraft: Forever, lus grâce à{" "}
+          <a href="https://wago.tools" rel="noopener noreferrer">wago.tools</a>. Elles restent la propriété de Blizzard Entertainment et sont
+          utilisées dans le cadre de la tolérance accordée aux sites de fans.
         </p>
         <p>
           Base de données des objets : noms, descriptions, niveaux, prix et icônes proviennent des fichiers du jeu World of Warcraft: Forever,

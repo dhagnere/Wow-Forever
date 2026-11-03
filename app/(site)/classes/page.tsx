@@ -45,7 +45,7 @@ export default async function Classes() {
           <SelecteurClasses classes={CLASSES.map(({ slug, nom, couleur, roles, armure, presentation }) => ({ slug, nom, couleur, roles, armure, presentation }))} />
           <p className="doux" style={{ marginTop: 16, fontSize: 14 }}>
             Rôles hérités de l&apos;Azeroth d&apos;origine ; les nouveautés de Forever sont ajoutées dès leur confirmation.
-            Icônes : <a href="https://game-icons.net" rel="noopener noreferrer">game-icons.net</a>, licence CC BY 3.0.
+            Icônes officielles du jeu © Blizzard Entertainment, lues grâce à <a href="https://wago.tools" rel="noopener noreferrer">wago.tools</a>.
           </p>
         </section>
 

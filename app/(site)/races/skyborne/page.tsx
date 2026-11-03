@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SKYBORNE } from "@/content/monde";
 import { Ariane } from "@/components/Ariane";
+import { IconesRace } from "@/components/IconeRace";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { dateLongue } from "@/lib/site";
 
@@ -20,9 +21,14 @@ export default function Skyborne() {
       <section className="bandeau-page">
         <div className="wrap">
           <Ariane etapes={[{ nom: "Races", href: "/races/" }, { nom: "Skyborne" }]} />
-          <p className="surtitre">Nouvelle race jouable</p>
-          <h1>{s.nom}</h1>
-          <p className="chapo">{s.resume}</p>
+          <div className="presentation-auteur">
+            <IconesRace race="Skyborne" taille={96} />
+            <div>
+              <p className="surtitre">Nouvelle race jouable</p>
+              <h1>{s.nom}</h1>
+              <p className="chapo">{s.resume}</p>
+            </div>
+          </div>
         </div>
       </section>
       <div className="wrap contenu">

@@ -57,7 +57,8 @@ export function decoderBlp(src: Buffer): ImageRgba {
   const hauteur = src.readUInt32LE(16);
   const debut = src.readUInt32LE(20);
   const taille = src.readUInt32LE(84);
-  if (!largeur || !hauteur || largeur > 1024 || hauteur > 1024) throw new ErreurBlp("Dimensions inattendues.");
+  // 4096 pixels au plus : les planches d'icônes de l'interface font 2048 × 1024.
+  if (!largeur || !hauteur || largeur > 4096 || hauteur > 4096) throw new ErreurBlp("Dimensions inattendues.");
   if (debut + taille > src.length) throw new ErreurBlp("Fichier tronqué.");
   const pixels = Buffer.alloc(largeur * hauteur * 4);
   const ecrire = (x: number, y: number, rgba: number[]) => {
