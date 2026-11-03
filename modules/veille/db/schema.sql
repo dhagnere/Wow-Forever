@@ -187,3 +187,30 @@ CREATE TABLE IF NOT EXISTS stats_actions (
   chemin    TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS stats_actions_date_idx ON stats_actions (cree_le);
+
+-- Tableau des guildes : fiches déposées par les guildes, publiées après relecture.
+-- Le responsable modifie sa fiche par un lien secret ; seule l'empreinte du jeton est gardée.
+CREATE TABLE IF NOT EXISTS guildes (
+  id               SERIAL PRIMARY KEY,
+  slug             TEXT NOT NULL UNIQUE,
+  nom              TEXT NOT NULL,
+  faction          TEXT NOT NULL CHECK (faction IN ('alliance', 'horde')),
+  serveur          TEXT NOT NULL,
+  type_royaume     TEXT NOT NULL CHECK (type_royaume IN ('jce', 'jcj', 'rp', 'hardcore')),
+  objectifs        TEXT[] NOT NULL DEFAULT '{}',
+  classes          TEXT[] NOT NULL DEFAULT '{}',
+  roles            TEXT[] NOT NULL DEFAULT '{}',
+  horaires         TEXT NOT NULL DEFAULT '',
+  description      TEXT NOT NULL DEFAULT '',
+  discord          TEXT NOT NULL DEFAULT '',
+  site             TEXT NOT NULL DEFAULT '',
+  contact_jeu      TEXT NOT NULL DEFAULT '',
+  recrute          BOOLEAN NOT NULL DEFAULT true,
+  statut           TEXT NOT NULL DEFAULT 'en_attente' CHECK (statut IN ('en_attente', 'publiee', 'refusee')),
+  a_relire         BOOLEAN NOT NULL DEFAULT true,
+  jeton_empreinte  TEXT NOT NULL,
+  depot_empreinte  TEXT NOT NULL DEFAULT '',
+  cree_le          TIMESTAMPTZ NOT NULL DEFAULT now(),
+  maj_le           TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS guildes_statut_idx ON guildes (statut, maj_le DESC);

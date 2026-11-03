@@ -59,3 +59,12 @@ export { enregistrerSignal } from "./statistiques/collecte";
 export { tableauStatistiques, csvParJour, evolution } from "./statistiques/tableau";
 export { statsFacebook } from "./statistiques/facebook";
 export { NOMS_SOURCES } from "./statistiques/classement";
+
+// Tableau des guildes.
+export type { Guilde, FiltresGuildes, StatutGuilde } from "./guildes/depot";
+export type { FicheGuilde } from "./guildes/validation";
+export {
+  deposerGuilde, guildeParJeton, modifierGuilde, confirmerGuilde, listerGuildes, lireGuilde, guildesARelire, guildesPubliees,
+  deciderGuilde, listerGuildesPourPlan, ErreurGuilde, DUREE_VALIDITE_JOURS, empreinteDepot,
+} from "./guildes/depot";
+export { validerFiche, FACTIONS, TYPES_ROYAUME, OBJECTIFS, ROLES, CLASSES_GUILDE } from "./guildes/validation";

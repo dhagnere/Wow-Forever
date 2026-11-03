@@ -32,6 +32,10 @@ Site de fans francophone non officiel consacré à World of Warcraft: Forever. N
 
 Mesure maison, sans cookie ni stockage dans le navigateur (`components/Mesure.tsx` → `/api/mesure` → `statistiques/collecte.ts`). Ne jamais enregistrer l'adresse IP, un identifiant durable ni les paramètres d'adresse : le visiteur est une empreinte salée (`STATS_SEL`) recalculée chaque jour. Les refus de suivi du navigateur (DNT, GPC) sont respectés ; les données de plus de 13 mois sont effacées. Tableau de bord : `/admin/statistiques` (`exigerAdmin()`). Un bouton se mesure en lui donnant un attribut `data-cta="nom-court"`.
 
+## Tableau des guildes
+
+Contenu déposé par des inconnus (`guildes/`). Chaque fiche passe par la relecture de `/admin/guildes` avant publication ; une modification repasse en relecture. Les textes sont affichés comme du texte brut (jamais en HTML), sans lien : les seuls liens sont l'invitation Discord et un site https, validés par `validerFiche` et rendus en `rel="nofollow ugc"`. Le lien de modification est un secret : seule son empreinte est en base, la page `/guildes/modifier/…` n'est ni indexée ni mesurée.
+
 ## Base d'objets
 
 Importée des fichiers du jeu par wago.tools (`objets/wago.ts`, produit `wowf`), en français. L'import remplace tout en une transaction et s'arrête si moins de 1 000 objets sont lus. Les objets internes (tests, équipement des monstres, objets périmés, niveau requis au-delà de 60) sont écartés par `objetInterne` (`objets/conversion.ts`). Les icônes ne sont demandées à wago.tools que pour un objet connu de la base, puis gardées en cache dans `objets_icones`. Garder le crédit wago.tools et la mention Blizzard (pages de la base et mentions légales).

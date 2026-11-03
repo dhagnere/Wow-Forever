@@ -49,6 +49,8 @@ export default function Communaute() {
           <li>Un lien vers un autre site, oui, s&apos;il répond à la question posée. La publicité, non.</li>
           <li>Les rumeurs se signalent comme telles. Une information sans source reste une rumeur.</li>
         </ul>
+        <h2>Vous dirigez une guilde ?</h2>
+        <p>Inscrivez-la au <Link href="/guildes/">tableau des guildes</Link> : c&apos;est gratuit, et les joueurs qui cherchent une maison passent par là.</p>
         <p>Une question pour Jobwow, une erreur dans un article ? <Link href="/contact/">Écrivez-lui</Link>.</p>
       </div>
     </>

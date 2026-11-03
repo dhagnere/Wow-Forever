@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { listerObjetsPourPlan, listerPourPlan } from "@/modules/veille";
+import { listerGuildesPourPlan, listerObjetsPourPlan, listerPourPlan } from "@/modules/veille";
 import { RUBRIQUES } from "@/config/taxonomie";
 import { CLASSES } from "@/content/classes";
 import { ZONES, DONJONS } from "@/content/monde";
@@ -11,7 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const fixes = [
     "/", "/actualites/", "/classes/", "/races/", "/races/skyborne/", "/zones/", "/donjons/", "/guides/bien-demarrer/",
     "/guides/zones-de-depart/", "/guides/zones-par-niveau/", "/guides/liste-des-donjons/",
-    "/base-de-donnees/", "/base-de-donnees/objets/", "/calendrier/", "/lettre/", "/communaute/", "/contact/", "/confidentialite/", "/carnet/", "/a-propos/", "/plan-du-site/", "/mentions-legales/",
+    "/base-de-donnees/", "/base-de-donnees/objets/", "/calendrier/", "/lettre/", "/communaute/", "/guildes/", "/guildes/inscrire/", "/soutenir/", "/contact/", "/confidentialite/", "/carnet/", "/a-propos/", "/plan-du-site/", "/mentions-legales/",
     ...RUBRIQUES.map((r) => `/rubriques/${r.slug}/`),
     ...CLASSES.map((c) => `/classes/${c.slug}/`),
     ...ZONES.map((z) => `/zones/${z.slug}/`),
@@ -20,5 +20,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const articles = (await listerPourPlan()).map((a) => ({ url: `${SITE.url}/articles/${a.slug}/`, lastModified: a.modifieLe }));
   // Fiches d'objets : qualité « bonne » et au-delà, pour ne pas noyer le plan sous les objets gris et blancs.
   const objets = (await listerObjetsPourPlan().catch(() => [])).map((o) => ({ url: `${SITE.url}/base-de-donnees/objets/${o.id}/` }));
-  return [...fixes, ...articles, ...objets];
+  const guildes = (await listerGuildesPourPlan().catch(() => [])).map((g) => ({ url: `${SITE.url}/guildes/${g.slug}/`, lastModified: g.majLe }));
+  return [...fixes, ...articles, ...guildes, ...objets];
 }

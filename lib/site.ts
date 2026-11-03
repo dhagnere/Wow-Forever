@@ -10,6 +10,10 @@ export const SITE = {
   gtmId: process.env.NEXT_PUBLIC_GTM_ID === "off" ? "" : (process.env.NEXT_PUBLIC_GTM_ID ?? "GTM-KMGBD5FD"),
   /** Discord de la Taverne (lien d'invitation) : sans valeur, les boutons Discord ne s'affichent pas. */
   discord: process.env.NEXT_PUBLIC_DISCORD_URL ?? "",
+  /** Liens de dons (Tipeee, Ko-fi…). Sans valeur, la page Soutenir annonce une ouverture prochaine. */
+  donPonctuel: process.env.NEXT_PUBLIC_DON_PONCTUEL_URL ?? "",
+  donMensuel: process.env.NEXT_PUBLIC_DON_MENSUEL_URL ?? "",
+  plateformeDon: process.env.NEXT_PUBLIC_DON_PLATEFORME ?? "",
   contact: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "contact@taverne-eternelle.fr",
   mentionBlizzard:
     "Site de fans indépendant, non affilié à Blizzard Entertainment. World of Warcraft et Warcraft sont des marques de Blizzard Entertainment.",

@@ -12,11 +12,12 @@ const MENU: Entree[] = [
   { href: "/", label: "Accueil", prefixe: [] },
   {
     label: "Le Comptoir",
-    prefixe: ["/actualites", "/articles", "/rubriques", "/recherche", "/calendrier", "/lettre", "/communaute"],
+    prefixe: ["/actualites", "/articles", "/rubriques", "/recherche", "/calendrier", "/lettre", "/communaute", "/guildes"],
     liens: [
       { href: "/actualites/", label: "Actualités", detail: "Nouvelles du jour, correctifs, annonces" },
       { href: "/calendrier/", label: "Calendrier", detail: "Sortie, raids, Hardcore, été 2027" },
       { href: "/lettre/", label: "La Lettre de la Taverne", detail: "Chaque dimanche à 10 h" },
+      { href: "/guildes/", label: "Tableau des guildes", detail: "Les guildes francophones qui recrutent" },
       { href: "/communaute/", label: "Communauté", detail: "Discord, Page Facebook" },
     ],
   },

@@ -20,6 +20,8 @@ Score d'un sujet : poids des sites qui en parlent (un site compte une fois, mêm
 - **Pages ajoutées** : `/calendrier/` (et `/agenda-taverne.ics`), `/lettre/`, `/communaute/`, `/contact/`, `/confidentialite/`, page introuvable, `/rss.xml`, `/sitemap-actualites.xml`.
 - **Appels à l'action** : un bouton principal et un secondaire par page, chacun marqué `data-cta` ; les liens publiés sur Facebook portent `utm_source=facebook`.
 - **Statistiques** : `/admin/statistiques`, sans cookie (voir `CLAUDE.md`).
+- **Tableau des guildes** : `/guildes/`. Les guildes s'inscrivent sans compte ni adresse électronique ; chaque fiche est relue dans `/admin/guildes/` avant publication. Le responsable reçoit un lien secret pour modifier sa fiche ou confirmer qu'elle est active ; une fiche non confirmée depuis 90 jours n'est plus affichée. Trois dépôts par jour et par connexion au plus.
+- **Soutenir** : `/soutenir/`. Les boutons de don n'apparaissent qu'une fois `NEXT_PUBLIC_DON_PONCTUEL_URL` ou `NEXT_PUBLIC_DON_MENSUEL_URL` renseignées (et `NEXT_PUBLIC_DON_PLATEFORME`, par exemple « Tipeee »). Agent public : obtenir l'autorisation de cumul d'activités avant la première recette.
 
 ### Changer de nom de domaine
 

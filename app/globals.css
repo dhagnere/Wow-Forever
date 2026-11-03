@@ -469,3 +469,26 @@ a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(236, 184, 90, 0
 .stats-creneaux { min-width: 620px; font-size: 12px; }
 .stats-creneaux th, .stats-creneaux td { padding: 0; height: 22px; text-align: center; background: none; color: var(--texte-doux); font-weight: 400; border: 1px solid var(--fond); }
 .stats-creneaux td { background: var(--surface-2); }
+
+/* Tableau des guildes */
+.grille-guildes { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; }
+.carte-guilde { display: flex; flex-direction: column; gap: 10px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--bordure); border-top: 4px solid var(--bordure-vive); border-radius: 6px; }
+.carte-guilde.faction-alliance { border-top-color: #3d6fd6; }
+.carte-guilde.faction-horde { border-top-color: var(--braise); }
+.carte-guilde header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: start; }
+.carte-guilde header .surtitre { grid-column: 1 / -1; margin: 0; font-size: 12px; }
+.carte-guilde h2 { margin: 0; font-family: var(--police-titre); font-size: 22px; }
+.carte-guilde h2 a { color: var(--texte-titre); text-decoration: none; }
+.carte-guilde h2 a:hover { color: var(--or-pale); }
+.carte-guilde .puces { margin: 0; }
+.carte-guilde p { margin: 0; }
+.texte-guilde { white-space: pre-line; overflow-wrap: anywhere; }
+.carte-guilde footer { margin-top: auto; display: flex; flex-direction: column; gap: 10px; padding-top: 10px; border-top: 1px solid var(--bordure); }
+.actions-guilde { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.etiquette-recrute { color: #fff; background: var(--vert-hyjal); border-color: var(--vert-hyjal); }
+.formulaire-guilde { display: flex; flex-direction: column; gap: 20px; }
+.formulaire-guilde fieldset { margin: 0; padding: 16px 18px; border: 1px solid var(--bordure); border-radius: 6px; }
+.formulaire-guilde legend { padding: 0 6px; font-weight: 700; color: var(--or-clair); }
+.grille-champs { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.cases-guilde { display: flex; flex-wrap: wrap; gap: 10px 18px; }
+.lien-secret { padding: 10px 12px; background: var(--fond-nuit); border: 1px solid var(--bordure); border-radius: 4px; overflow-wrap: anywhere; }

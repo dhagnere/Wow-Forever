@@ -9,7 +9,7 @@ export function FormulaireLettre() {
     <form action={action} className="formulaire-lettre">
       <div className="champ">
         <label htmlFor="courriel">Votre adresse électronique</label>
-        <input id="courriel" name="courriel" type="email" autoComplete="email" required maxLength={254} placeholder="prenom@exemple.fr" />
+        <input id="courriel" name="courriel" type="email" autoComplete="email" required maxLength={254} placeholder="prenom@exemple.fr" defaultValue={etat?.courriel} />
       </div>
       <div className="piege" aria-hidden="true">
         <label htmlFor="site_web">Ne pas remplir</label>
