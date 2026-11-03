@@ -80,10 +80,15 @@ lancer("base:quetes", async () => {
   for (const l of lignes(await locale("gameobject_template_locale.sql"), "gameobject_template_locale")) if (l.locale === "frFR" && l.name) nomsDecor.set(n(l.entry), String(l.name));
   for (const l of lignes(await locale("quest_template_locale.sql"), "quest_template_locale")) if (l.locale === "frFR" && l.Title) titres.set(n(l.ID), String(l.Title));
 
-  const creatures = new Map<number, { nom: string; faction: number }>();
-  for (const l of lignes(sql, "creature_template")) creatures.set(n(l.Entry), { nom: nomsCreatures.get(n(l.Entry)) ?? String(l.Name ?? ""), faction: n(l.Faction) });
+  const creatures = new Map<number, { nom: string; faction: number; loot: number }>();
+  for (const l of lignes(sql, "creature_template")) creatures.set(n(l.Entry), { nom: nomsCreatures.get(n(l.Entry)) ?? String(l.Name ?? ""), faction: n(l.Faction), loot: n(l.LootId) });
   const decor = new Map<number, string>();
-  for (const l of lignes(sql, "gameobject_template")) decor.set(n(l.entry), nomsDecor.get(n(l.entry)) ?? String(l.name ?? ""));
+  const lootDecor = new Map<number, number[]>();
+  for (const l of lignes(sql, "gameobject_template")) {
+    decor.set(n(l.entry), nomsDecor.get(n(l.entry)) ?? String(l.name ?? ""));
+    // Coffres, plantes, caisses (type 3) : leur butin est l'entrée data1.
+    if (n(l.type) === 3 && n(l.data1)) lootDecor.set(n(l.data1), [...(lootDecor.get(n(l.data1)) ?? []), n(l.entry)]);
+  }
   const objetDeDepart = new Map<number, number>();
   for (const l of lignes(sql, "item_template")) if (n(l.startquest)) objetDeDepart.set(n(l.startquest), n(l.entry));
 
@@ -99,7 +104,10 @@ lancer("base:quetes", async () => {
   // --- Quêtes.
   type Q = {
     id: number; titre: string; niveau: number; min: number; classes: number; races: number; type: number; zone: number;
-    prev: number; suite: number; objectifs: string[]; objets: { id: number; n: string; q: number; choix: boolean; b: boolean }[]; sorts: string[]; argent: number;
+    prev: number; suite: number; objectifs: string[];
+    /** Cibles des objectifs : créatures à vaincre ou qui lâchent l'objet demandé, objets du décor à activer ou à fouiller. */
+    ciblesPnj: number[]; ciblesDecor: number[]; objetsRequis: number[];
+    objets: { id: number; n: string; q: number; choix: boolean; b: boolean }[]; sorts: string[]; argent: number;
   };
   const quetes = new Map<number, Q>();
   for (const l of lignes(sql, "quest_template")) {
@@ -111,9 +119,13 @@ lancer("base:quetes", async () => {
 
     // Objectifs, rédigés à partir des données.
     const objectifs: string[] = [];
+    const ciblesPnj: number[] = [];
+    const ciblesDecor: number[] = [];
+    const objetsRequis: number[] = [];
     for (let k = 1; k <= 4; k++) {
       const item = n(l[`ReqItemId${k}`]);
       const nb = n(l[`ReqItemCount${k}`]);
+      if (item && nb) objetsRequis.push(item);
       if (item && nb) objectifs.push(`Rapporter ${nb > 1 ? `${nb} × ` : ""}${nomsObjets.get(item) ?? `objet ${item}`}`);
     }
     for (let k = 1; k <= 4; k++) {
@@ -123,6 +135,7 @@ lancer("base:quetes", async () => {
       if (!cible || !nb) continue;
       const nom = cible > 0 ? creatures.get(cible)?.nom : decor.get(-cible);
       if (!nom) continue;
+      if (cible > 0) ciblesPnj.push(cible); else ciblesDecor.push(-cible);
       if (sort) objectifs.push(`Utiliser ${nomsSorts.get(sort) ?? "le sort demandé"} sur ${nb > 1 ? `${nb} × ` : ""}${nom}`);
       else if (cible > 0) objectifs.push(`Vaincre ${nb > 1 ? `${nb} × ` : ""}${nom}`);
       else objectifs.push(`Activer ${nb > 1 ? `${nb} × ` : ""}${nom}`);
@@ -143,8 +156,35 @@ lancer("base:quetes", async () => {
     quetes.set(id, {
       id, titre: titres.get(id) ?? String(l.Title ?? ""), niveau: n(l.QuestLevel), min: n(l.MinLevel), classes: n(l.RequiredClasses),
       races: n(l.RequiredRaces), type: n(l.Type), zone: n(l.ZoneOrSort), prev: n(l.PrevQuestId), suite: n(l.NextQuestInChain),
-      objectifs, objets, sorts: [...new Set(sorts)], argent: Math.max(0, n(l.RewOrReqMoney)),
+      objectifs, ciblesPnj, ciblesDecor, objetsRequis, objets, sorts: [...new Set(sorts)], argent: Math.max(0, n(l.RewOrReqMoney)),
     });
+  }
+  // Qui lâche les objets demandés par les quêtes : monstres (butin direct) et objets du décor.
+  const requis = new Set([...quetes.values()].flatMap((q) => q.objetsRequis));
+  const sourcesPnj = new Map<number, Set<number>>();
+  const sourcesDecor = new Map<number, Set<number>>();
+  const lootVersPnj = new Map<number, number[]>();
+  for (const [id, c] of creatures) if (c.loot) lootVersPnj.set(c.loot, [...(lootVersPnj.get(c.loot) ?? []), id]);
+  for (const l of lignes(sql, "creature_loot_template")) {
+    const item = n(l.item);
+    if (!requis.has(item) || n(l.mincountOrRef) < 0) continue;
+    for (const c of lootVersPnj.get(n(l.entry)) ?? []) sourcesPnj.set(item, (sourcesPnj.get(item) ?? new Set()).add(c));
+  }
+  for (const l of lignes(sql, "gameobject_loot_template")) {
+    const item = n(l.item);
+    if (!requis.has(item) || n(l.mincountOrRef) < 0) continue;
+    for (const g of lootDecor.get(n(l.entry)) ?? []) sourcesDecor.set(item, (sourcesDecor.get(item) ?? new Set()).add(g));
+  }
+  for (const q of quetes.values()) {
+    for (const item of q.objetsRequis) {
+      // Au-delà de 25 sources, l'objet tombe un peu partout : la carte n'apprendrait rien.
+      const p = [...(sourcesPnj.get(item) ?? [])];
+      const d = [...(sourcesDecor.get(item) ?? [])];
+      if (p.length <= 25) q.ciblesPnj.push(...p);
+      if (d.length <= 25) q.ciblesDecor.push(...d);
+    }
+    q.ciblesPnj = [...new Set(q.ciblesPnj)];
+    q.ciblesDecor = [...new Set(q.ciblesDecor)];
   }
   console.log(`${quetes.size} quêtes de l'Azeroth d'origine présentes dans Forever (${quetesForever.size} dans ses fichiers).`);
 
@@ -215,8 +255,14 @@ lancer("base:quetes", async () => {
   const pourTous = [...quetes.values()].filter((q) => (!q.classes || (q.classes & TOUTES_CLASSES) === TOUTES_CLASSES) && q.niveau > 0 && !TYPES_HORS_PARCOURS.has(q.type) && !SAISONNIERES.has(q.zone));
   for (const q of pourTous) {
     for (const r of donneurs.get(q.id) ?? []) citer(r);
-    // Le guide de 1 à 60 place aussi sur la carte le PNJ à qui l'on rend la quête.
+    // Le guide de 1 à 60 place aussi sur la carte le PNJ à qui l'on rend la quête, et les cibles des objectifs.
     for (const r of receveurs.get(q.id) ?? []) citer(r);
+  }
+  for (const q of quetes.values()) {
+    if (!q.classes || nbClasses(q.classes) <= 2) {
+      q.ciblesPnj.forEach((id) => pnjCites.add(id));
+      q.ciblesDecor.forEach((id) => decorCites.add(id));
+    }
   }
 
   const posPnj = await positions("creature", "creature_spawn_entry", pnjCites);
@@ -286,9 +332,28 @@ lancer("base:quetes", async () => {
   type EtapeGuide = {
     id: number; t: string; nv: number; min: number; ra: number; cl: number; grp: 1 | 0; obj: string[];
     g: number; gn: string; r: number; rn: string; rl: string | null; av: number;
+    /** Cibles des objectifs dans la zone : points (en % de la carte) et centre du principal secteur. */
+    cib: { p: [number, number][]; c: [number, number] } | null;
   };
   const guide: Record<"alliance" | "horde", { lieu: string; niveaux: [number, number]; hubs: Hub[]; etapes: EtapeGuide[] }[]> = { alliance: [], horde: [] };
   const quetesDeClasse = [...quetes.values()].filter((q) => q.classes && nbClasses(q.classes) <= 2 && !SAISONNIERES.has(q.zone) && q.niveau > 0 && q.niveau < 60);
+  /** Où se trouvent les cibles d'une quête dans la zone : points fusionnés à 1,5 % près, et centre du secteur le plus dense. */
+  const ciblesDans = (q: Q, lieu: string): EtapeGuide["cib"] => {
+    const pts: [number, number][] = [];
+    const ajouterPts = (p?: Position) => {
+      for (const [u, v] of p?.z?.[lieu] ?? []) if (pts.length < 40 && !pts.some(([a, b]) => Math.abs(a - u) < 1.5 && Math.abs(b - v) < 1.5)) pts.push([u, v]);
+    };
+    q.ciblesPnj.forEach((id) => ajouterPts(posPnj.get(id)));
+    q.ciblesDecor.forEach((id) => ajouterPts(posDecor.get(id)));
+    if (!pts.length) return null;
+    const voisins = (a: [number, number]) => pts.filter((b) => Math.hypot(a[0] - b[0], a[1] - b[1]) < 8);
+    const coeur = voisins([...pts].sort((a, b) => voisins(b).length - voisins(a).length)[0]);
+    const c: [number, number] = [
+      Math.round((coeur.reduce((s, x) => s + x[0], 0) / coeur.length) * 10) / 10,
+      Math.round((coeur.reduce((s, x) => s + x[1], 0) / coeur.length) * 10) / 10,
+    ];
+    return { p: pts.slice(0, 16), c };
+  };
   const placer = (r: Ref | undefined) => {
     if (!r) return null;
     const p = r.t === "pnj" ? posPnj.get(r.id) : r.t === "decor" ? posDecor.get(r.id) : undefined;
@@ -321,36 +386,11 @@ lancer("base:quetes", async () => {
           grp: q.type === 1 ? 1 : 0, obj: q.objectifs,
           g: hubDe(ld, d.n), gn: d.n, r: hubDe(lr, rec?.n ?? ""), rn: rec?.n ?? "", rl: lr && lr.lieu !== z.lieu ? lr.lieu : null,
           av: q.prev > 0 ? q.prev : 0,
+          cib: ciblesDans(q, z.lieu),
         });
       }
-      // Ordre : par tranche de deux niveaux, on va au point de rassemblement le plus proche, on y prend tout ce qu'il
-      // propose, puis on passe au suivant ; on limite ainsi les allers-retours d'un bout à l'autre de la zone.
+      // L'ordre de passage est calculé par race et par classe (lib/guide.ts) : ici, simple tri par niveau.
       etapes.sort((a, b) => (a.min || a.nv) - (b.min || b.nv) || a.nv - b.nv || a.id - b.id);
-      const tranches = new Map<number, EtapeGuide[]>();
-      for (const e of etapes) {
-        const t = Math.floor((e.min || e.nv) / 2);
-        tranches.set(t, [...(tranches.get(t) ?? []), e]);
-      }
-      const ordonnees: EtapeGuide[] = [];
-      let ici: Hub | null = null;
-      for (const t of [...tranches.keys()].sort((a, b) => a - b)) {
-        const parHub = new Map<number, EtapeGuide[]>();
-        for (const e of tranches.get(t)!) parHub.set(e.g, [...(parHub.get(e.g) ?? []), e]);
-        while (parHub.size) {
-          const prochain: number = [...parHub.keys()].sort((a, b) => {
-            if (!ici || a < 0 || b < 0) return a - b;
-            return Math.hypot(hubs[a].x - ici.x, hubs[a].y - ici.y) - Math.hypot(hubs[b].x - ici.x, hubs[b].y - ici.y);
-          })[0];
-          const lot = parHub.get(prochain)!;
-          parHub.delete(prochain);
-          ordonnees.push(...lot);
-          // On repart du dernier receveur de ce point, sinon du point lui-même.
-          const dernier = lot[lot.length - 1];
-          const h = dernier.r >= 0 ? dernier.r : prochain;
-          if (h >= 0) ici = hubs[h];
-        }
-      }
-      etapes.splice(0, etapes.length, ...ordonnees);
       // Une quête passe toujours après celle qu'elle demande d'avoir faite.
       for (let tour = 0; tour < 5; tour++) {
         let change = false;

@@ -701,8 +701,20 @@ a:hover > .icone-jeu, a:hover .icone-jeu { border-color: var(--or-pale); box-sha
 .carte-guide { position: sticky; top: 90px; margin: 0; }
 .carte-guide figcaption { margin-top: 6px; font-size: 13px; }
 .trace-route { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.trace-route polyline { fill: none; stroke: #ffd100; stroke-width: 3; stroke-dasharray: 8 5; stroke-linejoin: round; filter: drop-shadow(0 0 2px #000); }
-.hub-carte { position: absolute; display: grid; place-items: center; width: 20px; height: 20px; margin: -10px 0 0 -10px; padding: 0; border-radius: 50%; background: #ffd100; border: 2px solid #2b1d14; color: #2b1d14; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5); }
+.fleche-route { stroke: #ffd100; stroke-width: 0.45; filter: drop-shadow(0 0 0.3px #000); }
+.fleche-faite { stroke: #3fae3f; opacity: 0.55; }
+.fleche-active { stroke: #fff; stroke-width: 0.7; }
+.pointe-or { fill: #ffd100; }
+.pointe-rouge { fill: #ff5a3c; }
+.fleches-quete line { stroke: #ff5a3c; stroke-width: 0.55; filter: drop-shadow(0 0 0.3px #000); }
+.fleches-quete line.retour { stroke-dasharray: 1.2 0.8; }
+.cible-carte { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: #ff5a3c; border: 2px solid #2b1d14; box-shadow: 0 0 6px rgba(255, 90, 60, 0.8); pointer-events: none; }
+.secteur-carte { position: absolute; display: grid; place-items: center; min-width: 20px; height: 20px; margin: -10px 0 0 -10px; padding: 0 4px; background: #ff9a3c; border: 2px solid #2b1d14; border-radius: 4px; color: #2b1d14; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; transform: rotate(45deg); }
+.secteur-carte span { transform: rotate(-45deg); }
+.legende-pnj, .legende-secteur { display: inline-block; width: 10px; height: 10px; border: 1px solid #2b1d14; vertical-align: -1px; }
+.legende-pnj { border-radius: 50%; background: #ffd100; }
+.legende-secteur { background: #ff9a3c; transform: rotate(45deg); }
+.hub-carte { position: absolute; display: grid; place-items: center; min-width: 20px; height: 20px; margin: -10px 0 0 -10px; padding: 0 4px; white-space: nowrap; padding: 0; border-radius: 50%; background: #ffd100; border: 2px solid #2b1d14; color: #2b1d14; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5); }
 .hub-fini { background: #3fae3f; color: #fff; }
 .hub-choisi { outline: 3px solid #fff; outline-offset: 1px; z-index: 2; }
 .quetes-guide { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 720px; overflow-y: auto; }
@@ -726,3 +738,22 @@ a:hover > .icone-jeu, a:hover .icone-jeu { border-color: var(--or-pale); box-sha
 .erreur-champ { color: #ff8d7a; font-size: 14px; }
 .succes { padding: 10px 14px; border: 1px solid #3fae3f; border-radius: 4px; background: rgba(63, 174, 63, 0.12); }
 @media (max-width: 900px) { .zone-corps { grid-template-columns: minmax(0, 1fr); } .carte-guide { position: static; } .quetes-guide { max-height: none; } }
+
+.arrets-guide { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-height: 760px; overflow-y: auto; }
+.arret-guide { padding: 8px 10px; border-radius: 6px; border: 1px solid transparent; }
+.arret-actif { border-color: var(--or); background: var(--surface-2); }
+.arret-titre { display: flex; align-items: center; gap: 8px; width: 100%; padding: 2px 0; background: none; border: 0; color: var(--texte-titre); font: inherit; text-align: left; cursor: pointer; }
+.pastille-secteur { background: #ff9a3c; border-radius: 3px; }
+.actions-arret { list-style: none; margin: 4px 0 0; padding: 0 0 0 28px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.ligne-action { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 8px; align-items: start; }
+label.ligne-action { cursor: pointer; }
+.ligne-action input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: #3fae3f; }
+.puce-action { display: grid; place-items: center; width: 18px; height: 18px; color: #ffd100; font-weight: 800; }
+.action-faire .puce-action { color: #ff9a3c; }
+.verbe { color: var(--texte-doux); }
+.action-rendre.faite strong, .action-prendre.faite strong, .action-faire.faite strong { text-decoration: line-through; color: var(--texte-doux); }
+.objectifs { color: #e2d3b3; }
+.voir-cibles { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; color: #ff9a3c; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.voir-cibles input { width: 16px; height: 16px; accent-color: #ff5a3c; }
+@media (max-width: 900px) { .arrets-guide { max-height: none; } }
+.hub-loin { position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: #ffd100; border: 1px solid #2b1d14; opacity: 0.6; pointer-events: none; }

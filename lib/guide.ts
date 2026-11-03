@@ -14,6 +14,8 @@ export interface Hub { x: number; y: number; n: string[] }
 export interface EtapeGuide {
   id: number; t: string; nv: number; min: number; ra: number; cl: number; grp: 0 | 1; obj: string[];
   g: number; gn: string; r: number; rn: string; rl: string | null; av: number;
+  /** Cibles des objectifs dans la zone (points en % de la carte) et centre du secteur principal. */
+  cib: { p: [number, number][]; c: [number, number] } | null;
 }
 export interface ZoneGuide { lieu: string; niveaux: [number, number]; hubs: Hub[]; etapes: EtapeGuide[] }
 
@@ -81,4 +83,114 @@ export function guidePour(race: RaceGuide, classe: string): ZoneGuide[] {
     .filter((z) => z.etapes.length >= 4)
     // La zone de départ ouvre toujours la route.
     .sort((a, b) => Number(b.lieu === race.depart) - Number(a.lieu === race.depart));
+}
+
+// --- Ordre de passage : on simule le joueur dans la zone.
+
+export type TypeAction = "prendre" | "faire" | "rendre";
+export interface Action { a: TypeAction; q: number }
+export interface Arret {
+  /** Position sur la carte (null : à faire hors de la zone, par exemple rendre une quête ailleurs). */
+  x: number | null;
+  y: number | null;
+  type: "pnj" | "cible" | "ailleurs";
+  hub: number;
+  actions: Action[];
+}
+
+const RAYON_CIBLES = 7;
+
+/**
+ * Ordre logique d'une zone, quête par quête :
+ *  - une quête se prend à son niveau (niveau minimal atteint) et seulement si sa quête préalable a été rendue ;
+ *  - elle se rend après avoir atteint ses cibles (monstres à vaincre, objets à ramasser), jamais avant ;
+ *  - à chaque point, on rend tout ce qui est fini puis on prend tout ce qui est disponible ;
+ *  - on va toujours au plus proche : cible d'une quête en cours, PNJ à qui rendre, PNJ qui propose une quête.
+ * Le niveau du joueur suit les quêtes rendues ; s'il manque des niveaux pour la suite, on l'avance au plus juste.
+ */
+export function planifier(z: { niveaux: [number, number]; hubs: Hub[]; etapes: EtapeGuide[] }): Arret[] {
+  const E = z.etapes;
+  const ids = new Map(E.map((e, i) => [e.id, i]));
+  const etat = E.map(() => "dispo" as "dispo" | "prise" | "finie" | "rendue");
+  const arrets: Arret[] = [];
+  let niveau = Math.max(1, z.niveaux[0]);
+  let ici: { x: number; y: number } | null = null;
+
+  const minimum = (e: EtapeGuide) => e.min || Math.max(1, e.nv - 2);
+  const prealableRendu = (e: EtapeGuide) => !e.av || !ids.has(e.av) || etat[ids.get(e.av)!] === "rendue";
+  const disponible = (i: number) => etat[i] === "dispo" && minimum(E[i]) <= niveau && prealableRendu(E[i]);
+  const distance = (p: { x: number; y: number }) => (ici ? Math.hypot(p.x - ici.x, p.y - ici.y) : 0);
+  // Une quête sans cible sur la carte (lettre à remettre, objectif hors de la zone) est faite dès qu'elle est prise.
+  const finieDesLaPrise = (e: EtapeGuide) => !e.cib;
+
+  const arreter = (a: Omit<Arret, "actions">, actions: Action[]) => {
+    if (!actions.length) return;
+    const dernier = arrets[arrets.length - 1];
+    if (dernier && dernier.type === a.type && dernier.hub === a.hub && dernier.x === a.x && dernier.y === a.y) dernier.actions.push(...actions);
+    else arrets.push({ ...a, actions });
+    if (a.x !== null && a.y !== null) ici = { x: a.x, y: a.y };
+  };
+
+  const rendre = (i: number, actions: Action[]) => {
+    etat[i] = "rendue";
+    niveau = Math.max(niveau, E[i].nv - 1);
+    actions.push({ a: "rendre", q: i });
+  };
+
+  /** Au point de rassemblement h : rendre ce qui est fini, prendre ce qui est disponible, tant qu'il y a du nouveau. */
+  const auPoint = (h: number) => {
+    const actions: Action[] = [];
+    for (let encore = true; encore; ) {
+      encore = false;
+      E.forEach((e, i) => {
+        if (etat[i] === "finie" && (e.r === h || (e.r < 0 && !e.rl && e.g === h))) { rendre(i, actions); encore = true; }
+      });
+      E.forEach((e, i) => {
+        if (e.g === h && disponible(i)) {
+          etat[i] = finieDesLaPrise(e) ? "finie" : "prise";
+          actions.push({ a: "prendre", q: i });
+          if (finieDesLaPrise(e) && e.obj.length) actions.push({ a: "faire", q: i });
+          encore = true;
+        }
+      });
+    }
+    arreter({ x: z.hubs[h].x, y: z.hubs[h].y, type: "pnj", hub: h }, actions);
+  };
+
+  for (let tour = 0; tour < 2000; tour++) {
+    // Les quêtes à rendre hors de la zone sont notées à part, dès que leurs objectifs sont faits.
+    const ailleurs: Action[] = [];
+    E.forEach((e, i) => { if (etat[i] === "finie" && e.r < 0 && e.rl) rendre(i, ailleurs); });
+    if (ailleurs.length) arreter({ x: null, y: null, type: "ailleurs", hub: -1 }, ailleurs);
+
+    type Cible = { x: number; y: number; faire: () => void };
+    const choix: Cible[] = [];
+    E.forEach((e, i) => {
+      if (etat[i] === "prise" && e.cib) {
+        const [x, y] = e.cib.c;
+        choix.push({
+          x, y,
+          faire: () => {
+            // Toutes les quêtes en cours dont les cibles sont dans le même secteur se font ensemble.
+            const actions: Action[] = [];
+            E.forEach((f, j) => {
+              if (etat[j] === "prise" && f.cib && Math.hypot(f.cib.c[0] - x, f.cib.c[1] - y) < RAYON_CIBLES) { etat[j] = "finie"; actions.push({ a: "faire", q: j }); }
+            });
+            arreter({ x, y, type: "cible", hub: -1 }, actions);
+          },
+        });
+      }
+      const h = etat[i] === "finie" && e.r >= 0 ? e.r : etat[i] === "finie" && e.r < 0 && !e.rl && e.g >= 0 ? e.g : disponible(i) && e.g >= 0 ? e.g : -1;
+      if (h >= 0) choix.push({ x: z.hubs[h].x, y: z.hubs[h].y, faire: () => auPoint(h) });
+    });
+    if (choix.length) {
+      choix.sort((a, b) => distance(a) - distance(b))[0].faire();
+      continue;
+    }
+    // Plus rien à faire au niveau actuel : on gagne le niveau qui manque pour la quête la plus accessible.
+    const restantes = E.map((e, i) => i).filter((i) => etat[i] === "dispo" && E[i].g >= 0 && prealableRendu(E[i]));
+    if (!restantes.length) break;
+    niveau = Math.min(...restantes.map((i) => minimum(E[i])));
+  }
+  return arrets;
 }

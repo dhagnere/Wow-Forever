@@ -9,7 +9,7 @@ import { GuideParcours, type ZoneVue } from "@/components/GuideParcours";
 import { ECRAN_CLASSE, fondBandeau } from "@/lib/ecrans";
 import { pageLieu, urlCarte } from "@/lib/cartes";
 import { nomLieu } from "@/lib/quetes";
-import { cleGuide, combinaisons, guidePour, raceGuide, versionGuide } from "@/lib/guide";
+import { cleGuide, combinaisons, guidePour, planifier, raceGuide, versionGuide } from "@/lib/guide";
 
 type Props = { params: Promise<{ race: string; classe: string }> };
 
@@ -39,7 +39,8 @@ export default async function GuideRaceClasse({ params }: Props) {
   if (!c) notFound();
   const zones: ZoneVue[] = guidePour(c.race, c.classe.slug).map((z) => ({
     lieu: z.lieu, nom: nomLieu(z.lieu), carte: urlCarte(z.lieu, 1000), lienCarte: pageLieu(z.lieu), niveaux: z.niveaux, hubs: z.hubs,
-    etapes: z.etapes.map(({ id, t, nv, min, cl, grp, obj, g, gn, r, rn, rl }) => ({ id, t, nv, min, cl, grp, obj, g, gn, r, rn, rl: rl ? nomLieu(rl) : null })),
+    etapes: z.etapes.map(({ id, t, nv, min, cl, grp, obj, g, gn, r, rn, rl, cib }) => ({ id, t, nv, min, cl, grp, obj, g, gn, r, rn, rl: rl ? nomLieu(rl) : null, cib })),
+    arrets: planifier(z),
   }));
   if (!zones.length) notFound();
   const titre = `${c.race.nom} ${c.classe.nom.toLowerCase()}`;
@@ -59,8 +60,8 @@ export default async function GuideRaceClasse({ params }: Props) {
             <Ariane etapes={[{ nom: "Guides", href: "/guides/parcours/" }, { nom: "Parcours de 1 à 60", href: "/guides/parcours/" }, { nom: titre }]} />
             <h1>Guide de 1 à 60 : {titre}</h1>
             <p className="chapo" style={{ margin: 0 }}>
-              {zones.length} zones, {zones.reduce((s, z) => s + z.etapes.length, 0)} quêtes dans l&apos;ordre, dont {nbClasse} quêtes de classe. Sur chaque carte,
-              les PNJ sont numérotés et le trait suit la route. Cochez au fur et à mesure.
+              {zones.length} zones, {zones.reduce((s, z) => s + z.etapes.length, 0)} quêtes, dont {nbClasse} quêtes de classe, dans un ordre logique :
+              prendre, faire les objectifs, rendre, puis la suite. Les flèches de chaque carte vont d&apos;une étape à la suivante.
             </p>
           </div>
         </div>
@@ -70,7 +71,8 @@ export default async function GuideRaceClasse({ params }: Props) {
           <p style={{ margin: 0 }}>
             <strong>À vérifier en jeu.</strong> Route établie à partir des quêtes de l&apos;Azeroth d&apos;origine encore présentes dans Forever : des PNJ ou des
             étapes ont pu changer, et les nouveautés de Forever n&apos;y figurent pas encore. Prenez les quêtes au même endroit avant de partir, faites
-            celles marquées « Groupe » à plusieurs, et passez une zone si elle devient trop facile.
+            celles marquées « Groupe » à plusieurs, et passez une zone si elle devient trop facile. La case « Monstres et objets sur la carte » montre où
+            trouver les cibles d&apos;une quête, avec une flèche du donneur vers les cibles, puis vers le PNJ à qui la rendre.
           </p>
         </div>
         <GuideParcours cle={cleGuide(c.race, c.classe.slug)} titre={`Guide de 1 à 60 : ${titre}`} zones={zones} retour={chemin} />

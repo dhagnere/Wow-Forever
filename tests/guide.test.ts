@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { combinaisons, guidePour, raceGuide, cleGuide, libelleGuide, BITS_CLASSES } from "@/lib/guide";
-import { routeDesHubs } from "@/components/GuideParcours";
+import { combinaisons, guidePour, planifier, raceGuide, cleGuide, libelleGuide, BITS_CLASSES } from "@/lib/guide";
+import { segment } from "@/components/GuideParcours";
 import { carte } from "@/lib/cartes";
 import { cleGuideValide } from "@/modules/veille/joueurs/validation";
 
@@ -52,7 +52,39 @@ describe("guide de 1 à 60", () => {
     }
   });
 
-  it("trace la route sans repasser deux fois de suite au même point", () => {
-    expect(routeDesHubs([{ g: 0, r: 0 }, { g: 0, r: 1 }, { g: -1, r: 2 }, { g: 2, r: 2 }, { g: 0, r: 0 }])).toEqual([0, 1, 2, 0]);
+  it("suit un ordre logique pour chaque race et chaque classe : prendre, faire, rendre, puis la suite", () => {
+    for (const { race, classe } of combinaisons()) {
+      for (const z of guidePour(race, classe.slug)) {
+        const arrets = planifier(z);
+        const ordre = new Map<string, number>();
+        let rang = 0;
+        for (const a of arrets) for (const x of a.actions) ordre.set(`${x.a}:${z.etapes[x.q].id}`, rang++);
+        const ids = new Set(z.etapes.map((e) => e.id));
+        for (const e of z.etapes) {
+          const prise = ordre.get(`prendre:${e.id}`);
+          const rendue = ordre.get(`rendre:${e.id}`);
+          // Chaque quête est prise puis rendue, une fois, dans cet ordre.
+          expect(prise, `${z.lieu} « ${e.t} » prise`).toBeDefined();
+          expect(rendue, `${z.lieu} « ${e.t} » rendue`).toBeDefined();
+          expect(rendue!).toBeGreaterThan(prise!);
+          // Les objectifs se font entre la prise et le rendu.
+          const faite = ordre.get(`faire:${e.id}`);
+          if (faite !== undefined) expect(faite > prise! && faite < rendue!).toBe(true);
+          if (e.cib) expect(faite, `${z.lieu} « ${e.t} » objectifs`).toBeDefined();
+          // Une suite ne se prend qu'après avoir rendu la quête qui l'ouvre.
+          if (e.av && ids.has(e.av)) expect(prise!).toBeGreaterThan(ordre.get(`rendre:${e.av}`)!);
+        }
+        // Une quête n'est rendue qu'une seule fois.
+        const rendus = arrets.flatMap((a) => a.actions.filter((x) => x.a === "rendre").map((x) => x.q));
+        expect(new Set(rendus).size).toBe(rendus.length);
+      }
+    }
+  });
+
+  it("raccourcit les flèches pour laisser voir la pointe, et n'en trace pas entre deux points confondus", () => {
+    const s = segment({ x: 10, y: 10 }, { x: 50, y: 10 })!;
+    expect(s[0]).toBeCloseTo(12.2);
+    expect(s[2]).toBeCloseTo(47.8);
+    expect(segment({ x: 10, y: 10 }, { x: 11, y: 10 })).toBeNull();
   });
 });
