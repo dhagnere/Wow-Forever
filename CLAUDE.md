@@ -80,6 +80,7 @@ npm run veille:liens     # remplace les liens Google News des sources par l'adre
 npm run base:importer    # base d'objets depuis wago.tools, caractéristiques comprises (si nouvelle version du jeu ; --forcer, --icones)
 npm run base:butin -- <dump CMaNGOS> <db_world AzerothCore>  # « où le trouver » → modules/veille/objets/donnees/butin.json.gz (fichier versionné)
 npm run base:quetes -- <dump CMaNGOS> <db_world AzerothCore> # quêtes de classe et parcours de 1 à 60 → content/quetes-jeu.json (fichier versionné)
+npm run base:quetes -- <dump CMaNGOS> <db_world AzerothCore> --en  # même chose en anglais → content/quetes-jeu.en.json, content/guide-jeu.en.json
 npm run visuels:generer  # PNG de l'enseigne, de l'icône du site et de l'avatar de Jobwow, depuis visuels/
 npm run cartes:jeu       # cartes du monde (continents, zones, Zéphras) assemblées depuis les tuiles du jeu → public/images/jeu/cartes/
 npm run ecrans:jeu       # écrans de chargement du jeu (config/ecrans.ts) → public/images/jeu/ecrans/, en 1600 et 800 pixels

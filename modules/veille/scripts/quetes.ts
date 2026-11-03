@@ -15,6 +15,8 @@ import { VILLES, lignes, lireCsv, lireDump, n, preparerPositions, type Position 
  * les quêtes encore présentes dans les fichiers de Forever (table QuestV2) sont gardées. Aucun texte de quête n'est
  * repris : les objectifs sont rédigés à partir des données (objets à rapporter, créatures à vaincre).
  * Résultat : content/quetes-jeu.json, lu par les pages /guides/quetes-de-classe/ et /guides/parcours/.
+ * Avec --en : version anglaise (titres et noms d'origine de CMaNGOS, objets et sorts en anglais, objectifs rédigés en
+ * anglais), écrite dans content/quetes-jeu.en.json et content/guide-jeu.en.json.
  */
 
 const CLASSES: [string, number][] = [
@@ -24,6 +26,9 @@ const TOUTES_CLASSES = 1503;
 const RACES: [string, number][] = [
   ["Humain", 1], ["Orc", 2], ["Nain", 4], ["Elfe de la nuit", 8], ["Mort-vivant", 16], ["Tauren", 32], ["Gnome", 64], ["Troll", 128],
 ];
+const RACES_EN: Record<string, string> = {
+  Humain: "Human", Orc: "Orc", Nain: "Dwarf", "Elfe de la nuit": "Night Elf", "Mort-vivant": "Undead", Tauren: "Tauren", Gnome: "Gnome", Troll: "Troll",
+};
 const ALLIANCE = 1 | 4 | 8 | 64;
 const HORDE = 2 | 16 | 32 | 128;
 /** Faction du jeu « Alliance » et « Horde » (FactionTemplate.Enemies). */
@@ -44,14 +49,20 @@ const TYPES_HORS_PARCOURS = new Set([41, 62, 81]);
 type Ref = { t: "pnj" | "decor" | "objet"; id: number; n: string; b?: boolean };
 
 lancer("base:quetes", async () => {
-  const [fichierDump, dossierLocales] = process.argv.slice(2);
+  const EN = process.argv.includes("--en");
+  const [fichierDump, dossierLocales] = process.argv.slice(2).filter((a) => !a.startsWith("--"));
+  const suffixe = EN ? ".en" : "";
+  /** Objectifs rédigés à partir des données, dans la langue voulue. */
+  const V = EN
+    ? { rapporter: "Bring", vaincre: "Kill", activer: "Use", utiliser: "Use", sur: "on", sortDemande: "the required spell", objet: "item" }
+    : { rapporter: "Rapporter", vaincre: "Vaincre", activer: "Activer", utiliser: "Utiliser", sur: "sur", sortDemande: "le sort demandé", objet: "objet" };
   if (!fichierDump || !dossierLocales) throw new Error("Usage : npm run base:quetes -- <dump CMaNGOS> <dossier db_world AzerothCore>");
   const sql = await lireDump(fichierDump);
   const locale = async (f: string) => (await import("node:fs/promises")).readFile(path.join(dossierLocales, f), "utf8");
   const version = await derniereVersion();
 
   const [questV2, itemSparse, spellName, spellEffect, factionTemplate] = await Promise.all(
-    ["QuestV2", "ItemSparse", "SpellName", "SpellEffect", "FactionTemplate"].map((t) => tableCsv(t, version)),
+    ["QuestV2", "ItemSparse", "SpellName", "SpellEffect", "FactionTemplate"].map((t) => tableCsv(t, version, EN ? "enUS" : "frFR")),
   );
   const quetesForever = new Set(lireCsv(questV2).map((l) => Number(l.ID)));
   const sparse = lireCsv(itemSparse);
@@ -76,9 +87,12 @@ lancer("base:quetes", async () => {
   const nomsCreatures = new Map<number, string>();
   const nomsDecor = new Map<number, string>();
   const titres = new Map<number, string>();
-  for (const l of lignes(await locale("creature_template_locale.sql"), "creature_template_locale")) if (l.locale === "frFR" && l.Name) nomsCreatures.set(n(l.entry), String(l.Name));
-  for (const l of lignes(await locale("gameobject_template_locale.sql"), "gameobject_template_locale")) if (l.locale === "frFR" && l.name) nomsDecor.set(n(l.entry), String(l.name));
-  for (const l of lignes(await locale("quest_template_locale.sql"), "quest_template_locale")) if (l.locale === "frFR" && l.Title) titres.set(n(l.ID), String(l.Title));
+  // En anglais, les noms d'origine de CMaNGOS suffisent ; en français, ceux d'AzerothCore.
+  if (!EN) {
+    for (const l of lignes(await locale("creature_template_locale.sql"), "creature_template_locale")) if (l.locale === "frFR" && l.Name) nomsCreatures.set(n(l.entry), String(l.Name));
+    for (const l of lignes(await locale("gameobject_template_locale.sql"), "gameobject_template_locale")) if (l.locale === "frFR" && l.name) nomsDecor.set(n(l.entry), String(l.name));
+    for (const l of lignes(await locale("quest_template_locale.sql"), "quest_template_locale")) if (l.locale === "frFR" && l.Title) titres.set(n(l.ID), String(l.Title));
+  }
 
   const creatures = new Map<number, { nom: string; faction: number; loot: number }>();
   for (const l of lignes(sql, "creature_template")) creatures.set(n(l.Entry), { nom: nomsCreatures.get(n(l.Entry)) ?? String(l.Name ?? ""), faction: n(l.Faction), loot: n(l.LootId) });
@@ -126,7 +140,7 @@ lancer("base:quetes", async () => {
       const item = n(l[`ReqItemId${k}`]);
       const nb = n(l[`ReqItemCount${k}`]);
       if (item && nb) objetsRequis.push(item);
-      if (item && nb) objectifs.push(`Rapporter ${nb > 1 ? `${nb} × ` : ""}${nomsObjets.get(item) ?? `objet ${item}`}`);
+      if (item && nb) objectifs.push(`${V.rapporter} ${nb > 1 ? `${nb} × ` : ""}${nomsObjets.get(item) ?? `${V.objet} ${item}`}`);
     }
     for (let k = 1; k <= 4; k++) {
       const cible = n(l[`ReqCreatureOrGOId${k}`]);
@@ -136,9 +150,9 @@ lancer("base:quetes", async () => {
       const nom = cible > 0 ? creatures.get(cible)?.nom : decor.get(-cible);
       if (!nom) continue;
       if (cible > 0) ciblesPnj.push(cible); else ciblesDecor.push(-cible);
-      if (sort) objectifs.push(`Utiliser ${nomsSorts.get(sort) ?? "le sort demandé"} sur ${nb > 1 ? `${nb} × ` : ""}${nom}`);
-      else if (cible > 0) objectifs.push(`Vaincre ${nb > 1 ? `${nb} × ` : ""}${nom}`);
-      else objectifs.push(`Activer ${nb > 1 ? `${nb} × ` : ""}${nom}`);
+      if (sort) objectifs.push(`${V.utiliser} ${nomsSorts.get(sort) ?? V.sortDemande} ${V.sur} ${nb > 1 ? `${nb} × ` : ""}${nom}`);
+      else if (cible > 0) objectifs.push(`${V.vaincre} ${nb > 1 ? `${nb} × ` : ""}${nom}`);
+      else objectifs.push(`${V.activer} ${nb > 1 ? `${nb} × ` : ""}${nom}`);
     }
     const objets: Q["objets"] = [];
     for (let k = 1; k <= 6; k++) {
@@ -200,7 +214,7 @@ lancer("base:quetes", async () => {
     if (!m || m === (ALLIANCE | HORDE)) return null;
     if (m === ALLIANCE) return ["Alliance"];
     if (m === HORDE) return ["Horde"];
-    return RACES.filter(([, b]) => m & b).map(([r]) => r);
+    return RACES.filter(([, b]) => m & b).map(([r]) => (EN ? RACES_EN[r] ?? r : r));
   };
   const classes: Record<string, { titre: string; niveaux: [number, number]; races: string[] | null; quetes: number[] }[]> = {};
   const gardees = new Set<number>();
@@ -325,7 +339,7 @@ lancer("base:quetes", async () => {
     }];
   }));
   const donnees = { version: { jeu: version, source: "CMaNGOS classic-db (GPL v3), titres et noms français AzerothCore (GPL v2)" }, classes, quetes: fiches, parcours };
-  await writeFile(path.join(process.cwd(), "content/quetes-jeu.json"), JSON.stringify(donnees));
+  await writeFile(path.join(process.cwd(), `content/quetes-jeu${suffixe}.json`), JSON.stringify(donnees));
 
   // --- Guide de 1 à 60 : pour chaque zone de la route, les quêtes dans l'ordre et les points de rassemblement.
   type Hub = { x: number; y: number; n: string[] };
@@ -403,7 +417,7 @@ lancer("base:quetes", async () => {
       if (etapes.length >= 5) guide[camp].push({ lieu: z.lieu, niveaux: z.niveaux, hubs, etapes });
     }
   }
-  await writeFile(path.join(process.cwd(), "content/guide-jeu.json"), JSON.stringify({ version: donnees.version, guide }));
+  await writeFile(path.join(process.cwd(), `content/guide-jeu${suffixe}.json`), JSON.stringify({ version: donnees.version, guide }));
   console.log(`Guide 1-60 : ${(["alliance", "horde"] as const).map((c) => `${c} ${guide[c].length} zones, ${guide[c].reduce((s, z) => s + z.etapes.length, 0)} quêtes`).join(" ; ")}.`);
   console.log(`Quêtes de classe : ${Object.entries(classes).map(([c, ch]) => `${c} ${ch.reduce((s, x) => s + x.quetes.length, 0)} (${ch.length} chaînes)`).join(", ")}.`);
   console.log(`Parcours : Alliance ${parcours.alliance.length} zones, Horde ${parcours.horde.length} zones.`);
