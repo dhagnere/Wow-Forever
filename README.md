@@ -36,16 +36,16 @@ Score d'un sujet : poids des sites qui en parlent (un site compte une fois, mêm
 3. Relier le dépôt GitHub à l'application. Chaque envoi déclenche un déploiement ; la base est créée ou mise à jour par la commande `postdeploy` du `Procfile`.
 4. Vérifier les sources :
    ```bash
-   scalingo --app azeroth-forever run npm run veille:sources
+   scalingo --app wowforever run npm run veille:sources
    ```
    Retirer ou corriger dans `config/sources.ts` les flux en échec.
 5. Voir le classement du jour, sans coût :
    ```bash
-   scalingo --app azeroth-forever run npm run veille:essai
+   scalingo --app wowforever run npm run veille:essai
    ```
 6. Premier passage complet, puis relecture dans `/admin/veille` :
    ```bash
-   scalingo --app azeroth-forever run npm run veille:quotidien
+   scalingo --app wowforever run npm run veille:quotidien
    ```
    Pour transformer en brouillons les sujets d'une revue déjà faite (par `veille:essai`), sans refaire la collecte : cocher les sujets dans `/admin/veille/revue` et cliquer sur « Rédiger les sujets cochés », ou lancer `npm run veille:revue`.
 7. Créer l'application Meta, obtenir un jeton de Page longue durée avec la permission `pages_manage_posts`, saisir `FACEBOOK_PAGE_ID` et `FACEBOOK_PAGE_TOKEN`. Le relais horaire s'active seul.
@@ -54,7 +54,7 @@ Score d'un sujet : poids des sites qui en parlent (un site compte une fois, mêm
 
 10. Base d'objets : premier import, icônes comprises (5 minutes environ), puis la tâche quotidienne suit les nouvelles versions du jeu :
    ```bash
-   scalingo --app azeroth-forever run npm run base:importer -- --icones
+   scalingo --app wowforever run npm run base:importer -- --icones
    ```
 
 11. Lettre de la Taverne (Brevo) : créer une liste, un modèle de confirmation « double opt-in », puis saisir `BREVO_API_KEY`, `BREVO_LISTE_ID` et `BREVO_MODELE_DOI`. Dans les campagnes, activer le suivi Google Analytics de Brevo avec `utm_source=lettre` : les visites venues de la Lettre apparaissent alors dans les statistiques.
