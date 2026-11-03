@@ -15,6 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/base-de-donnees/", "/base-de-donnees/objets/", "/cartes/", ...tousLesLieux().map((l) => `/cartes/${l}/`), "/calendrier/", "/lettre/", "/communaute/", "/guildes/", "/guildes/inscrire/", "/soutenir/", "/contact/", "/confidentialite/", "/carnet/", "/a-propos/", "/plan-du-site/", "/mentions-legales/",
     ...RUBRIQUES.map((r) => `/rubriques/${r.slug}/`),
     ...CLASSES.map((c) => `/classes/${c.slug}/`),
+    ...CLASSES.map((c) => `/classes/${c.slug}/talents/`),
     ...ZONES.map((z) => `/zones/${z.slug}/`),
     ...DONJONS.map((d) => `/donjons/${d.slug}/`),
   ].map((chemin) => ({ url: `${SITE.url}${chemin}` }));

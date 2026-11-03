@@ -17,7 +17,7 @@ const n = (v: string | undefined) => (Number.isFinite(Number(v)) ? Number(v) : 0
 export const TABLES_SORTS = [
   "SkillLineAbility", "SpellName", "Spell", "SpellLevels", "SpellMisc", "SpellEffect", "SpellDuration", "SpellCastTimes",
   "SpellRange", "SpellRadius", "SpellCooldowns", "SpellPower", "SpellAuraOptions", "SpellTargetRestrictions",
-  "SpellDescriptionVariables", "SpellXDescriptionVariables", "TalentTab", "Talent", "CreatureFamily",
+  "SpellDescriptionVariables", "SpellXDescriptionVariables", "TalentTab", "Talent", "CreatureFamily", "PetLoyalty",
 ] as const;
 export type TablesSorts = Record<(typeof TABLES_SORTS)[number], string>;
 
@@ -66,6 +66,8 @@ export interface Talent {
   premier: string;
   dernier: string;
   prerequis: string | null;
+  /** Talent à remplir entièrement avant celui-ci (identifiant dans le même arbre). */
+  prerequisId: number | null;
   /** Le talent donne un sort à lancer (et pas un simple bonus permanent). */
   actif: boolean;
 }
@@ -94,6 +96,8 @@ export interface Familiers {
   mode: "partage" | "groupe";
   familles: FamilleFamilier[];
   techniques: TechniqueFamilier[];
+  /** Niveaux de loyauté du familier, du premier au dernier (chasseur). */
+  loyaute?: string[];
 }
 
 /** Lignes du jeu : techniques apprises par le dressage du chasseur, et techniques communes à toutes les bêtes. */
@@ -106,6 +110,9 @@ export interface BilanSorts {
   icones: number[];
   incompletes: number;
 }
+
+/** Nom affiché d'un talent dont les fichiers ne donnent ni le nom ni l'effet. */
+export const TALENT_NON_PUBLIE = "[Talent pas encore publié]";
 
 const PASSIF = 0x40;
 const CACHE = 0x80;
@@ -306,21 +313,25 @@ export function convertirSorts(csv: TablesSorts): BilanSorts {
 
       // Talents de l'arbre.
       const lignes = talentsParArbre.get(spec.arbre) ?? [];
-      const nomTalent = new Map(lignes.map((t) => [n(t.ID), noms.get(n(t.SpellRank_0)) ?? ""]));
+      const nomTalent = new Map(lignes.map((t) => [n(t.ID), noms.get(n(t.SpellRank_0)) || TALENT_NON_PUBLIE]));
       const talents: Talent[] = lignes.flatMap((t) => {
         const ids = Array.from({ length: 9 }, (_, k) => n(t[`SpellRank_${k}`])).filter(Boolean);
-        if (!ids.length || !noms.get(ids[0])) return [];
+        if (!ids.length) return [];
+        // Talent présent dans l'arbre mais dont le sort n'est pas encore publié (fichier chiffré) : gardé, pour que
+        // l'arbre et les prérequis restent justes.
+        const nom = noms.get(ids[0]) || TALENT_NON_PUBLIE;
         const m = divers.get(ids[0]);
         const icone = n(m?.SpellIconFileDataID);
         if (icone) icones.add(icone);
         const palier = n(t.TierID);
         const pre = n(t.PrereqTalent_0);
         return [{
-          id: n(t.ID), nom: noms.get(ids[0])!, icone, palier, colonne: n(t.ColumnIndex), rangs: ids.length,
+          id: n(t.ID), nom, icone, palier, colonne: n(t.ColumnIndex), rangs: ids.length,
           niveau: 10 + palier * 5,
           premier: description(ids[0]),
           dernier: ids.length > 1 ? description(ids[ids.length - 1]) : "",
           prerequis: pre ? nomTalent.get(pre) || null : null,
+          prerequisId: pre || null,
           actif: !(n(m?.Attributes_0) & PASSIF),
         }];
       }).sort((a, b) => a.palier - b.palier || a.colonne - b.colonne);
@@ -369,6 +380,11 @@ export function convertirSorts(csv: TablesSorts): BilanSorts {
       mode: "partage",
       familles: betes.map((b) => ({ nom: b.nom, icone: b.icone, techniques: b.sorts.map((x) => x.nom) })),
       techniques: techniquesBetes,
+      loyaute: lire(csv.PetLoyalty)
+        .sort((a, b) => n(a.ID) - n(b.ID))
+        .map((l) => (l.Name_lang ?? "").replace(/^\([^)]*\)\s*/, "").trim())
+        // Les deux dernières lignes sont techniques (« Cap de loyauté », « Inutilisé »).
+        .filter((nom) => nom && !/^(cap de loyauté|inutilisé)$/i.test(nom)),
     },
     demoniste: {
       mode: "groupe",

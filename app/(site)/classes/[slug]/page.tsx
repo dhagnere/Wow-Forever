@@ -50,6 +50,7 @@ export default async function PageClasse({ params }: Props) {
             <div className="actions-bandeau">
               {sorts ? <a href="#sorts" className="btn btn-or" data-cta="sorts-classe">Sorts et talents</a> : null}
               <Link href="/guides/liste-des-donjons/" className={sorts ? "btn btn-contour" : "btn btn-or"} data-cta="donjons-classe">Voir les donjons à mon niveau</Link>
+              {sorts ? <Link href={`/classes/${c.slug}/talents/`} className="btn btn-contour" data-cta="calculateur-classe">Calculateur de talents</Link> : null}
               <Link href="/lettre/" className="btn btn-contour" data-cta="lettre-classe">Recevoir la Lettre</Link>
             </div>
           </div>
@@ -97,7 +98,7 @@ export default async function PageClasse({ params }: Props) {
               </ol>
             </section>
 
-            {sorts ? <SortsClasse nomClasse={c.nom} version={sorts.version} specialisations={sorts.specialisations} /> : null}
+            {sorts ? <SortsClasse slugClasse={c.slug} nomClasse={c.nom} version={sorts.version} specialisations={sorts.specialisations} /> : null}
 
             {familiers ? <FamiliersClasse classe={c.nom} familiers={familiers} /> : null}
 

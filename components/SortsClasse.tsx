@@ -97,7 +97,7 @@ function Talents({ talents }: { talents: Talent[] }) {
   );
 }
 
-function Panneau({ spe }: { spe: Specialisation }) {
+function Panneau({ spe, slugClasse }: { spe: Specialisation; slugClasse: string }) {
   const parTalent = spe.sorts.filter((s) => s.talent).length;
   return (
     <>
@@ -112,6 +112,9 @@ function Panneau({ spe }: { spe: Specialisation }) {
       {spe.talents.length ? (
         <>
           <h4 className="sous-titre-spe">Arbre de talents <span className="doux">({spe.talents.length} talents)</span></h4>
+          <p style={{ margin: "0 0 14px" }}>
+            <Link href={`/classes/${slugClasse}/talents/`} className="btn btn-contour" data-cta="calculateur-spe">Composer mon build dans le calculateur</Link>
+          </p>
           <Talents talents={spe.talents} />
         </>
       ) : null}
@@ -119,15 +122,16 @@ function Panneau({ spe }: { spe: Specialisation }) {
   );
 }
 
-export function SortsClasse({ nomClasse, version, specialisations }: { nomClasse: string; version: string; specialisations: Specialisation[] }) {
+export function SortsClasse({ slugClasse, nomClasse, version, specialisations }: { slugClasse: string; nomClasse: string; version: string; specialisations: Specialisation[] }) {
   return (
     <section aria-labelledby="t-sorts" id="sorts">
       <h2 id="t-sorts" className="section-titre" style={{ fontSize: 26 }}>Sorts et talents par spécialisation</h2>
       <p className="doux" style={{ marginTop: 0 }}>
         Chaque onglet regroupe les sorts appris chez le maître des {nomClasse.toLowerCase()}s, par école, puis l&apos;arbre de talents de la spécialisation.
+        Pour répartir vos points, ouvrez le <Link href={`/classes/${slugClasse}/talents/`}>calculateur de talents</Link>.
       </p>
       <OngletsSpe onglets={specialisations.map((s) => ({ slug: s.slug, nom: s.nom, icone: s.icone ? iconeSort(s.icone) : "" }))}>
-        {specialisations.map((s) => <Panneau key={s.slug} spe={s} />)}
+        {specialisations.map((s) => <Panneau key={s.slug} spe={s} slugClasse={slugClasse} />)}
       </OngletsSpe>
       <p className="doux note-donnees">
         Données lues dans les fichiers du jeu grâce à <a href="https://wago.tools" rel="noopener noreferrer">wago.tools</a>, version {version}.

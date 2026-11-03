@@ -609,3 +609,41 @@ a:hover > .icone-jeu, a:hover .icone-jeu { border-color: var(--or-pale); box-sha
 .famille .icone-sort { width: 44px; height: 44px; }
 .sort-familles { color: var(--or-clair); }
 .demon + .demon { margin-top: 28px; }
+.loyaute { margin: 14px 0 0; font-size: 15px; }
+
+/* Calculateur de talents */
+.calc-bilan { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 24px; margin-bottom: 20px; }
+.calc-bilan p { margin: 0; }
+.calc-bilan strong { font-size: 20px; color: var(--texte-titre); font-variant-numeric: tabular-nums; }
+.calc-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-left: auto; }
+.calc-detail .calc-actions { margin: 12px 0 0; }
+.calc-actions .btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+.calc-arbres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.calc-arbre { background: linear-gradient(180deg, #23180f, #1a120c); border: 1px solid var(--bordure); border-radius: 6px; padding: 12px; }
+.calc-arbre header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.calc-arbre h2 { margin: 0; font-size: 18px; flex: 1; }
+.calc-compte { font-size: 20px; font-weight: 700; color: var(--or-clair); font-variant-numeric: tabular-nums; }
+.calc-raz { background: none; border: 0; color: var(--texte-doux); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; padding: 4px; }
+.calc-grille { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.calc-fleches { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.calc-fleches line { stroke: #6b5440; stroke-width: 3; }
+.calc-fleches line.fleche-active { stroke: var(--or); }
+.calc-talent { position: relative; justify-self: center; width: 52px; height: 52px; margin: 8px 0; padding: 0; background: #000; border: 2px solid #4b4b4b; border-radius: 8px; cursor: pointer; }
+.calc-talent img { display: block; width: 100%; height: 100%; border-radius: 6px; }
+.calc-ferme img { filter: grayscale(1) brightness(0.55); }
+.calc-ouvert { border-color: #3fae3f; }
+.calc-entame { border-color: #3fae3f; box-shadow: 0 0 8px rgba(63, 174, 63, 0.5); }
+.calc-max { border-color: #f1c24b; box-shadow: 0 0 10px rgba(241, 194, 75, 0.55); }
+.calc-choisi { outline: 2px solid #fff; outline-offset: 2px; }
+.calc-talent:focus-visible { outline: 3px solid var(--or-pale, #ffe08a); outline-offset: 2px; }
+.calc-rang { position: absolute; right: -8px; bottom: -8px; min-width: 30px; padding: 0 4px; background: #0d0905; border: 1px solid #4b4b4b; border-radius: 4px; font-size: 12px; font-weight: 700; line-height: 18px; color: #9d9d9d; font-variant-numeric: tabular-nums; }
+.calc-ouvert .calc-rang, .calc-entame .calc-rang { color: #5fd35f; border-color: #3fae3f; }
+.calc-max .calc-rang { color: #f1c24b; border-color: #f1c24b; }
+.calc-detail { position: sticky; bottom: 0; z-index: 5; margin-top: 16px; padding: 14px 16px; background: rgba(32, 22, 15, 0.97); border: 1px solid var(--bordure-vive); border-radius: 6px; box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.45); }
+.calc-detail-titre { display: flex; gap: 12px; align-items: center; margin-bottom: 6px; }
+.calc-detail h3 { margin: 0; font-size: 18px; }
+.calc-detail .sort-meta { margin: 2px 0 0; }
+.calc-motif { margin: 8px 0 0; font-size: 14px; }
+@media (max-width: 980px) { .calc-arbres { grid-template-columns: minmax(0, 1fr); max-width: 420px; margin: 0 auto; } }
+@media (max-width: 600px) { .calc-detail .sort-desc { max-height: 6.5em; overflow-y: auto; } .calc-actions { margin-left: 0; } }
+.calc-sans-icone { display: grid; place-items: center; width: 100%; height: 100%; color: var(--texte-doux); font-weight: 700; font-size: 20px; }

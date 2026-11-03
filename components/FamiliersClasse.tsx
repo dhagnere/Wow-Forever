@@ -41,6 +41,13 @@ export function FamiliersClasse({ classe, familiers }: { classe: string; familie
               </li>
             ))}
           </ul>
+          {familiers.loyaute?.length ? (
+            <p className="loyaute">
+              <strong>Loyauté du familier :</strong>{" "}
+              {familiers.loyaute.map((l, i) => <span key={l}>{i ? <span className="doux" aria-hidden="true"> → </span> : null}{l}</span>)}
+              <span className="doux"> ({familiers.loyaute.length} niveaux, lus dans les fichiers du jeu)</span>
+            </p>
+          ) : null}
           <h3 className="sous-titre-spe">Toutes les techniques <span className="doux">({familiers.techniques.length})</span></h3>
           <ul className="sorts">
             {familiers.techniques.map((t) => (
