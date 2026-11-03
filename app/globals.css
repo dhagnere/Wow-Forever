@@ -792,3 +792,8 @@ label.ligne-action { cursor: pointer; }
 .note-zone { margin: 0; padding: 12px 14px; border: 1px dashed var(--or); border-radius: 6px; background: rgba(224, 162, 59, 0.07); font-size: 15px; }
 .choix-pastille { gap: 6px; padding: 4px 10px 4px 4px; min-height: 34px; border: 1px solid var(--bordure-vive); border-radius: 18px; font-size: 14px; text-decoration: none; color: var(--texte); }
 .choix-pastille:hover, .choix-pastille:focus-visible { border-color: var(--or); background: var(--surface-2); }
+
+/* Version anglaise : lien de langue et proposition aux navigateurs non francophones */
+.outils-entete a.choix-langue { min-width: 32px; min-height: 32px; justify-content: center; padding: 0 6px; border: 1px solid rgba(224, 162, 59, 0.45); border-radius: 4px; font-size: 12px; letter-spacing: 0.08em; }
+.outils-entete a.choix-langue:hover { border-color: var(--or-clair); }
+.suggestion-langue { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 14px; padding: 10px 16px; background: #141b46; border-bottom: 1px solid rgba(224, 162, 59, 0.35); font-size: 14px; }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { trouverClasse } from "@/content/classes";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { IconeClasse } from "@/components/IconeClasse";
 import { IconeRace } from "@/components/IconeRace";
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `Guide de 1 à 60 : ${c.race.nom} ${c.classe.nom.toLowerCase()} sur WoW Forever`,
     description: `La route de 1 à 60 du ${c.race.nom.toLowerCase()} ${c.classe.nom.toLowerCase()} sur WoW Forever : zones dans l'ordre, chaque quête avec ses PNJ sur la carte, quêtes de classe comprises, et progression à cocher.`,
-    alternates: { canonical: `/guides/parcours/${c.race.slug}/${c.classe.slug}/` },
+    alternates: { canonical: `/guides/parcours/${c.race.slug}/${c.classe.slug}/`, languages: languesDe(`/guides/parcours/${c.race.slug}/${c.classe.slug}/`) },
   };
 }
 

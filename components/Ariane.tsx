@@ -7,10 +7,10 @@ export interface Etape {
   href?: string;
 }
 
-export function Ariane({ etapes }: { etapes: Etape[] }) {
-  const toutes = [{ nom: "Accueil", href: "/" }, ...etapes];
+export function Ariane({ etapes, langue = "fr" }: { etapes: Etape[]; langue?: "fr" | "en" }) {
+  const toutes = [langue === "en" ? { nom: "Home", href: "/en/" } : { nom: "Accueil", href: "/" }, ...etapes];
   return (
-    <nav className="ariane" aria-label="Fil d'Ariane">
+    <nav className="ariane" aria-label={langue === "en" ? "Breadcrumb" : "Fil d'Ariane"}>
       <ol>
         {toutes.map((e, i) => (
           <li key={i}>{e.href && i < toutes.length - 1 ? <Link href={e.href}>{e.nom}</Link> : <span aria-current="page">{e.nom}</span>}</li>

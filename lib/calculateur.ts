@@ -47,22 +47,23 @@ export function arbreValable(arbre: TalentCalcul[], pts: number[]): boolean {
 }
 
 /** Pourquoi un point ne peut pas être ajouté (null : il peut l'être). */
-export function blocageAjout(arbres: TalentCalcul[][], points: Points, a: number, i: number, noms?: { arbre: string; talent: (id: number) => string }): string | null {
+export function blocageAjout(arbres: TalentCalcul[][], points: Points, a: number, i: number, noms?: { arbre: string; talent: (id: number) => string; en?: boolean }): string | null {
   const arbre = arbres[a];
   const t = arbre[i];
-  if (points[a][i] >= t.rangs) return "Talent au maximum.";
-  if (total(points) >= POINTS_MAX) return `Les ${POINTS_MAX} points du niveau ${NIVEAU_MAX} sont dépensés.`;
+  const en = noms?.en;
+  if (points[a][i] >= t.rangs) return en ? "Talent maxed out." : "Talent au maximum.";
+  if (total(points) >= POINTS_MAX) return en ? `All ${POINTS_MAX} points of level ${NIVEAU_MAX} are spent.` : `Les ${POINTS_MAX} points du niveau ${NIVEAU_MAX} sont dépensés.`;
   const requis = t.palier * 5;
-  if (pointsAuDessus(arbre, points[a], t.palier) < requis) return `Demande ${requis} points dans ${noms?.arbre ?? "cet arbre"}.`;
-  if (!prerequisRempli(arbre, points[a], t)) return `Demande d'abord ${noms?.talent(t.prerequisId!) ?? "son prérequis"} au maximum.`;
+  if (pointsAuDessus(arbre, points[a], t.palier) < requis) return en ? `Requires ${requis} points in ${noms?.arbre ?? "this tree"}.` : `Demande ${requis} points dans ${noms?.arbre ?? "cet arbre"}.`;
+  if (!prerequisRempli(arbre, points[a], t)) return en ? `Requires ${noms?.talent(t.prerequisId!) ?? "its prerequisite"} at max rank first.` : `Demande d'abord ${noms?.talent(t.prerequisId!) ?? "son prérequis"} au maximum.`;
   return null;
 }
 
-export function blocageRetrait(arbres: TalentCalcul[][], points: Points, a: number, i: number): string | null {
-  if (points[a][i] <= 0) return "Aucun point à retirer.";
+export function blocageRetrait(arbres: TalentCalcul[][], points: Points, a: number, i: number, en = false): string | null {
+  if (points[a][i] <= 0) return en ? "No point to remove." : "Aucun point à retirer.";
   const essai = [...points[a]];
   essai[i]--;
-  return arbreValable(arbres[a], essai) ? null : "D'autres talents de l'arbre dépendent de ce point.";
+  return arbreValable(arbres[a], essai) ? null : en ? "Other talents in this tree depend on this point." : "D'autres talents de l'arbre dépendent de ce point.";
 }
 
 export function modifier(points: Points, a: number, i: number, delta: number): Points {

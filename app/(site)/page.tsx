@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { listerPublies } from "@/modules/veille";
 import { CLASSES } from "@/content/classes";
@@ -10,6 +11,7 @@ import { ChoixGuideParClasse } from "@/components/ChoixGuide";
 import { HeureLocale } from "@/components/HeureLocale";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = { alternates: { canonical: "/", languages: { fr: "/", en: "/en/", "x-default": "/" } } };
 
 const TERRES = [
   { href: "/zones/mont-hyjal/", nom: "Mont Hyjal", teinte: "#7fbf7a", ecran: "kalimdor" },

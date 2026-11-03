@@ -31,25 +31,47 @@ export interface ArbreVue {
 
 const COLONNES = 4;
 
+const TXT = {
+  fr: {
+    rang: "Rang", suivant: (n: number) => `Rang suivant (${n})`, manquants: (n: number) => `Les fichiers de Forever ne décrivent pas encore les rangs 2 à ${n} de ce talent.`,
+    prerequis: "son prérequis", points: (n: number) => `${n} point${n > 1 ? "s" : ""}`, sur: "sur", niveau: "niveau", requis: "requis",
+    restants: (n: number) => `${n} restant${n > 1 ? "s" : ""}`, copie: "Lien copié", copier: "Copier le lien du build", effacerTout: "Tout effacer",
+    arbre: "Arbre", effacer: "Effacer", surRangs: "sur", palier: "palier", dansArbre: (n: number) => `, ${n} points dans l'arbre`,
+    requiert: " · requiert ", sort: " · donne un sort", inconnu: "Les fichiers du jeu ne donnent pas encore son nom ni son effet.",
+    retirer: (n: string) => `Retirer un point de ${n}`, ajouter: (n: string) => `Ajouter un point à ${n}`, moins: "− 1 point", plus: "+ 1 point",
+    dp: " : ", aide: "Clic sur un talent : un point de plus ; clic droit : un point de moins. Sur téléphone, chaque toucher ajoute un point et le bouton − de ce panneau en retire un.",
+  },
+  en: {
+    rang: "Rank", suivant: (n: number) => `Next rank (${n})`, manquants: (n: number) => `Forever's files do not describe ranks 2 to ${n} of this talent yet.`,
+    prerequis: "its prerequisite", points: (n: number) => `${n} point${n === 1 ? "" : "s"}`, sur: "of", niveau: "level", requis: "required",
+    restants: (n: number) => `${n} left`, copie: "Link copied", copier: "Copy build link", effacerTout: "Reset all",
+    arbre: "Tree", effacer: "Reset", surRangs: "of", palier: "tier", dansArbre: (n: number) => `, ${n} points in the tree`,
+    requiert: " · requires ", sort: " · grants a spell", inconnu: "The game files do not give its name or effect yet.",
+    retirer: (n: string) => `Remove a point from ${n}`, ajouter: (n: string) => `Add a point to ${n}`, moins: "− 1 point", plus: "+ 1 point",
+    dp: ": ", aide: "Click a talent to add a point; right-click to remove one. On a phone, each tap adds a point and the − button in this panel removes one.",
+  },
+} as const;
+type Textes = (typeof TXT)["fr"] | (typeof TXT)["en"];
+
 /** Comme l'infobulle du jeu : le rang atteint, puis le rang suivant ; à défaut, le premier rang publié. */
-function DescriptionsRangs({ t, pt }: { t: TalentVue; pt: number }) {
+function DescriptionsRangs({ t, pt, L }: { t: TalentVue; pt: number; L: Textes }) {
   const texte = (k: number) => t.descriptions[k] ?? null;
   const lignes: { titre: string; texte: string }[] = [];
   if (t.rangs === 1) {
     if (t.description) lignes.push({ titre: "", texte: t.description });
   } else {
-    if (pt > 0 && texte(pt - 1)) lignes.push({ titre: `Rang ${pt}`, texte: texte(pt - 1)! });
-    if (pt < t.rangs && texte(pt)) lignes.push({ titre: pt ? `Rang suivant (${pt + 1})` : "Rang 1", texte: texte(pt)! });
-    if (!lignes.length && t.description) lignes.push({ titre: "Rang 1", texte: t.description });
+    if (pt > 0 && texte(pt - 1)) lignes.push({ titre: `${L.rang} ${pt}`, texte: texte(pt - 1)! });
+    if (pt < t.rangs && texte(pt)) lignes.push({ titre: pt ? L.suivant(pt + 1) : `${L.rang} 1`, texte: texte(pt)! });
+    if (!lignes.length && t.description) lignes.push({ titre: `${L.rang} 1`, texte: t.description });
   }
   const manquants = t.descriptions.slice(1).filter((d) => !d).length;
   return (
     <>
       {lignes.map((l) => (
-        <p key={l.titre} className="sort-desc">{l.titre ? <span className="doux">{l.titre} : </span> : null}{l.texte}</p>
+        <p key={l.titre} className="sort-desc">{l.titre ? <span className="doux">{l.titre}{L.dp}</span> : null}{l.texte}</p>
       ))}
       {t.rangs > 1 && manquants && pt > 1 ? (
-        <p className="doux calc-motif">Les fichiers de Forever ne décrivent pas encore les rangs 2 à {t.rangs} de ce talent.</p>
+        <p className="doux calc-motif">{L.manquants(t.rangs)}</p>
       ) : null}
     </>
   );
@@ -60,7 +82,9 @@ function DescriptionsRangs({ t, pt }: { t: TalentVue; pt: number }) {
  * de moins ; le panneau du talent choisi offre aussi + et −, pour les écrans tactiles. Le build se lit et s'écrit dans
  * l'adresse (?build=…), pour le partager.
  */
-export function CalculateurTalents({ classe, arbres }: { classe: string; arbres: ArbreVue[] }) {
+export function CalculateurTalents({ classe, arbres, langue = "fr" }: { classe: string; arbres: ArbreVue[]; langue?: "fr" | "en" }) {
+  const L: Textes = TXT[langue];
+  const en = langue === "en";
   const regles = useMemo(() => arbres.map((a) => a.talents), [arbres]);
   const [points, setPoints] = useState<Points>(() => vide(regles));
   const [choix, setChoix] = useState<{ a: number; i: number } | null>(null);
@@ -87,14 +111,14 @@ export function CalculateurTalents({ classe, arbres }: { classe: string; arbres:
     history.replaceState(null, "", url);
   }, [points, lu]);
 
-  const nomTalent = (a: number) => (id: number) => arbres[a].talents.find((t) => t.id === id)?.nom ?? "son prérequis";
+  const nomTalent = (a: number) => (id: number) => arbres[a].talents.find((t) => t.id === id)?.nom ?? L.prerequis;
   const ajouter = (a: number, i: number) => {
     setChoix({ a, i });
     if (!blocageAjout(regles, points, a, i)) setPoints((p) => modifier(p, a, i, 1));
   };
   const retirer = (a: number, i: number) => {
     setChoix({ a, i });
-    if (!blocageRetrait(regles, points, a, i)) setPoints((p) => modifier(p, a, i, -1));
+    if (!blocageRetrait(regles, points, a, i, en)) setPoints((p) => modifier(p, a, i, -1));
   };
 
   const depenses = total(points);
@@ -113,8 +137,8 @@ export function CalculateurTalents({ classe, arbres }: { classe: string; arbres:
 
   const t = choix ? arbres[choix.a].talents[choix.i] : null;
   const pt = choix ? points[choix.a][choix.i] : 0;
-  const motifAjout = choix ? blocageAjout(regles, points, choix.a, choix.i, { arbre: arbres[choix.a].nom, talent: nomTalent(choix.a) }) : null;
-  const motifRetrait = choix ? blocageRetrait(regles, points, choix.a, choix.i) : null;
+  const motifAjout = choix ? blocageAjout(regles, points, choix.a, choix.i, { arbre: arbres[choix.a].nom, talent: nomTalent(choix.a), en }) : null;
+  const motifRetrait = choix ? blocageRetrait(regles, points, choix.a, choix.i, en) : null;
 
   return (
     <div className="calculateur">
@@ -124,14 +148,14 @@ export function CalculateurTalents({ classe, arbres }: { classe: string; arbres:
           {principal ? <span className="doux"> · {principal}</span> : null}
         </p>
         <p className="doux">
-          {depenses} point{depenses > 1 ? "s" : ""} sur {POINTS_MAX} · niveau {niveauRequis(depenses)} requis · {POINTS_MAX - depenses} restant{POINTS_MAX - depenses > 1 ? "s" : ""}
+          {L.points(depenses)} {L.sur} {POINTS_MAX} · {L.niveau} {niveauRequis(depenses)} {L.requis} · {L.restants(POINTS_MAX - depenses)}
         </p>
         <div className="calc-actions">
           <button type="button" className="btn btn-or" onClick={copier} data-cta="partager-build" disabled={!depenses}>
-            {copie ? "Lien copié" : "Copier le lien du build"}
+            {copie ? L.copie : L.copier}
           </button>
           <button type="button" className="btn btn-contour" onClick={() => { setPoints(vide(regles)); setChoix(null); }} disabled={!depenses}>
-            Tout effacer
+            {L.effacerTout}
           </button>
         </div>
       </div>
@@ -141,7 +165,7 @@ export function CalculateurTalents({ classe, arbres }: { classe: string; arbres:
           const lignes = Math.max(...arbre.talents.map((x) => x.palier)) + 1;
           const position = new Map(arbre.talents.map((x) => [x.id, x]));
           return (
-            <section key={arbre.slug} className="calc-arbre" aria-label={`Arbre ${arbre.nom}`}>
+            <section key={arbre.slug} className="calc-arbre" aria-label={`${L.arbre} ${arbre.nom}`}>
               <header>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 {arbre.icone ? <img src={arbre.icone} alt="" width={32} height={32} className="icone-jeu" /> : null}
@@ -149,7 +173,7 @@ export function CalculateurTalents({ classe, arbres }: { classe: string; arbres:
                 <span className="calc-compte">{parArbre[a]}</span>
                 {parArbre[a] ? (
                   <button type="button" className="calc-raz" onClick={() => setPoints((p) => p.map((x, k) => (k === a ? x.map(() => 0) : x)))}>
-                    Effacer
+                    {L.effacer}
                   </button>
                 ) : null}
               </header>
@@ -180,7 +204,7 @@ export function CalculateurTalents({ classe, arbres }: { classe: string; arbres:
                       type="button"
                       className={`calc-talent calc-${etat}${actif ? " calc-choisi" : ""}`}
                       style={{ gridColumn: x.colonne + 1, gridRow: x.palier + 1 }}
-                      aria-label={`${x.nom}, ${v} sur ${x.rangs}`}
+                      aria-label={`${x.nom}, ${v} ${L.surRangs} ${x.rangs}`}
                       title={x.nom}
                       onClick={() => ajouter(a, i)}
                       onContextMenu={(e) => { e.preventDefault(); retirer(a, i); }}
@@ -212,26 +236,23 @@ export function CalculateurTalents({ classe, arbres }: { classe: string; arbres:
               <div>
                 <h3>{t.nom} <span className="doux">{pt}/{t.rangs}</span></h3>
                 <p className="sort-meta">
-                  {arbres[choix.a].nom} · palier {t.palier + 1} · niveau {t.niveau}
-                  {t.palier ? `, ${t.palier * 5} points dans l'arbre` : ""}
-                  {t.prerequis ? ` · requiert ${t.prerequis}` : ""}
-                  {t.actif ? " · donne un sort" : ""}
+                  {arbres[choix.a].nom} · {L.palier} {t.palier + 1} · {L.niveau} {t.niveau}
+                  {t.palier ? L.dansArbre(t.palier * 5) : ""}
+                  {t.prerequis ? `${L.requiert}${t.prerequis}` : ""}
+                  {t.actif ? L.sort : ""}
                 </p>
               </div>
             </div>
-            {!t.description && !t.icone ? <p className="doux" style={{ margin: 0 }}>Les fichiers du jeu ne donnent pas encore son nom ni son effet.</p> : null}
-            <DescriptionsRangs t={t} pt={pt} />
+            {!t.description && !t.icone ? <p className="doux" style={{ margin: 0 }}>{L.inconnu}</p> : null}
+            <DescriptionsRangs t={t} pt={pt} L={L} />
             <div className="calc-actions">
-              <button type="button" className="btn btn-contour" onClick={() => retirer(choix.a, choix.i)} disabled={!!motifRetrait} aria-label={`Retirer un point de ${t.nom}`}>− 1 point</button>
-              <button type="button" className="btn btn-or" onClick={() => ajouter(choix.a, choix.i)} disabled={!!motifAjout} aria-label={`Ajouter un point à ${t.nom}`}>+ 1 point</button>
+              <button type="button" className="btn btn-contour" onClick={() => retirer(choix.a, choix.i)} disabled={!!motifRetrait} aria-label={L.retirer(t.nom)}>{L.moins}</button>
+              <button type="button" className="btn btn-or" onClick={() => ajouter(choix.a, choix.i)} disabled={!!motifAjout} aria-label={L.ajouter(t.nom)}>{L.plus}</button>
             </div>
             {motifAjout && pt < t.rangs ? <p className="doux calc-motif">{motifAjout}</p> : null}
           </>
         ) : (
-          <p className="doux" style={{ margin: 0 }}>
-            Clic sur un talent : un point de plus ; clic droit : un point de moins. Sur téléphone, chaque toucher ajoute un point
-            et le bouton − de ce panneau en retire un.
-          </p>
+          <p className="doux" style={{ margin: 0 }}>{L.aide}</p>
         )}
       </div>
     </div>

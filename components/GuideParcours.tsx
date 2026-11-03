@@ -49,10 +49,51 @@ export function courbe(a: { x: number; y: number }, b: { x: number; y: number },
   return `M${r(x1)},${r(y1)} Q${r(cx)},${r(cy)} ${r(x2)},${r(y2)}`;
 }
 
+/** Textes de l'interface du guide, en français et en anglais. */
+const TXT = {
+  fr: {
+    carte: "Carte", secteur: "Secteur des objectifs", ailleurs: "Hors de la zone", etape: (n: number) => `étape${n > 1 ? "s" : ""}`,
+    titreSecteur: "Monstres et objets des quêtes en cours", zoomer: "Zoomer", dezoomer: "Dézoomer", entiere: "Toute la zone",
+    pnj: "PNJ", objectifs: "objectifs", fleches: (a: number, b: number) => ` · flèches : étapes ${a} à ${b}`,
+    aide: "Molette ou deux doigts pour zoomer, glisser pour se déplacer, double clic pour approcher.", detaillee: "Carte détaillée",
+    verbes: { prendre: "Prendre", faire: "Faire", rendre: "Rendre" }, a: "à", niv: "niv.", classe: "Classe", groupe: "Groupe", terminee: "Terminée",
+    voirCibles: "Monstres et objets sur la carte", rendues: "quêtes rendues", progression: "Progression du guide",
+    chargement: "Chargement de votre progression…",
+    duJour: (n: number) => `aujourd'hui : ${n} quête${n > 1 ? "s" : ""} rendue${n > 1 ? "s" : ""}.`,
+    envoi: "Sauvegarde…", ok: "Progression sauvegardée.", erreur: "Sauvegarde impossible, réessayez.", compte: "Progression sauvegardée sur votre compte.",
+    derniers: "Derniers jours", sansCompte: ["Vos cases cochées disparaîtront en quittant la page.", "Créez un compte gratuit", "pour garder votre progression."],
+    resume: (a: number, b: number, nb: number, t: number, e: number) => ` · niveaux ${a} à ${b} · ${nb}/${t} quêtes · ${e} étapes`,
+    depart: " · zone de départ · quêtes à relever au lancement",
+    popupTitre: "Gardez votre progression",
+    popup: (t: string) => `Avec un compte gratuit à la Taverne, chaque quête cochée dans « ${t} » est sauvegardée, jour après jour, sur tous vos appareils. Sans compte, vos cases s'effacent quand vous quittez la page.`,
+    popupLettre: "Le même formulaire vous inscrit à la Lettre du dimanche, si vous le souhaitez.",
+    creer: "Créer mon compte", connexion: "Me connecter", plusTard: "Plus tard", nombre: "fr-FR", decimal: ",", dp: " : ", pv: " ; ",
+  },
+  en: {
+    carte: "Map", secteur: "Objective area", ailleurs: "Outside the zone", etape: (n: number) => `step${n > 1 ? "s" : ""}`,
+    titreSecteur: "Monsters and objects for current quests", zoomer: "Zoom in", dezoomer: "Zoom out", entiere: "Whole zone",
+    pnj: "NPCs", objectifs: "objectives", fleches: (a: number, b: number) => ` · arrows: steps ${a} to ${b}`,
+    aide: "Scroll or pinch to zoom, drag to move, double-click to get closer.", detaillee: "Detailed map",
+    verbes: { prendre: "Accept", faire: "Do", rendre: "Turn in" }, a: "to", niv: "lvl", classe: "Class", groupe: "Group", terminee: "Done",
+    voirCibles: "Monsters and objects on the map", rendues: "quests turned in", progression: "Guide progress",
+    chargement: "Loading your progress…",
+    duJour: (n: number) => `today: ${n} quest${n === 1 ? "" : "s"} turned in.`,
+    envoi: "Saving…", ok: "Progress saved.", erreur: "Could not save, please try again.", compte: "Progress saved to your account.",
+    derniers: "Last days", sansCompte: ["Your ticks will be lost when you leave the page.", "Create a free account", "to keep your progress."],
+    resume: (a: number, b: number, nb: number, t: number, e: number) => ` · levels ${a} to ${b} · ${nb}/${t} quests · ${e} steps`,
+    depart: " · starting zone · quests to be recorded at launch",
+    popupTitre: "Keep your progress",
+    popup: (t: string) => `With a free account at the Tavern, every quest you tick in “${t}” is saved, day after day, on all your devices. Without an account, your ticks are cleared when you leave the page.`,
+    popupLettre: "The same form can also sign you up for our Sunday newsletter (in French), if you wish.",
+    creer: "Create my account", connexion: "Log in", plusTard: "Later", nombre: "en-GB", decimal: ".", dp: ": ", pv: "; ",
+  },
+} as const;
+type Textes = (typeof TXT)["fr"] | (typeof TXT)["en"];
+
 const aujourdhui = () => new Intl.DateTimeFormat("fr-CA", { timeZone: "Europe/Paris" }).format(new Date());
 
-function CarteZone({ z, faites, voir, actif, onArret, cadrage }: {
-  z: ZoneVue; faites: Set<number>; voir: Set<number>; actif: number | null; onArret: (i: number) => void;
+function CarteZone({ z, faites, voir, actif, onArret, cadrage, t }: {
+  z: ZoneVue; t: Textes; faites: Set<number>; voir: Set<number>; actif: number | null; onArret: (i: number) => void;
   cadrage: { cle: string; points: [number, number][] } | null;
 }) {
   const [v, setV] = useState<Vue>(VUE_ENTIERE);
@@ -149,7 +190,7 @@ function CarteZone({ z, faites, voir, actif, onArret, cadrage }: {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={z.carte}
-          alt={`Carte : ${z.nom}`}
+          alt={`${t.carte}${t.dp}${z.nom}`}
           width={1000}
           height={667}
           loading="lazy"
@@ -198,7 +239,7 @@ function CarteZone({ z, faites, voir, actif, onArret, cadrage }: {
         })}
         {quetesVues.flatMap(({ e }) => e.cib!.p.map(([x, y], k) => {
           const p = pos(x, y);
-          return p.visible ? <span key={`${e.id}-${k}`} className="cible-carte" style={{ left: `${p.gauche}%`, top: `${p.haut}%` }} title={`${e.t} : ${e.obj.join(" ; ")}`} aria-hidden="true" /> : null;
+          return p.visible ? <span key={`${e.id}-${k}`} className="cible-carte" style={{ left: `${p.gauche}%`, top: `${p.haut}%` }} title={`${e.t}${t.dp}${e.obj.join(t.pv)}`} aria-hidden="true" /> : null;
         }))}
         {[...horsFenetre.entries()].filter(([h]) => !places.some((a) => a.type === "pnj" && a.hub === h)).map(([h, a]) => {
           const p = pos(a.x, a.y);
@@ -215,34 +256,34 @@ function CarteZone({ z, faites, voir, actif, onArret, cadrage }: {
               className={`${p.type === "pnj" ? "hub-carte" : "secteur-carte"}${p.fait ? " hub-fini" : ""}${actif !== null && p.etapes.includes(actif + 1) ? " hub-choisi" : ""}`}
               style={{ left: `${e.gauche}%`, top: `${e.haut}%` }}
               onClick={() => { if (!aGlisse.current) onArret(p.etapes.find((n) => !arretFait(z.arrets[n - 1])) ?? p.etapes[0]); }}
-              aria-label={`${p.type === "pnj" ? p.noms.join(", ") : "Secteur des objectifs"}, étape${p.etapes.length > 1 ? "s" : ""} ${p.etapes.join(", ")}`}
-              title={p.type === "pnj" ? p.noms.join(", ") : "Monstres et objets des quêtes en cours"}
+              aria-label={`${p.type === "pnj" ? p.noms.join(", ") : t.secteur}, ${t.etape(p.etapes.length)} ${p.etapes.join(", ")}`}
+              title={p.type === "pnj" ? p.noms.join(", ") : t.titreSecteur}
             >
               <span>{libelle}</span>
             </button>
           );
         })}
         <div className="zoom-commandes">
-          <button type="button" onClick={() => setV((w) => zoomerAutour(w, 1.6, 0.5, 0.5))} disabled={v.s >= ZOOM_MAX} aria-label="Zoomer">+</button>
-          <button type="button" onClick={() => setV((w) => zoomerAutour(w, 1 / 1.6, 0.5, 0.5))} disabled={v.s <= ZOOM_MIN} aria-label="Dézoomer">−</button>
-          <button type="button" onClick={() => setV(VUE_ENTIERE)} disabled={v.s <= ZOOM_MIN} aria-label="Toute la zone" title="Toute la zone">⤢</button>
+          <button type="button" onClick={() => setV((w) => zoomerAutour(w, 1.6, 0.5, 0.5))} disabled={v.s >= ZOOM_MAX} aria-label={t.zoomer}>+</button>
+          <button type="button" onClick={() => setV((w) => zoomerAutour(w, 1 / 1.6, 0.5, 0.5))} disabled={v.s <= ZOOM_MIN} aria-label={t.dezoomer}>−</button>
+          <button type="button" onClick={() => setV(VUE_ENTIERE)} disabled={v.s <= ZOOM_MIN} aria-label={t.entiere} title={t.entiere}>⤢</button>
         </div>
-        {v.s > 1 ? <span className="zoom-niveau" aria-live="polite">× {v.s.toFixed(1).replace(".", ",")}</span> : null}
+        {v.s > 1 ? <span className="zoom-niveau" aria-live="polite">× {v.s.toFixed(1).replace(".", t.decimal)}</span> : null}
       </div>
       <figcaption className="doux">
-        <span className="legende-pnj" aria-hidden="true" /> PNJ · <span className="legende-secteur" aria-hidden="true" /> objectifs{z.arrets.length ? ` · flèches : étapes ${debut + 1} à ${Math.min(fin + 1, z.arrets.length)}` : ""}.
-        Molette ou deux doigts pour zoomer, glisser pour se déplacer, double clic pour approcher.{" "}
-        <Link href={z.lienCarte}>Carte détaillée</Link> · © Blizzard Entertainment
+        <span className="legende-pnj" aria-hidden="true" /> {t.pnj} · <span className="legende-secteur" aria-hidden="true" /> {t.objectifs}{z.arrets.length ? t.fleches(debut + 1, Math.min(fin + 1, z.arrets.length)) : ""}.
+        {t.aide}{" "}
+        <Link href={z.lienCarte}>{t.detaillee}</Link> · © Blizzard Entertainment
       </figcaption>
     </figure>
   );
 }
 
-const VERBES = { prendre: "Prendre", faire: "Faire", rendre: "Rendre" } as const;
 /** Nombre d'étapes tracées après l'étape en cours. */
 const FENETRE = 8;
 
-export function GuideParcours({ cle, titre, zones, retour }: { cle: string; titre: string; zones: ZoneVue[]; retour: string }) {
+export function GuideParcours({ cle, titre, zones, retour, langue = "fr" }: { cle: string; titre: string; zones: ZoneVue[]; retour: string; langue?: "fr" | "en" }) {
+  const t: Textes = TXT[langue];
   const [faites, setFaites] = useState<Set<number>>(new Set());
   const [voir, setVoir] = useState<Set<number>>(new Set());
   const [compte, setCompte] = useState<{ connecte: boolean; pseudo?: string } | null>(null);
@@ -350,32 +391,32 @@ export function GuideParcours({ cle, titre, zones, retour }: { cle: string; titr
   const duJour = jours.find((j) => j.jour === aujourdhui())?.faites ?? 0;
   // Joueur qui commence : la première zone (même sans quêtes relevées, comme Zéphras) ; sinon la première à terminer.
   const zoneEnCours = nbFaites === 0 ? 0 : zones.findIndex((z) => z.etapes.some((e) => !faites.has(e.id)));
-  const lienCompte = `/compte/?retour=${encodeURIComponent(retour)}`;
+  const lienCompte = `${langue === "en" ? "/en/account/" : "/compte/"}?retour=${encodeURIComponent(retour)}`;
 
   return (
     <div className="guide-parcours">
       <div className="guide-bilan" aria-live="polite">
         <div>
-          <p className="guide-compteur"><strong>{nbFaites}</strong> / {total} quêtes rendues</p>
-          <div className="barre" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={nbFaites} aria-label="Progression du guide">
+          <p className="guide-compteur"><strong>{nbFaites}</strong> / {total} {t.rendues}</p>
+          <div className="barre" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={nbFaites} aria-label={t.progression}>
             <span style={{ width: `${total ? (100 * nbFaites) / total : 0}%` }} />
           </div>
         </div>
         <div className="guide-sauvegarde">
-          {compte === null ? <span className="doux">Chargement de votre progression…</span>
+          {compte === null ? <span className="doux">{t.chargement}</span>
             : compte.connecte ? (
               <>
                 <span>
-                  <strong>{compte.pseudo}</strong>, aujourd&apos;hui : {duJour} quête{duJour > 1 ? "s" : ""} rendue{duJour > 1 ? "s" : ""}.{" "}
-                  <span className="doux">{etat === "envoi" ? "Sauvegarde…" : etat === "ok" ? "Progression sauvegardée." : etat === "erreur" ? "Sauvegarde impossible, réessayez." : "Progression sauvegardée sur votre compte."}</span>
+                  <strong>{compte.pseudo}</strong>, {t.duJour(duJour)}{" "}
+                  <span className="doux">{etat === "envoi" ? t.envoi : etat === "ok" ? t.ok : etat === "erreur" ? t.erreur : t.compte}</span>
                 </span>
                 {jours.length > 1 ? (
-                  <span className="doux jours">Derniers jours : {jours.slice(0, 7).map((j) => `${j.jour.slice(8, 10)}/${j.jour.slice(5, 7)} · ${j.faites}`).join(" — ")}</span>
+                  <span className="doux jours">{t.derniers}{t.dp}{jours.slice(0, 7).map((j) => `${j.jour.slice(8, 10)}/${j.jour.slice(5, 7)} · ${j.faites}`).join(" — ")}</span>
                 ) : null}
               </>
             ) : (
               <span>
-                Vos cases cochées disparaîtront en quittant la page. <Link href={lienCompte} data-cta="guide-compte">Créez un compte gratuit</Link> pour garder votre progression.
+                {t.sansCompte[0]} <Link href={lienCompte} data-cta="guide-compte">{t.sansCompte[1]}</Link> {t.sansCompte[2]}
               </span>
             )}
         </div>
@@ -393,24 +434,24 @@ export function GuideParcours({ cle, titre, zones, retour }: { cle: string; titr
                   <span className="zone-titre">
                     <strong>{z.nom}</strong>
                     <span className="doux">
-                      {z.etapes.length ? ` · niveaux ${z.niveaux[0]} à ${z.niveaux[1]} · ${nb}/${z.etapes.length} quêtes · ${z.arrets.length} étapes` : " · zone de départ · quêtes à relever au lancement"}
+                      {z.etapes.length ? t.resume(z.niveaux[0], z.niveaux[1], nb, z.etapes.length, z.arrets.length) : t.depart}
                     </span>
                   </span>
-                  {z.etapes.length && nb === z.etapes.length ? <span className="badge-talent">Terminée</span> : null}
+                  {z.etapes.length && nb === z.etapes.length ? <span className="badge-talent">{t.terminee}</span> : null}
                 </summary>
                 <div className="zone-corps">
-                  <CarteZone z={z} faites={faites} voir={voir} actif={arretActif} onArret={(n) => allerA(zi, n - 1)} cadrage={cadrage?.zone === zi ? cadrage : null} />
+                  <CarteZone z={z} faites={faites} voir={voir} actif={arretActif} onArret={(n) => allerA(zi, n - 1)} cadrage={cadrage?.zone === zi ? cadrage : null} t={t} />
                   {z.note ? <p className="note-zone">{z.note}</p> : null}
                   <ol className="arrets-guide">
                     {z.arrets.map((a, ai) => {
                       const lieu = a.type === "pnj" ? z.hubs[a.hub].n.slice(0, 3).join(", ")
-                        : a.type === "cible" ? "Secteur des objectifs" : "Hors de la zone";
+                        : a.type === "cible" ? t.secteur : t.ailleurs;
                       return (
                         <li key={ai} id={`arret-${z.lieu}-${ai}`} className={`arret-guide arret-${a.type}${arretActif === ai ? " arret-actif" : ""}`}>
                           <button type="button" className="arret-titre" onClick={() => { setActif(arretActif === ai ? null : { zone: zi, arret: ai }); if (arretActif !== ai) cadrerEtape(zi, ai); }}>
                             <span className={a.type === "pnj" ? "pastille" : "pastille pastille-secteur"}>{ai + 1}</span>
                             <strong>{lieu}</strong>
-                            {a.x !== null && a.y !== null ? <span className="doux"> ({a.x.toLocaleString("fr-FR")} · {a.y.toLocaleString("fr-FR")})</span> : null}
+                            {a.x !== null && a.y !== null ? <span className="doux"> ({a.x.toLocaleString(t.nombre)} · {a.y.toLocaleString(t.nombre)})</span> : null}
                           </button>
                           <ul className="actions-arret">
                             {a.actions.map((x) => {
@@ -421,21 +462,21 @@ export function GuideParcours({ cle, titre, zones, retour }: { cle: string; titr
                                   {x.a === "rendre" ? (
                                     <label className="ligne-action">
                                       <input type="checkbox" checked={fait} onChange={() => basculer(e.id)} />
-                                      <span><span className="verbe">{VERBES[x.a]}</span> <strong>{e.t}</strong>{e.rl ? <span className="doux"> à {e.rn} ({e.rl})</span> : a.type !== "pnj" && e.rn ? <span className="doux"> à {e.rn}</span> : null}</span>
+                                      <span><span className="verbe">{t.verbes[x.a]}</span> <strong>{e.t}</strong>{e.rl ? <span className="doux"> {t.a} {e.rn} ({e.rl})</span> : a.type !== "pnj" && e.rn ? <span className="doux"> {t.a} {e.rn}</span> : null}</span>
                                     </label>
                                   ) : (
                                     <div className="ligne-action">
                                       <span className="puce-action" aria-hidden="true">{x.a === "prendre" ? "!" : "⚔"}</span>
                                       <span>
-                                        <span className="verbe">{VERBES[x.a]}</span> <strong>{e.t}</strong>
-                                        {x.a === "prendre" ? <span className="doux"> · niv. {e.nv}</span> : null}
-                                        {x.a === "prendre" && e.cl ? <span className="badge-talent">Classe</span> : null}
-                                        {x.a === "prendre" && e.grp ? <span className="badge-talent">Groupe</span> : null}
-                                        {x.a === "faire" && e.obj.length ? <span className="objectifs"> : {e.obj.join(" ; ")}</span> : null}
+                                        <span className="verbe">{t.verbes[x.a]}</span> <strong>{e.t}</strong>
+                                        {x.a === "prendre" ? <span className="doux"> · {t.niv} {e.nv}</span> : null}
+                                        {x.a === "prendre" && e.cl ? <span className="badge-talent">{t.classe}</span> : null}
+                                        {x.a === "prendre" && e.grp ? <span className="badge-talent">{t.groupe}</span> : null}
+                                        {x.a === "faire" && e.obj.length ? <span className="objectifs">{t.dp}{e.obj.join(t.pv)}</span> : null}
                                         {e.cib && x.a === "faire" ? (
                                           <label className="voir-cibles">
                                             <input type="checkbox" checked={voir.has(e.id)} onChange={() => basculerVoir(zi, e)} />
-                                            Monstres et objets sur la carte
+                                            {t.voirCibles}
                                           </label>
                                         ) : null}
                                       </span>
@@ -459,16 +500,13 @@ export function GuideParcours({ cle, titre, zones, retour }: { cle: string; titr
       {popup ? (
         <div className="fond-popup" role="presentation" onClick={fermerPopup}>
           <div className="popup" role="dialog" aria-modal="true" aria-labelledby="titre-popup" onClick={(e) => e.stopPropagation()}>
-            <h2 id="titre-popup">Gardez votre progression</h2>
-            <p>
-              Avec un compte gratuit à la Taverne, chaque quête cochée dans « {titre} » est sauvegardée, jour après jour, sur tous vos appareils.
-              Sans compte, vos cases s&apos;effacent quand vous quittez la page.
-            </p>
-            <p className="doux" style={{ fontSize: 14 }}>Le même formulaire vous inscrit à la Lettre du dimanche, si vous le souhaitez.</p>
+            <h2 id="titre-popup">{t.popupTitre}</h2>
+            <p>{t.popup(titre)}</p>
+            <p className="doux" style={{ fontSize: 14 }}>{t.popupLettre}</p>
             <div className="actions-bandeau">
-              <Link href={lienCompte} className="btn btn-or" data-cta="popup-compte-creer">Créer mon compte</Link>
-              <Link href={`${lienCompte}&mode=connexion`} className="btn btn-contour" data-cta="popup-compte-connexion">Me connecter</Link>
-              <button type="button" className="btn btn-contour" onClick={fermerPopup}>Plus tard</button>
+              <Link href={lienCompte} className="btn btn-or" data-cta="popup-compte-creer">{t.creer}</Link>
+              <Link href={`${lienCompte}&mode=connexion`} className="btn btn-contour" data-cta="popup-compte-connexion">{t.connexion}</Link>
+              <button type="button" className="btn btn-contour" onClick={fermerPopup}>{t.plusTard}</button>
             </div>
           </div>
         </div>

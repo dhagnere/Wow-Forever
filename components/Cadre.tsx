@@ -3,6 +3,7 @@ import { NavPrincipale } from "./NavPrincipale";
 import { SITE } from "@/lib/site";
 import { GererCookies } from "./BandeauCookies";
 import { Decompte } from "./Decompte";
+import { ChoixLangue, SuggestionAnglais } from "./ChoixLangue";
 
 /** Enseigne de la Taverne (chope et sablier), décorative : le nom du site est écrit à côté. */
 export function Medaillon({ taille }: { taille: number }) {
@@ -26,6 +27,7 @@ export function Entete() {
           <NomSite />
         </Link>
         <div className="outils-entete">
+          <ChoixLangue langue="fr" />
           <Link href="/lettre/" className="btn btn-or btn-petit" data-cta="lettre-entete">Recevoir la Lettre</Link>
           <Link href="/compte/" aria-label="Mon compte" data-cta="compte-entete">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
@@ -109,6 +111,7 @@ export function SiteCadre({ children }: { children: React.ReactNode }) {
     <>
       <a href="#contenu" className="sr-only">Aller au contenu</a>
       <Entete />
+      <SuggestionAnglais />
       <main id="contenu">{children}</main>
       <Pied />
     </>

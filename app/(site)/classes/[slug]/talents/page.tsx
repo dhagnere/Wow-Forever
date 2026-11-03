@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CLASSES, trouverClasse } from "@/content/classes";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { IconeClasse } from "@/components/IconeClasse";
 import { CalculateurTalents, type ArbreVue } from "@/components/CalculateurTalents";
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `Calculateur de talents du ${c.nom} sur WoW Forever`,
     description: `Préparez votre build de ${c.nom.toLowerCase()} sur WoW Forever : les trois arbres de talents du jeu, ${POINTS_MAX} points au niveau 60, et un lien à partager.`,
-    alternates: { canonical: `/classes/${c.slug}/talents/` },
+    alternates: { canonical: `/classes/${c.slug}/talents/`, languages: languesDe(`/classes/${c.slug}/talents/`) },
   };
 }
 

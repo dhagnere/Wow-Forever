@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CLASSES, trouverClasse } from "@/content/classes";
 import { estPilier } from "@/config/taxonomie";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { IconeClasse } from "@/components/IconeClasse";
 import { IconeRace } from "@/components/IconeRace";
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `Guide du ${c.nom} sur WoW Forever`,
     description: `${c.nom} sur WoW Forever : rôles (${c.roles.join(", ").toLowerCase()}), races possibles, sorts et talents de chaque spécialisation, conseils pour bien débuter.`,
-    alternates: { canonical: `/classes/${c.slug}/` },
+    alternates: { canonical: `/classes/${c.slug}/`, languages: languesDe(`/classes/${c.slug}/`) },
   };
 }
 

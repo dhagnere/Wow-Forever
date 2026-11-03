@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { RACES_ORIGINE, SKYBORNE } from "@/content/monde";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { IconesRace } from "@/components/IconeRace";
 import { fondBandeau } from "@/lib/ecrans";
@@ -11,7 +12,7 @@ import { TraitsRaciaux } from "@/components/TraitsRaciaux";
 export const metadata: Metadata = {
   title: "Les races de WoW Forever",
   description: "Les races jouables de World of Warcraft: Forever et leurs traits raciaux, dont les Skyborne, nouvelle race ouverte à l'Alliance comme à la Horde.",
-  alternates: { canonical: "/races/" },
+  alternates: { canonical: "/races/", languages: languesDe("/races/") },
 };
 
 export default function Races() {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { LienLieu } from "@/components/Cartes";
 import { fondBandeau } from "@/lib/ecrans";
@@ -12,7 +13,7 @@ import { IconeRace } from "@/components/IconeRace";
 export const metadata: Metadata = {
   title: "Parcours de montée en niveau de 1 à 60 sur WoW Forever",
   description: "La route de l'Alliance et celle de la Horde, zone par zone, du niveau 1 au niveau 60 : fourchette de niveaux, nombre de quêtes et principaux donneurs.",
-  alternates: { canonical: "/guides/parcours/" },
+  alternates: { canonical: "/guides/parcours/", languages: languesDe("/guides/parcours/") },
 };
 
 function Route({ camp, etapes }: { camp: string; etapes: EtapeParcours[] }) {

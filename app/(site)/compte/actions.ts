@@ -9,12 +9,21 @@ import { empreinteConnexion, joueurConnecte, jetonSession, oublierSession, poser
 import { desinscrire, inscrire } from "@/lib/lettre";
 import { envoyerCourriel } from "@/lib/courriel";
 import { SITE } from "@/lib/site";
+import { erreursEn, messageEn } from "@/lib/messages-en";
 
 export type EtatCompte = { message?: string; erreurs?: Record<string, string>; saisie?: Record<string, string>; ok?: boolean } | null;
 
 const champ = (d: FormData, nom: string, max = 254) => String(d.get(nom) ?? "").slice(0, max);
+/** Formulaires de la version anglaise (/en/account/) : messages traduits, retour par défaut sur la page anglaise. */
+const anglais = (d: FormData) => d.get("langue") === "en";
+const traduire = (d: FormData, e: EtatCompte): EtatCompte =>
+  e && anglais(d) ? { ...e, message: e.message ? messageEn(e.message) : e.message, erreurs: erreursEn(e.erreurs) } : e;
 
-export async function creer(_e: EtatCompte, d: FormData): Promise<EtatCompte> {
+export async function creer(e: EtatCompte, d: FormData): Promise<EtatCompte> {
+  return traduire(d, await creerCompteJoueur(e, d));
+}
+
+async function creerCompteJoueur(_e: EtatCompte, d: FormData): Promise<EtatCompte> {
   // Champ piège invisible : un robot le remplit, un humain non.
   if (champ(d, "site_web")) redirect("/");
   const saisie = { pseudo: champ(d, "pseudo", 40), courriel: champ(d, "courriel") };
@@ -36,7 +45,7 @@ export async function creer(_e: EtatCompte, d: FormData): Promise<EtatCompte> {
     const r = await inscrire(v.valeur.courriel, SITE.url);
     lettre = r.ok ? "lettre" : "lettre-plus-tard";
   }
-  const u = new URL(retourSur(d.get("retour")), SITE.url);
+  const u = new URL(retourSur(d.get("retour"), anglais(d) ? "/en/account/" : "/compte/"), SITE.url);
   u.searchParams.set("bienvenue", lettre || "compte");
   redirect(`${u.pathname}${u.search}`);
 }
@@ -44,15 +53,21 @@ export async function creer(_e: EtatCompte, d: FormData): Promise<EtatCompte> {
 export async function seConnecter(_e: EtatCompte, d: FormData): Promise<EtatCompte> {
   const saisie = { courriel: champ(d, "courriel") };
   const r = await connecter(saisie.courriel, champ(d, "mot_de_passe", 200));
-  if (!r.ok) return { message: r.message, saisie };
+  if (!r.ok) return traduire(d, { message: r.message, saisie });
   await poserSession(r.jeton);
-  redirect(retourSur(d.get("retour")));
+  redirect(retourSur(d.get("retour"), anglais(d) ? "/en/account/" : "/compte/"));
 }
 
 export async function seDeconnecter(): Promise<void> {
   await fermerSession(await jetonSession());
   await oublierSession();
   redirect("/compte/");
+}
+
+export async function seDeconnecterEn(): Promise<void> {
+  await fermerSession(await jetonSession());
+  await oublierSession();
+  redirect("/en/account/");
 }
 
 export async function demanderOubli(_e: EtatCompte, d: FormData): Promise<EtatCompte> {

@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { CLASSES } from "@/content/classes";
 import { listerPublies } from "@/modules/veille";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { IconeClasse } from "@/components/IconeClasse";
 import { SelecteurClasses } from "@/components/SelecteurClasses";
@@ -14,7 +15,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Les classes de WoW Forever",
   description: "Les neuf classes de World of Warcraft: Forever : rôles, armure, races possibles et conseils pour bien débuter avec chacune.",
-  alternates: { canonical: "/classes/" },
+  alternates: { canonical: "/classes/", languages: languesDe("/classes/") },
 };
 
 export default async function Classes() {

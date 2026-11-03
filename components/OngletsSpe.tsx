@@ -6,7 +6,7 @@ import { Children, useEffect, useId, useState, type ReactNode } from "react";
  * Onglets des spécialisations d'une classe. Les trois panneaux sont rendus par le serveur et présents dans la page
  * (moteurs de recherche compris) ; seul le panneau choisi est affiché. Une adresse en #spe-<slug> ouvre l'onglet voulu.
  */
-export function OngletsSpe({ onglets, children }: { onglets: { slug: string; nom: string; icone: string }[]; children: ReactNode }) {
+export function OngletsSpe({ onglets, children, langue = "fr" }: { onglets: { slug: string; nom: string; icone: string }[]; children: ReactNode; langue?: "fr" | "en" }) {
   const panneaux = Children.toArray(children);
   const [actif, setActif] = useState(0);
   const base = useId();
@@ -28,7 +28,7 @@ export function OngletsSpe({ onglets, children }: { onglets: { slug: string; nom
 
   return (
     <div className="spes">
-      <div role="tablist" aria-label="Spécialisations" className="onglets-spe">
+      <div role="tablist" aria-label={langue === "en" ? "Specialisations" : "Spécialisations"} className="onglets-spe">
         {onglets.map((o, i) => (
           <button
             key={o.slug}
