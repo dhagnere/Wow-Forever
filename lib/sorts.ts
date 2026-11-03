@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import type { Familiers, Specialisation } from "@/modules/veille";
+import type { Familiers, Specialisation, TraitRacial } from "@/modules/veille";
 
 /**
  * Sorts et talents des classes, par spécialisation : content/sorts-jeu.json, produit par npm run sorts:jeu
@@ -12,6 +12,7 @@ interface DonneesSorts {
   genere: string;
   classes: Record<string, Specialisation[]>;
   familiers?: Record<string, Familiers>;
+  races?: Record<string, TraitRacial[]>;
 }
 
 let cache: DonneesSorts | null | undefined;
@@ -30,6 +31,18 @@ export function sortsDeClasse(slug: string): { version: string; specialisations:
   const d = donnees();
   const specialisations = d?.classes[slug];
   return d && specialisations?.length ? { version: d.version, specialisations } : null;
+}
+
+/** Traits raciaux d'une race (slug du site : humain, elfe-de-la-nuit, skyborne…). */
+export function traitsDeRace(slug: string): TraitRacial[] {
+  return donnees()?.races?.[slug] ?? [];
+}
+
+/** Nom de la race sur le site (« Elfe de la nuit ») → slug des traits raciaux (« elfe-de-la-nuit »). */
+export const slugRace = (nom: string) => nom.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z]+/g, "-");
+
+export function versionSorts(): string | null {
+  return donnees()?.version ?? null;
 }
 
 /** Familiers du chasseur (bêtes) et du démoniste (démons), avec leurs techniques. */

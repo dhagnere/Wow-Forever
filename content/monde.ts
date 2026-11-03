@@ -92,13 +92,11 @@ export const SKYBORNE = {
     { faction: "Alliance", nom: "L'ordre des savants", anglais: "High Order", texte: "Tourné vers la redécouverte du savoir arcanique perdu.", classes: ["Druide", "Chasseur", "Mage", "Voleur", "Guerrier"] },
     { faction: "Horde", nom: "L'ordre des vents", anglais: "Windshapers", texte: "Guides spirituels du peuple, au plus près des élémentaires.", classes: ["Druide", "Chasseur", "Chaman", "Voleur", "Guerrier"] },
   ],
-  capacites: [
-    { nom: "Walk on Air", effet: "Planer en descendant pendant 10 secondes, utilisable en mouvement", faction: "Les deux" },
-    { nom: "Wind Blessed", effet: "+2 % de hâte, au corps à corps, à distance et pour les sorts", faction: "Les deux" },
-    { nom: "Elemental Insight", effet: "+5 % de dégâts contre les élémentaires", faction: "Les deux" },
-    { nom: "Read Ley Line", effet: "+50 % de régénération de vie et de mana pendant 30 secondes", faction: "Alliance" },
-    { nom: "Skysight", effet: "+15 % de vitesse de course pendant 15 secondes", faction: "Horde" },
-  ],
+  /**
+   * Capacités propres à une faction, relevées pendant la bêta (Read Ley Line : Alliance ; Skysight : Horde). Les fichiers
+   * du jeu donnent les noms français et les effets, pas la faction. Les autres capacités sont communes aux deux.
+   */
+  factionsCapacites: { "Lecture des lignes telluriques": "Alliance", "Vue céleste": "Horde" } as Record<string, string>,
   acces: [
     "La race n'est pas incluse dans l'abonnement seul. Elle se débloque avec l'une des éditions supérieures de Forever : pack héroïque, pack épique, collection Warcraft Forever ou édition collector.",
     "Sans l'une d'elles, impossible de créer un personnage Skyborne. Les autres races restent accessibles avec l'abonnement.",

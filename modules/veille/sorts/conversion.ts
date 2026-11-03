@@ -104,12 +104,33 @@ export interface Familiers {
   loyaute?: string[];
 }
 
+/** Traits raciaux : ligne de compétence raciale du jeu → slug de la race sur le site. */
+export const LIGNES_RACIALES: Record<string, number> = {
+  humain: 754, nain: 101, "elfe-de-la-nuit": 126, gnome: 753, orc: 125, "mort-vivant": 220, tauren: 124, troll: 733, skyborne: 2980,
+};
+
+/** Masques de classe du jeu → nom affiché. */
+const CLASSES_MASQUE: [number, string][] = [
+  [1, "Guerrier"], [2, "Paladin"], [4, "Chasseur"], [8, "Voleur"], [16, "Prêtre"], [64, "Chaman"], [128, "Mage"], [256, "Démoniste"], [1024, "Druide"],
+];
+
+export interface TraitRacial {
+  nom: string;
+  icone: number;
+  passif: boolean;
+  /** Incantation, recharge, portée, coût : vide pour un trait passif. */
+  details: string[];
+  /** Une variante par groupe de classes (classes null : toutes les classes). */
+  variantes: { classes: string[] | null; description: string }[];
+}
+
 /** Lignes du jeu : techniques apprises par le dressage du chasseur, et techniques communes à toutes les bêtes. */
 const DRESSAGE = 261;
 const COMMUNES_BETES = 270;
 
 export interface BilanSorts {
   classes: Record<string, Specialisation[]>;
+  races: Record<string, TraitRacial[]>;
   familiers: Record<string, Familiers>;
   icones: number[];
   incompletes: number;
@@ -398,5 +419,56 @@ export function convertirSorts(csv: TablesSorts): BilanSorts {
   };
   for (const f of Object.values(familiers)) for (const g of f.familles) if (g.icone) icones.add(g.icone);
 
-  return { classes, familiers, icones: [...icones].sort((a, b) => a - b), incompletes };
+  // Traits raciaux : passifs compris, variantes par classe regroupées sous un même nom.
+  const races: BilanSorts["races"] = {};
+  for (const [race, ligne] of Object.entries(LIGNES_RACIALES)) {
+    const traits = new Map<string, TraitRacial & { ordre: number }>();
+    capacites.forEach((c, ordre) => {
+      if (n(c.SkillLine) !== ligne || n(c.AcquireMethod) === 3) return;
+      const id = n(c.Spell);
+      const nom = noms.get(id);
+      const m = divers.get(id);
+      if (!nom || !m || n(m.Attributes_0) & CACHE) return;
+      const passif = (n(m.Attributes_0) & PASSIF) !== 0;
+      const masque = n(c.ClassMask);
+      const classes = masque > 0 && (masque & 0x5df) !== 0x5df ? CLASSES_MASQUE.filter(([b]) => masque & b).map(([, x]) => x) : null;
+      const texte = description(id);
+      const t = traits.get(nom) ?? (() => {
+        const icone = n(m.SpellIconFileDataID);
+        if (icone) icones.add(icone);
+        const ms = incantations.get(n(m.CastingTimeIndex)) ?? 0;
+        const rc = recharges.get(id);
+        const recharge = Math.max(n(rc?.RecoveryTime), n(rc?.CategoryRecoveryTime));
+        const portee = portees.get(n(m.RangeIndex)) ?? 0;
+        const details = passif ? [] : [
+          (n(m.Attributes_1) & CANALISE) ? "Canalisé" : ms > 0 ? `Incantation ${dureeFr(ms)}` : "Instantané",
+          recharge >= 1500 ? `Recharge ${dureeFr(recharge)}` : null,
+          portee > 5 && portee < 1000 ? `Portée ${nombreFr(portee)}\u00a0m` : null,
+          texteCout(couts.get(id)),
+        ].filter((x): x is string => !!x);
+        return { nom, icone, passif, details, variantes: [], ordre };
+      })();
+      const meme = t.variantes.find((v) => v.description === texte);
+      if (meme) {
+        if (meme.classes && classes) meme.classes = [...new Set([...meme.classes, ...classes])];
+        else meme.classes = null;
+      } else {
+        t.variantes.push({ classes, description: texte });
+      }
+      traits.set(nom, t);
+    });
+    // Actifs d'abord, puis passifs, dans l'ordre du jeu.
+    races[race] = [...traits.values()]
+      .sort((a, b) => Number(a.passif) - Number(b.passif) || a.ordre - b.ordre)
+      .map(({ ordre: _ordre, ...t }) => ({
+        ...t,
+        // Une variante qui couvre toutes les classes vaut pour tout le monde.
+        variantes: t.variantes.map((v) => ({
+          ...v,
+          classes: v.classes && v.classes.length < CLASSES_MASQUE.length ? CLASSES_MASQUE.map(([, x]) => x).filter((x) => v.classes!.includes(x)) : null,
+        })),
+      }));
+  }
+
+  return { classes, races, familiers, icones: [...icones].sort((a, b) => a - b), incompletes };
 }

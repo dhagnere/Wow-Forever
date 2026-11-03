@@ -35,6 +35,7 @@ lancer("sorts:jeu", async () => {
       talents += s.talents.length;
     }
   }
+  console.log(`traits raciaux : ${Object.entries(bilan.races).map(([r, t]) => `${r} ${t.length}`).join(", ")}`);
   for (const [classe, f] of Object.entries(bilan.familiers)) {
     console.log(`familiers du ${classe} : ${f.familles.length} familles, ${f.techniques.length} techniques`);
   }
@@ -42,7 +43,7 @@ lancer("sorts:jeu", async () => {
 
   await writeFile(
     path.join(process.cwd(), "content/sorts-jeu.json"),
-    JSON.stringify({ version, genere: new Date().toISOString().slice(0, 10), classes: bilan.classes, familiers: bilan.familiers }),
+    JSON.stringify({ version, genere: new Date().toISOString().slice(0, 10), classes: bilan.classes, races: bilan.races, familiers: bilan.familiers }),
   );
   console.log(`${sorts} sorts, ${talents} talents ; ${bilan.incompletes} descriptions avec une valeur propre au personnage (« X »).`);
 

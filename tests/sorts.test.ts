@@ -141,4 +141,19 @@ describe("sorts produits (content/sorts-jeu.json)", () => {
     for (const d of f.familles) expect(d.techniques.length).toBeGreaterThanOrEqual(3);
     expect(f.techniques.find((t) => t.nom === "Verrou magique")!.familles).toEqual(["Chasseur corrompu"]);
   });
+
+  it("donne ses traits à chaque race, variantes de classe comprises", () => {
+    const races = (donnees as unknown as { races: Record<string, { nom: string; passif: boolean; variantes: { classes: string[] | null; description: string }[] }[]> }).races;
+    expect(Object.keys(races).sort()).toEqual(["elfe-de-la-nuit", "gnome", "humain", "mort-vivant", "nain", "orc", "skyborne", "tauren", "troll"]);
+    for (const traits of Object.values(races)) {
+      expect(traits.length).toBeGreaterThanOrEqual(4);
+      for (const t of traits) for (const v of t.variantes) expect(v.description).not.toMatch(/\$/);
+    }
+    // Même texte pour toutes les classes : une seule variante, sans liste de classes.
+    expect(races.orc.find((t) => t.nom === "Ordre")!.variantes).toEqual([expect.objectContaining({ classes: null })]);
+    const pensee = races.gnome.find((t) => t.nom === "Pensée expansive")!;
+    expect(pensee.passif).toBe(true);
+    expect(pensee.variantes.map((v) => v.classes)).toContainEqual(["Voleur"]);
+    expect(races.skyborne.map((t) => t.nom)).toEqual(expect.arrayContaining(["Marche sur l'air", "Vue céleste", "Lecture des lignes telluriques"]));
+  });
 });

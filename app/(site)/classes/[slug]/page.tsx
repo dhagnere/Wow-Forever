@@ -9,7 +9,7 @@ import { IconeRace } from "@/components/IconeRace";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { dateLongue } from "@/lib/site";
 import { ECRAN_CLASSE, fondBandeau } from "@/lib/ecrans";
-import { familiersDeClasse, sortsDeClasse } from "@/lib/sorts";
+import { familiersDeClasse, slugRace, sortsDeClasse } from "@/lib/sorts";
 import { SortsClasse } from "@/components/SortsClasse";
 import { FamiliersClasse } from "@/components/FamiliersClasse";
 
@@ -80,7 +80,7 @@ export default async function PageClasse({ params }: Props) {
                   <tbody>
                     {c.races.map((r) => (
                       <tr key={r.race}>
-                        <td style={{ fontWeight: 600 }}><span className="lien-icone"><IconeRace race={r.race} taille={32} />{r.lien ? <Link href={r.lien}>{r.race}</Link> : r.race}</span></td>
+                        <td style={{ fontWeight: 600 }}><span className="lien-icone"><IconeRace race={r.race} taille={32} /><Link href={r.lien ?? `/races/#${slugRace(r.race)}`}>{r.race}</Link></span></td>
                         <td>{r.faction}</td>
                         <td className="doux">{r.statut}</td>
                       </tr>

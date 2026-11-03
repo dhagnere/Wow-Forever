@@ -647,3 +647,12 @@ a:hover > .icone-jeu, a:hover .icone-jeu { border-color: var(--or-pale); box-sha
 @media (max-width: 980px) { .calc-arbres { grid-template-columns: minmax(0, 1fr); max-width: 420px; margin: 0 auto; } }
 @media (max-width: 600px) { .calc-detail .sort-desc { max-height: 6.5em; overflow-y: auto; } .calc-actions { margin-left: 0; } }
 .calc-sans-icone { display: grid; place-items: center; width: 100%; height: 100%; color: var(--texte-doux); font-weight: 700; font-size: 20px; }
+
+/* Traits raciaux */
+.races-traits { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 460px), 1fr)); gap: 18px; }
+.race-traits { padding: 14px; background: var(--surface-chaude); border: 1px solid var(--bordure); border-radius: 6px; scroll-margin-top: 16px; }
+.race-traits header { gap: 12px; margin-bottom: 12px; }
+.race-traits h3 { margin: 0; font-size: 20px; }
+.race-traits h3 a { color: inherit; }
+.race-traits .sort-meta { margin: 0; }
+.traits .sort { background: var(--surface); }

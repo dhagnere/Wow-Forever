@@ -6,6 +6,8 @@ import { IconesRace } from "@/components/IconeRace";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { dateLongue } from "@/lib/site";
 import { fondBandeau } from "@/lib/ecrans";
+import { traitsDeRace, versionSorts } from "@/lib/sorts";
+import { TraitsRaciaux } from "@/components/TraitsRaciaux";
 
 export const dynamic = "force-dynamic";
 
@@ -58,13 +60,11 @@ export default function Skyborne() {
 
             <section aria-labelledby="t-capacites">
               <h2 id="t-capacites" className="section-titre" style={{ fontSize: 26 }}>Capacités raciales</h2>
-              <p className="doux">Valeurs relevées pendant la bêta, susceptibles d&apos;évoluer. Noms anglais en attendant la traduction officielle.</p>
-              <div className="tableau-boite">
-                <table>
-                  <thead><tr><th scope="col">Capacité</th><th scope="col">Effet</th><th scope="col">Faction</th></tr></thead>
-                  <tbody>{s.capacites.map((c) => <tr key={c.nom}><td style={{ fontWeight: 600 }}>{c.nom}</td><td>{c.effet}</td><td>{c.faction}</td></tr>)}</tbody>
-                </table>
-              </div>
+              <p className="doux">
+                Noms et effets lus dans les fichiers du jeu{versionSorts() ? ` (version ${versionSorts()})` : ""}. Deux capacités dépendent de la faction,
+                d&apos;après la bêta ; les autres sont communes à tous les Skyborne.
+              </p>
+              <TraitsRaciaux traits={traitsDeRace("skyborne")} factions={s.factionsCapacites} />
             </section>
 
             <section aria-labelledby="t-acces">
