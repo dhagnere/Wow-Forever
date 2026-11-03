@@ -47,6 +47,8 @@ export { COOKIE_SESSION, DUREE_SESSION_S, creerJeton, jetonValide, motDePasseCor
 // Base d'objets (wago.tools).
 export type { Objet, ObjetResume, Categorie, FiltresObjets, EtatBase } from "./objets/depot";
 export { categoriesObjets, chercherObjets, lireObjet, iconeObjet, etatBase, listerObjetsPourPlan, OBJETS_PAR_PAGE } from "./objets/depot";
+export { NOMS_CARACTERISTIQUES, bonusPrincipal } from "./objets/caracteristiques";
+export type { Caracteristique } from "./objets/caracteristiques";
 export {
   qualite, QUALITES, emplacement, lien as lienObjet, classesAutorisees, decouperPrix, prixEnTexte, vitesse as vitesseArme, nomCategorie,
 } from "./objets/libelles";
@@ -68,3 +70,7 @@ export {
   deciderGuilde, listerGuildesPourPlan, ErreurGuilde, DUREE_VALIDITE_JOURS, empreinteDepot,
 } from "./guildes/depot";
 export { validerFiche, FACTIONS, TYPES_ROYAUME, OBJECTIFS, ROLES, CLASSES_GUILDE } from "./guildes/validation";
+
+// Où trouver les objets (données communautaires de l'Azeroth d'origine).
+export type { OuTrouver, SourceMonstre, SourceDecor, SourceMarchand, SourceQuete, Emplacement } from "./objets/butin";
+export { ouTrouver, RANGS, sourceDesDonnees } from "./objets/butin";

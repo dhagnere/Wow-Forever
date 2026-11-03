@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-  classesAutorisees, decouperPrix, emplacement, lienObjet, qualite, vitesseArme, type Objet, type ObjetResume,
+  bonusPrincipal, classesAutorisees, decouperPrix, emplacement, lienObjet, NOMS_CARACTERISTIQUES, qualite, vitesseArme, type Objet, type ObjetResume,
 } from "@/modules/veille";
 
 export function urlObjet(id: number): string {
@@ -93,12 +93,27 @@ export function FicheObjet({ objet }: { objet: Objet }) {
         {empl || objet.categorie ? (
           <li className="fiche-double"><span>{empl ?? ""}</span><span>{objet.categorie}</span></li>
         ) : null}
-        {estArme && objet.vitesseMs > 0 ? <li className="fiche-double"><span /><span>Vitesse {vitesseArme(objet.vitesseMs)}</span></li> : null}
+        {estArme && objet.vitesseMs > 0 ? (
+          <li className="fiche-double">
+            <span>{objet.degatsMin !== null && objet.degatsMax !== null ? `${objet.degatsMin} - ${objet.degatsMax} points de dégâts` : ""}</span>
+            <span>Vitesse {vitesseArme(objet.vitesseMs)}</span>
+          </li>
+        ) : null}
+        {estArme && objet.degatsMin !== null && objet.degatsMax !== null && objet.vitesseMs > 0 ? (
+          <li>({((objet.degatsMin + objet.degatsMax) / 2 / (objet.vitesseMs / 1000)).toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} dégâts par seconde)</li>
+        ) : null}
+        {objet.armure ? <li>Armure : {objet.armure}</li> : null}
+        {objet.caracteristiques.filter((c) => bonusPrincipal(c.type)).map((c, i) => (
+          <li key={`p${i}`}>+{c.valeur} {NOMS_CARACTERISTIQUES[c.type] ?? "caractéristique"}</li>
+        ))}
         {objet.casesSac > 0 ? <li>Sac de {objet.casesSac} emplacements</li> : null}
         {classes.length ? (
           <li>Classes : {classes.map((c, i) => <span key={c.slug}>{i ? ", " : ""}<Link href={`/classes/${c.slug}/`}>{c.nom}</Link></span>)}</li>
         ) : null}
         {objet.niveauRequis > 1 ? <li>Niveau {objet.niveauRequis} requis</li> : null}
+        {objet.caracteristiques.filter((c) => !bonusPrincipal(c.type)).map((c, i) => (
+          <li key={`e${i}`} className="fiche-equipe">Équipé : +{c.valeur} {NOMS_CARACTERISTIQUES[c.type] ?? "caractéristique"}</li>
+        ))}
         {objet.description ? <li className="fiche-description">« {objet.description} »</li> : null}
         {objet.prixVente > 0 ? <li>Prix de vente : <Prix cuivre={objet.prixVente} /></li> : null}
       </ul>

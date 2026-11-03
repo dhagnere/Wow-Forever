@@ -3,6 +3,7 @@ import { pool } from "../db/pool";
 import { normaliser } from "../collecte/texte";
 import { decoderBlp } from "./blp";
 import { convertirCategories, convertirEnsembles, convertirObjets, type LigneObjet } from "./conversion";
+import { preparerTables, TABLES_CARACTERISTIQUES, type Caracteristique } from "./caracteristiques";
 import { derniereVersion, fichierBrut, tableCsv } from "./wago";
 
 /** Base d'objets de WoW Forever : import depuis wago.tools, lecture pour le site, icônes en cache. */
@@ -34,6 +35,10 @@ export interface Objet extends ObjetResume {
   casesSac: number;
   nomClasse: string;
   ensemble: { id: number; nom: string; objets: ObjetResume[] } | null;
+  caracteristiques: Caracteristique[];
+  armure: number | null;
+  degatsMin: number | null;
+  degatsMax: number | null;
 }
 
 export interface Categorie {
@@ -62,14 +67,14 @@ export interface BilanImport { version: string; nombre: number; ignore: boolean;
 const COLONNES_OBJETS = [
   "id", "nom", "nom_recherche", "description", "classe", "sous_classe", "qualite", "niveau_objet", "niveau_requis",
   "emplacement", "lien", "classes_autorisees", "prix_vente", "prix_achat", "pile", "exemplaires_max", "vitesse_ms",
-  "cases_sac", "ensemble", "icone",
+  "cases_sac", "ensemble", "icone", "caracteristiques", "armure", "degats_min", "degats_max",
 ] as const;
 
 function valeursObjet(o: LigneObjet): unknown[] {
   return [
     o.id, o.nom, o.nomRecherche, o.description, o.classe, o.sousClasse, o.qualite, o.niveauObjet, o.niveauRequis,
     o.emplacement, o.lien, o.classesAutorisees, o.prixVente, o.prixAchat, o.pile, o.exemplairesMax, o.vitesseMs,
-    o.casesSac, o.ensemble, o.icone,
+    o.casesSac, o.ensemble, o.icone, JSON.stringify(o.caracteristiques), o.armure, o.degatsMin, o.degatsMax,
   ];
 }
 
@@ -101,7 +106,10 @@ export async function importerObjets(options: { forcer?: boolean; version?: stri
   const [sparse, item, classes, sousClasses, ensemblesCsv] = await Promise.all(
     ["ItemSparse", "Item", "ItemClass", "ItemSubClass", "ItemSet"].map((t) => tableCsv(t, version)),
   );
-  const objets = convertirObjets(sparse, item);
+  const tablesCsv = Object.fromEntries(
+    await Promise.all(TABLES_CARACTERISTIQUES.map(async (t) => [t, await tableCsv(t, version)] as const)),
+  ) as Record<(typeof TABLES_CARACTERISTIQUES)[number], string>;
+  const objets = convertirObjets(sparse, item, preparerTables(tablesCsv));
   const categories = convertirCategories(classes, sousClasses);
   const ensembles = convertirEnsembles(ensemblesCsv);
   // Garde-fou : une table quasi vide signale un incident chez wago.tools, pas une base de jeu vidée.
@@ -218,6 +226,7 @@ export async function lireObjet(id: number): Promise<Objet | null> {
   const { rows } = await pool().query<LigneResume & {
     description: string; lien: number; classes_autorisees: number; prix_vente: string; prix_achat: string; pile: number;
     exemplaires_max: number; vitesse_ms: number; cases_sac: number; ensemble: number | null; nom_classe: string | null; nom_ensemble: string | null;
+    caracteristiques: Caracteristique[] | null; armure: number | null; degats_min: number | null; degats_max: number | null;
   }>(
     `SELECT o.*, COALESCE(NULLIF(sc.nom_long, ''), sc.nom, c.nom) AS categorie, c.nom AS nom_classe, e.nom AS nom_ensemble
        FROM objets o
@@ -239,6 +248,7 @@ export async function lireObjet(id: number): Promise<Objet | null> {
     description: l.description, lien: l.lien, classesAutorisees: l.classes_autorisees,
     prixVente: Number(l.prix_vente), prixAchat: Number(l.prix_achat), pile: l.pile, exemplairesMax: l.exemplaires_max,
     vitesseMs: l.vitesse_ms, casesSac: l.cases_sac, nomClasse: l.nom_classe ?? "", ensemble,
+    caracteristiques: l.caracteristiques ?? [], armure: l.armure, degatsMin: l.degats_min, degatsMax: l.degats_max,
   };
 }
 

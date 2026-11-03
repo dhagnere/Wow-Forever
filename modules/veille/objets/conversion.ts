@@ -1,5 +1,6 @@
 import { parse } from "csv-parse/sync";
 import { normaliser } from "../collecte/texte";
+import { calculer, type Caracteristique, type TablesCaracteristiques } from "./caracteristiques";
 
 /**
  * Conversion des tables du jeu (ItemSparse, Item, ItemClass, ItemSubClass, ItemSet) en lignes de la base d'objets.
@@ -27,6 +28,10 @@ export interface LigneObjet {
   casesSac: number;
   ensemble: number | null;
   icone: number;
+  caracteristiques: Caracteristique[];
+  armure: number | null;
+  degatsMin: number | null;
+  degatsMax: number | null;
 }
 
 export interface LigneCategorie { classe: number; sousClasse: number; nom: string; nomLong: string }
@@ -74,7 +79,7 @@ export function objetInterne(nom: string, niveauRequis: number): boolean {
   return niveauRequis > NIVEAU_MAX || MOTIFS_INTERNES.some((m) => m.test(nom));
 }
 
-export function convertirObjets(sparseCsv: string, itemCsv: string): LigneObjet[] {
+export function convertirObjets(sparseCsv: string, itemCsv: string, tables?: TablesCaracteristiques): LigneObjet[] {
   const sparse = lignes(sparseCsv);
   const items = lignes(itemCsv);
   exigerColonnes("ItemSparse", sparse[0], ["ID", "Display_lang", "Description_lang", "OverallQualityID", "ItemLevel", "RequiredLevel", "InventoryType", "Bonding", "AllowableClass", "SellPrice", "BuyPrice"]);
@@ -86,6 +91,7 @@ export function convertirObjets(sparseCsv: string, itemCsv: string): LigneObjet[
     const item = parId.get(id);
     const nom = (s.Display_lang ?? "").trim();
     if (!item || !nom || id <= 0 || objetInterne(nom, entier(s.RequiredLevel))) continue;
+    const calcul = tables ? calculer(s, entier(item.ClassID), entier(item.SubclassID), tables) : { caracteristiques: [], armure: null, degatsMin: null, degatsMax: null };
     resultat.push({
       id,
       nom,
@@ -107,6 +113,7 @@ export function convertirObjets(sparseCsv: string, itemCsv: string): LigneObjet[
       casesSac: entier(s.ContainerSlots),
       ensemble: entier(s.ItemSet) > 0 ? entier(s.ItemSet) : null,
       icone: entier(item.IconFileDataID),
+      ...calcul,
     });
   }
   return resultat;

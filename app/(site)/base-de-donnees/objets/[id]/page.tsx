@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { emplacement, etatBase, lireObjet, nomCategorie, prixEnTexte, qualite } from "@/modules/veille";
+import { emplacement, etatBase, lireObjet, nomCategorie, ouTrouver, prixEnTexte, qualite } from "@/modules/veille";
+import { OuTrouver } from "@/components/OuTrouver";
 import { Ariane } from "@/components/Ariane";
 import { FicheObjet, Prix, TableauObjets } from "@/components/Objets";
 import { urlObjets } from "@/lib/objets";
@@ -64,6 +65,8 @@ export default async function FicheObjetPage({ params }: Props) {
             </dl>
           </div>
         </div>
+
+        <OuTrouver o={ouTrouver(o.id)} />
 
         {o.ensemble ? (
           <section aria-labelledby="t-ensemble" style={{ marginTop: 40 }}>

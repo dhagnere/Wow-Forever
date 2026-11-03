@@ -214,3 +214,9 @@ CREATE TABLE IF NOT EXISTS guildes (
   maj_le           TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS guildes_statut_idx ON guildes (statut, maj_le DESC);
+
+-- Caractéristiques calculées à l'import comme le fait le jeu (bonus, armure, dégâts des armes).
+ALTER TABLE objets ADD COLUMN IF NOT EXISTS caracteristiques JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE objets ADD COLUMN IF NOT EXISTS armure INTEGER;
+ALTER TABLE objets ADD COLUMN IF NOT EXISTS degats_min INTEGER;
+ALTER TABLE objets ADD COLUMN IF NOT EXISTS degats_max INTEGER;

@@ -40,6 +40,10 @@ Contenu déposé par des inconnus (`guildes/`). Chaque fiche passe par la relect
 
 Importée des fichiers du jeu par wago.tools (`objets/wago.ts`, produit `wowf`), en français. L'import remplace tout en une transaction et s'arrête si moins de 1 000 objets sont lus. Les objets internes (tests, équipement des monstres, objets périmés, niveau requis au-delà de 60) sont écartés par `objetInterne` (`objets/conversion.ts`). Les icônes ne sont demandées à wago.tools que pour un objet connu de la base, puis gardées en cache dans `objets_icones`. Garder le crédit wago.tools et la mention Blizzard (pages de la base et mentions légales). Les icônes de classes et de races, les écrans de chargement et les cartes du monde (`public/images/jeu/`) viennent de la même source : `npm run icones:jeu`, `npm run ecrans:jeu` et `npm run cartes:jeu` les refont. Les pages de lieux `/cartes/<lieu>/` relient les noms des guides (`content/reference.ts`) aux cartes par `lieuParNom` (`lib/cartes.ts`) : un nom qui diffère du jeu va dans `ALIAS` (le test `tests/cartes.test.ts` le signale). La liste des écrans est dans `config/ecrans.ts`, le choix de l'écran de chaque page dans `lib/ecrans.ts`. Chaque illustration porte la mention « © Blizzard Entertainment ».
 
+## Caractéristiques et sources des objets
+
+Les bonus, l'armure et les dégâts sont calculés à l'import par `objets/caracteristiques.ts`, comme le fait le jeu (budget du niveau d'objet × part de chaque bonus) ; les légendaires gardent des dégâts propres, non calculés. « Où le trouver » vient des bases libres CMaNGOS classic-db (GPL v3) et AzerothCore (noms français, GPL v2) : `npm run base:butin` produit `objets/donnees/butin.json.gz`, lu par `ouTrouver`. Les positions sont converties sur les cartes du jeu, la zone d'un point étant tranchée par les zones d'exploration des cartes. Ne pas récupérer ces données sur Wowhead ou un site équivalent : leurs bases sont protégées. Garder le crédit sur les fiches et dans les mentions légales.
+
 ## Commandes
 
 ```bash
@@ -55,7 +59,8 @@ npm run veille:revue     # rédige les meilleurs sujets de la dernière revue, s
 npm run veille:dossier   # dossiers de référence sur 60 jours (zones-depart, donjons, zones-niveaux), sans coût d'API
 npm run veille:facebook  # relais Facebook
 npm run veille:liens     # remplace les liens Google News des sources par l'adresse directe des articles (aussi fait chaque matin)
-npm run base:importer    # base d'objets depuis wago.tools (si nouvelle version du jeu ; --forcer, --icones)
+npm run base:importer    # base d'objets depuis wago.tools, caractéristiques comprises (si nouvelle version du jeu ; --forcer, --icones)
+npm run base:butin -- <dump CMaNGOS> <db_world AzerothCore>  # « où le trouver » → modules/veille/objets/donnees/butin.json.gz (fichier versionné)
 npm run visuels:generer  # PNG de l'enseigne, de l'icône du site et de l'avatar de Jobwow, depuis visuels/
 npm run cartes:jeu       # cartes du monde (continents, zones, Zéphras) assemblées depuis les tuiles du jeu → public/images/jeu/cartes/
 npm run ecrans:jeu       # écrans de chargement du jeu (config/ecrans.ts) → public/images/jeu/ecrans/, en 1600 et 800 pixels
