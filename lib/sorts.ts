@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { Familiers, Specialisation, TraitRacial } from "@/modules/veille";
+import { suffixe, type Langue } from "./langue";
 
 /**
  * Sorts et talents des classes, par spécialisation : content/sorts-jeu.json, produit par npm run sorts:jeu
@@ -15,27 +16,27 @@ interface DonneesSorts {
   races?: Record<string, TraitRacial[]>;
 }
 
-let cache: DonneesSorts | null | undefined;
-function donnees(): DonneesSorts | null {
-  if (cache === undefined) {
+const cache = new Map<Langue, DonneesSorts | null>();
+function donnees(langue: Langue = "fr"): DonneesSorts | null {
+  if (!cache.has(langue)) {
     try {
-      cache = JSON.parse(readFileSync(path.join(process.cwd(), "content/sorts-jeu.json"), "utf8")) as DonneesSorts;
+      cache.set(langue, JSON.parse(readFileSync(path.join(process.cwd(), `content/sorts-jeu${suffixe(langue)}.json`), "utf8")) as DonneesSorts);
     } catch {
-      cache = null;
+      cache.set(langue, null);
     }
   }
-  return cache;
+  return cache.get(langue)!;
 }
 
-export function sortsDeClasse(slug: string): { version: string; specialisations: Specialisation[] } | null {
-  const d = donnees();
+export function sortsDeClasse(slug: string, langue: Langue = "fr"): { version: string; specialisations: Specialisation[] } | null {
+  const d = donnees(langue);
   const specialisations = d?.classes[slug];
   return d && specialisations?.length ? { version: d.version, specialisations } : null;
 }
 
 /** Traits raciaux d'une race (slug du site : humain, elfe-de-la-nuit, skyborne…). */
-export function traitsDeRace(slug: string): TraitRacial[] {
-  return donnees()?.races?.[slug] ?? [];
+export function traitsDeRace(slug: string, langue: Langue = "fr"): TraitRacial[] {
+  return donnees(langue)?.races?.[slug] ?? [];
 }
 
 /** Nom de la race sur le site (« Elfe de la nuit ») → slug des traits raciaux (« elfe-de-la-nuit »). */
@@ -46,8 +47,8 @@ export function versionSorts(): string | null {
 }
 
 /** Familiers du chasseur (bêtes) et du démoniste (démons), avec leurs techniques. */
-export function familiersDeClasse(slug: string): Familiers | null {
-  const f = donnees()?.familiers?.[slug];
+export function familiersDeClasse(slug: string, langue: Langue = "fr"): Familiers | null {
+  const f = donnees(langue)?.familiers?.[slug];
   return f?.familles.length ? f : null;
 }
 

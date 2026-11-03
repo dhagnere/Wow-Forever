@@ -4,6 +4,7 @@ import { CLASSES } from "@/content/classes";
 import { SKYBORNE } from "@/content/monde";
 import { NIVEAUX_ZEPHRAS, QUETES_ZEPHRAS, type QueteZephras } from "@/content/zephras";
 import { carte } from "./cartes";
+import { suffixe, type Langue } from "./langue";
 
 /**
  * Guide de 1 à 60 : content/guide-jeu.json (npm run base:quetes), adapté à une race et une classe.
@@ -63,19 +64,20 @@ export const BITS_CLASSES: Record<string, number> = {
 
 const DEPARTS = new Set(RACES_GUIDE.filter((r) => !r.skyborne).map((r) => r.depart));
 
-let cache: { version: { jeu: string; source: string }; guide: Record<"alliance" | "horde", ZoneGuide[]> } | null | undefined;
-function donnees() {
-  if (cache === undefined) {
+type DonneesGuide = { version: { jeu: string; source: string }; guide: Record<"alliance" | "horde", ZoneGuide[]> };
+const cache = new Map<Langue, DonneesGuide | null>();
+function donnees(langue: Langue = "fr"): DonneesGuide | null {
+  if (!cache.has(langue)) {
     try {
-      cache = JSON.parse(readFileSync(path.join(process.cwd(), "content/guide-jeu.json"), "utf8"));
+      cache.set(langue, JSON.parse(readFileSync(path.join(process.cwd(), `content/guide-jeu${suffixe(langue)}.json`), "utf8")));
     } catch {
-      cache = null;
+      cache.set(langue, null);
     }
   }
-  return cache;
+  return cache.get(langue)!;
 }
 
-export const versionGuide = () => donnees()?.version ?? null;
+export const versionGuide = (langue: Langue = "fr") => donnees(langue)?.version ?? null;
 export const raceGuide = (slug: string) => RACES_GUIDE.find((r) => r.slug === slug);
 
 /** Combinaisons jouables (races de chaque classe, hors Skyborne qui démarrent sur l'île de Zéphras). */
@@ -129,8 +131,8 @@ export function zoneZephras(race: RaceGuide, classe: string, quetes: QueteZephra
   return { lieu: ZEPHRAS, niveaux: NIVEAUX_ZEPHRAS ?? [1, 10], hubs, etapes };
 }
 
-export function guidePour(race: RaceGuide, classe: string): ZoneGuide[] {
-  const d = donnees();
+export function guidePour(race: RaceGuide, classe: string, langue: Langue = "fr"): ZoneGuide[] {
+  const d = donnees(langue);
   const bitClasse = BITS_CLASSES[classe] ?? 0;
   if (race.skyborne) {
     // Après l'île : la route de la faction à partir du niveau 10, hors zones de départ des autres races ; seules les

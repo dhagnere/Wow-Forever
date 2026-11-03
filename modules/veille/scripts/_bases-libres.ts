@@ -80,9 +80,9 @@ export const VILLES = new Set(["hurlevent", "forgefer", "darnassus", "orgrimmar"
 export type Position = { z: Record<string, [number, number][]>; d?: [string, string | null] };
 
 /** Prépare la conversion des positions (tables de cartes du jeu lues une fois) pour un dump donné. */
-export async function preparerPositions(sql: string, version: string) {
+export async function preparerPositions(sql: string, version: string, locale: "frFR" | "enUS" = "frFR") {
   // --- Positions : monstres et objets du décor, convertis sur les cartes des zones.
-  const [assignCsv, uiMapCsv, mapCsv] = await Promise.all([tableCsv("UiMapAssignment", version), tableCsv("UiMap", version), tableCsv("Map", version)]);
+  const [assignCsv, uiMapCsv, mapCsv] = await Promise.all([tableCsv("UiMapAssignment", version), tableCsv("UiMap", version), tableCsv("Map", version, locale)]);
   const slugParUiMap = new Map<number, string>();
   for (const u of lireCsv(uiMapCsv)) {
     const s = slugLieu(u.Name_lang ?? "");

@@ -203,7 +203,7 @@ lancer("base:quetes", async () => {
   console.log(`${quetes.size} quêtes de l'Azeroth d'origine présentes dans Forever (${quetesForever.size} dans ses fichiers).`);
 
   // --- Positions des donneurs et receveurs cités.
-  const { positions, tuilesLues } = await preparerPositions(sql, version);
+  const { positions, tuilesLues } = await preparerPositions(sql, version, EN ? "enUS" : "frFR");
   const pnjCites = new Set<number>();
   const decorCites = new Set<number>();
   const citer = (r: Ref) => (r.t === "pnj" ? pnjCites.add(r.id) : r.t === "decor" ? decorCites.add(r.id) : null);

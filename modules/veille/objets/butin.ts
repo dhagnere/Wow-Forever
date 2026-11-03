@@ -18,16 +18,19 @@ interface Donnees {
   objets: Record<string, { m: [number, number, number][]; o: [number, number][]; v: number[]; q: number[]; a?: [number, number, number]; mt?: number }>;
 }
 
-let cache: Donnees | null | undefined;
-function donnees(): Donnees | null {
-  if (cache === undefined) {
+/** Version anglaise du site : butin.en.json.gz (noms d'origine de CMaNGOS). */
+type Langue = "fr" | "en";
+const cache = new Map<Langue, Donnees | null>();
+function donnees(langue: Langue = "fr"): Donnees | null {
+  if (!cache.has(langue)) {
     try {
-      cache = JSON.parse(gunzipSync(readFileSync(path.join(process.cwd(), "modules/veille/objets/donnees/butin.json.gz"))).toString("utf8")) as Donnees;
+      const f = langue === "en" ? "butin.en.json.gz" : "butin.json.gz";
+      cache.set(langue, JSON.parse(gunzipSync(readFileSync(path.join(process.cwd(), "modules/veille/objets/donnees", f))).toString("utf8")) as Donnees);
     } catch {
-      cache = null;
+      cache.set(langue, null);
     }
   }
-  return cache;
+  return cache.get(langue)!;
 }
 
 export interface Emplacement {
@@ -62,8 +65,8 @@ function emplacement(l: Lieu | undefined): Emplacement {
 
 export const RANGS: Record<number, string> = { 1: "Élite", 2: "Rare élite", 3: "Boss", 4: "Rare" };
 
-export function ouTrouver(idObjet: number): OuTrouver | null {
-  const d = donnees();
+export function ouTrouver(idObjet: number, langue: Langue = "fr"): OuTrouver | null {
+  const d = donnees(langue);
   const o = d?.objets[String(idObjet)];
   if (!d || !o) return null;
   const marchand = (id: number): SourceMarchand | null => {

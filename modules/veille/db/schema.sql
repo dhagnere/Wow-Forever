@@ -299,3 +299,7 @@ CREATE TABLE IF NOT EXISTS stats_recherches (
   resultats  INTEGER
 );
 CREATE INDEX IF NOT EXISTS stats_recherches_date_idx ON stats_recherches (cree_le);
+
+-- Version anglaise du site : noms et descriptions des objets en anglais, remplis à l'import.
+ALTER TABLE objets ADD COLUMN IF NOT EXISTS nom_en TEXT NOT NULL DEFAULT '';
+ALTER TABLE objets ADD COLUMN IF NOT EXISTS description_en TEXT NOT NULL DEFAULT '';

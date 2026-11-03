@@ -14,6 +14,7 @@ import { lignes, lireCsv, lireDump, n, preparerPositions } from "./_bases-libres
  * Données de l'Azeroth d'origine (1.12), base communautaire libre CMaNGOS classic-db (GPL v3) ; noms français des
  * créatures, objets du décor et quêtes : AzerothCore (GPL v2). Positions converties sur les cartes du jeu (UiMapAssignment).
  * Résultat : modules/veille/objets/donnees/butin.json.gz, lu par la fiche de chaque objet.
+ * Avec --en : noms d'origine de CMaNGOS (anglais), écrits dans butin.en.json.gz pour la version anglaise du site.
  */
 
 
@@ -21,7 +22,8 @@ import { lignes, lireCsv, lireDump, n, preparerPositions } from "./_bases-libres
 interface Ligne { entry: number; item: number; chance: number; groupe: number; ref: number; max: number }
 
 lancer("base:butin", async () => {
-  const [fichierDump, dossierLocales] = process.argv.slice(2);
+  const EN = process.argv.includes("--en");
+  const [fichierDump, dossierLocales] = process.argv.slice(2).filter((a) => !a.startsWith("--"));
   if (!fichierDump || !dossierLocales) throw new Error("Usage : npm run base:butin -- <dump CMaNGOS> <dossier db_world AzerothCore>");
   const sql = await lireDump(fichierDump);
   const locale = async (f: string) => readFile(path.join(dossierLocales, f), "utf8");
@@ -34,9 +36,12 @@ lancer("base:butin", async () => {
   const nomsCreatures = new Map<number, string>();
   const nomsObjetsDecor = new Map<number, string>();
   const titresQuetes = new Map<number, string>();
-  for (const l of lignes(await locale("creature_template_locale.sql"), "creature_template_locale")) if (l.locale === "frFR" && l.Name) nomsCreatures.set(n(l.entry), String(l.Name));
-  for (const l of lignes(await locale("gameobject_template_locale.sql"), "gameobject_template_locale")) if (l.locale === "frFR" && l.name) nomsObjetsDecor.set(n(l.entry), String(l.name));
-  for (const l of lignes(await locale("quest_template_locale.sql"), "quest_template_locale")) if (l.locale === "frFR" && l.Title) titresQuetes.set(n(l.ID), String(l.Title));
+  // En anglais, les noms d'origine de CMaNGOS suffisent ; en français, ceux d'AzerothCore.
+  if (!EN) {
+    for (const l of lignes(await locale("creature_template_locale.sql"), "creature_template_locale")) if (l.locale === "frFR" && l.Name) nomsCreatures.set(n(l.entry), String(l.Name));
+    for (const l of lignes(await locale("gameobject_template_locale.sql"), "gameobject_template_locale")) if (l.locale === "frFR" && l.name) nomsObjetsDecor.set(n(l.entry), String(l.name));
+    for (const l of lignes(await locale("quest_template_locale.sql"), "quest_template_locale")) if (l.locale === "frFR" && l.Title) titresQuetes.set(n(l.ID), String(l.Title));
+  }
 
   // --- Créatures.
   const creatures = new Map<number, { nom: string; min: number; max: number; rang: number; loot: number; vendeur: number }>();
@@ -96,7 +101,7 @@ lancer("base:butin", async () => {
     return res;
   }
 
-  const { positions, tuilesLues } = await preparerPositions(sql, version);
+  const { positions, tuilesLues } = await preparerPositions(sql, version, EN ? "enUS" : "frFR");
 
   // --- Sources par objet.
   type Sources = { m: [number, number, number][]; o: [number, number][]; v: number[]; q: number[]; a?: [number, number, number] };
@@ -186,6 +191,6 @@ lancer("base:butin", async () => {
   const dossier = path.join(process.cwd(), "modules/veille/objets/donnees");
   await mkdir(dossier, { recursive: true });
   const json = JSON.stringify(donnees);
-  await writeFile(path.join(dossier, "butin.json.gz"), gzipSync(json, { level: 9 }));
+  await writeFile(path.join(dossier, EN ? "butin.en.json.gz" : "butin.json.gz"), gzipSync(json, { level: 9 }));
   console.log(`${Object.keys(sortie).length} objets avec au moins une source ; ${citeesCreatures.size} créatures, ${citeesDecor.size} objets du décor, ${citeesQuetes.size} quêtes. ${(json.length / 1e6).toFixed(1)} Mo de données.`);
 });

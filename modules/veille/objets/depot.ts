@@ -67,14 +67,19 @@ export interface BilanImport { version: string; nombre: number; ignore: boolean;
 const COLONNES_OBJETS = [
   "id", "nom", "nom_recherche", "description", "classe", "sous_classe", "qualite", "niveau_objet", "niveau_requis",
   "emplacement", "lien", "classes_autorisees", "prix_vente", "prix_achat", "pile", "exemplaires_max", "vitesse_ms",
-  "cases_sac", "ensemble", "icone", "caracteristiques", "armure", "degats_min", "degats_max",
+  "cases_sac", "ensemble", "icone", "caracteristiques", "armure", "degats_min", "degats_max", "nom_en", "description_en",
 ] as const;
 
-function valeursObjet(o: LigneObjet): unknown[] {
+/** Noms et descriptions en anglais (version anglaise du site), lus dans les fichiers du jeu en enUS. */
+type Anglais = Map<number, { nom: string; description: string }>;
+
+function valeursObjet(o: LigneObjet, en: Anglais): unknown[] {
+  const a = en.get(o.id);
   return [
     o.id, o.nom, o.nomRecherche, o.description, o.classe, o.sousClasse, o.qualite, o.niveauObjet, o.niveauRequis,
     o.emplacement, o.lien, o.classesAutorisees, o.prixVente, o.prixAchat, o.pile, o.exemplairesMax, o.vitesseMs,
     o.casesSac, o.ensemble, o.icone, JSON.stringify(o.caracteristiques), o.armure, o.degatsMin, o.degatsMax,
+    a?.nom ?? "", a?.description ?? "",
   ];
 }
 
@@ -110,6 +115,10 @@ export async function importerObjets(options: { forcer?: boolean; version?: stri
     await Promise.all(TABLES_CARACTERISTIQUES.map(async (t) => [t, await tableCsv(t, version)] as const)),
   ) as Record<(typeof TABLES_CARACTERISTIQUES)[number], string>;
   const objets = convertirObjets(sparse, item, preparerTables(tablesCsv));
+  // Mêmes objets, noms et descriptions en anglais.
+  const anglais: Anglais = new Map(
+    convertirObjets(await tableCsv("ItemSparse", version, "enUS"), item).map((o) => [o.id, { nom: o.nom, description: o.description }]),
+  );
   const recettesCsv = Object.fromEntries(
     await Promise.all(["SkillLineAbility", "SpellEffect", "SpellReagents", "SpellName", "SkillLine", "ItemEffect", "ItemXItemEffect"].map(async (t) => [t, await tableCsv(t, version)] as const)),
   ) as Record<"SkillLineAbility" | "SpellEffect" | "SpellReagents" | "SpellName" | "SkillLine" | "ItemEffect" | "ItemXItemEffect", string>;
@@ -123,7 +132,7 @@ export async function importerObjets(options: { forcer?: boolean; version?: stri
   try {
     await client.query("BEGIN");
     await client.query("TRUNCATE objets, objets_categories, objets_ensembles, objets_recettes");
-    await insererParPaquets(client, "objets", COLONNES_OBJETS, objets.map(valeursObjet));
+    await insererParPaquets(client, "objets", COLONNES_OBJETS, objets.map((o) => valeursObjet(o, anglais)));
     await insererParPaquets(client, "objets_categories", ["classe", "sous_classe", "nom", "nom_long"],
       categories.map((c) => [c.classe, c.sousClasse, c.nom, c.nomLong]));
     await insererParPaquets(client, "objets_ensembles", ["id", "nom"], ensembles.map((e) => [e.id, e.nom]));

@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { carte } from "./cartes";
+import { suffixe, type Langue } from "./langue";
+import { CARTES_EN } from "@/content/lieux-en";
 
 /**
  * Guides de quêtes : content/quetes-jeu.json, produit par npm run base:quetes à partir des bases libres de l'Azeroth
@@ -54,24 +56,24 @@ interface DonneesQuetes {
   parcours: Record<"alliance" | "horde", EtapeParcours[]>;
 }
 
-let cache: DonneesQuetes | null | undefined;
-function donnees(): DonneesQuetes | null {
-  if (cache === undefined) {
+const cache = new Map<Langue, DonneesQuetes | null>();
+function donnees(langue: Langue = "fr"): DonneesQuetes | null {
+  if (!cache.has(langue)) {
     try {
-      cache = JSON.parse(readFileSync(path.join(process.cwd(), "content/quetes-jeu.json"), "utf8")) as DonneesQuetes;
+      cache.set(langue, JSON.parse(readFileSync(path.join(process.cwd(), `content/quetes-jeu${suffixe(langue)}.json`), "utf8")) as DonneesQuetes);
     } catch {
-      cache = null;
+      cache.set(langue, null);
     }
   }
-  return cache;
+  return cache.get(langue)!;
 }
 
-export const versionQuetes = () => donnees()?.version ?? null;
-export const chainesDeClasse = (slug: string): Chaine[] => donnees()?.classes[slug] ?? [];
-export const ficheQuete = (id: number): FicheQuete | undefined => donnees()?.quetes[String(id)];
-export const parcours = (camp: "alliance" | "horde"): EtapeParcours[] => donnees()?.parcours[camp] ?? [];
+export const versionQuetes = (langue: Langue = "fr") => donnees(langue)?.version ?? null;
+export const chainesDeClasse = (slug: string, langue: Langue = "fr"): Chaine[] => donnees(langue)?.classes[slug] ?? [];
+export const ficheQuete = (id: number, langue: Langue = "fr"): FicheQuete | undefined => donnees(langue)?.quetes[String(id)];
+export const parcours = (camp: "alliance" | "horde", langue: Langue = "fr"): EtapeParcours[] => donnees(langue)?.parcours[camp] ?? [];
 
-export const nomLieu = (slug: string) => carte(slug)?.nom ?? slug;
+export const nomLieu = (slug: string, langue: Langue = "fr") => (langue === "en" ? CARTES_EN[slug] : undefined) ?? carte(slug)?.nom ?? slug;
 
 /** Tranches d'affichage des quêtes de classe. Le niveau 60 regroupe les quêtes d'équipement de raid. */
 export const TRANCHES_QUETES: { titre: string; min: number; max: number }[] = [
