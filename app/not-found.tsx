@@ -6,6 +6,7 @@ export default function Introuvable() {
   return (
     <SiteCadre>
       <div className="wrap contenu centre">
+        <span hidden data-introuvable />
         <p className="surtitre">Erreur 404</p>
         <h1 className="titre" style={{ fontSize: 40 }}>Vous vous êtes égaré dans les Rives claires</h1>
         <p className="doux">Cette page n&apos;existe pas, ou plus. Jobwow vous raccompagne au comptoir.</p>

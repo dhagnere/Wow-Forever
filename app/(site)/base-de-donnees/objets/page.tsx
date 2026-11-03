@@ -44,6 +44,7 @@ export default async function ListeObjets({ searchParams }: Props) {
             { nom: titre },
           ]} />
           <p className="surtitre">Base de données</p>
+          {f.q ? <span hidden data-recherche={f.q} data-lieu="objets" data-resultats={total} /> : null}
           <h1>{f.q ? <>Objets : <span className="accent">« {f.q} »</span></> : titre}</h1>
           <p className="chapo">{total.toLocaleString("fr-FR")} objet{total > 1 ? "s" : ""}{f.q || f.qualite !== undefined || f.niveauMin !== undefined || f.niveauMax !== undefined ? " correspondant à votre recherche" : ""}.</p>
         </div>

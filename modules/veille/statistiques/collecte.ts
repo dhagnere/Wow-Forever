@@ -1,9 +1,10 @@
 import { pool } from "../db/pool";
-import { cheminMesurable, classerAppareil, classerSource, empreinteDuJour, estRobot } from "./classement";
+import { cheminMesurable, classerAppareil, classerSource, empreinteDuJour, estRobot, langueMesurable, paysDuFuseau, termeMesurable } from "./classement";
 
 /** Données envoyées par la page (composant <Mesure />). Tout est vérifié ici : rien n'est cru sur parole. */
 export type Signal =
-  | { t: "vue"; id: string; chemin: string; referent?: string; utm?: string; interne?: boolean }
+  | { t: "vue"; id: string; chemin: string; referent?: string; utm?: string; interne?: boolean; fuseau?: string; langue?: string; introuvable?: boolean }
+  | { t: "recherche"; lieu: "site" | "objets"; terme: string; resultats?: number }
   | { t: "fin"; id: string; duree: number; lecture: number }
   | { t: "cta_vue" | "cta_clic"; nom: string; chemin: string }
   | { t: "sortie"; lien: string; chemin: string };
@@ -43,8 +44,9 @@ export async function enregistrerSignal(s: Signal, c: Contexte): Promise<boolean
     if (!chemin || typeof s.id !== "string" || !ID.test(s.id)) return false;
     const source = s.interne ? "interne" : classerSource(typeof s.referent === "string" ? s.referent.slice(0, 500) : undefined, typeof s.utm === "string" ? s.utm.slice(0, 40) : undefined, c.hoteSite);
     await db.query(
-      "INSERT INTO stats_vues (id, visiteur, chemin, source, appareil) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO NOTHING",
-      [s.id, empreinteDuJour(sel(), c.ip, c.ua), chemin, source, classerAppareil(c.ua)],
+      `INSERT INTO stats_vues (id, visiteur, chemin, source, appareil, pays, langue, introuvable) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       ON CONFLICT (id) DO NOTHING`,
+      [s.id, empreinteDuJour(sel(), c.ip, c.ua), chemin, source, classerAppareil(c.ua), paysDuFuseau(s.fuseau), langueMesurable(s.langue), s.introuvable === true],
     );
     if (Math.random() < 0.002) await purger();
     return true;
@@ -66,6 +68,15 @@ export async function enregistrerSignal(s: Signal, c: Contexte): Promise<boolean
     await db.query("INSERT INTO stats_actions (type, nom, chemin) VALUES ($1, $2, $3)", [s.t, s.nom, chemin]);
     return true;
   }
+  if (s.t === "recherche") {
+    // Terme saisi dans la recherche du site ou de la base d'objets : filtré (ni adresse, ni long nombre), sans lien avec le
+    // visiteur ni avec ses autres pages.
+    const terme = termeMesurable(s.terme);
+    if (!terme || (s.lieu !== "site" && s.lieu !== "objets")) return false;
+    const n = Number(s.resultats);
+    await db.query("INSERT INTO stats_recherches (lieu, terme, resultats) VALUES ($1, $2, $3)", [s.lieu, terme, Number.isInteger(n) && n >= 0 ? Math.min(n, 100000) : null]);
+    return true;
+  }
   if (s.t === "sortie") {
     const chemin = cheminMesurable(s.chemin);
     const lien = sortieLisible(s.lien);
@@ -79,4 +90,5 @@ export async function enregistrerSignal(s: Signal, c: Contexte): Promise<boolean
 export async function purger(): Promise<void> {
   await pool().query(`DELETE FROM stats_vues WHERE cree_le < now() - interval '${CONSERVATION}'`);
   await pool().query(`DELETE FROM stats_actions WHERE cree_le < now() - interval '${CONSERVATION}'`);
+  await pool().query(`DELETE FROM stats_recherches WHERE cree_le < now() - interval '${CONSERVATION}'`);
 }

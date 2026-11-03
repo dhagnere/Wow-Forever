@@ -29,7 +29,27 @@ export interface Tableau {
   ctas: LigneCta[];
   sorties: { lien: string; clics: number }[];
   creneaux: number[][]; // [jour de la semaine 0 = lundi][heure 0-23] : pages vues
+  /** Visiteurs par pays, estimé d'après le fuseau horaire du navigateur. */
+  pays: Repartition[];
+  langues: Repartition[];
+  /** Recherches faites sur le site et dans la base d'objets ; « vides » : sans aucun résultat (contenus à écrire). */
+  recherches: { terme: string; lieu: string; nombre: number; sansResultat: number }[];
+  recherchesVides: { terme: string; lieu: string; nombre: number }[];
+  /** Pages introuvables (erreur 404) demandées, avec l'origine la plus fréquente : liens à corriger. */
+  introuvables: { chemin: string; vues: number; source: string }[];
+  /** Pages par lesquelles on arrive sur le site, depuis l'extérieur. */
+  entrees: { chemin: string; visites: number; source: string }[];
+  joueurs: StatsJoueurs;
   enseignements: string[];
+}
+
+export interface StatsJoueurs {
+  comptes: number;
+  nouveaux: number;
+  actifs7j: number;
+  abonnesLettre: number;
+  quetesRendues: number;
+  guides: { guide: string; joueurs: number; quetes: number }[];
 }
 
 /** Visites : suites de pages vues d'un même visiteur, séparées par moins de 30 minutes. */
@@ -75,6 +95,37 @@ function repartir(lignes: { cle: string; nombre: number }[], noms: (cle: string)
 
 const NOMS_APPAREILS: Record<string, string> = { mobile: "Mobile", tablette: "Tablette", ordinateur: "Ordinateur" };
 
+const nomsRegions = new Intl.DisplayNames(["fr"], { type: "region" });
+const nomsLangues = new Intl.DisplayNames(["fr"], { type: "language" });
+const nomPays = (c: string) => {
+  if (!c) return "Inconnu";
+  try { return nomsRegions.of(c) ?? c; } catch { return c; }
+};
+const nomLangue = (c: string) => {
+  if (!c) return "Inconnue";
+  try { return nomsLangues.of(c) ?? c; } catch { return c; }
+};
+
+/** Comptes joueurs et guide de 1 à 60 sur la période. */
+async function statsJoueurs(debut: Date, fin: Date): Promise<StatsJoueurs> {
+  const db = pool();
+  const [c, g] = await Promise.all([
+    db.query<{ comptes: number; nouveaux: number; actifs: number; lettre: number; quetes: number }>(
+      `SELECT (SELECT count(*)::int FROM joueurs) AS comptes,
+              (SELECT count(*)::int FROM joueurs WHERE cree_le >= $1 AND cree_le < $2) AS nouveaux,
+              (SELECT count(*)::int FROM joueurs WHERE vu_le > now() - interval '7 days') AS actifs,
+              (SELECT count(*)::int FROM joueurs WHERE lettre) AS lettre,
+              (SELECT COALESCE(sum(faites), 0)::int FROM progression_jours WHERE jour >= ($1 AT TIME ZONE 'Europe/Paris')::date AND jour <= ($2 AT TIME ZONE 'Europe/Paris')::date) AS quetes`,
+      [debut, fin],
+    ),
+    db.query<{ guide: string; joueurs: number; quetes: number }>(
+      "SELECT guide, count(*)::int AS joueurs, sum(cardinality(quetes))::int AS quetes FROM progression GROUP BY guide ORDER BY joueurs DESC, quetes DESC LIMIT 15",
+    ),
+  ]);
+  const r = c.rows[0];
+  return { comptes: r.comptes, nouveaux: r.nouveaux, actifs7j: r.actifs, abonnesLettre: r.lettre, quetesRendues: r.quetes, guides: g.rows };
+}
+
 export async function tableauStatistiques(jours = 30, maintenant = new Date()): Promise<Tableau> {
   const j = [7, 30, 90, 365].includes(jours) ? jours : 30;
   const fin = maintenant;
@@ -83,7 +134,7 @@ export async function tableauStatistiques(jours = 30, maintenant = new Date()): 
   const db = pool();
   const p = [debut, fin];
 
-  const [actuel, precedent, parJour, sources, appareils, pages, ctas, sorties, creneaux] = await Promise.all([
+  const [actuel, precedent, parJour, sources, appareils, pages, ctas, sorties, creneaux, pays, langues, recherches, vides, introuvables, entrees, joueurs] = await Promise.all([
     compteurs(debut, fin),
     compteurs(debutPrecedent, debut),
     db.query<{ jour: string; visiteurs: number; visites: number; pages_vues: number }>(
@@ -119,6 +170,33 @@ export async function tableauStatistiques(jours = 30, maintenant = new Date()): 
          FROM stats_vues WHERE cree_le >= $1 AND cree_le < $2 GROUP BY 1, 2`,
       p,
     ),
+    db.query<{ cle: string; nombre: number }>("SELECT pays AS cle, count(DISTINCT visiteur)::int AS nombre FROM stats_vues WHERE cree_le >= $1 AND cree_le < $2 GROUP BY 1", p),
+    db.query<{ cle: string; nombre: number }>("SELECT langue AS cle, count(DISTINCT visiteur)::int AS nombre FROM stats_vues WHERE cree_le >= $1 AND cree_le < $2 GROUP BY 1", p),
+    db.query<{ terme: string; lieu: string; nombre: number; vides: number }>(
+      `SELECT terme, lieu, count(*)::int AS nombre, count(*) FILTER (WHERE resultats = 0)::int AS vides
+         FROM stats_recherches WHERE cree_le >= $1 AND cree_le < $2 GROUP BY terme, lieu ORDER BY nombre DESC, terme LIMIT 25`,
+      p,
+    ),
+    db.query<{ terme: string; lieu: string; nombre: number }>(
+      `SELECT terme, lieu, count(*)::int AS nombre FROM stats_recherches
+        WHERE cree_le >= $1 AND cree_le < $2 AND resultats = 0 GROUP BY terme, lieu ORDER BY nombre DESC, terme LIMIT 20`,
+      p,
+    ),
+    db.query<{ chemin: string; vues: number; source: string }>(
+      `SELECT chemin, count(*)::int AS vues, mode() WITHIN GROUP (ORDER BY source) AS source
+         FROM stats_vues WHERE cree_le >= $1 AND cree_le < $2 AND introuvable GROUP BY chemin ORDER BY vues DESC LIMIT 20`,
+      p,
+    ),
+    db.query<{ chemin: string; visites: number; source: string }>(
+      `WITH v AS (
+         SELECT chemin, source, CASE WHEN cree_le - lag(cree_le) OVER (PARTITION BY visiteur ORDER BY cree_le) <= interval '30 minutes' THEN 0 ELSE 1 END AS debut
+           FROM stats_vues WHERE cree_le >= $1 AND cree_le < $2 AND NOT introuvable
+       )
+       SELECT chemin, count(*)::int AS visites, mode() WITHIN GROUP (ORDER BY source) AS source
+         FROM v WHERE debut = 1 AND source <> 'interne' GROUP BY chemin ORDER BY visites DESC LIMIT 15`,
+      p,
+    ),
+    statsJoueurs(debut, fin).catch(() => ({ comptes: 0, nouveaux: 0, actifs7j: 0, abonnesLettre: 0, quetesRendues: 0, guides: [] })),
   ]);
 
   const grille = Array.from({ length: 7 }, () => Array<number>(24).fill(0));
@@ -139,9 +217,23 @@ export async function tableauStatistiques(jours = 30, maintenant = new Date()): 
     ctas: ctas.rows.map((r) => ({ ...r, taux: r.affichages ? r.clics / r.affichages : 0 })),
     sorties: sorties.rows,
     creneaux: grille,
+    pays: repartir(pays.rows, nomPays),
+    langues: repartir(langues.rows, nomLangue),
+    recherches: recherches.rows.map((r) => ({ terme: r.terme, lieu: r.lieu, nombre: r.nombre, sansResultat: r.vides })),
+    recherchesVides: vides.rows,
+    introuvables: introuvables.rows.map((r) => ({ ...r, source: NOMS_SOURCES[r.source as Source] ?? r.source })),
+    entrees: entrees.rows.map((r) => ({ ...r, source: NOMS_SOURCES[r.source as Source] ?? r.source })),
+    joueurs,
     enseignements: [],
   };
   t.enseignements = enseignements(t);
+  // Les manques : ce que les visiteurs cherchent sans le trouver.
+  if (t.recherchesVides.length) {
+    const top = t.recherchesVides.slice(0, 3).map((r) => `« ${r.terme} »`).join(", ");
+    t.enseignements.push(`Recherches sans résultat : ${top}. Autant de sujets d'article ou de pages à compléter.`);
+  }
+  const perdues = t.introuvables.reduce((n, r) => n + r.vues, 0);
+  if (perdues) t.enseignements.push(`${perdues} visite${perdues > 1 ? "s" : ""} sur une page introuvable : corriger ou rediriger les liens listés plus bas.`);
   return t;
 }
 

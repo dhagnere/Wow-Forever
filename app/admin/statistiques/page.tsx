@@ -3,6 +3,7 @@ import Link from "next/link";
 import { exigerAdmin } from "@/lib/admin";
 import { evolution, statsFacebook, tableauStatistiques, type Compteurs } from "@/modules/veille";
 import { dateCourte } from "@/lib/site";
+import { libelleGuide } from "@/lib/guide";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Statistiques" };
@@ -98,6 +99,96 @@ export default async function Statistiques({ searchParams }: { searchParams: Pro
           ) : <p className="doux">Aucun clic vers un autre site.</p>}
         </section>
       </div>
+
+      <div className="stats-deux">
+        <section className="stats-bloc">
+          <h2>Pays des visiteurs</h2>
+          <p className="doux" style={{ marginTop: 0 }}>Estimés d&apos;après le fuseau horaire du navigateur, sans adresse IP.</p>
+          <Barres lignes={t.pays.slice(0, 12)} />
+        </section>
+        <section className="stats-bloc">
+          <h2>Langues des navigateurs</h2>
+          <Barres lignes={t.langues.slice(0, 10)} />
+        </section>
+      </div>
+
+      <div className="stats-deux">
+        <section className="stats-bloc">
+          <h2>Mots cherchés sur le site</h2>
+          <p className="doux" style={{ marginTop: 0 }}>Recherche des articles et de la base d&apos;objets.</p>
+          {t.recherches.length ? (
+            <div className="tableau-boite">
+              <table>
+                <thead><tr><th scope="col">Terme</th><th scope="col">Où</th><th scope="col" className="num">Recherches</th><th scope="col" className="num">Sans résultat</th></tr></thead>
+                <tbody>
+                  {t.recherches.map((r) => (
+                    <tr key={`${r.lieu}-${r.terme}`}>
+                      <td><a href={r.lieu === "objets" ? `/base-de-donnees/objets/?q=${encodeURIComponent(r.terme)}` : `/recherche/?q=${encodeURIComponent(r.terme)}`} target="_blank" rel="noreferrer">{r.terme}</a></td>
+                      <td className="doux">{r.lieu === "objets" ? "Objets" : "Articles"}</td>
+                      <td className="num">{nf.format(r.nombre)}</td>
+                      <td className="num">{r.sansResultat ? nf.format(r.sansResultat) : "–"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : <p className="doux">Aucune recherche sur la période.</p>}
+        </section>
+        <section className="stats-bloc">
+          <h2>Recherches sans résultat</h2>
+          <p className="doux" style={{ marginTop: 0 }}>Ce que les visiteurs veulent et ne trouvent pas : idées d&apos;articles ou de pages.</p>
+          {t.recherchesVides.length ? (
+            <ul className="stats-liste">{t.recherchesVides.map((r) => <li key={`${r.lieu}-${r.terme}`}><span>{r.terme} <span className="doux">({r.lieu === "objets" ? "objets" : "articles"})</span></span><strong>{r.nombre}</strong></li>)}</ul>
+          ) : <p className="doux">Toutes les recherches ont trouvé quelque chose.</p>}
+        </section>
+      </div>
+
+      <div className="stats-deux">
+        <section className="stats-bloc">
+          <h2>Pages d&apos;entrée</h2>
+          <p className="doux" style={{ marginTop: 0 }}>Première page des visites venues de l&apos;extérieur, avec leur origine la plus fréquente.</p>
+          {t.entrees.length ? (
+            <ul className="stats-liste">{t.entrees.map((e) => <li key={e.chemin}><span><a href={e.chemin} target="_blank" rel="noreferrer">{e.chemin}</a> <span className="doux">· {e.source}</span></span><strong>{nf.format(e.visites)}</strong></li>)}</ul>
+          ) : <p className="doux">Aucune visite venue de l&apos;extérieur.</p>}
+        </section>
+        <section className="stats-bloc">
+          <h2>Pages introuvables (404)</h2>
+          <p className="doux" style={{ marginTop: 0 }}>Adresses demandées qui n&apos;existent pas : un lien à corriger, ici ou sur le site d&apos;origine.</p>
+          {t.introuvables.length ? (
+            <ul className="stats-liste">{t.introuvables.map((e) => <li key={e.chemin}><span><code>{e.chemin}</code> <span className="doux">· {e.source}</span></span><strong>{nf.format(e.vues)}</strong></li>)}</ul>
+          ) : <p className="doux">Aucune page introuvable sur la période.</p>}
+        </section>
+      </div>
+
+      <section className="stats-bloc">
+        <h2>Joueurs inscrits et guide de 1 à 60</h2>
+        <div className="stats-compteurs" style={{ marginBottom: 16 }}>
+          <div className="stats-compteur"><p>Comptes</p><strong>{nf.format(t.joueurs.comptes)}</strong><span className="doux">+{nf.format(t.joueurs.nouveaux)} sur la période</span></div>
+          <div className="stats-compteur"><p>Actifs sur 7 jours</p><strong>{nf.format(t.joueurs.actifs7j)}</strong><span className="doux">{t.joueurs.comptes ? pct(t.joueurs.actifs7j / t.joueurs.comptes) : "–"} des comptes</span></div>
+          <div className="stats-compteur"><p>Lettre demandée</p><strong>{nf.format(t.joueurs.abonnesLettre)}</strong><span className="doux">depuis un compte</span></div>
+          <div className="stats-compteur"><p>Quêtes rendues</p><strong>{nf.format(t.joueurs.quetesRendues)}</strong><span className="doux">cochées sur la période</span></div>
+        </div>
+        {t.joueurs.guides.length ? (
+          <div className="tableau-boite">
+            <table>
+              <thead><tr><th scope="col">Guide suivi</th><th scope="col" className="num">Joueurs</th><th scope="col" className="num">Quêtes cochées</th></tr></thead>
+              <tbody>
+                {t.joueurs.guides.map((g) => (
+                  <tr key={g.guide}><td><a href={libelleGuide(g.guide).lien} target="_blank" rel="noreferrer">{libelleGuide(g.guide).nom.replace("Guide de 1 à 60 · ", "")}</a></td><td className="num">{nf.format(g.joueurs)}</td><td className="num">{nf.format(g.quetes)}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <p className="doux">Aucun guide commencé par un joueur inscrit.</p>}
+      </section>
+
+      <section className="stats-bloc">
+        <h2>Mots-clés tapés dans Google</h2>
+        <p className="doux" style={{ margin: 0 }}>
+          Google ne transmet plus les mots-clés aux sites visités : ils ne sont visibles que dans la Google Search Console (requêtes, impressions,
+          clics, position). Une fois le site validé dans la Search Console, ce tableau pourra les reprendre automatiquement.
+        </p>
+      </section>
 
       <section className="stats-bloc">
         <h2>Pages</h2>

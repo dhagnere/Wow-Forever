@@ -2,6 +2,7 @@
  * Classement des visites, sans réseau ni base : origine, appareil, robots, empreinte du jour.
  * Fonctions pures, testées.
  */
+import { PAYS_PAR_FUSEAU } from "./fuseaux";
 import { createHash } from "node:crypto";
 
 export const SOURCES = ["google", "moteurs", "facebook", "instagram", "tiktok", "x", "discord", "lettre", "sites", "direct", "interne"] as const;
@@ -73,4 +74,29 @@ export function cheminMesurable(chemin: unknown): string | null {
   // /guildes/modifier/… contient le lien secret d'une fiche : jamais mesuré.
   if (/^\/(admin|reseaux|api|_next|medias)(\/|$)/.test(propre) || propre.startsWith("/guildes/modifier")) return null;
   return propre;
+}
+
+/** Pays estimé d'après le fuseau horaire du navigateur (« Europe/Brussels » → BE) ; '' si inconnu. Aucune adresse IP. */
+export function paysDuFuseau(fuseau: unknown): string {
+  return typeof fuseau === "string" && fuseau.length < 60 ? PAYS_PAR_FUSEAU[fuseau] ?? "" : "";
+}
+
+/** Langue du navigateur, réduite à sa forme courte (« fr-FR », « fr », « en-US ») ; '' sinon. */
+export function langueMesurable(langue: unknown): string {
+  if (typeof langue !== "string") return "";
+  const m = /^([a-z]{2,3})(?:-([A-Za-z]{2}))?/.exec(langue.trim());
+  return m ? (m[2] ? `${m[1]}-${m[2].toUpperCase()}` : m[1]) : "";
+}
+
+/**
+ * Terme de recherche gardé pour les statistiques : minuscules, espaces réduits, 2 à 60 caractères, lettres, chiffres et
+ * ponctuation simple. Une adresse électronique, un lien ou un nombre de cinq chiffres ou plus (téléphone, code) est refusé.
+ */
+export function termeMesurable(terme: unknown): string | null {
+  if (typeof terme !== "string") return null;
+  const t = terme.normalize("NFC").toLowerCase().replace(/\s+/g, " ").trim();
+  if (t.length < 2 || t.length > 60) return null;
+  if (/[@<>{}\\]|https?:|www\.|\d{5,}/.test(t)) return null;
+  if (!/^[\p{L}\p{N} '’:,.!?()&+-]+$/u.test(t)) return null;
+  return t;
 }

@@ -23,6 +23,7 @@ export default async function Recherche({ searchParams }: { searchParams: Promis
         </div>
       </section>
       <div className="wrap contenu">
+        {q ? <span hidden data-recherche={q} data-lieu="site" data-resultats={articles.length} /> : null}
         <Repertoire articles={articles} total={articles.length} page={1} base="/recherche/" requete={q} />
       </div>
     </>

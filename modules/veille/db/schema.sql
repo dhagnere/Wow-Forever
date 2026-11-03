@@ -285,3 +285,17 @@ CREATE TABLE IF NOT EXISTS progression_jours (
   faites     INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (joueur_id, guide, jour)
 );
+
+-- Statistiques d'audience, compléments : pays estimé d'après le fuseau horaire du navigateur (jamais d'après l'adresse IP),
+-- langue du navigateur, pages introuvables, et recherches faites sur le site (termes filtrés, sans lien avec le visiteur).
+ALTER TABLE stats_vues ADD COLUMN IF NOT EXISTS pays TEXT NOT NULL DEFAULT '';
+ALTER TABLE stats_vues ADD COLUMN IF NOT EXISTS langue TEXT NOT NULL DEFAULT '';
+ALTER TABLE stats_vues ADD COLUMN IF NOT EXISTS introuvable BOOLEAN NOT NULL DEFAULT false;
+CREATE TABLE IF NOT EXISTS stats_recherches (
+  id         BIGSERIAL PRIMARY KEY,
+  cree_le    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  lieu       TEXT NOT NULL CHECK (lieu IN ('site', 'objets')),
+  terme      TEXT NOT NULL,
+  resultats  INTEGER
+);
+CREATE INDEX IF NOT EXISTS stats_recherches_date_idx ON stats_recherches (cree_le);

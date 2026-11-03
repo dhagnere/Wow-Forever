@@ -30,7 +30,7 @@ Site de fans francophone non officiel consacré à World of Warcraft: Forever. N
 
 ## Statistiques d'audience
 
-Mesure maison, sans cookie ni stockage dans le navigateur (`components/Mesure.tsx` → `/api/mesure` → `statistiques/collecte.ts`). Ne jamais enregistrer l'adresse IP, un identifiant durable ni les paramètres d'adresse : le visiteur est une empreinte salée (`STATS_SEL`) recalculée chaque jour. Les refus de suivi du navigateur (DNT, GPC) sont respectés ; les données de plus de 13 mois sont effacées. Tableau de bord : `/admin/statistiques` (`exigerAdmin()`). Un bouton se mesure en lui donnant un attribut `data-cta="nom-court"`.
+Mesure maison, sans cookie ni stockage dans le navigateur (`components/Mesure.tsx` → `/api/mesure` → `statistiques/collecte.ts`). Ne jamais enregistrer l'adresse IP, un identifiant durable ni les paramètres d'adresse : le visiteur est une empreinte salée (`STATS_SEL`) recalculée chaque jour. Les refus de suivi du navigateur (DNT, GPC) sont respectés ; les données de plus de 13 mois sont effacées. Le pays est estimé d'après le fuseau horaire du navigateur (`statistiques/fuseaux.ts`, table IANA), jamais d'après l'IP ; la langue du navigateur est réduite à sa forme courte (`fr-FR`). Seule exception aux paramètres d'adresse : le terme tapé dans la recherche du site ou de la base d'objets, envoyé par la page (`data-recherche`), filtré par `termeMesurable` (ni adresse électronique, ni lien, ni nombre de cinq chiffres ou plus) et gardé dans `stats_recherches`, sans lien avec le visiteur. Les pages introuvables se signalent par `data-introuvable` (page 404). Tableau de bord : `/admin/statistiques` (`exigerAdmin()`). Un bouton se mesure en lui donnant un attribut `data-cta="nom-court"`.
 
 ## Tableau des guildes
 

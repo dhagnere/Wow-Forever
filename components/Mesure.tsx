@@ -34,7 +34,14 @@ export function Mesure() {
     if (navigator.doNotTrack === "1" || (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl) return;
     const id = idAleatoire();
     const utm = new URLSearchParams(location.search).get("utm_source") ?? undefined;
-    envoyer([{ t: "vue", id, chemin, referent: premiere.current ? document.referrer : undefined, utm, interne: !premiere.current && !utm }]);
+    // Fuseau horaire et langue du navigateur : le serveur en déduit le pays, sans jamais garder l'adresse IP.
+    let fuseau: string | undefined;
+    try { fuseau = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { fuseau = undefined; }
+    const introuvable = !!document.querySelector("[data-introuvable]");
+    envoyer([{ t: "vue", id, chemin, referent: premiere.current ? document.referrer : undefined, utm, interne: !premiere.current && !utm, fuseau, langue: navigator.language, introuvable }]);
+    // Recherche faite sur le site : le terme et le nombre de résultats, que la page indique elle-même.
+    const r = document.querySelector<HTMLElement>("[data-recherche]");
+    if (r?.dataset.recherche) envoyer([{ t: "recherche", lieu: r.dataset.lieu, terme: r.dataset.recherche, resultats: Number(r.dataset.resultats) }]);
     premiere.current = false;
 
     // Durée de lecture : seulement le temps où la page est visible.

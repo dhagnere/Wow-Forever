@@ -24,8 +24,11 @@ export default function Confidentialite() {
         <p>
           Le site compte ses visites avec son propre outil, hébergé chez Scalingo en France. Il ne dépose aucun cookie et n&apos;enregistre ni votre
           adresse IP ni aucun identifiant durable : chaque visiteur reçoit un code anonyme recalculé chaque jour, impossible à relier d&apos;un jour
-          à l&apos;autre. Sont mesurés la page vue, le site d&apos;où vous venez, le type d&apos;appareil, la durée et la part de lecture, ainsi que
-          les clics sur les boutons du site. Ces chiffres servent à savoir quels articles sont lus, pour mieux écrire les suivants.
+          à l&apos;autre. Sont mesurés la page vue, le site d&apos;où vous venez, le type d&apos;appareil, la durée et la part de lecture, les clics
+          sur les boutons du site, et les pages introuvables. Le pays est estimé d&apos;après le fuseau horaire de votre navigateur (jamais d&apos;après
+          votre adresse IP), avec la langue de celui-ci. Les mots tapés dans la recherche du site sont comptés à part, sans lien avec vous ni avec
+          vos autres pages ; une adresse électronique, un lien ou un long nombre n&apos;est jamais gardé. Ces chiffres servent à savoir quels articles
+          sont lus et ce qui manque au site, pour mieux écrire les suivants.
         </p>
 
         <h2>Google Tag Manager et Google Analytics</h2>
