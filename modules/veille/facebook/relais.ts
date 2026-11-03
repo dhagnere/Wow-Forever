@@ -1,5 +1,5 @@
 import { config } from "../config";
-import { texteReseau, urlArticle } from "../reseaux/textes";
+import { lienSuivi, texteReseau, urlArticle } from "../reseaux/textes";
 import { obtenirVideo } from "../reels/stockage";
 import { publierReelInstagram } from "../reseaux/instagram";
 import { etatTiktok, publierTiktok } from "../reseaux/tiktok";
@@ -44,7 +44,7 @@ export function requeteFacebook(a: Pick<Article, "accrocheFacebook" | "texteFace
 } {
   const message = messageFacebook(a);
   if (a.imageFacebookId) return { chemin: "photos", params: { url: urlMedia(a.imageFacebookId), message } };
-  return { chemin: "feed", params: { message, link: urlArticle(a.slug) } };
+  return { chemin: "feed", params: { message, link: lienSuivi(a.slug, "facebook") } };
 }
 
 async function publierSurPage(a: Article): Promise<string> {

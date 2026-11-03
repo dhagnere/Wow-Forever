@@ -66,7 +66,7 @@ export default function Skyborne() {
             </section>
 
             <section className="avis" aria-labelledby="t-avis">
-              <div className="avis-titre"><span className="avatar" aria-hidden="true">S</span><h2 id="t-avis">L&apos;avis de Silfax</h2></div>
+              <div className="avis-titre"><span className="avatar" aria-hidden="true">S</span><h2 id="t-avis">L&apos;avis de Jobwow</h2></div>
               <p className="doux" style={{ margin: 0 }}>{s.avis}</p>
             </section>
 
@@ -78,7 +78,7 @@ export default function Skyborne() {
             <ArticlesLies pilier="races/skyborne" />
           </div>
           <aside className="colonne-laterale">
-            <p className="doux" style={{ margin: 0, fontSize: 14 }}>Fiche mise à jour le {dateLongue(s.misAJour)} par Silfax.</p>
+            <p className="doux" style={{ margin: 0, fontSize: 14 }}>Fiche mise à jour le {dateLongue(s.misAJour)} par Jobwow.</p>
           </aside>
         </div>
       </div>

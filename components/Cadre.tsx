@@ -4,19 +4,16 @@ import { SITE } from "@/lib/site";
 import { GererCookies } from "./BandeauCookies";
 import { Decompte } from "./Decompte";
 
-/** Médaillon Silfax, décoratif : le nom du site est écrit à côté. */
+/** Enseigne de la Taverne (chope et sablier), décorative : le nom du site est écrit à côté. */
 export function Medaillon({ taille }: { taille: number }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src="/images/logo-silfax-96.png"
-      srcSet="/images/logo-silfax-96.png 1x, /images/logo-silfax-192.png 2x"
-      width={taille}
-      height={taille}
-      alt=""
-      className="logo-medaillon"
-    />
+    <img src="/images/enseigne-taverne.svg" width={Math.round((taille * 240) / 228)} height={taille} alt="" className="logo-medaillon" />
   );
+}
+
+export function NomSite() {
+  return <span className="logo-texte">LA TAVERNE <span>ÉTERNELLE</span></span>;
 }
 
 export function Entete() {
@@ -24,16 +21,17 @@ export function Entete() {
     <header className="entete">
       <div className="wrap entete-haut">
         <Decompte />
-        <Link href="/" className="logo logo-pile" aria-label="Azeroth Forever, accueil">
+        <Link href="/" className="logo logo-pile" aria-label="La Taverne Éternelle, accueil">
           <Medaillon taille={56} />
-          <span className="logo-texte">AZEROTH <span>FOREVER</span></span>
+          <NomSite />
         </Link>
         <div className="outils-entete">
+          <Link href="/lettre/" className="btn btn-or btn-petit" data-cta="lettre-entete">Recevoir la Lettre</Link>
           <Link href="/recherche/" aria-label="Rechercher dans les articles">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
             <span className="sr-only">Rechercher</span>
           </Link>
-          <a href={SITE.facebook} rel="noopener noreferrer" aria-label="Page Facebook Azeroth Forever">
+          <a href={SITE.facebook} rel="noopener noreferrer" aria-label="Page Facebook de la Taverne Éternelle">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 3h-2a4 4 0 0 0-4 4v3H7v4h2v7h4v-7h3l1-4h-4V7a1 1 0 0 1 1-1h2z" /></svg>
           </a>
         </div>
@@ -49,16 +47,21 @@ export function Entete() {
 
 const LIENS_PIED: [string, string][] = [
   ["/actualites/", "Actualités"],
+  ["/calendrier/", "Calendrier"],
   ["/guides/bien-demarrer/", "Guides"],
   ["/classes/", "Classes"],
   ["/races/", "Races"],
   ["/zones/", "Zones"],
   ["/guides/liste-des-donjons/", "Donjons"],
-  ["/carnet/", "Carnet de Silfax"],
+  ["/carnet/", "Carnet de Jobwow"],
   ["/recherche/", "Recherche"],
   ["/plan-du-site/", "Plan du site"],
-  ["/a-propos/", "Qui est Silfax ?"],
+  ["/lettre/", "La Lettre"],
+  ["/communaute/", "Communauté"],
+  ["/a-propos/", "Qui est Jobwow ?"],
+  ["/contact/", "Contact"],
   ["/mentions-legales/", "Mentions légales"],
+  ["/confidentialite/", "Confidentialité"],
 ];
 
 export function Pied() {
@@ -72,13 +75,14 @@ export function Pied() {
         <div className="wrap pied-corps">
           <div className="pied-marque">
             <p className="logo" style={{ fontSize: 20, margin: 0 }}>
-              <span className="logo-texte">AZEROTH <span>FOREVER</span></span>
+              <NomSite />
             </p>
-            <p>WoW Forever en français, de 1 à 60. Écrit et relu par Silfax.</p>
+            <p>{SITE.signature}.</p>
           </div>
           <nav aria-label="Pied de page" className="pied-liens">
             {LIENS_PIED.map(([href, nom]) => <Link key={href} href={href}>{nom}</Link>)}
             <a href={SITE.facebook} rel="noopener noreferrer">Page Facebook</a>
+            {SITE.discord ? <a href={SITE.discord} rel="noopener noreferrer">Discord</a> : null}
             {SITE.gtmId ? <GererCookies /> : null}
           </nav>
         </div>
@@ -87,7 +91,7 @@ export function Pied() {
             {SITE.mentionBlizzard} Les captures d&apos;écran du jeu restent la propriété de Blizzard Entertainment. Certains liens
             sont affiliés : ils peuvent rapporter une commission au site, sans surcoût pour vous.
           </p>
-          <p className="pied-devise">Écrit par un joueur, pour les joueurs ✦</p>
+          <p className="pied-devise">Écrit par un joueur, pour les joueurs ✦ <a href="/rss.xml">Flux RSS</a></p>
         </div>
       </footer>
     </>

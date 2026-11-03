@@ -137,8 +137,8 @@ export async function ecrireArticle(): Promise<void> {
 }
 
 /**
- * Demande à l'IA une proposition d'avis de Silfax, à partir du texte en cours d'édition.
- * La proposition est conservée à part : elle n'entre dans l'avis que si Silfax la reprend.
+ * Demande à l'IA une proposition d'avis de Jobwow, à partir du texte en cours d'édition.
+ * La proposition est conservée à part : elle n'entre dans l'avis que si Jobwow la reprend.
  */
 export async function proposerAvisPour(
   id: number,

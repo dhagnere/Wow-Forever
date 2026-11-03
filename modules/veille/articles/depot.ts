@@ -163,7 +163,7 @@ export async function definirImage(id: number, emplacement: "une" | "facebook", 
   if (emplacement === "une") await oublierVideo(id);
 }
 
-/** Conserve la dernière proposition d'avis de l'IA (n'écrit jamais dans l'avis de Silfax). */
+/** Conserve la dernière proposition d'avis de l'IA (n'écrit jamais dans l'avis de Jobwow). */
 export async function enregistrerAvisPropose(id: number, avis: string): Promise<void> {
   await pool().query("UPDATE articles SET avis_propose = $2 WHERE id = $1", [id, avis]);
 }

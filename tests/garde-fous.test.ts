@@ -13,12 +13,12 @@ const base = {
   description: "Tout savoir sur la sortie de WoW Forever le 5 novembre : horaire, abonnement, codes d'invitation.",
 };
 
-describe("avis de Silfax obligatoire", () => {
+describe("avis de Jobwow obligatoire", () => {
   it("autorise un article complet", () => {
     expect(verifierPublication(base)).toEqual([]);
   });
   it("refuse un avis vide", () => {
-    expect(verifierPublication({ ...base, avisSilfax: "   " }).join(" ")).toMatch(/avis de Silfax/);
+    expect(verifierPublication({ ...base, avisSilfax: "   " }).join(" ")).toMatch(/avis de Jobwow/);
   });
   it("refuse un avis resté en texte à remplacer", () => {
     const avis = "[Votre ressenti de joueur, 2 à 4 phrases : ce qui vous donne envie, ce qui vous inquiète, par quoi commencer.]";
@@ -69,9 +69,9 @@ describe("relais Facebook", () => {
     expect(dansLaPlageHoraire(new Date("2026-11-06T21:00:00Z"))).toBe(false); // 22h
   });
   it("pointe toujours vers le site et ajoute les mots-dièse", () => {
-    process.env.SITE_URL = "https://azeroth-forever.fr";
+    process.env.SITE_URL = "https://www.taverne-eternelle.fr";
     const m = messageFacebook({ accrocheFacebook: "Le donjon caché enfin révélé", texteFacebook: "Ce que l'on sait.", slug: "donjon-cache", titre: "t" });
-    expect(m).toContain("La suite ici : https://azeroth-forever.fr/articles/donjon-cache/");
+    expect(m).toContain("Lire la suite à la Taverne : https://www.taverne-eternelle.fr/articles/donjon-cache/?utm_source=facebook&utm_medium=social&utm_campaign=veille");
     expect(m).toContain("#WoWForever #WorldofWarcraft");
   });
 });

@@ -10,7 +10,7 @@ import { longueurX, texteReseau } from "@/modules/veille/reseaux/textes";
 import { videoDepuisImage } from "@/modules/veille/reels/video";
 import { publierReel } from "@/modules/veille/reels/publication";
 
-process.env.SITE_URL = "https://azeroth-forever.fr";
+process.env.SITE_URL = "https://www.taverne-eternelle.fr";
 const article = {
   accrocheFacebook: "Le mineur kobold, tueur numéro 1 de la bêta",
   texteFacebook: "Blizzard dévoile le bilan de la bêta : près de 9 millions de personnages, un million de chutes mortelles et un kobold redoutable. ".repeat(3),
@@ -22,12 +22,12 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe("phrase d'appel à l'action", () => {
   it("est la même, mot pour mot, sur tous les réseaux", () => {
-    expect(phraseAppel()).toBe("👉 Abonne-toi à Azeroth Forever pour ne rien rater de WoW Forever, et retrouve tous nos guides sur azeroth-forever.fr");
+    expect(phraseAppel()).toBe("👉 Abonne-toi à la Taverne Éternelle pour ne rien rater de WoW Forever, et retrouve tous nos guides sur taverne-eternelle.fr");
     for (const r of ["facebook", "reel", "x", "instagram", "tiktok"] as const) expect(texteReseau(r, article)).toContain(phraseAppel());
   });
   it("garde le lien vers l'article sur Facebook et X, et renvoie vers le site ailleurs", () => {
-    expect(texteReseau("facebook", article)).toContain("La suite ici : https://azeroth-forever.fr/articles/bilan-beta/");
-    expect(texteReseau("x", article)).toContain("https://azeroth-forever.fr/articles/bilan-beta/");
+    expect(texteReseau("facebook", article)).toContain("Lire la suite à la Taverne : https://www.taverne-eternelle.fr/articles/bilan-beta/?utm_source=facebook&utm_medium=social&utm_campaign=veille");
+    expect(texteReseau("x", article)).toContain("https://www.taverne-eternelle.fr/articles/bilan-beta/");
     expect(texteReseau("instagram", article)).toContain("lien dans la bio");
     expect(texteReseau("instagram", article)).not.toContain("https://");
   });
@@ -74,6 +74,6 @@ describe("publication du Reel", () => {
       "https://graph.facebook.com/v21.0/123/video_reels",
     ]);
     expect(appels[1].corps).toBe("2048 octets");
-    expect(decodeURIComponent(appels[2].corps.replace(/\+/g, " "))).toContain("Abonne-toi à Azeroth Forever");
+    expect(decodeURIComponent(appels[2].corps.replace(/\+/g, " "))).toContain("Abonne-toi à la Taverne Éternelle");
   });
 });

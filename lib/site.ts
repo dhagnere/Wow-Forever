@@ -1,13 +1,18 @@
 export const SITE = {
-  nom: "Azeroth Forever",
-  signature: "WoW Forever en français, de 1 à 60",
-  auteur: "Silfax",
+  nom: "La Taverne Éternelle",
+  signature: "L'actualité de WoW Forever, servie chaque matin par Jobwow",
+  /** Signature de fin d'article. */
+  signatureArticle: "— Jobwow, au comptoir de la Taverne",
+  auteur: "Jobwow",
   url: (process.env.SITE_URL ?? "http://localhost:3000").replace(/\/+$/, ""),
   facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL ?? "https://www.facebook.com/",
   /** Conteneur Google Tag Manager. NEXT_PUBLIC_GTM_ID=off le désactive (développement local, par exemple). */
   gtmId: process.env.NEXT_PUBLIC_GTM_ID === "off" ? "" : (process.env.NEXT_PUBLIC_GTM_ID ?? "GTM-KMGBD5FD"),
+  /** Discord de la Taverne (lien d'invitation) : sans valeur, les boutons Discord ne s'affichent pas. */
+  discord: process.env.NEXT_PUBLIC_DISCORD_URL ?? "",
+  contact: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "contact@taverne-eternelle.fr",
   mentionBlizzard:
-    "World of Warcraft et Blizzard Entertainment sont des marques de Blizzard Entertainment, Inc. Azeroth Forever est un site de fans non officiel, sans lien avec Blizzard.",
+    "Site de fans indépendant, non affilié à Blizzard Entertainment. World of Warcraft et Warcraft sont des marques de Blizzard Entertainment.",
 };
 
 const FORMAT_JOUR = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" });

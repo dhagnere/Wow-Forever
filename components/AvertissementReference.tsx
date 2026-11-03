@@ -7,7 +7,7 @@ export function AvertissementReference() {
     <p className="info" role="note" style={{ margin: "0 0 32px" }}>
       <strong>Repères de l&apos;Azeroth d&apos;origine.</strong> Forever reprend la carte du jeu d&apos;origine : ces niveaux en
       sont tirés et restent indicatifs, à confirmer en jeu. Les éléments propres à Forever sont signalés.
-      Mise à jour le {dateLongue(MISE_A_JOUR_REFERENCE)} par Silfax.
+      Mise à jour le {dateLongue(MISE_A_JOUR_REFERENCE)} par Jobwow.
     </p>
   );
 }

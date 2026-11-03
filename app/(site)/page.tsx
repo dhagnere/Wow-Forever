@@ -23,7 +23,16 @@ export default async function Accueil() {
 
   return (
     <>
-      <JsonLd donnees={{ "@context": "https://schema.org", "@type": "WebSite", name: SITE.nom, url: SITE.url, inLanguage: "fr-FR" }} />
+      <JsonLd
+        donnees={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: SITE.nom,
+          url: SITE.url,
+          inLanguage: "fr-FR",
+          potentialAction: { "@type": "SearchAction", target: `${SITE.url}/recherche/?q={search_term_string}`, "query-input": "required name=search_term_string" },
+        }}
+      />
       <section className="heros">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -34,16 +43,16 @@ export default async function Accueil() {
           alt="Coucher de soleil sur une plage d'Azeroth, une épave échouée sur le sable"
           fetchPriority="high"
         />
-        <p className="heros-credit">Capture de Silfax · © Blizzard Entertainment</p>
+        <p className="heros-credit">Capture de Jobwow · © Blizzard Entertainment</p>
         <div className="wrap">
           <div className="heros-carte cadre">
             <p className="surtitre" style={{ fontSize: 15, letterSpacing: "0.22em", marginBottom: 14 }}>5 novembre · minuit</p>
             <h1>L&apos;Azeroth d&apos;origine renaît</h1>
             <span className="ornement" aria-hidden="true" />
-            <p>Classes, quêtes, donjons et nouvelles terres de WoW Forever, racontés en français par Silfax, de 1 à 60.</p>
+            <p>L&apos;actualité de WoW Forever, servie chaque matin par Jobwow. Classes, quêtes, donjons et nouvelles terres, en français, de 1 à 60.</p>
             <div className="boutons">
-              <Link href="/guides/bien-demarrer/" className="btn btn-or">Commencer l&apos;aventure</Link>
-              <Link href="/actualites/" className="btn btn-contour">Dernières nouvelles</Link>
+              <Link href="/lettre/" className="btn btn-or" data-cta="lettre-accueil">Recevoir la Lettre de la Taverne</Link>
+              <Link href="/guides/bien-demarrer/" className="btn btn-contour" data-cta="debuter-accueil">Bien débuter sur WoW Forever</Link>
             </div>
           </div>
         </div>
@@ -91,7 +100,7 @@ export default async function Accueil() {
             <p style={{ marginTop: 16 }}><Link href="/actualites/">Toutes les actualités</Link></p>
           </div>
           <aside className="encadre-chaud cadre" style={{ flex: "1 1 300px" }} aria-labelledby="t-carnet">
-            <h2 id="t-carnet" className="titre" style={{ margin: "0 0 8px", fontSize: 23, color: "var(--or-clair)" }}>Le carnet de Silfax</h2>
+            <h2 id="t-carnet" className="titre" style={{ margin: "0 0 8px", fontSize: 23, color: "var(--or-clair)" }}>Le carnet de Jobwow</h2>
             <p style={{ margin: "0 0 16px", color: "var(--texte-chaud)" }}>
               Chaque dimanche à 18h, le récit de la semaine et une capture d&apos;écran. De 1 à 60, sans tricher.
             </p>
@@ -120,9 +129,9 @@ export default async function Accueil() {
         <section className="encadre cadre" style={{ padding: "30px 34px", display: "flex", flexWrap: "wrap", gap: 20, alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ flex: "1 1 420px" }}>
             <h2 className="titre" style={{ margin: "0 0 6px", fontSize: 23 }}>Rejoignez la compagnie</h2>
-            <p className="doux" style={{ margin: 0 }}>Chaque nouvel article part aussi sur la Page Facebook Azeroth Forever, entre 8h et 22h.</p>
+            <p className="doux" style={{ margin: 0 }}>Chaque nouvel article part aussi sur la Page Facebook de la Taverne Éternelle, entre 8h et 22h.</p>
           </div>
-          <a href={SITE.facebook} className="btn btn-facebook" rel="noopener noreferrer">Suivre sur Facebook</a>
+          <a href={SITE.facebook} className="btn btn-facebook" rel="noopener noreferrer" data-cta="facebook-accueil">Suivre sur Facebook</a>
         </section>
       </div>
     </>

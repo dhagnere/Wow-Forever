@@ -10,12 +10,21 @@ type Entree = (Lien & { prefixe: string[]; silfax?: boolean }) | Groupe;
 
 const MENU: Entree[] = [
   { href: "/", label: "Accueil", prefixe: [] },
-  { href: "/actualites/", label: "Actualités", prefixe: ["/actualites", "/articles", "/rubriques", "/recherche"] },
+  {
+    label: "Le Comptoir",
+    prefixe: ["/actualites", "/articles", "/rubriques", "/recherche", "/calendrier", "/lettre", "/communaute"],
+    liens: [
+      { href: "/actualites/", label: "Actualités", detail: "Nouvelles du jour, correctifs, annonces" },
+      { href: "/calendrier/", label: "Calendrier", detail: "Sortie, raids, Hardcore, été 2027" },
+      { href: "/lettre/", label: "La Lettre de la Taverne", detail: "Chaque dimanche à 10 h" },
+      { href: "/communaute/", label: "Communauté", detail: "Discord, Page Facebook" },
+    ],
+  },
   {
     label: "Guides",
     prefixe: ["/guides"],
     liens: [
-      { href: "/guides/bien-demarrer/", label: "Bien démarrer", detail: "Sortie, abonnement, premiers pas" },
+      { href: "/guides/bien-demarrer/", label: "Bien débuter", detail: "Race, classe, zone, premiers métiers" },
       { href: "/guides/zones-de-depart/", label: "Zones de départ", detail: "Où commence chaque race" },
       { href: "/guides/zones-par-niveau/", label: "Zones par niveau", detail: "La route de 1 à 60" },
       { href: "/guides/liste-des-donjons/", label: "Liste des donjons", detail: "Donjons et raids par niveau" },
@@ -25,14 +34,14 @@ const MENU: Entree[] = [
     label: "Explorer",
     prefixe: ["/classes", "/races", "/zones", "/donjons", "/base-de-donnees"],
     liens: [
-      { href: "/classes/", label: "Classes", detail: "Rôles, races possibles, conseils" },
-      { href: "/races/", label: "Races", detail: "Dont les Skyborne" },
-      { href: "/zones/", label: "Zones", detail: "Les nouvelles terres de Forever" },
-      { href: "/donjons/", label: "Donjons et raids", detail: "Repérés en bêta, annoncés" },
+      { href: "/classes/", label: "L'Armurerie · Classes", detail: "Rôles, races possibles, conseils" },
+      { href: "/races/", label: "Le Registre · Races", detail: "Dont les Skyborne" },
+      { href: "/zones/", label: "La Salle des cartes · Zones", detail: "Les nouvelles terres de Forever" },
+      { href: "/donjons/", label: "La Cave · Donjons et raids", detail: "Repérés en bêta, annoncés" },
       { href: "/base-de-donnees/", label: "Base de données", detail: "Tous les objets du jeu, en français" },
     ],
   },
-  { href: "/carnet/", label: "Carnet de Silfax", prefixe: ["/carnet"], silfax: true },
+  { href: "/carnet/", label: "Le Carnet de Jobwow", prefixe: ["/carnet"], silfax: true },
 ];
 
 function actif(chemin: string, prefixe: string[], href?: string) {

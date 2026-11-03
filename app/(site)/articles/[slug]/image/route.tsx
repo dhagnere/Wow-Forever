@@ -8,7 +8,7 @@ const size = { width: 1200, height: 630 };
 
 export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const article = await lirePublie((await params).slug);
-  const titre = article?.titre ?? "Azeroth Forever";
+  const titre = article?.titre ?? "La Taverne Éternelle";
   const rubrique = article ? (trouverRubrique(article.rubrique)?.nom ?? "") : "WoW Forever en français";
   const taille = titre.length > 90 ? 50 : titre.length > 60 ? 58 : 66;
 
@@ -17,8 +17,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
       <div
         style={{
           width: "100%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between",
-          padding: "64px 72px", color: "#f8f2e2",
-          background: "radial-gradient(ellipse at 20% 15%, rgba(232,192,106,0.28), transparent 50%), linear-gradient(160deg, #3a2e24 0%, #1c1b1a 65%, #141312 100%)",
+          padding: "64px 72px", color: "#fbf1da",
+          background: "radial-gradient(ellipse at 20% 15%, rgba(232,192,106,0.28), transparent 50%), linear-gradient(160deg, #3a2e24 0%, #2b1d14 65%, #141312 100%)",
           border: "12px solid #8a6418",
         }}
       >
@@ -26,9 +26,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
         <div style={{ display: "flex", fontSize: taille, fontWeight: 700, lineHeight: 1.12 }}>{titre}</div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", fontSize: 40, fontWeight: 700, letterSpacing: 4 }}>
-            AZEROTH&nbsp;<span style={{ color: "#d9a94a" }}>FOREVER</span>
+            LA TAVERNEAZEROTH&nbsp;<span style={{ color: "#e0a23b" }}>FOREVER</span>nbsp;<span style={{ color: "#e0a23b" }}>ÉTERNELLE</span>
           </div>
-          <div style={{ display: "flex", fontSize: 26, color: "#b8ae99" }}>par Silfax</div>
+          <div style={{ display: "flex", fontSize: 26, color: "#b8ae99" }}>par Jobwow</div>
         </div>
       </div>
     ),

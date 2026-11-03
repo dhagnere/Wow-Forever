@@ -4,7 +4,7 @@
  */
 
 const BASE = "https://wago.tools";
-const AGENT = "AzerothForever/1.0 (+site de fans)";
+const AGENT = "TaverneEternelle/1.0 (+site de fans)";
 
 export function produit(): string {
   return process.env.OBJETS_PRODUIT?.trim() || "wowf";

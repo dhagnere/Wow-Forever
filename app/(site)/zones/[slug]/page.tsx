@@ -72,7 +72,7 @@ export default async function PageZone({ params }: Props) {
                 {ZONES.filter((x) => x.slug !== z.slug).map((x) => <li key={x.slug}><Link href={`/zones/${x.slug}/`}>{x.nom}</Link> <span className="doux">— {x.niveau}</span></li>)}
               </ul>
             </div>
-            <p className="doux" style={{ margin: 0, fontSize: 14 }}>Fiche mise à jour le {dateLongue(z.misAJour)} par Silfax.</p>
+            <p className="doux" style={{ margin: 0, fontSize: 14 }}>Fiche mise à jour le {dateLongue(z.misAJour)} par Jobwow.</p>
           </aside>
         </div>
       </div>

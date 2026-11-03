@@ -42,17 +42,17 @@ describe("post Facebook", () => {
   const base = { accrocheFacebook: "Accroche", texteFacebook: "Texte.", slug: "un-article", titre: "Titre" };
 
   it("publie un post photo quand une image propre au post existe", () => {
-    process.env.SITE_URL = "https://azeroth-forever.fr";
+    process.env.SITE_URL = "https://www.taverne-eternelle.fr";
     const r = requeteFacebook({ ...base, imageFacebookId: 42 });
     expect(r.chemin).toBe("photos");
-    expect(r.params.url).toBe("https://azeroth-forever.fr/medias/42/");
-    expect(r.params.message).toContain("La suite ici : https://azeroth-forever.fr/articles/un-article/");
+    expect(r.params.url).toBe("https://www.taverne-eternelle.fr/medias/42/");
+    expect(r.params.message).toContain("Lire la suite à la Taverne : https://www.taverne-eternelle.fr/articles/un-article/?utm_source=facebook&utm_medium=social&utm_campaign=veille");
   });
 
   it("publie un post lien sinon", () => {
     const r = requeteFacebook({ ...base, imageFacebookId: null });
     expect(r.chemin).toBe("feed");
-    expect(r.params.link).toBe("https://azeroth-forever.fr/articles/un-article/");
+    expect(r.params.link).toBe("https://www.taverne-eternelle.fr/articles/un-article/?utm_source=facebook&utm_medium=social&utm_campaign=veille");
   });
 });
 

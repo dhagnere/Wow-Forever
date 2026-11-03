@@ -14,8 +14,8 @@ export default function PlanDuSite() {
     { titre: "Races", liens: [["/races/", "Toutes les races"], ["/races/skyborne/", "Skyborne, la nouvelle race"]] },
     { titre: "Monde", liens: [["/zones/", "Zones"], ...ZONES.map((z) => [`/zones/${z.slug}/`, z.nom] as [string, string]), ["/donjons/", "Donjons et raids"], ...DONJONS.map((d) => [`/donjons/${d.slug}/`, d.nom] as [string, string]), ["/base-de-donnees/", "Base de données des objets"]] },
     { titre: "Guides", liens: [["/guides/bien-demarrer/", "Bien démarrer"], ["/guides/zones-de-depart/", "Zones de départ"], ["/guides/zones-par-niveau/", "Zones par niveau"], ["/guides/liste-des-donjons/", "Liste des donjons"], ...RUBRIQUES.filter((r) => r.famille === "guides").map((r) => [`/rubriques/${r.slug}/`, r.nom] as [string, string])] },
-    { titre: "Carnet de Silfax", liens: [["/carnet/", "Tous les épisodes"], ["/rubriques/tests/", "Tests et avis"]] },
-    { titre: "Le site", liens: [["/a-propos/", "Qui est Silfax ?"], ["/mentions-legales/", "Mentions légales"]] },
+    { titre: "Carnet de Jobwow", liens: [["/carnet/", "Tous les épisodes"], ["/rubriques/tests/", "Tests et avis"]] },
+    { titre: "Le site", liens: [["/a-propos/", "Qui est Jobwow ?"], ["/mentions-legales/", "Mentions légales"]] },
   ];
   return (
     <div className="wrap contenu">

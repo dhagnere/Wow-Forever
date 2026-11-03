@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { listerPublies } from "@/modules/veille";
 import { Ariane } from "@/components/Ariane";
-import { dateLongue } from "@/lib/site";
+import { SITE, dateLongue } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Le carnet de Silfax — de 1 à 60 sur WoW Forever",
-  description: "Chaque dimanche à 18h, le récit de la semaine de Silfax sur WoW Forever : quêtes marquantes, pièges évités, rencontres de la route.",
+  title: "Le Carnet de Jobwow — de 1 à 60 sur WoW Forever",
+  description: "Chaque dimanche à 18h, le récit de la semaine de Jobwow sur WoW Forever : quêtes marquantes, pièges évités, rencontres de la route.",
   alternates: { canonical: "/carnet/" },
 };
 
@@ -18,10 +18,20 @@ export default async function Carnet() {
     <>
       <section className="bandeau-page" style={{ background: "var(--surface-chaude)" }}>
         <div className="wrap">
-          <Ariane etapes={[{ nom: "Le carnet de Silfax" }]} />
-          <p className="surtitre">Chaque dimanche à 18h</p>
-          <h1>Le carnet de Silfax</h1>
-          <p className="chapo">De 1 à 60 sur WoW Forever, une semaine après l&apos;autre. Les quêtes qui ont marqué, les pièges évités, les rencontres de la route.</p>
+          <Ariane etapes={[{ nom: "Le Carnet de Jobwow" }]} />
+          <div className="presentation-auteur">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/jobwow-512.png" width={140} height={140} alt="Jobwow, gnome mage au chapeau étoilé" className="avatar-jobwow" />
+            <div>
+              <p className="surtitre">Chaque dimanche à 18h</p>
+              <h1>Le Carnet de Jobwow</h1>
+              <p className="chapo">De 1 à 60 sur WoW Forever, une semaine après l&apos;autre. Les quêtes qui ont marqué, les pièges évités, les rencontres de la route.</p>
+              <div className="actions-bandeau">
+                {SITE.discord ? <a href={SITE.discord} className="btn btn-or" rel="noopener noreferrer" data-cta="discord-carnet">Répondre à Jobwow sur Discord</a> : null}
+                <Link href="/lettre/" className={SITE.discord ? "btn btn-contour" : "btn btn-or"} data-cta="lettre-carnet">Recevoir la Lettre</Link>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
       <div className="wrap contenu">
@@ -44,7 +54,7 @@ export default async function Carnet() {
           </section>
           <aside className="colonne-laterale">
             <section className="encadre-nuit" aria-labelledby="t-fiche">
-              <h2 id="t-fiche" className="titre" style={{ margin: "0 0 4px", fontSize: 22 }}>Silfax</h2>
+              <h2 id="t-fiche" className="titre" style={{ margin: "0 0 4px", fontSize: 22 }}>Jobwow</h2>
               <p style={{ margin: "0 0 14px", fontSize: 14, color: "#cfc7b4" }}>[Race] · [Classe] · [Faction]</p>
               <dl style={{ margin: 0, display: "grid", gridTemplateColumns: "auto 1fr", gap: "6px 16px", fontSize: 15 }}>
                 <dt style={{ color: "#cfc7b4" }}>Serveur</dt><dd style={{ margin: 0 }}>[Nom du serveur]</dd>

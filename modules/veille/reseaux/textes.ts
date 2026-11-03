@@ -8,6 +8,14 @@ export function urlArticle(slug: string): string {
   return `${config.siteUrl()}/articles/${slug}/`;
 }
 
+/**
+ * Lien vers l'article marqué pour la mesure d'audience : le module statistiques compte ainsi les visites venues
+ * de chaque réseau, article par article.
+ */
+export function lienSuivi(slug: string, source: "facebook" | "x"): string {
+  return `${urlArticle(slug)}?utm_source=${source}&utm_medium=social&utm_campaign=veille`;
+}
+
 /** Longueur comptée par X : chaque lien vaut 23 caractères. */
 export function longueurX(texte: string): number {
   return [...texte.replace(/https?:\/\/\S+/g, "x".repeat(23))].length;
@@ -29,11 +37,11 @@ export function texteReseau(reseau: Reseau, a: Contenu): string {
   const presentation = a.texteFacebook.trim();
   const appel = phraseAppel();
   const diese = MOTS_DIESE.join(" ");
-  const lien = urlArticle(a.slug);
 
   if (reseau === "facebook") {
-    return [accroche, presentation, `La suite ici : ${lien}`, appel, diese].filter(Boolean).join("\n\n");
+    return [accroche, presentation, `Lire la suite à la Taverne : ${lienSuivi(a.slug, "facebook")}`, appel, diese].filter(Boolean).join("\n\n");
   }
+  const lien = lienSuivi(a.slug, "x");
   if (reseau === "x") {
     const fixe = [accroche, "", lien, "", appel, diese];
     const base = fixe.join("\n");

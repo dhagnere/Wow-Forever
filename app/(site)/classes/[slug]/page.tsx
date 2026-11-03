@@ -33,13 +33,17 @@ export default async function PageClasse({ params }: Props) {
         <div className="wrap" style={{ display: "flex", flexWrap: "wrap", gap: 36, alignItems: "center" }}>
           <IconeClasse slug={c.slug} couleur={c.couleur} taille={150} />
           <div style={{ flex: "1 1 480px" }}>
-            <Ariane etapes={[{ nom: "Classes", href: "/classes/" }, { nom: c.nom }]} />
+            <Ariane etapes={[{ nom: "L'Armurerie", href: "/classes/" }, { nom: c.nom }]} />
             <h1>Le {c.nom}</h1>
             <p className="chapo" style={{ marginBottom: 18 }}>{c.presentation}</p>
             <ul className="puces">
               {c.roles.map((r) => <li key={r} className="puce">{r}</li>)}
               <li className="puce puce-douce">Armure : {c.armure}</li>
             </ul>
+            <div className="actions-bandeau">
+              <Link href="/guides/liste-des-donjons/" className="btn btn-or" data-cta="donjons-classe">Voir les donjons à mon niveau</Link>
+              <Link href="/lettre/" className="btn btn-contour" data-cta="lettre-classe">Recevoir la Lettre</Link>
+            </div>
           </div>
         </div>
       </section>
@@ -107,7 +111,7 @@ export default async function PageClasse({ params }: Props) {
                 ))}
               </ul>
             </div>
-            <p className="doux" style={{ margin: 0, fontSize: 14 }}>Guide mis à jour le {dateLongue(c.misAJour)} par Silfax.</p>
+            <p className="doux" style={{ margin: 0, fontSize: 14 }}>Guide mis à jour le {dateLongue(c.misAJour)} par Jobwow.</p>
           </aside>
         </div>
       </div>

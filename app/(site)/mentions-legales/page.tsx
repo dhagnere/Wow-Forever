@@ -11,8 +11,11 @@ export default function MentionsLegales() {
       <article className="article corps">
         <h1>Mentions légales</h1>
         <h2>Éditeur</h2>
-        <p>[Nom et prénom de l&apos;éditeur, ou dénomination si micro-entreprise] · [Adresse postale ou domiciliation] · [Adresse électronique de contact]</p>
-        <p>Directeur de la publication : [Nom].</p>
+        <p>
+          Site édité à titre non professionnel par Jobwow (pseudonyme). Conformément à la loi pour la confiance dans l&apos;économie numérique,
+          l&apos;identité de l&apos;éditeur a été communiquée à l&apos;hébergeur. Contact : <a href={`mailto:${SITE.contact}`}>{SITE.contact}</a>.
+        </p>
+        <p>Directeur de la publication : Jobwow. [Numéro SIRET à ajouter en cas d&apos;activité rémunérée.]</p>
         <h2>Hébergeur</h2>
         <p>Scalingo SAS, 13 rue Jacques Peirotes, 67000 Strasbourg, France — scalingo.com. [Adresse à vérifier au moment de la publication.]</p>
         <h2>Propriété intellectuelle</h2>
@@ -26,14 +29,14 @@ export default function MentionsLegales() {
           en bas de page.
         </p>
         <p>
-          [À compléter : outils réellement activés dans le conteneur Google Tag Manager (par exemple Google Analytics), durée de conservation
-          des données, destinataires (Google), transferts hors Union européenne, droits des personnes et adresse de contact.]
+          Le site mesure aussi son audience avec son propre outil, sans cookie ni adresse IP conservée. Le détail de chaque traitement, la Lettre
+          comprise, figure dans la <a href="/confidentialite/">politique de confidentialité</a>.
         </p>
         <h2>Crédits</h2>
         <p>
           Icônes de classes : dessins des contributeurs de <a href="https://game-icons.net" rel="noopener noreferrer">game-icons.net</a>,
           sous licence <a href="https://creativecommons.org/licenses/by/3.0/deed.fr" rel="noopener noreferrer">Creative Commons BY 3.0</a>,
-          recolorés et encadrés pour Azeroth Forever.
+          recolorés et encadrés pour la Taverne Éternelle.
         </p>
         <p>
           Base de données des objets : noms, descriptions, niveaux, prix et icônes proviennent des fichiers du jeu World of Warcraft: Forever,

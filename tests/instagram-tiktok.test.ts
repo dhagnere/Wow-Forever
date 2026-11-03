@@ -24,7 +24,7 @@ function simuler(reponses: (a: Appel) => unknown) {
 beforeEach(() => {
   appels = [];
   jetons.clear();
-  process.env.SITE_URL = "https://azeroth-forever.fr";
+  process.env.SITE_URL = "https://www.taverne-eternelle.fr";
   process.env.FACEBOOK_PAGE_ID = "111";
   process.env.FACEBOOK_PAGE_TOKEN = "jeton-page";
   delete process.env.INSTAGRAM_USER_ID;
@@ -44,11 +44,11 @@ describe("Instagram", () => {
       if (a.url.endsWith("/999/media_publish")) return { id: "media-42" };
       return {};
     });
-    const id = await publierReelInstagram("https://azeroth-forever.fr/articles/a/video/", "Légende", async () => {});
+    const id = await publierReelInstagram("https://www.taverne-eternelle.fr/articles/a/video/", "Légende", async () => {});
     expect(id).toBe("media-42");
     const creation = new URLSearchParams(appels.find((a) => a.url.endsWith("/999/media"))!.corps);
     expect(creation.get("media_type")).toBe("REELS");
-    expect(creation.get("video_url")).toBe("https://azeroth-forever.fr/articles/a/video/");
+    expect(creation.get("video_url")).toBe("https://www.taverne-eternelle.fr/articles/a/video/");
     expect(creation.get("caption")).toBe("Légende");
     expect(new URLSearchParams(appels.at(-1)!.corps).get("creation_id")).toBe("conteneur");
   });
@@ -65,7 +65,7 @@ describe("TikTok", () => {
   const jetonValide = () => jetons.set("tiktok", { reseau: "tiktok", compte: "silfax", acces: "acces-ok", rafraichissement: "r1", expireLe: new Date(Date.now() + 3_600_000), rafraichissementExpireLe: null });
 
   it("prépare une autorisation avec l'adresse de retour hors de /admin", () => {
-    expect(urlRetourTiktok()).toBe("https://azeroth-forever.fr/reseaux/tiktok/retour/");
+    expect(urlRetourTiktok()).toBe("https://www.taverne-eternelle.fr/reseaux/tiktok/retour/");
     const u = new URL(urlAutorisationTiktok("etat-1"));
     expect(u.searchParams.get("redirect_uri")).toBe(urlRetourTiktok());
     expect(u.searchParams.get("scope")).toContain("video.upload");

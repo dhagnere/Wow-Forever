@@ -1,27 +1,29 @@
-/* Charte Azeroth Forever : ambiance « cuir et acier », titres en Cinzel, or et laiton. */
+/* Charte de la Taverne Éternelle : bois sombre, ambre de chandelle et parchemin ; titres en Cinzel, texte en Source Sans 3. */
 
 :root {
-  /* Palette « cuir et acier » : anthracite chaud, cuir, laiton et or. */
-  --fond: #1c1b1a;
-  --fond-nuit: #141312;
-  --surface: #262423;
-  --surface-2: #2f2c2a;
+  /* Palette « bois et chandelle » : bois sombre, ambre, parchemin, vert de Hyjal, rouge braise. */
+  --fond: #2b1d14;
+  --fond-nuit: #20150e;
+  --surface: #36261a;
+  --surface-2: #402d1f;
   --surface-chaude: #33281f;
-  --bordure: #4a3d2c;
-  --bordure-vive: #8a6418;
-  --acier: #5b5853;
-  --or: #d9a94a;
-  --or-clair: #e8c06a;
-  --or-pale: #f6dc9a;
-  --texte: #ece4d2;
-  --texte-titre: #f8f2e2;
+  --bordure: #5a4130;
+  --bordure-vive: #9a6a22;
+  --acier: #6e5a48;
+  --or: #e0a23b;
+  --or-clair: #ecb85a;
+  --or-pale: #f6d79a;
+  --texte: #f3e6c8;
+  --texte-titre: #fbf1da;
   --texte-doux: #b8ae99;
   --texte-chaud: #d6cebd;
   --sur-or: #1a1406;
-  --parchemin: #efe6d2;
+  --parchemin: #f3e6c8;
   --parchemin-bord: #cdbb94;
   --encre: #2b2118;
   --encre-douce: #5e4f3d;
+  --vert-hyjal: #2f5d50;
+  --braise: #a3402c;
   --facebook: #1f5fbf;
   --danger: #e07a6a;
   --succes: #7fbf7a;
@@ -56,7 +58,7 @@ h1, h2, h3 { color: var(--texte-titre); line-height: 1.2; }
 /* En-tête : barre haute (compte à rebours, logo centré, recherche) puis menu centré */
 .entete { position: relative; z-index: 20; background: linear-gradient(180deg, #2a2826, #1f1e1c); }
 .entete-haut { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding-top: 12px; padding-bottom: 12px; }
-.entete-menu { border-top: 1px solid #34312e; border-bottom: 1px solid var(--bordure); background: #222120; }
+.entete-menu { border-top: 1px solid #4a3424; border-bottom: 1px solid var(--bordure); background: #2e1f15; }
 .logo { display: inline-flex; align-items: center; gap: 12px; font-family: var(--police-titre); font-weight: 800; font-size: 26px; letter-spacing: 0.06em; color: #f4efe3; text-decoration: none; }
 .logo-pile { flex-direction: column; gap: 4px; font-size: 17px; letter-spacing: 0.16em; text-align: center; line-height: 1.1; }
 .logo-texte span { color: var(--or); }
@@ -78,10 +80,10 @@ a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(232, 192, 106, 
 .nav-groupe { position: relative; }
 .nav-groupe > summary::after { content: ""; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); opacity: 0.7; }
 .nav-groupe[open] > summary::after { transform: translateY(2px) rotate(-135deg); }
-.nav-sousmenu { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); min-width: 240px; padding: 8px; background: #262423; border: 1px solid var(--bordure); border-radius: 6px; box-shadow: 0 16px 32px rgba(0, 0, 0, 0.55); display: flex; flex-direction: column; }
+.nav-sousmenu { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); min-width: 240px; padding: 8px; background: #36261a; border: 1px solid var(--bordure); border-radius: 6px; box-shadow: 0 16px 32px rgba(0, 0, 0, 0.55); display: flex; flex-direction: column; }
 .nav-sousmenu a { padding: 10px 14px; border-radius: 4px; color: var(--texte); text-decoration: none; font-weight: 600; }
 .nav-sousmenu a small { display: block; font-weight: 400; font-size: 13px; color: var(--texte-doux); }
-.nav-sousmenu a:hover, .nav-sousmenu a[aria-current="page"] { background: #33302d; color: var(--or-pale); }
+.nav-sousmenu a:hover, .nav-sousmenu a[aria-current="page"] { background: #4a3424; color: var(--or-pale); }
 @media (max-width: 760px) {
   .entete-haut { grid-template-columns: 1fr auto; }
   .decompte { display: none; }
@@ -91,8 +93,8 @@ a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(232, 192, 106, 
 }
 
 /* Rivets : bande d'acier entre deux matières */
-.rivets { height: 12px; border-top: 1px solid #0d0c0b; border-bottom: 1px solid #0d0c0b;
-  background: radial-gradient(circle at 50% 50%, #a19b92 0 1.4px, #4d4943 1.6px 2.4px, transparent 2.6px) 0 50% / 26px 12px repeat-x, linear-gradient(180deg, #46423d, #2b2926); }
+.rivets { height: 12px; border-top: 1px solid #140d08; border-bottom: 1px solid #140d08;
+  background: radial-gradient(circle at 50% 50%, #a19b92 0 1.4px, #6b4f3a 1.6px 2.4px, transparent 2.6px) 0 50% / 26px 12px repeat-x, linear-gradient(180deg, #5f4633, #2b2926); }
 
 /* Boutons */
 .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 12px 22px; border-radius: 4px; font-family: var(--police-titre); font-weight: 700; letter-spacing: 0.04em; text-decoration: none; border: 1px solid transparent; cursor: pointer; font-size: 15px; }
@@ -110,7 +112,7 @@ a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(232, 192, 106, 
     radial-gradient(ellipse at 22% 30%, rgba(232, 192, 106, 0.18), transparent 45%),
     radial-gradient(circle at 78% 18%, rgba(246, 220, 154, 0.35) 0 3%, transparent 3.4%),
     radial-gradient(ellipse at 50% 120%, #4a3524, transparent 60%),
-    linear-gradient(180deg, #141312 0%, #211f1d 60%, #3a2e24 100%);
+    linear-gradient(180deg, #20150e 0%, #2f2017 60%, #3a2e24 100%);
 }
 .heros .wrap { position: relative; padding-top: 112px; padding-bottom: 112px; display: flex; justify-content: flex-start; }
 /* Capture d'écran en fond : la carte se place à gauche, sur la montagne sombre, et laisse voir le soleil et l'épave. */
@@ -127,7 +129,7 @@ a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(232, 192, 106, 
   radial-gradient(circle, var(--or-clair) 0 4px, transparent 5px) center / 14px 14px no-repeat; }
 .boutons { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 
-.bandeau-page { position: relative; overflow: hidden; border-bottom: 1px solid #34312e;
+.bandeau-page { position: relative; overflow: hidden; border-bottom: 1px solid #4a3424;
   background: linear-gradient(90deg, rgba(20, 19, 18, 0.96) 0%, rgba(20, 19, 18, 0.82) 45%, rgba(20, 19, 18, 0.55) 100%), var(--image-bandeau, url("/images/heros-accueil-1920.jpg")) center 40% / cover no-repeat, var(--surface); }
 .bandeau-page::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 40%; background: linear-gradient(0deg, var(--fond), transparent); pointer-events: none; }
 .bandeau-page .wrap { position: relative; z-index: 1; padding-top: 56px; padding-bottom: 64px; }
@@ -170,13 +172,13 @@ a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(232, 192, 106, 
 .encadre { background: var(--surface); border: 1px solid var(--bordure); border-radius: 4px; padding: 20px 22px; }
 .encadre h2 { margin: 0 0 8px; font-size: 16px; }
 .encadre-chaud { background: var(--surface-chaude); border: 1px solid var(--bordure-vive); border-radius: 4px; padding: 28px; }
-.encadre-nuit { background: #211f1d; border-radius: 12px; padding: 24px; }
+.encadre-nuit { background: #2f2017; border-radius: 12px; padding: 24px; }
 
 /* Visuels générés (remplacent les illustrations tant qu'elles ne sont pas fournies) */
 .visuel { position: relative; display: block; width: 100%; background:
   radial-gradient(ellipse at 30% 20%, rgba(232, 192, 106, 0.25), transparent 55%),
   radial-gradient(ellipse at 80% 90%, rgba(138, 100, 24, 0.25), transparent 55%),
-  linear-gradient(160deg, #3a2e24, #1c1b1a 70%); }
+  linear-gradient(160deg, #3a2e24, #2b1d14 70%); }
 .visuel::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.35)); }
 .visuel-texte { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 18px; background: rgba(20, 19, 18, 0.78); font-family: var(--police-titre); font-weight: 700; color: var(--texte-titre); z-index: 1; }
 
@@ -192,7 +194,7 @@ a:hover > .icone-classe { filter: drop-shadow(0 0 8px rgba(232, 192, 106, 0.55))
 
 /* Liste d'actualités */
 .fil { list-style: none; margin: 0; padding: 0; }
-.fil li { border-bottom: 1px solid #2c2a2a; padding: 16px 0; }
+.fil li { border-bottom: 1px solid #3a2819; padding: 16px 0; }
 .fil li:last-child { border-bottom: 0; }
 .fil .meta { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; color: var(--or-clair); text-transform: uppercase; }
 .fil a { color: var(--texte-titre); text-decoration: none; font-size: 19px; font-weight: 600; }
@@ -274,9 +276,9 @@ td { padding: 12px 16px; border-top: 1px solid var(--bordure); }
 .repertoire-categories a { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 4px; color: var(--texte); text-decoration: none; font-size: 15px; }
 .repertoire-categories a span { font-size: 13px; color: var(--texte-doux); }
 .repertoire-categories a:hover { background: var(--surface-2); }
-.repertoire-categories a[aria-current="page"] { background: #3a3128; color: var(--or-pale); box-shadow: inset 3px 0 0 var(--or); }
+.repertoire-categories a[aria-current="page"] { background: #4d3522; color: var(--or-pale); box-shadow: inset 3px 0 0 var(--or); }
 .lignes { list-style: none; margin: 0; padding: 0; border: 1px solid var(--bordure); border-radius: 6px; overflow: hidden; }
-.lignes li { border-top: 1px solid #34312e; }
+.lignes li { border-top: 1px solid #4a3424; }
 .lignes li:first-child { border-top: 0; }
 .lignes a { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; padding: 14px 18px; text-decoration: none; color: var(--texte); background: var(--surface); }
 .lignes a:hover { background: var(--surface-2); }
@@ -290,7 +292,7 @@ td { padding: 12px 16px; border-top: 1px solid var(--bordure); }
 
 /* Sélecteur de classes */
 .cartes-classes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.carte-classe { display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: #232120; border: 1px solid var(--couleur, var(--bordure)); border-radius: 4px; text-decoration: none; color: var(--texte); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4); }
+.carte-classe { display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: #33231a; border: 1px solid var(--couleur, var(--bordure)); border-radius: 4px; text-decoration: none; color: var(--texte); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4); }
 .carte-classe:hover { background: #2c2927; color: var(--texte-titre); }
 .carte-classe strong { display: block; font-size: 17px; color: var(--texte-titre); }
 .carte-classe span { font-size: 13px; color: var(--texte-doux); }
@@ -298,7 +300,7 @@ td { padding: 12px 16px; border-top: 1px solid var(--bordure); }
 .onglets-classes button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 2px 12px; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--texte-doux); font: inherit; font-size: 13px; cursor: pointer; }
 .onglets-classes button[aria-selected="true"] { color: var(--texte-titre); border-bottom-color: var(--or); }
 .onglets-classes button:hover { color: var(--texte); }
-.panneau-classe { display: flex; flex-wrap: wrap; gap: 20px 28px; align-items: center; padding: 28px; background: linear-gradient(135deg, #2c2724, #232120); border: 1px solid var(--bordure); border-top: 0; }
+.panneau-classe { display: flex; flex-wrap: wrap; gap: 20px 28px; align-items: center; padding: 28px; background: linear-gradient(135deg, #2c2724, #33231a); border: 1px solid var(--bordure); border-top: 0; }
 .panneau-classe h2 { margin: 2px 0 8px; font-family: var(--police-titre); font-size: 30px; }
 
 /* Pagination */
@@ -345,7 +347,7 @@ textarea.grand { min-height: 420px; font-family: ui-monospace, SFMono-Regular, M
 }
 
 /* Base de données des objets */
-.icone-objet { flex: none; display: block; border: 1px solid var(--bordure); border-radius: 4px; background: #0d0c0b; box-shadow: 0 0 0 1px #000; }
+.icone-objet { flex: none; display: block; border: 1px solid var(--bordure); border-radius: 4px; background: #140d08; box-shadow: 0 0 0 1px #000; }
 .nom-objet { font-weight: 700; text-decoration: none; }
 .nom-objet:hover { text-decoration: underline; }
 .cellule-objet { display: flex; align-items: center; gap: 12px; }
@@ -403,3 +405,67 @@ textarea.grand { min-height: 420px; font-family: ui-monospace, SFMono-Regular, M
   .table-objets td, .table-objets th { padding-left: 10px; padding-right: 10px; }
   .fiche-objet h1 { font-size: 22px; }
 }
+
+/* Bouton compact de l'en-tête (cible tactile de 44 px conservée) */
+.btn-petit { padding: 10px 16px; font-size: 13px; }
+.logo-medaillon { border-radius: 0; filter: drop-shadow(0 0 6px rgba(224, 162, 59, 0.3)); }
+a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(236, 184, 90, 0.55)); }
+@media (max-width: 760px) { .outils-entete .btn-petit { display: none; } }
+
+/* Taverne : boutons groupés, avatar de Jobwow, signature, Lettre, calendrier */
+.actions-bandeau { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+.presentation-auteur { display: flex; align-items: center; gap: 24px; margin-bottom: 20px; }
+.presentation-auteur h1 { margin-top: 0; }
+.avatar-jobwow { flex: none; display: block; border-radius: 50%; border: 3px solid var(--or); background: #141b46; box-shadow: 0 0 0 4px rgba(224, 162, 59, 0.15); }
+.avatar-petit { border-width: 2px; }
+.signature-article { margin: 18px 0 0; font-family: var(--police-titre); font-weight: 700; color: var(--or-clair); text-align: right; }
+.appel-lettre { margin: 28px 0; padding: 20px 22px; background: var(--surface-chaude); border: 1px solid var(--bordure-vive); border-radius: 6px; }
+.appel-lettre p { margin: 0 0 14px; }
+.appel-lettre .partage { margin: 0; display: flex; flex-wrap: wrap; gap: 12px; }
+.bandeau-lettre { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 16px; background: var(--fond-nuit); border-top: 2px solid var(--or); box-shadow: 0 -10px 24px rgba(0, 0, 0, 0.45); }
+.bandeau-lettre p { flex: 1; margin: 0; font-size: 14px; }
+.bandeau-lettre-fermer { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: none; border: 0; color: var(--texte); cursor: pointer; }
+.colonnes-lettre { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 40px; align-items: start; }
+.liste-lettre { padding-left: 20px; line-height: 1.7; }
+.formulaire-lettre { display: flex; flex-direction: column; gap: 16px; }
+.formulaire-lettre input[type="email"] { font: inherit; font-size: 16px; width: 100%; padding: 12px; border-radius: 6px; border: 1px solid var(--parchemin-bord); background: var(--parchemin); color: var(--encre); }
+.case { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.45; }
+.case input { width: 20px; height: 20px; margin-top: 1px; flex: none; accent-color: var(--or); }
+.piege { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.frise { list-style: none; margin: 0 0 32px; padding: 0 0 0 28px; border-left: 2px solid var(--bordure-vive); display: flex; flex-direction: column; gap: 28px; max-width: 760px; }
+.frise li { position: relative; }
+.frise li::before { content: ""; position: absolute; left: -36px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--or); box-shadow: 0 0 0 4px var(--fond); }
+.frise li.frise-a-venir::before { background: var(--fond); border: 2px solid var(--or); }
+.frise h2 { margin: 0 0 6px; font-family: var(--police-titre); font-size: 22px; }
+.frise p { margin: 0 0 6px; }
+.etiquette-rubrique { background: var(--vert-hyjal); }
+.nouveau { color: #fff; background: var(--braise); }
+@media (max-width: 860px) { .colonnes-lettre { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) { .presentation-auteur { flex-direction: column; align-items: flex-start; } }
+
+/* Administration : statistiques */
+.stats-tete { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
+.stats-periodes { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.stats-periodes a:not(.btn) { padding: 8px 12px; border-radius: 4px; color: var(--texte); text-decoration: none; border: 1px solid var(--bordure); }
+.stats-periodes a[aria-current="page"] { background: var(--surface-chaude); border-color: var(--or); color: var(--or-pale); }
+.stats-compteurs { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin: 20px 0; }
+.stats-compteur { background: var(--surface); border: 1px solid var(--bordure); border-radius: 6px; padding: 14px 16px; }
+.stats-compteur p { margin: 0 0 4px; font-size: 13px; color: var(--texte-doux); }
+.stats-compteur strong { display: block; font-family: var(--police-titre); font-size: 26px; color: var(--texte-titre); }
+.stats-compteur span { font-size: 13px; }
+.stats-hausse { color: var(--succes); }
+.stats-baisse { color: var(--danger); }
+.stats-bloc { margin: 28px 0; }
+.stats-bloc h2 { font-size: 20px; margin: 0 0 12px; }
+.stats-bloc ul { margin: 0; }
+.stats-deux { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+.stats-barres { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.stats-barres li { display: grid; grid-template-columns: 140px minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 14px; }
+.stats-barre { height: 10px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
+.stats-barre span { display: block; height: 100%; background: var(--or); }
+.stats-liste { list-style: none; padding: 0; }
+.stats-liste li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--bordure); font-size: 14px; word-break: break-all; }
+.stats .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.stats-creneaux { min-width: 620px; font-size: 12px; }
+.stats-creneaux th, .stats-creneaux td { padding: 0; height: 22px; text-align: center; background: none; color: var(--texte-doux); font-weight: 400; border: 1px solid var(--fond); }
+.stats-creneaux td { background: var(--surface-2); }

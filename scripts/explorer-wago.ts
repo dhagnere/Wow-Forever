@@ -8,7 +8,7 @@
 const BASE = "https://wago.tools";
 
 async function lire(url: string): Promise<Response> {
-  const r = await fetch(url, { headers: { "User-Agent": "AzerothForever/1.0 (+site de fans)" }, signal: AbortSignal.timeout(60_000) });
+  const r = await fetch(url, { headers: { "User-Agent": "TaverneEternelle/1.0 (+site de fans)" }, signal: AbortSignal.timeout(60_000) });
   if (!r.ok) throw new Error(`${url} : HTTP ${r.status}`);
   return r;
 }

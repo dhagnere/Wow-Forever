@@ -18,7 +18,7 @@ export function editeurGoogleNews(titre: string, source: unknown): { editeur?: s
 
 async function telecharger(url: string): Promise<string> {
   const r = await fetch(url, {
-    headers: { "User-Agent": "AzerothForeverVeille/1.0 (+site de fans non officiel)", Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml" },
+    headers: { "User-Agent": "TaverneEternelleVeille/1.0 (+site de fans non officiel)", Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml" },
     signal: AbortSignal.timeout(15_000),
     redirect: "follow",
   });

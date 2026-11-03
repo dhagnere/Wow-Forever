@@ -6,9 +6,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: { default: `${SITE.nom} — ${SITE.signature}`, template: `%s · ${SITE.nom}` },
   description:
-    "Classes, quêtes, donjons et nouvelles terres de World of Warcraft: Forever, racontés en français par Silfax, de 1 à 60.",
+    "L'actualité de WoW Forever en français, servie chaque matin par Jobwow : nouvelles vérifiées, guides de classes, zones et donjons, de 1 à 60.",
   openGraph: { siteName: SITE.nom, locale: "fr_FR", type: "website" },
-  alternates: { canonical: "/" },
+  alternates: { canonical: "/", types: { "application/rss+xml": [{ url: "/rss.xml", title: "La Taverne Éternelle" }] } },
+  // Condition pour apparaître dans Google Discover avec une grande image.
+  robots: { index: true, follow: true, "max-image-preview": "large", googleBot: { index: true, follow: true, "max-image-preview": "large" } },
   // Validation Google Search Console (méthode « Balise HTML ») : contenu de l'attribut content, sans guillemets.
   verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
 };

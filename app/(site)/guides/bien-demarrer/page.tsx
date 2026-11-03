@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Ariane } from "@/components/Ariane";
+import { SITE } from "@/lib/site";
 import { ArticlesLies } from "@/components/ArticlesLies";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +18,7 @@ export default function BienDemarrer() {
       <section className="bandeau-page">
         <div className="wrap">
           <Ariane etapes={[{ nom: "Guides" }, { nom: "Bien démarrer" }]} />
-          <h1>Bien démarrer sur WoW Forever</h1>
+          <h1>Bien débuter sur WoW Forever</h1>
           <p className="chapo">Le guide pour les débutants comme pour les revenants : ce qu&apos;il faut savoir avant le premier soir de jeu.</p>
         </div>
       </section>
@@ -29,7 +30,11 @@ export default function BienDemarrer() {
             <h2>Faut-il acheter le jeu ?</h2>
             <p>Non. Forever est compris dans l&apos;abonnement à World of Warcraft ou dans le temps de jeu. Les éditions vendues en boutique sont facultatives : elles ajoutent des bonus et des codes pour inviter des amis, qui pourront jouer gratuitement du 5 au 11 novembre. La nouvelle race <Link href="/races/skyborne/">Skyborne</Link> demande l&apos;une des éditions supérieures.</p>
             <h2>Quelle classe choisir ?</h2>
-            <p>Tout dépend de votre façon de jouer. Les <Link href="/classes/">fiches de classe</Link> détaillent rôles, points forts et races possibles. [Conseil personnel de Silfax pour un premier personnage.]</p>
+            <p>Tout dépend de votre façon de jouer. Les <Link href="/classes/">fiches de classe</Link> détaillent rôles, points forts et races possibles. [Conseil personnel de Jobwow pour un premier personnage.]</p>
+            <div className="actions-bandeau" style={{ margin: "4px 0 20px" }}>
+              <Link href="/classes/" className="btn btn-or" data-cta="classes-debuter">Choisir ma classe</Link>
+              {SITE.discord ? <a href={SITE.discord} className="btn btn-contour" rel="noopener noreferrer" data-cta="discord-debuter">Rejoindre la Taverne sur Discord</a> : null}
+            </div>
             <h2>Qu&apos;est-ce qui change par rapport à Classic ?</h2>
             <ul>
               <li>Le niveau maximal reste fixé à 60.</li>
@@ -45,12 +50,12 @@ export default function BienDemarrer() {
               donnent les étapes de 1 à 60.
             </p>
             <h2>Choisir son serveur</h2>
-            <p>[Types de serveurs proposés au lancement et conseils de Silfax : à compléter à l&apos;ouverture.]</p>
+            <p>[Types de serveurs proposés au lancement et conseils de Jobwow : à compléter à l&apos;ouverture.]</p>
             <div style={{ marginTop: 32 }}><ArticlesLies pilier="guides/bien-demarrer" titre="Articles pour bien démarrer" /></div>
           </article>
           <aside className="colonne-laterale">
             <div className="encadre-nuit">
-              <h2 className="titre" style={{ margin: "0 0 6px", fontSize: 19, color: "var(--or-clair)" }}>Le carnet de Silfax</h2>
+              <h2 className="titre" style={{ margin: "0 0 6px", fontSize: 19, color: "var(--or-clair)" }}>Le carnet de Jobwow</h2>
               <p style={{ margin: "0 0 14px", fontSize: 15, color: "#cfc7b4" }}>De 1 à 60, une semaine après l&apos;autre, chaque dimanche à 18h.</p>
               <Link href="/carnet/" className="btn btn-or">Ouvrir le carnet</Link>
             </div>

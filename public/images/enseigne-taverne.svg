@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 228" role="img" aria-label="Enseigne de la Taverne Éternelle : une chope et un sablier">
+  <defs>
+    <linearGradient id="bois" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7a4d2b"/>
+      <stop offset="0.55" stop-color="#5a3820"/>
+      <stop offset="1" stop-color="#3b2414"/>
+    </linearGradient>
+    <linearGradient id="ambre" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6cf7a"/>
+      <stop offset="0.5" stop-color="#e0a23b"/>
+      <stop offset="1" stop-color="#a8701f"/>
+    </linearGradient>
+  </defs>
+  <!-- Potence et chaînes -->
+  <path d="M 14 16 H 226" stroke="#6b4f3a" stroke-width="10" stroke-linecap="round"/>
+  <path d="M 14 16 C 4 16, 4 30, 14 30" fill="none" stroke="#6b4f3a" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 226 16 C 236 16, 236 30, 226 30" fill="none" stroke="#6b4f3a" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 62 20 V 52 M 178 20 V 52" stroke="url(#ambre)" stroke-width="4" stroke-dasharray="5 3"/>
+  <!-- Planche -->
+  <rect x="18" y="52" width="204" height="158" rx="20" fill="url(#bois)" stroke="url(#ambre)" stroke-width="6"/>
+  <rect x="30" y="64" width="180" height="134" rx="12" fill="none" stroke="#e0a23b" stroke-width="2" opacity="0.45"/>
+  <path d="M 40 104 C 80 98, 120 112, 200 102 M 40 160 C 90 168, 140 150, 200 164" fill="none" stroke="#2b1d14" stroke-width="2" opacity="0.35"/>
+  <!-- Chope -->
+  <path d="M 114 112 h 10 a 18 18 0 0 1 0 44 h -10" fill="none" stroke="url(#ambre)" stroke-width="10" stroke-linecap="round"/>
+  <rect x="56" y="104" width="60" height="78" rx="8" fill="url(#ambre)"/>
+  <rect x="56" y="118" width="60" height="6" fill="#a8701f" opacity="0.8"/>
+  <rect x="56" y="164" width="60" height="6" fill="#a8701f" opacity="0.8"/>
+  <path d="M 72 132 V 158 M 86 132 V 158 M 100 132 V 158" stroke="#a8701f" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+  <g fill="#f3e6c8">
+    <circle cx="62" cy="104" r="11"/><circle cx="80" cy="97" r="14"/><circle cx="99" cy="99" r="13"/><circle cx="114" cy="106" r="9"/>
+    <rect x="54" y="102" width="64" height="10" rx="5"/>
+  </g>
+  <!-- Sablier -->
+  <rect x="146" y="98" width="52" height="9" rx="3" fill="url(#ambre)"/>
+  <rect x="146" y="175" width="52" height="9" rx="3" fill="url(#ambre)"/>
+  <path d="M 150 107 V 175 M 194 107 V 175" stroke="#a8701f" stroke-width="4"/>
+  <path d="M 155 107 H 189 L 175 141 L 189 175 H 155 L 169 141 Z" fill="#f3e6c8" fill-opacity="0.85" stroke="#e0a23b" stroke-width="2.5"/>
+  <path d="M 161 113 H 183 L 172 134 Z" fill="#e0a23b"/>
+  <path d="M 172 141 V 170" stroke="#e0a23b" stroke-width="1.5" stroke-dasharray="2 3"/>
+  <path d="M 158 173 Q 172 152 186 173 Z" fill="#e0a23b"/>
+</svg>

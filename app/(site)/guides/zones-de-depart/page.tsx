@@ -70,7 +70,7 @@ export default function ZonesDeDepart() {
                 Les zones des niveaux 10 à 20 prennent le relais : Marche de l&apos;Ouest, Loch Modan, Forêt des Pins-Argentés, Sombrivage,
                 Les Tarides. Le détail, niveau par niveau, est dans <Link href="/guides/zones-par-niveau/">les zones par niveau</Link>.
               </p>
-              <p className="doux">[Conseil de Silfax : quelle zone de départ choisir pour un premier personnage, et pourquoi.]</p>
+              <p className="doux">[Conseil de Jobwow : quelle zone de départ choisir pour un premier personnage, et pourquoi.]</p>
             </section>
 
             <ArticlesLies pilier="guides/zones-de-depart" />

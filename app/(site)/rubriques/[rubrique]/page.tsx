@@ -31,7 +31,7 @@ export default async function PageRubrique({ params, searchParams }: Props) {
       <section className="bandeau-page">
         <div className="wrap">
           <Ariane etapes={[{ nom: "Actualités", href: "/actualites/" }, { nom: r.nom }]} />
-          <p className="surtitre">Rubrique</p>
+          <p className="surtitre">{r.enseigne ?? "Rubrique"}</p>
           <h1>{r.nom}</h1>
           <p className="chapo">{r.description}</p>
         </div>

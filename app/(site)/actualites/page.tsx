@@ -22,7 +22,7 @@ export default async function Actualites({ searchParams }: { searchParams: Promi
       <section className="bandeau-page">
         <div className="wrap">
           <Ariane etapes={[{ nom: "Actualités" }]} />
-          <p className="surtitre">Chaque matin, relu par Silfax</p>
+          <p className="surtitre">Le Comptoir · chaque matin, relu par Jobwow</p>
           <h1>Le fil <span className="accent">d&apos;Azeroth</span></h1>
           <p className="chapo">Les nouvelles de WoW Forever repérées dans le monde entier, traduites, triées par rubrique et commentées.</p>
         </div>

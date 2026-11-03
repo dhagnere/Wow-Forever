@@ -19,7 +19,7 @@ export interface Article {
   chapo: string;
   corps: string; // Markdown
   avisSilfax: string;
-  /** Avis proposé par l'IA, à relire et reprendre par Silfax. Jamais publié tel quel. */
+  /** Avis proposé par l'IA, à relire et reprendre par Jobwow. Jamais publié tel quel. */
   avisPropose: string;
   rubrique: SlugRubrique;
   etiquettes: string[];
@@ -28,7 +28,7 @@ export interface Article {
   accrocheFacebook: string;
   texteFacebook: string;
   sources: SourceCitee[];
-  /** Image d'en-tête envoyée par Silfax (absente : visuel généré par le site). */
+  /** Image d'en-tête envoyée par Jobwow (absente : visuel généré par le site). */
   image: { id: number; alt: string; credit: string } | null;
   /** Image propre au post Facebook (absente : l'image d'en-tête sert d'aperçu du lien). */
   imageFacebookId: number | null;

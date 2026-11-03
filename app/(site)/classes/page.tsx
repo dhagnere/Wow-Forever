@@ -23,7 +23,7 @@ export default async function Classes() {
       <section className="bandeau-page">
         <div className="wrap">
           <Ariane etapes={[{ nom: "Classes" }]} />
-          <p className="surtitre">Tank, soigneur ou dégâts</p>
+          <p className="surtitre">L&apos;Armurerie · Classes</p>
           <h1>Choisis ta <span className="accent">voie</span></h1>
           <p className="chapo">Neuf classes, neuf façons d&apos;aborder Azeroth. Rôles, armure, races possibles et premiers conseils, fiche par fiche.</p>
         </div>

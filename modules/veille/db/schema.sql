@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS articles (
   facebook_publie_le  TIMESTAMPTZ,
   facebook_tentatives INTEGER NOT NULL DEFAULT 0,
   facebook_erreur     TEXT,
-  -- Garde-fou : aucun article publié sans l'avis de Silfax.
+  -- Garde-fou : aucun article publié sans l'avis de Jobwow.
   CONSTRAINT avis_obligatoire CHECK (statut <> 'publie' OR length(btrim(avis_silfax)) > 0)
 );
 
@@ -67,7 +67,7 @@ ALTER TABLE articles ADD COLUMN IF NOT EXISTS image_alt TEXT NOT NULL DEFAULT ''
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS image_credit TEXT NOT NULL DEFAULT '';
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS image_facebook_id INTEGER REFERENCES medias(id) ON DELETE SET NULL;
 
--- Avis proposé par l'IA : une suggestion que Silfax relit et reprend. L'avis publié reste avis_silfax.
+-- Avis proposé par l'IA : une suggestion que Jobwow relit et reprend. L'avis publié reste avis_silfax.
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS avis_propose TEXT NOT NULL DEFAULT '';
 
 -- Mode « dossier » (recherches de référence sur 60 jours). Contrainte recréée à chaque déploiement : idempotent.
@@ -163,3 +163,27 @@ CREATE TABLE IF NOT EXISTS objets_icones (
   png      BYTEA NOT NULL,
   cree_le  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Mesure d'audience sans cookie (module statistiques). Le visiteur est un code recalculé chaque jour
+-- (empreinte salée de l'adresse IP et du navigateur) : ni adresse IP ni identifiant durable ne sont conservés.
+CREATE TABLE IF NOT EXISTS stats_vues (
+  id          TEXT PRIMARY KEY,
+  cree_le     TIMESTAMPTZ NOT NULL DEFAULT now(),
+  visiteur    TEXT NOT NULL,
+  chemin      TEXT NOT NULL,
+  source      TEXT NOT NULL,
+  appareil    TEXT NOT NULL,
+  duree_s     INTEGER,
+  lecture     SMALLINT
+);
+CREATE INDEX IF NOT EXISTS stats_vues_date_idx ON stats_vues (cree_le);
+CREATE INDEX IF NOT EXISTS stats_vues_visiteur_idx ON stats_vues (visiteur, cree_le);
+
+CREATE TABLE IF NOT EXISTS stats_actions (
+  id        BIGSERIAL PRIMARY KEY,
+  cree_le   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  type      TEXT NOT NULL CHECK (type IN ('cta_vue', 'cta_clic', 'sortie')),
+  nom       TEXT NOT NULL,
+  chemin    TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS stats_actions_date_idx ON stats_actions (cree_le);

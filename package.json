@@ -1,8 +1,8 @@
 {
-  "name": "azeroth-forever",
+  "name": "taverne-eternelle",
   "version": "0.1.0",
   "private": true,
-  "description": "Azeroth Forever — WoW Forever en français, de 1 à 60. Site Next.js et module de veille.",
+  "description": "La Taverne Éternelle — WoW Forever en français, de 1 à 60. Site Next.js et module de veille.",
   "license": "GPL-3.0-only",
   "engines": {
     "node": "22.x"
@@ -22,7 +22,8 @@
     "icones:generer": "node scripts/generer-icones-classes.mjs",
     "veille:dossier": "tsx modules/veille/scripts/dossier.ts",
     "base:explorer": "tsx scripts/explorer-wago.ts",
-    "base:importer": "tsx modules/veille/scripts/objets.ts"
+    "base:importer": "tsx modules/veille/scripts/objets.ts",
+    "visuels:generer": "node scripts/generer-visuels.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

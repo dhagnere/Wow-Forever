@@ -13,7 +13,7 @@ const PAGE = (titre: string, texte: string) =>
 
 /**
  * Retour de TikTok après autorisation. Le jeton aléatoire comparé ici n'a pu être posé que par /admin/reseaux/tiktok/connexion/,
- * réservé à l'administration : c'est lui qui garantit que la connexion a été demandée par Silfax.
+ * réservé à l'administration : c'est lui qui garantit que la connexion a été demandée par Jobwow.
  */
 export async function GET(req: Request) {
   const url = new URL(req.url);

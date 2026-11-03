@@ -36,7 +36,7 @@ export default async function Veille({ searchParams }: { searchParams: Promise<{
           <form action={seDeconnecter}><button className="btn btn-contour" type="submit">Se déconnecter</button></form>
         </div>
       </div>
-      <p className="doux">Chaque matin, la veille dépose ici ses brouillons, classés par score et par thème. Relire, valider l&apos;avis de Silfax, publier les meilleurs, supprimer les autres.</p>
+      <p className="doux">Chaque matin, la veille dépose ici ses brouillons, classés par score et par thème. Relire, valider l&apos;avis de Jobwow, publier les meilleurs, supprimer les autres.</p>
 
       <nav className="onglets" aria-label="Statut">
         {ONGLETS.map((o) => (

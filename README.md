@@ -1,17 +1,31 @@
-# Azeroth Forever
+# La Taverne Éternelle
 
-WoW Forever en français, de 1 à 60. Site de fans non officiel, signé Silfax.
+L'actualité de WoW Forever, servie chaque matin par Jobwow. Site de fans non officiel, de 1 à 60.
 
-Le site publie trois familles de pages : le fil d'actualité alimenté chaque matin par la veille, les pages piliers durables (classes, races, zones, donjons) et les contenus personnels de Silfax (carnet du dimanche, tests). Chaque article publié part ensuite sur la Page Facebook.
+Le site publie trois familles de pages : le fil d'actualité alimenté chaque matin par la veille, les pages piliers durables (classes, races, zones, donjons) et les contenus personnels de Jobwow (carnet du dimanche, tests). Chaque article publié part ensuite sur la Page Facebook.
 
 ## Fonctionnement
 
 1. **Chaque matin**, la veille parcourt les sources de `config/sources.ts`, garde les sujets des dernières 36 heures qui parlent de Forever, écarte les doublons et classe le reste.
 2. Les douze meilleurs sujets deviennent des **brouillons** rédigés en français par l'API Anthropic, rangés dans leur rubrique et rattachés à leur page pilier.
-3. Silfax **relit** dans `/admin/veille`, écrit son avis, publie ou supprime. Sans avis, la publication est refusée.
+3. Jobwow **relit** dans `/admin/veille`, écrit son avis, publie ou supprime. Sans avis, la publication est refusée.
 4. **Chaque heure**, entre 8h et 22h, les articles publiés partent sur la Page Facebook avec leur image d'ouverture, puis en Reel (vidéo verticale de 10 secondes fabriquée par le site). Chaque post se termine par la même phrase d'appel à l'action, définie dans `config/reseaux.ts`. La même vidéo part en Reel sur Instagram (compte professionnel relié à la Page) et sur TikTok (compte relié depuis `/admin/reseaux/` ; mode brouillon par défaut, mode direct après audit de l'application par TikTok). Le texte pour X est prêt à copier dans l'éditeur.
 
 Score d'un sujet : poids des sites qui en parlent (un site compte une fois, même s'il remonte par plusieurs flux) + fraîcheur (3 points au plus) + 1,5 point si une vidéo existe + 1 point par source en langue étrangère (2 au plus). Chaque sujet est aussi classé par thème (rubrique) et, quand il en désigne une nettement, par page pilier, à partir de mots-clés français et anglais, sans coût d'API. La sélection quotidienne plafonne chaque thème pour alimenter toutes les pages. La revue complète de chaque passage est conservée dans la table `veille_revues` et consultable dans `/admin/veille/revue`, avec un filtre par thème ; la liste des articles montre le remplissage de chaque page de thème.
+
+## La Taverne en bref
+
+- **Identité** : enseigne de taverne (chope et sablier), palette bois sombre `#2B1D14`, ambre `#E0A23B`, parchemin `#F3E6C8`, vert de Hyjal `#2F5D50`, rouge braise `#A3402C` ; Cinzel et Source Sans 3. Jobwow, gnome mage, signe « — Jobwow, au comptoir de la Taverne ». Avatar à télécharger pour les réseaux : `public/images/jobwow-1080.png`.
+- **Rubriques** : Le Comptoir (actualités), L'Armurerie (classes), La Salle des cartes (zones), La Cave (donjons et raids), Le Registre (races), Le Carnet de Jobwow. Les adresses ne changent pas.
+- **Pages ajoutées** : `/calendrier/` (et `/agenda-taverne.ics`), `/lettre/`, `/communaute/`, `/contact/`, `/confidentialite/`, page introuvable, `/rss.xml`, `/sitemap-actualites.xml`.
+- **Appels à l'action** : un bouton principal et un secondaire par page, chacun marqué `data-cta` ; les liens publiés sur Facebook portent `utm_source=facebook`.
+- **Statistiques** : `/admin/statistiques`, sans cookie (voir `CLAUDE.md`).
+
+### Changer de nom de domaine
+
+1. Déclarer `www.taverne-eternelle.fr` dans Scalingo (onglet *Domains*), en domaine principal.
+2. Chez le registraire : `www` en CNAME vers la cible donnée par Scalingo ; l'adresse sans `www` et les `.com` en redirection permanente (301) vers `https://www.taverne-eternelle.fr`.
+3. Changer `SITE_URL` chez Scalingo. Le domaine affiché dans la phrase d'appel des réseaux, les liens Facebook, le plan du site et l'agenda suivent seuls.
 
 ## Mise en service sur Scalingo
 
@@ -40,6 +54,9 @@ Score d'un sujet : poids des sites qui en parlent (un site compte une fois, mêm
    ```bash
    scalingo --app azeroth-forever run npm run base:importer -- --icones
    ```
+
+11. Lettre de la Taverne (Brevo) : créer une liste, un modèle de confirmation « double opt-in », puis saisir `BREVO_API_KEY`, `BREVO_LISTE_ID` et `BREVO_MODELE_DOI`. Dans les campagnes, activer le suivi Google Analytics de Brevo avec `utm_source=lettre` : les visites venues de la Lettre apparaissent alors dans les statistiques.
+12. Statistiques : saisir `STATS_SEL` (32 caractères aléatoires). Discord : `NEXT_PUBLIC_DISCORD_URL` (lien d'invitation) ; sans lui, les boutons Discord restent masqués.
 
 ### Tâches planifiées (`cron.json`)
 
@@ -77,9 +94,9 @@ tests/               tests unitaires
 ## Reste à faire
 
 - **Illustrations** : chaque article peut recevoir une image d'en-tête et une image propre au post Facebook, envoyées depuis `/admin/veille` (stockées en base). Les visuels des pages fixes (accueil, classes, zones) restent générés en CSS (`components/Visuels.tsx`) : déposer les images dans `public/images/` et remplacer `<Visuel>` / `<Embleme>` par des balises `<img>`.
-- **Textes entre crochets** : avis de Silfax sur les pages piliers, conseils de classe, fiche du personnage, mentions légales (éditeur, données personnelles).
+- **Textes entre crochets** : avis de Jobwow sur les pages piliers, conseils de classe, fiche du personnage, mentions légales (éditeur, données personnelles).
 - **Adresses des flux** : à confirmer avec `npm run veille:sources` une fois en ligne.
 - **Outils** (calculateur de talents, quiz) : prévus dans la maquette, à développer quand Blizzard publiera les arbres de talents de Forever.
 - **Cadre juridique** : interroger le service RH ou le référent déontologue avant toute monétisation (voir le plan de lancement, point 4).
 
-World of Warcraft et Blizzard Entertainment sont des marques de Blizzard Entertainment, Inc. Azeroth Forever est un site de fans non officiel, sans lien avec Blizzard.
+World of Warcraft et Blizzard Entertainment sont des marques de Blizzard Entertainment, Inc. La Taverne Éternelle est un site de fans non officiel, sans lien avec Blizzard.

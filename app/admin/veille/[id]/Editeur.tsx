@@ -27,7 +27,7 @@ function champ(form: HTMLFormElement | null, nom: string): string {
   return el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el.value : "";
 }
 
-/** Proposition d'avis par l'IA : affichée à côté du champ, reprise seulement sur un clic de Silfax. */
+/** Proposition d'avis par l'IA : affichée à côté du champ, reprise seulement sur un clic de Jobwow. */
 function PropositionAvis({
   initiale, proposer, avisRef,
 }: {
@@ -130,7 +130,7 @@ export function Editeur({
         </div>
         <div className="champ">
           <label htmlFor="imageCredit">Crédit</label>
-          <small>Affiché sous l&apos;image. Exemple : « Capture de Silfax · © Blizzard Entertainment ».</small>
+          <small>Affiché sous l&apos;image. Exemple : « Capture de Jobwow · © Blizzard Entertainment ».</small>
           <input id="imageCredit" name="imageCredit" type="text" defaultValue={valeurs.imageCredit} maxLength={160} />
         </div>
       </fieldset>
@@ -149,7 +149,7 @@ export function Editeur({
         <textarea id="corps" name="corps" className="grand" defaultValue={valeurs.corps} />
       </div>
       <div className="champ">
-        <label htmlFor="avisSilfax">L&apos;avis de Silfax</label>
+        <label htmlFor="avisSilfax">L&apos;avis de Jobwow</label>
         <small>Obligatoire pour publier ({avisMinimum} caractères minimum) : ressenti de joueur, ce qui donne envie, ce qui inquiète.</small>
         <textarea id="avisSilfax" name="avisSilfax" ref={avisRef} defaultValue={valeurs.avisSilfax} style={{ minHeight: 140 }} />
       </div>
@@ -213,7 +213,7 @@ export function Editeur({
         </div>
         <div className="champ">
           <label htmlFor="texteFacebook">Texte de présentation</label>
-          <small>2 à 3 phrases simples. Le lien « La suite ici » et les mots-dièse sont ajoutés automatiquement.</small>
+          <small>2 à 3 phrases simples. Le lien « Lire la suite à la Taverne » et les mots-dièse sont ajoutés automatiquement.</small>
           <textarea id="texteFacebook" name="texteFacebook" defaultValue={valeurs.texteFacebook} style={{ minHeight: 90 }} />
         </div>
         {valeurs.imageFacebookId ? (

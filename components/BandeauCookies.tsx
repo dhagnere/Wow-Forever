@@ -58,7 +58,7 @@ export function BandeauCookies() {
     <div className="bandeau-cookies" role="dialog" aria-modal="false" aria-labelledby="t-cookies">
       <div className="wrap">
         <p id="t-cookies" style={{ margin: 0 }}>
-          <strong>Mesure d&apos;audience.</strong> Avec votre accord, Azeroth Forever utilise des cookies Google pour compter les
+          <strong>Mesure d&apos;audience.</strong> Avec votre accord, la Taverne Éternelle utilise des cookies Google pour compter les
           visites et améliorer le site. Vous pouvez changer d&apos;avis à tout moment en bas de page.{" "}
           <Link href="/mentions-legales/#cookies">En savoir plus</Link>
         </p>

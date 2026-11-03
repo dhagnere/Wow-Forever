@@ -1,6 +1,6 @@
-# Azeroth Forever — consignes pour Claude Code
+# La Taverne Éternelle — consignes pour Claude Code
 
-Site de fans francophone non officiel consacré à World of Warcraft: Forever. Next.js 16 (App Router), PostgreSQL, hébergé chez Scalingo. Les articles sont signés Silfax.
+Site de fans francophone non officiel consacré à World of Warcraft: Forever. Next.js 16 (App Router), PostgreSQL, hébergé chez Scalingo. Les articles sont signés Jobwow, gnome mage et tavernier (avatar : `visuels/jobwow.svg`). Le nom de code interne de l'avis reste `avis_silfax` / `avisSilfax` : ne pas renommer la colonne.
 
 ## Organisation
 
@@ -8,7 +8,9 @@ Site de fans francophone non officiel consacré à World of Warcraft: Forever. N
 |---|---|---|
 | `app/(site)/`, `components/`, `app/globals.css`, `content/` | Pages publiques, habillage, contenu des pages piliers | Libre |
 | `app/admin/` | Espace de relecture `/admin/veille` | Libre sur l'ergonomie, garde-fous intacts |
-| `modules/veille/` | Collecte, classement, rédaction IA, articles, relais Facebook, sessions, base d'objets (`objets/`) | Module cloisonné |
+| `modules/veille/` | Collecte, classement, rédaction IA, articles, relais Facebook, sessions, base d'objets (`objets/`), statistiques d'audience (`statistiques/`) | Module cloisonné |
+| `content/calendrier.ts` | Dates clés (page Calendrier et fichier d'agenda) | Libre ; une date non annoncée reste `null` |
+| `visuels/` | Dessins de l'enseigne, de la chope et de Jobwow ; `npm run visuels:generer` refait les PNG | Libre |
 | `config/sources.ts` | Sources surveillées | Libre |
 | `config/taxonomie.ts` | Rubriques et pages piliers | Ajouter librement ; ne pas renommer un slug déjà publié |
 
@@ -20,11 +22,15 @@ Site de fans francophone non officiel consacré à World of Warcraft: Forever. N
 
 ## Garde-fous à ne jamais affaiblir
 
-1. **Avis obligatoire.** Aucun article ne se publie sans « L'avis de Silfax » rédigé (80 caractères minimum, sans texte à remplacer entre crochets). La règle est appliquée deux fois : `articles/publication.ts` et la contrainte `avis_obligatoire` de la base. Ne pas retirer, assouplir ni contourner l'une ou l'autre, ni publier par une requête SQL directe. L'IA peut proposer un avis (`avis_propose`, affiché dans l'éditeur) ; il n'entre dans `avis_silfax` que par un clic de Silfax. Ne jamais remplir `avis_silfax` automatiquement.
+1. **Avis obligatoire.** Aucun article ne se publie sans « L'avis de Jobwow » rédigé (80 caractères minimum, sans texte à remplacer entre crochets). La règle est appliquée deux fois : `articles/publication.ts` et la contrainte `avis_obligatoire` de la base. Ne pas retirer, assouplir ni contourner l'une ou l'autre, ni publier par une requête SQL directe. L'IA peut proposer un avis (`avis_propose`, affiché dans l'éditeur) ; il n'entre dans `avis_silfax` que par un clic de Jobwow. Ne jamais remplir `avis_silfax` automatiquement.
 2. **Filtrage du HTML.** Tout contenu affiché passe par `markdownVersHtml` / `nettoyerHtml` (`rendu/html.ts`). Pas de `dangerouslySetInnerHTML` sur du contenu non filtré. Seules les vidéos YouTube sont intégrables.
 3. **Accès réservé.** Tout `/admin` exige une session signée : `proxy.ts` à l'entrée, `exigerAdmin()` en tête de chaque page et de chaque action serveur. Une nouvelle page ou action d'administration appelle `exigerAdmin()`.
 4. **Droit d'auteur.** Les consignes de rédaction (`redaction/consignes.ts`) imposent un article neuf, une seule citation courte, des sources créditées et aucune image copiée. Le ton peut être ajusté ; ces règles, non. Une image ne s'envoie qu'avec la case de déclaration des droits cochée, et passe toujours par `enregistrerImage` (réencodage, métadonnées retirées). Une image d'en-tête exige sa description.
 5. **Les réseaux suivent le site.** Le relais (Facebook, Reels, Instagram, TikTok) ne publie que des articles déjà en ligne, avec un lien ou un renvoi vers le site (jamais vers la source), entre 8h et 22h (Paris), trois publications par heure et par réseau au plus. Les jetons d'accès restent en base ou dans les variables d'environnement, jamais affichés ni journalisés. Tout texte destiné à un réseau social passe par `texteReseau` (`reseaux/textes.ts`), qui ajoute la phrase d'appel unique de `config/reseaux.ts` : ne pas la dupliquer ni la contourner.
+
+## Statistiques d'audience
+
+Mesure maison, sans cookie ni stockage dans le navigateur (`components/Mesure.tsx` → `/api/mesure` → `statistiques/collecte.ts`). Ne jamais enregistrer l'adresse IP, un identifiant durable ni les paramètres d'adresse : le visiteur est une empreinte salée (`STATS_SEL`) recalculée chaque jour. Les refus de suivi du navigateur (DNT, GPC) sont respectés ; les données de plus de 13 mois sont effacées. Tableau de bord : `/admin/statistiques` (`exigerAdmin()`). Un bouton se mesure en lui donnant un attribut `data-cta="nom-court"`.
 
 ## Base d'objets
 
@@ -45,6 +51,7 @@ npm run veille:revue     # rédige les meilleurs sujets de la dernière revue, s
 npm run veille:dossier   # dossiers de référence sur 60 jours (zones-depart, donjons, zones-niveaux), sans coût d'API
 npm run veille:facebook  # relais Facebook
 npm run base:importer    # base d'objets depuis wago.tools (si nouvelle version du jeu ; --forcer, --icones)
+npm run visuels:generer  # PNG de l'enseigne, de l'icône du site et de l'avatar de Jobwow, depuis visuels/
 npm run icones:generer   # régénère content/icones-classes.ts (game-icons.net, CC BY 3.0 : garder le crédit des mentions légales)
 ```
 

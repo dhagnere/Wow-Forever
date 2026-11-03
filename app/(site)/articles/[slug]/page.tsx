@@ -6,6 +6,7 @@ import { CarteArticle, nomRubrique } from "@/components/Articles";
 import { Ariane } from "@/components/Ariane";
 import { JsonLd } from "@/components/JsonLd";
 import { LigneSource } from "@/components/Sources";
+import { BandeauLettre } from "@/components/BandeauLettre";
 import { SITE, dateLongue, tempsDeLecture } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -62,7 +63,7 @@ export default async function PageArticle({ params }: Props) {
             "@type": "Organization",
             name: SITE.nom,
             url: SITE.url,
-            logo: { "@type": "ImageObject", url: `${SITE.url}/images/logo-silfax-192.png`, width: 192, height: 192 },
+            logo: { "@type": "ImageObject", url: `${SITE.url}/images/logo-taverne-512.png`, width: 512, height: 512 },
           },
           image: article.image ? [`${SITE.url}/medias/${article.image.id}/`, imageOuverture(article, url)] : [imageOuverture(article, url)],
           mainEntityOfPage: url,
@@ -79,7 +80,7 @@ export default async function PageArticle({ params }: Props) {
           <div className="article-meta">
             <span className="avatar" aria-hidden="true">S</span>
             <span>
-              Par <Link href="/a-propos/">Silfax</Link> · {article.publieLe ? dateLongue(article.publieLe) : ""} ·{" "}
+              Par <Link href="/a-propos/">Jobwow</Link> · {article.publieLe ? dateLongue(article.publieLe) : ""} ·{" "}
               {tempsDeLecture(article.corps)} min de lecture
             </span>
           </div>
@@ -97,14 +98,21 @@ export default async function PageArticle({ params }: Props) {
 
           <section className="avis" aria-labelledby="t-avis">
             <div className="avis-titre">
-              <span className="avatar" aria-hidden="true">S</span>
-              <h2 id="t-avis">L&apos;avis de Silfax</h2>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/jobwow-192.png" width={48} height={48} alt="" className="avatar-jobwow avatar-petit" />
+              <h2 id="t-avis">L&apos;avis de Jobwow</h2>
             </div>
             <div className="corps" style={{ fontSize: 17 }} dangerouslySetInnerHTML={{ __html: markdownVersHtml(article.avisSilfax) }} />
           </section>
 
-          <div className="partage">
-            <a href={partageFacebook} className="btn btn-facebook" rel="noopener noreferrer" target="_blank">Partager sur Facebook</a>
+          <p className="signature-article">{SITE.signatureArticle}</p>
+
+          <div className="appel-lettre">
+            <p><strong>Une semaine de WoW Forever, chaque dimanche à 10 h.</strong> Le billet de Jobwow, les cinq nouvelles à retenir et un tuyau de jeu.</p>
+            <div className="partage">
+              <Link href="/lettre/" className="btn btn-or" data-cta="lettre-article">Recevoir les nouvelles chaque dimanche</Link>
+              <a href={partageFacebook} className="btn btn-facebook" rel="noopener noreferrer" target="_blank" data-cta="partage-article">Partager sur Facebook</a>
+            </div>
           </div>
 
           {article.etiquettes.length ? (
@@ -122,6 +130,7 @@ export default async function PageArticle({ params }: Props) {
             </section>
           ) : null}
         </article>
+        <BandeauLettre />
 
         <aside className="colonne-laterale">
           {article.pilier ? (

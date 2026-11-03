@@ -21,9 +21,10 @@ export default async function Donjons() {
       <section className="bandeau-page">
         <div className="wrap">
           <Ariane etapes={[{ nom: "Monde", href: "/zones/" }, { nom: "Donjons et raids" }]} />
+          <p className="surtitre">La Cave · Donjons et raids</p>
           <h1>Donjons et raids de WoW Forever</h1>
           <p className="chapo">Neuf donjons inédits et des raids à 10 et 20 joueurs sont annoncés. Cette page est complétée au fil des annonces et des découvertes en jeu.</p>
-          <p className="doux" style={{ margin: "12px 0 0", fontSize: 14 }}>Mis à jour le {dateLongue("2026-10-31")} par Silfax</p>
+          <p className="doux" style={{ margin: "12px 0 0", fontSize: 14 }}>Mis à jour le {dateLongue("2026-10-31")} par Jobwow</p>
         </div>
       </section>
       <div className="wrap contenu">
@@ -54,7 +55,7 @@ export default async function Donjons() {
             </section>
             <section className="encadre-nuit" aria-labelledby="t-monter">
               <h2 id="t-monter" className="titre" style={{ margin: "0 0 8px", fontSize: 24, color: "var(--or-clair)" }}>Monter de 1 à 60</h2>
-              <p style={{ margin: "0 0 14px", color: "#cfc7b4" }}>Le parcours de Silfax, écrit au fil du jeu, zone par zone, avec les quêtes à ne pas rater. Gratuit, en français.</p>
+              <p style={{ margin: "0 0 14px", color: "#cfc7b4" }}>Le parcours de Jobwow, écrit au fil du jeu, zone par zone, avec les quêtes à ne pas rater. Gratuit, en français.</p>
               <Link href="/carnet/" className="btn btn-or">Suivre le parcours</Link>
             </section>
           </div>

@@ -22,7 +22,7 @@ export const ZONES: Zone[] = [
     resume: "La montagne sacrée de Kalimdor s'ouvre enfin aux joueurs de l'Azeroth d'origine. Une zone pensée pour les personnages arrivés au niveau maximal.",
     paragraphes: [
       "Mont Hyjal fait partie des quatre zones ajoutées par Forever, avec les Rives Claires, l'île de Zéphras et Shen'dralar. Contrairement aux trois autres, elle ne sert pas à monter de niveau : elle accompagne le contenu de fin de jeu, aux côtés des donjons et des raids.",
-      "[Récit de la première visite de Silfax : ambiance, premières quêtes, ennemis rencontrés.]",
+      "[Récit de la première visite de Jobwow : ambiance, premières quêtes, ennemis rencontrés.]",
     ],
     activites: [
       { titre: "Quêtes", texte: "[Chaînes de quêtes principales et récompenses : à relever en jeu.]" },
@@ -47,7 +47,7 @@ export const ZONES: Zone[] = [
     resume: "Terre natale des Skyborne : tous y commencent leur aventure, au village de Thendal.",
     paragraphes: [
       "L'île de Zéphras est la terre natale des Skyborne. Chaque faction y dispose de sa propre version de la zone.",
-      "[Récit de la découverte de l'île par Silfax.]",
+      "[Récit de la découverte de l'île par Jobwow.]",
     ],
     activites: [{ titre: "Quêtes de départ", texte: "[À relever en jeu.]" }],
     fiabilite: "Informations relevées pendant la bêta.",

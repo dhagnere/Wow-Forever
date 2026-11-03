@@ -25,7 +25,7 @@ function races(liste: [string, string][], skyborne?: string) {
   return lignes;
 }
 
-const A_COMPLETER = "[Conseil de Silfax à compléter après les premières heures de jeu.]";
+const A_COMPLETER = "[Conseil de Jobwow à compléter après les premières heures de jeu.]";
 
 export const CLASSES: Classe[] = [
   {
@@ -184,9 +184,9 @@ export const CLASSES: Classe[] = [
     ],
     races: races([["Elfe de la nuit", "Alliance"], ["Tauren", "Horde"]], "Alliance ou Horde"),
     debuter: [
-      { titre: "Choisir une voie pour monter de niveau.", texte: "[Conseil de Silfax : forme et branche de talents recommandées pour les niveaux 1 à 60.]" },
+      { titre: "Choisir une voie pour monter de niveau.", texte: "[Conseil de Jobwow : forme et branche de talents recommandées pour les niveaux 1 à 60.]" },
       { titre: "Récupérer chaque forme au bon moment.", texte: "Dans l'Azeroth d'origine, les formes s'obtiennent par des quêtes de classe. [Niveaux exacts dans Forever : à vérifier en jeu.]" },
-      { titre: "Garder de la mana pour se soigner.", texte: "[Astuce de rotation hors combat, tirée du carnet de Silfax.]" },
+      { titre: "Garder de la mana pour se soigner.", texte: "[Astuce de rotation hors combat, tirée du carnet de Jobwow.]" },
     ],
     misAJour: "2026-10-31",
   },

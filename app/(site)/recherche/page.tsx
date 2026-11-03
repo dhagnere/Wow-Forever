@@ -18,7 +18,7 @@ export default async function Recherche({ searchParams }: { searchParams: Promis
           <Ariane etapes={[{ nom: "Recherche" }]} />
           <p className="surtitre">Dans les articles du site</p>
           <h1>{q ? <>Résultats pour <span className="accent">« {q} »</span></> : "Rechercher"}</h1>
-          <p className="chapo">{q ? `${articles.length} article${articles.length > 1 ? "s" : ""} trouvé${articles.length > 1 ? "s" : ""}.` : "Une classe, un donjon, une zone, un mot de l'article : tapez, Silfax cherche."}</p>
+          <p className="chapo">{q ? `${articles.length} article${articles.length > 1 ? "s" : ""} trouvé${articles.length > 1 ? "s" : ""}.` : "Une classe, un donjon, une zone, un mot de l'article : tapez, Jobwow cherche."}</p>
         </div>
       </section>
       <div className="wrap contenu">

@@ -15,6 +15,7 @@ export default function Races() {
       <section className="bandeau-page">
         <div className="wrap">
           <Ariane etapes={[{ nom: "Races" }]} />
+          <p className="surtitre">Le Registre · Races</p>
           <h1>Les races de WoW Forever</h1>
           <p className="chapo">Huit races héritées de l&apos;Azeroth d&apos;origine, et une nouvelle venue : les Skyborne.</p>
         </div>

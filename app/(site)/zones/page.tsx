@@ -16,6 +16,7 @@ export default function Zones() {
       <section className="bandeau-page">
         <div className="wrap">
           <Ariane etapes={[{ nom: "Monde" }]} />
+          <p className="surtitre">La Salle des cartes · Zones</p>
           <h1>Le monde de WoW Forever</h1>
           <p className="chapo">Quatre nouvelles zones, neuf donjons inédits et des raids à 10 et 20 joueurs.</p>
         </div>

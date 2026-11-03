@@ -50,3 +50,12 @@ export { categoriesObjets, chercherObjets, lireObjet, iconeObjet, etatBase, list
 export {
   qualite, QUALITES, emplacement, lien as lienObjet, classesAutorisees, decouperPrix, prixEnTexte, vitesse as vitesseArme, nomCategorie,
 } from "./objets/libelles";
+
+// Statistiques d'audience (sans cookie).
+export type { Signal } from "./statistiques/collecte";
+export type { Tableau, Compteurs } from "./statistiques/tableau";
+export type { StatsFacebook } from "./statistiques/facebook";
+export { enregistrerSignal } from "./statistiques/collecte";
+export { tableauStatistiques, csvParJour, evolution } from "./statistiques/tableau";
+export { statsFacebook } from "./statistiques/facebook";
+export { NOMS_SOURCES } from "./statistiques/classement";

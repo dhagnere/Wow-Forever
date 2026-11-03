@@ -85,7 +85,7 @@ export default function ZonesParNiveau() {
               </ul>
             </div>
             <div className="encadre">
-              <h2>Le parcours de Silfax</h2>
+              <h2>Le parcours de Jobwow</h2>
               <p className="doux" style={{ margin: "0 0 10px", fontSize: 15 }}>La route réellement suivie, semaine après semaine.</p>
               <Link href="/carnet/">Ouvrir le carnet</Link>
             </div>
