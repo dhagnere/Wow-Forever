@@ -352,3 +352,23 @@ export async function relaisFacebookCetteHeure(): Promise<number> {
   );
   return Number(rows[0].n);
 }
+
+/** Articles dont une source au moins pointe encore vers Google News (correction des liens). */
+export async function articlesAvecLiensGoogleNews(): Promise<{ id: number; titre: string; sources: SourceCitee[] }[]> {
+  const { rows } = await pool().query<{ id: number; titre: string; sources: SourceCitee[] }>(
+    "SELECT id, titre, sources FROM articles WHERE sources::text LIKE '%news.google.com%' ORDER BY id",
+  );
+  return rows;
+}
+
+/** Remplace les sources d'un article par leur version corrigée (même nombre, même ordre) ; le reste ne change pas. */
+export async function remplacerSourcesCorrigees(id: number, corrigees: SourceCitee[]): Promise<void> {
+  const { rows } = await pool().query<{ sources: SourceCitee[] }>("SELECT sources FROM articles WHERE id = $1", [id]);
+  const actuelles = rows[0]?.sources;
+  if (!actuelles || actuelles.length !== corrigees.length) return;
+  const sources = actuelles.map((s, i) => {
+    const c = corrigees[i];
+    return /^https?:\/\//.test(c.url) ? { ...s, nom: c.nom || s.nom, titre: c.titre || s.titre, titreFr: c.titreFr ?? s.titreFr, url: c.url } : s;
+  });
+  await pool().query("UPDATE articles SET sources = $2 WHERE id = $1", [id, JSON.stringify(sources)]);
+}

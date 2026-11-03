@@ -2,18 +2,20 @@ import Parser from "rss-parser";
 import type { Source } from "@/config/sources";
 import type { Element } from "../types";
 import { texteBrut } from "../rendu/html";
+import { entreesGoogleNews } from "./liens";
 
 // Le téléchargement passe par fetch (délai maximal, erreurs réseau interceptées) ;
 // rss-parser ne sert qu'à analyser le XML.
 // « source » : éditeur réel d'un lien Google News (<source url="…">Nom</source>).
-const parser = new Parser<Record<string, unknown>, { source?: string | { _?: string } }>({ customFields: { item: ["source"] } });
+const parser = new Parser<Record<string, unknown>, { source?: string | { _?: string; $?: { url?: string } } }>({ customFields: { item: ["source"] } });
 
 /** Nom de l'éditeur d'un lien Google News, et titre débarrassé du suffixe « - Éditeur ». */
-export function editeurGoogleNews(titre: string, source: unknown): { editeur?: string; titre: string } {
+export function editeurGoogleNews(titre: string, source: unknown): { editeur?: string; site?: string; titre: string } {
   const editeur = (typeof source === "string" ? source : (source as { _?: string } | undefined)?._)?.trim();
+  const site = typeof source === "object" ? (source as { $?: { url?: string } } | undefined)?.$?.url : undefined;
   if (!editeur) return { titre };
   const suffixe = ` - ${editeur}`;
-  return { editeur, titre: titre.endsWith(suffixe) ? titre.slice(0, -suffixe.length) : titre };
+  return { editeur, site: site && /^https?:\/\//.test(site) ? site : undefined, titre: titre.endsWith(suffixe) ? titre.slice(0, -suffixe.length) : titre };
 }
 
 async function telecharger(url: string): Promise<string> {
@@ -47,12 +49,16 @@ function dateDe(item: Parser.Item): Date | null {
 
 export async function lireFlux(source: Source): Promise<ResultatFlux> {
   try {
-    const flux = await parser.parseString(await telecharger(source.url));
+    const xml = await telecharger(source.url);
+    const flux = await parser.parseString(xml);
+    // Site de l'éditeur de chaque lien Google News (attribut perdu par l'analyseur RSS).
+    const sites = new Map(entreesGoogleNews(xml).map((e) => [e.lien, e.site]));
     const elements: Element[] = [];
     for (const item of flux.items ?? []) {
       const publieLe = dateDe(item);
       if (!item.title || !item.link || !publieLe || !/^https?:\/\//i.test(item.link)) continue;
       const { editeur, titre } = editeurGoogleNews(texteBrut(item.title), item.source);
+      const site = sites.get(item.link);
       elements.push({
         sourceId: source.id,
         // Lien Google News : on crédite le site qui a publié l'article, pas l'agrégateur.
@@ -62,6 +68,7 @@ export async function lireFlux(source: Source): Promise<ResultatFlux> {
         video: !!source.video,
         titre: titre.slice(0, 300),
         url: item.link,
+        site,
         resume: texteBrut(item.content ?? item.summary ?? item.contentSnippet ?? "").slice(0, 1500),
         publieLe,
         theme: source.theme,

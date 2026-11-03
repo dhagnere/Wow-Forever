@@ -5,6 +5,7 @@ import { SLUGS_RUBRIQUES, PILIERS, estPilier, type SlugRubrique } from "@/config
 import { config } from "../config";
 import { texteBrut } from "../rendu/html";
 import type { Sujet, SourceCitee } from "../types";
+import { adresseDirecte } from "../collecte/liens";
 import type { NouveauBrouillon } from "../articles/depot";
 import { CONSIGNES, CONSIGNES_AVIS } from "./consignes";
 
@@ -63,7 +64,11 @@ function couper(texte: string, max: number): string {
 }
 
 export async function rediger(sujet: Sujet): Promise<ResultatRedaction> {
-  const elements = sujet.elements.slice(0, 5);
+  // Liens Google News remplacés par l'adresse directe de l'article quand on la retrouve :
+  // la page lue pour la rédaction et la source citée sont alors celles de l'éditeur.
+  const elements = await Promise.all(
+    sujet.elements.slice(0, 5).map(async (e) => ({ ...e, url: (await adresseDirecte({ url: e.url, titre: e.titre, site: e.site, nom: e.sourceNom })) ?? e.url })),
+  );
   const pages = await Promise.all(elements.slice(0, 2).map((e) => textePage(e.url)));
 
   const materiau = elements

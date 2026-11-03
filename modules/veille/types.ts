@@ -60,6 +60,8 @@ export interface Element {
   video: boolean;
   titre: string;
   url: string;
+  /** Site de l'éditeur, pour un lien Google News (sert à retrouver l'adresse directe de l'article). */
+  site?: string;
   resume: string;
   publieLe: Date;
   /** Thème suggéré par la source (recherche ciblée). */

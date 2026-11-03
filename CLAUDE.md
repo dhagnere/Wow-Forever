@@ -54,6 +54,7 @@ npm run veille:quotidien # passage complet : brouillons rédigés par l'IA
 npm run veille:revue     # rédige les meilleurs sujets de la dernière revue, sans refaire la collecte
 npm run veille:dossier   # dossiers de référence sur 60 jours (zones-depart, donjons, zones-niveaux), sans coût d'API
 npm run veille:facebook  # relais Facebook
+npm run veille:liens     # remplace les liens Google News des sources par l'adresse directe des articles (aussi fait chaque matin)
 npm run base:importer    # base d'objets depuis wago.tools (si nouvelle version du jeu ; --forcer, --icones)
 npm run visuels:generer  # PNG de l'enseigne, de l'icône du site et de l'avatar de Jobwow, depuis visuels/
 npm run cartes:jeu       # cartes du monde (continents, zones, Zéphras) assemblées depuis les tuiles du jeu → public/images/jeu/cartes/
