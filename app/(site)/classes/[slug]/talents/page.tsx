@@ -36,7 +36,7 @@ export default async function PageCalculateur({ params }: Props) {
     icone: s.icone ? iconeSort(s.icone) : "",
     talents: s.talents.map((t) => ({
       id: t.id, nom: t.nom, icone: t.icone ? iconeSort(t.icone) : "", palier: t.palier, colonne: t.colonne, rangs: t.rangs, niveau: t.niveau,
-      description: t.premier, prerequisId: t.prerequisId, prerequis: t.prerequis, actif: t.actif,
+      description: t.premier, descriptions: t.descriptions ?? [t.premier], prerequisId: t.prerequisId, prerequis: t.prerequis, actif: t.actif,
     })),
   }));
 
@@ -61,7 +61,7 @@ export default async function PageCalculateur({ params }: Props) {
         <p className="doux note-donnees">
           Arbres lus dans les fichiers du jeu de Forever grâce à <a href="https://wago.tools" rel="noopener noreferrer">wago.tools</a>,
           version {sorts.version}. Un point par niveau à partir du niveau 10 ; chaque palier demande 5 points de plus dans l&apos;arbre.
-          Les fichiers ne décrivent que le premier rang de chaque talent. Noms, textes et icônes : © Blizzard Entertainment.
+          Forever ne publie encore que le premier rang de chaque talent ; les rangs suivants s&apos;afficheront dès qu&apos;une version du jeu les contiendra. Noms, textes et icônes : © Blizzard Entertainment.
         </p>
         <p>
           <Link href={`/classes/${c.slug}/#sorts`}>Revenir aux sorts du {c.nom.toLowerCase()}</Link>

@@ -93,6 +93,9 @@ describe("sorts produits (content/sorts-jeu.json)", () => {
         for (const t of s.talents) {
           icones.add(t.icone);
           textes.push(t.premier);
+          expect(t.descriptions).toHaveLength(t.rangs);
+          expect(t.descriptions[0]).toBe(t.premier);
+          for (const d of t.descriptions) if (d) textes.push(d);
         }
       }
     }

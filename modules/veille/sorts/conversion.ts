@@ -62,9 +62,13 @@ export interface Talent {
   rangs: number;
   /** Niveau du personnage requis pour le premier point (10 au premier palier, puis 5 de plus par palier). */
   niveau: number;
-  /** Description au premier et au dernier rang. */
+  /** Description au premier rang. */
   premier: string;
-  dernier: string;
+  /**
+   * Description de chaque rang (null : rang absent des fichiers). Forever ne publie aujourd'hui que le premier rang ;
+   * les suivants s'afficheront d'eux-mêmes quand une version du jeu les contiendra (npm run sorts:jeu).
+   */
+  descriptions: (string | null)[];
   prerequis: string | null;
   /** Talent à remplir entièrement avant celui-ci (identifiant dans le même arbre). */
   prerequisId: number | null;
@@ -329,7 +333,7 @@ export function convertirSorts(csv: TablesSorts): BilanSorts {
           id: n(t.ID), nom, icone, palier, colonne: n(t.ColumnIndex), rangs: ids.length,
           niveau: 10 + palier * 5,
           premier: description(ids[0]),
-          dernier: ids.length > 1 ? description(ids[ids.length - 1]) : "",
+          descriptions: ids.map((id, k) => (k === 0 ? description(id) : noms.has(id) && textes.get(id)?.Description_lang ? description(id) : null)),
           prerequis: pre ? nomTalent.get(pre) || null : null,
           prerequisId: pre || null,
           actif: !(n(m?.Attributes_0) & PASSIF),

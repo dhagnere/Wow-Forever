@@ -81,12 +81,12 @@ function Talents({ talents }: { talents: Talent[] }) {
                     {t.actif ? <span className="badge-talent">Sort</span> : null}
                   </h5>
                   {t.prerequis ? <p className="sort-meta">Requiert {t.prerequis}</p> : null}
-                  {t.premier ? (
-                    <p className="sort-desc">
-                      {t.rangs > 1 ? <span className="doux">Rang 1 : </span> : null}
-                      {t.premier}
+                  {(t.descriptions ?? [t.premier]).map((d, k) => (d ? (
+                    <p key={k} className="sort-desc">
+                      {t.rangs > 1 ? <span className="doux">Rang {k + 1} : </span> : null}
+                      {d}
                     </p>
-                  ) : null}
+                  ) : null))}
                 </div>
               </li>
             ))}
@@ -136,7 +136,7 @@ export function SortsClasse({ slugClasse, nomClasse, version, specialisations }:
       <p className="doux note-donnees">
         Données lues dans les fichiers du jeu grâce à <a href="https://wago.tools" rel="noopener noreferrer">wago.tools</a>, version {version}.
         Valeurs de base, au niveau où chaque rang s&apos;apprend, sans bonus d&apos;équipement ; « X » dépend de votre puissance
-        d&apos;attaque ou de votre arme. Les fichiers ne décrivent que le premier rang des talents. Certains sorts présents dans
+        d&apos;attaque ou de votre arme. Forever ne publie encore que le premier rang des talents : les suivants apparaîtront ici dès qu&apos;une version du jeu les contiendra. Certains sorts présents dans
         les fichiers peuvent ne pas être actifs au lancement de Forever. Noms, textes et icônes : © Blizzard Entertainment
         (voir les <Link href="/mentions-legales/">mentions légales</Link>).
       </p>

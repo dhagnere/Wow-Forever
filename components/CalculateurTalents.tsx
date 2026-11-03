@@ -15,6 +15,8 @@ export interface TalentVue {
   rangs: number;
   niveau: number;
   description: string;
+  /** Description de chaque rang (null : pas encore publiée). */
+  descriptions: (string | null)[];
   prerequisId: number | null;
   prerequis: string | null;
   actif: boolean;
@@ -28,6 +30,30 @@ export interface ArbreVue {
 }
 
 const COLONNES = 4;
+
+/** Comme l'infobulle du jeu : le rang atteint, puis le rang suivant ; à défaut, le premier rang publié. */
+function DescriptionsRangs({ t, pt }: { t: TalentVue; pt: number }) {
+  const texte = (k: number) => t.descriptions[k] ?? null;
+  const lignes: { titre: string; texte: string }[] = [];
+  if (t.rangs === 1) {
+    if (t.description) lignes.push({ titre: "", texte: t.description });
+  } else {
+    if (pt > 0 && texte(pt - 1)) lignes.push({ titre: `Rang ${pt}`, texte: texte(pt - 1)! });
+    if (pt < t.rangs && texte(pt)) lignes.push({ titre: pt ? `Rang suivant (${pt + 1})` : "Rang 1", texte: texte(pt)! });
+    if (!lignes.length && t.description) lignes.push({ titre: "Rang 1", texte: t.description });
+  }
+  const manquants = t.descriptions.slice(1).filter((d) => !d).length;
+  return (
+    <>
+      {lignes.map((l) => (
+        <p key={l.titre} className="sort-desc">{l.titre ? <span className="doux">{l.titre} : </span> : null}{l.texte}</p>
+      ))}
+      {t.rangs > 1 && manquants && pt > 1 ? (
+        <p className="doux calc-motif">Les fichiers de Forever ne décrivent pas encore les rangs 2 à {t.rangs} de ce talent.</p>
+      ) : null}
+    </>
+  );
+}
 
 /**
  * Calculateur de talents : trois arbres côte à côte. Clic (ou Entrée) : un point de plus ; clic droit (ou Suppr) : un point
@@ -194,7 +220,7 @@ export function CalculateurTalents({ classe, arbres }: { classe: string; arbres:
               </div>
             </div>
             {!t.description && !t.icone ? <p className="doux" style={{ margin: 0 }}>Les fichiers du jeu ne donnent pas encore son nom ni son effet.</p> : null}
-            {t.description ? <p className="sort-desc">{t.rangs > 1 ? <span className="doux">Rang 1 : </span> : null}{t.description}</p> : null}
+            <DescriptionsRangs t={t} pt={pt} />
             <div className="calc-actions">
               <button type="button" className="btn btn-contour" onClick={() => retirer(choix.a, choix.i)} disabled={!!motifRetrait} aria-label={`Retirer un point de ${t.nom}`}>− 1 point</button>
               <button type="button" className="btn btn-or" onClick={() => ajouter(choix.a, choix.i)} disabled={!!motifAjout} aria-label={`Ajouter un point à ${t.nom}`}>+ 1 point</button>
