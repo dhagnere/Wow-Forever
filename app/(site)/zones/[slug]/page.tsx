@@ -6,6 +6,8 @@ import { estPilier } from "@/config/taxonomie";
 import { Ariane } from "@/components/Ariane";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { dateLongue } from "@/lib/site";
+import { ECRAN_ZONE, fondBandeau, nomEcran } from "@/lib/ecrans";
+import { IllustrationEcran } from "@/components/Visuels";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +27,7 @@ export default async function PageZone({ params }: Props) {
   const pilier = `zones/${z.slug}`;
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau(ECRAN_ZONE[z.slug] ?? "kalimdor")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Monde", href: "/zones/" }, { nom: z.nom }]} />
           {z.nouvelle ? <p className="surtitre">Nouvelle zone</p> : null}
@@ -36,6 +38,7 @@ export default async function PageZone({ params }: Props) {
       <div className="wrap contenu">
         <div className="colonnes">
           <div className="colonne-principale">
+            <IllustrationEcran ecran={ECRAN_ZONE[z.slug] ?? "kalimdor"} legende={ECRAN_ZONE[z.slug] === z.slug ? undefined : `En attendant l'écran de la zone, pas encore publié par Blizzard : ${nomEcran(ECRAN_ZONE[z.slug] ?? "kalimdor")}`} />
             <dl className="g4" style={{ margin: 0 }}>
               {[["Continent", z.continent], ["Niveau", z.niveau], ["Statut", z.statut], ["Accès", z.acces]].map(([t, v]) => (
                 <div key={t} className="encadre">

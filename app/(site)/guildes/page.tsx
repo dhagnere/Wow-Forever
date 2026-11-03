@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CLASSES_GUILDE, DUREE_VALIDITE_JOURS, FACTIONS, listerGuildes, OBJECTIFS, TYPES_ROYAUME } from "@/modules/veille";
 import { Ariane } from "@/components/Ariane";
 import { CarteGuilde } from "@/components/Guildes";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,7 @@ export default async function Guildes({ searchParams }: { searchParams: Promise<
 
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau("vallee-d-alterac")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Le Comptoir", href: "/actualites/" }, { nom: "Tableau des guildes" }]} />
           <p className="surtitre">Le Comptoir · recrutement</p>

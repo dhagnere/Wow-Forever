@@ -5,6 +5,8 @@ import { listerPublies } from "@/modules/veille";
 import { Ariane } from "@/components/Ariane";
 import { FilArticles } from "@/components/Articles";
 import { dateLongue } from "@/lib/site";
+import { ECRAN_DONJON, fondBandeau } from "@/lib/ecrans";
+import { Vignette } from "@/components/Visuels";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +20,7 @@ export default async function Donjons() {
   const articles = await listerPublies({ rubrique: "donjons-raids", limite: 5 });
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau("ruines-de-lordaeron")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Monde", href: "/zones/" }, { nom: "Donjons et raids" }]} />
           <p className="surtitre">La Cave · Donjons et raids</p>
@@ -38,7 +40,7 @@ export default async function Donjons() {
                   <thead><tr><th scope="col">Donjon</th><th scope="col">Accessible dès le niveau</th><th scope="col">Fiche</th></tr></thead>
                   <tbody>
                     {DONJONS.map((d) => (
-                      <tr key={d.slug}><td style={{ fontWeight: 600 }}>{d.nom}</td><td>{d.niveau}</td><td><Link href={`/donjons/${d.slug}/`}>Lire</Link></td></tr>
+                      <tr key={d.slug}><td style={{ fontWeight: 600 }}><span className="lien-icone">{ECRAN_DONJON[d.slug] ? <Vignette ecran={ECRAN_DONJON[d.slug]} /> : null}{d.nom}</span></td><td>{d.niveau}</td><td><Link href={`/donjons/${d.slug}/`}>Lire</Link></td></tr>
                     ))}
                     <tr><td colSpan={3} className="doux">[Cinq autres donjons annoncés : noms et niveaux à compléter au lancement]</td></tr>
                   </tbody>

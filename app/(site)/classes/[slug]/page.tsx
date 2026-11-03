@@ -8,6 +8,7 @@ import { IconeClasse } from "@/components/IconeClasse";
 import { IconeRace } from "@/components/IconeRace";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { dateLongue } from "@/lib/site";
+import { ECRAN_CLASSE, fondBandeau } from "@/lib/ecrans";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,7 @@ export default async function PageClasse({ params }: Props) {
 
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau(ECRAN_CLASSE[c.slug] ?? "salle-des-thanes")}>
         <div className="wrap" style={{ display: "flex", flexWrap: "wrap", gap: 36, alignItems: "center" }}>
           <IconeClasse slug={c.slug} couleur={c.couleur} taille={150} />
           <div style={{ flex: "1 1 480px" }}>

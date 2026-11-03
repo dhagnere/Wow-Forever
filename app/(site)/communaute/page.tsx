@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Ariane } from "@/components/Ariane";
 import { SITE } from "@/lib/site";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const metadata: Metadata = {
   title: "Communauté : le Discord et la Page de la Taverne",
@@ -21,7 +22,7 @@ const SALONS: [string, string][] = [
 export default function Communaute() {
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau("iles-des-sombrelances")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Le Comptoir", href: "/actualites/" }, { nom: "Communauté" }]} />
           <p className="surtitre">Entre joueurs</p>

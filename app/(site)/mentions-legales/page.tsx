@@ -34,7 +34,7 @@ export default function MentionsLegales() {
         </p>
         <h2>Crédits</h2>
         <p>
-          Icônes des classes, des races et des objets : fichiers du jeu World of Warcraft: Forever, lus grâce à{" "}
+          Icônes des classes, des races et des objets, écrans de chargement qui illustrent les pages : fichiers du jeu World of Warcraft: Forever, lus grâce à{" "}
           <a href="https://wago.tools" rel="noopener noreferrer">wago.tools</a>. Elles restent la propriété de Blizzard Entertainment et sont
           utilisées dans le cadre de la tolérance accordée aux sites de fans.
         </p>

@@ -8,6 +8,8 @@ import { JsonLd } from "@/components/JsonLd";
 import { LigneSource } from "@/components/Sources";
 import { BandeauLettre } from "@/components/BandeauLettre";
 import { SITE, dateLongue, tempsDeLecture } from "@/lib/site";
+import { ecranArticle, nomEcran } from "@/lib/ecrans";
+import { IllustrationEcran } from "@/components/Visuels";
 
 export const dynamic = "force-dynamic";
 
@@ -91,7 +93,9 @@ export default async function PageArticle({ params }: Props) {
               <img src={`/medias/${article.image.id}/`} alt={article.image.alt} fetchPriority="high" />
               {article.image.credit ? <figcaption>{article.image.credit}</figcaption> : null}
             </figure>
-          ) : null}
+          ) : (
+            <IllustrationEcran ecran={ecranArticle(article)} legende={`Illustration : ${nomEcran(ecranArticle(article))}, écran de chargement du jeu`} />
+          )}
 
           {article.chapo ? <p className="chapo-article">{article.chapo}</p> : null}
           <div className="corps" dangerouslySetInnerHTML={{ __html: markdownVersHtml(article.corps) }} />

@@ -4,6 +4,7 @@ import { ZONES_DEPART } from "@/content/reference";
 import { Ariane } from "@/components/Ariane";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { AvertissementReference } from "@/components/AvertissementReference";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
 export default function ZonesDeDepart() {
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau("ile-de-zephras")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Guides", href: "/guides/bien-demarrer/" }, { nom: "Zones de départ" }]} />
           <h1>Zones de départ</h1>

@@ -23,7 +23,8 @@
     "base:explorer": "tsx scripts/explorer-wago.ts",
     "base:importer": "tsx modules/veille/scripts/objets.ts",
     "visuels:generer": "node scripts/generer-visuels.mjs",
-    "icones:jeu": "tsx modules/veille/scripts/icones-jeu.ts"
+    "icones:jeu": "tsx modules/veille/scripts/icones-jeu.ts",
+    "ecrans:jeu": "tsx modules/veille/scripts/ecrans-jeu.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

@@ -3,6 +3,7 @@ import type { Article } from "@/modules/veille";
 import { trouverRubrique } from "@/config/taxonomie";
 import { dateCourte, tempsDeLecture } from "@/lib/site";
 import { Visuel } from "./Visuels";
+import { ecranArticle } from "@/lib/ecrans";
 
 export function nomRubrique(slug: string): string {
   return trouverRubrique(slug)?.nom ?? slug;
@@ -17,7 +18,7 @@ export function CarteArticle({ article, grande = false }: { article: Article; gr
           // eslint-disable-next-line @next/next/no-img-element
           <img src={`/medias/${article.image.id}/`} alt="" loading="lazy" />
         ) : (
-          <Visuel hauteur="100%" />
+          <Visuel hauteur="100%" ecran={ecranArticle(article)} />
         )}
         <span className="parchemin-badge">{nomRubrique(article.rubrique)}</span>
       </span>

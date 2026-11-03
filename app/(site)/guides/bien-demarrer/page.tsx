@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Ariane } from "@/components/Ariane";
 import { SITE } from "@/lib/site";
 import { ArticlesLies } from "@/components/ArticlesLies";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 export default function BienDemarrer() {
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau("royaumes-de-l-est")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Guides" }, { nom: "Bien démarrer" }]} />
           <h1>Bien débuter sur WoW Forever</h1>

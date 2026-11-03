@@ -3,6 +3,7 @@ import Link from "next/link";
 import { RACES_ORIGINE, SKYBORNE } from "@/content/monde";
 import { Ariane } from "@/components/Ariane";
 import { IconesRace } from "@/components/IconeRace";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const metadata: Metadata = {
   title: "Les races de WoW Forever",
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 export default function Races() {
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau("ile-de-zephras")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Races" }]} />
           <p className="surtitre">Le Registre · Races</p>

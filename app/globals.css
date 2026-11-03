@@ -500,3 +500,14 @@ a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(236, 184, 90, 0
 a:hover > .icone-jeu, a:hover .icone-jeu { border-color: var(--or-pale); box-shadow: 0 0 0 1px #000, 0 0 16px color-mix(in srgb, var(--lueur, #e0a23b) 60%, transparent); }
 .icone-classe.icone-jeu { filter: none; }
 .icones-race { display: inline-flex; gap: 6px; flex: none; }
+
+/* Écrans de chargement du jeu */
+.visuel-ecran { position: relative; overflow: hidden; background: #140d08; }
+.visuel-ecran img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.visuel-ecran .visuel-texte { z-index: 2; text-shadow: 0 2px 8px #000, 0 0 2px #000; }
+.visuel-ecran::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(20, 13, 8, 0.75), transparent 55%); pointer-events: none; }
+.illustration-ecran { margin: 0 0 28px; }
+.illustration-ecran img { display: block; width: 100%; height: auto; aspect-ratio: 2.2; object-fit: cover; border: 1px solid var(--bordure-vive); border-radius: 4px; }
+.illustration-ecran figcaption { margin-top: 6px; font-size: 13px; color: var(--texte-doux); }
+.vignette-ecran { flex: none; width: 96px; height: 44px; object-fit: cover; border-radius: 3px; border: 1px solid var(--bordure-vive); }
+@media (max-width: 600px) { .vignette-ecran { width: 64px; height: 30px; } }

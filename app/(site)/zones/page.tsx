@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ZONES } from "@/content/monde";
 import { Ariane } from "@/components/Ariane";
 import { Visuel } from "@/components/Visuels";
+import { fondBandeau } from "@/lib/ecrans";
+import { ECRAN_ZONE } from "@/lib/ecrans";
 
 export const metadata: Metadata = {
   title: "Les zones de WoW Forever",
@@ -13,7 +15,7 @@ export const metadata: Metadata = {
 export default function Zones() {
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau("kalimdor")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Monde" }]} />
           <p className="surtitre">La Salle des cartes · Zones</p>
@@ -27,7 +29,7 @@ export default function Zones() {
           <div className="g2">
             {ZONES.map((z) => (
               <Link key={z.slug} href={`/zones/${z.slug}/`} className="carte cadre">
-                <Visuel hauteur={160} />
+                <Visuel hauteur={160} ecran={ECRAN_ZONE[z.slug]} />
                 <div className="carte-corps">
                   <p className="surtitre">Niveau {z.niveau}</p>
                   <h3>{z.nom}</h3>

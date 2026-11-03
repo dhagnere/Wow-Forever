@@ -7,6 +7,7 @@ import { Ariane } from "@/components/Ariane";
 import { IconeClasse } from "@/components/IconeClasse";
 import { SelecteurClasses } from "@/components/SelecteurClasses";
 import { CarteArticle } from "@/components/Articles";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ export default async function Classes() {
   const articles = await listerPublies({ rubrique: "classes", limite: 3 });
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau("salle-des-thanes")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Classes" }]} />
           <p className="surtitre">L&apos;Armurerie · Classes</p>

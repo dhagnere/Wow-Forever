@@ -10,11 +10,11 @@ import { SITE } from "@/lib/site";
 export const dynamic = "force-dynamic";
 
 const TERRES = [
-  { href: "/zones/mont-hyjal/", nom: "Mont Hyjal", teinte: "#7fbf7a" },
-  { href: "/zones/ile-de-zephras/", nom: "Île de Zéphras", teinte: "#5fb8d6" },
-  { href: "/donjons/", nom: "Nouveaux donjons", teinte: "#d9822b" },
-  { href: "/donjons/#raids", nom: "Raids à 10 et 20", teinte: "#c0504d" },
-];
+  { href: "/zones/mont-hyjal/", nom: "Mont Hyjal", teinte: "#7fbf7a", ecran: "kalimdor" },
+  { href: "/zones/ile-de-zephras/", nom: "Île de Zéphras", teinte: "#5fb8d6", ecran: "ile-de-zephras" },
+  { href: "/donjons/", nom: "Nouveaux donjons", teinte: "#d9822b", ecran: "salle-des-thanes" },
+  { href: "/donjons/#raids", nom: "Raids à 10 et 20", teinte: "#c0504d", ecran: "coeur-du-magma" },
+] as const;
 
 export default async function Accueil() {
   const [recents, carnet] = await Promise.all([listerPublies({ limite: 9 }), listerPublies({ rubrique: "carnet", limite: 1 })]);
@@ -120,7 +120,7 @@ export default async function Accueil() {
           <div className="g4">
             {TERRES.map((t) => (
               <Link key={t.href} href={t.href} className="carte cadre" style={{ height: 240 }}>
-                <Visuel hauteur="100%" texte={t.nom} teinte={t.teinte} />
+                <Visuel hauteur="100%" texte={t.nom} teinte={t.teinte} ecran={t.ecran} />
               </Link>
             ))}
           </div>

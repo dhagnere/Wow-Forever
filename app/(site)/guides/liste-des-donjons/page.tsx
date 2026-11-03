@@ -5,6 +5,9 @@ import { DONJONS_ORIGINE, RAIDS } from "@/content/reference";
 import { Ariane } from "@/components/Ariane";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { AvertissementReference } from "@/components/AvertissementReference";
+import { fondBandeau } from "@/lib/ecrans";
+import { ECRAN_DONJON } from "@/lib/ecrans";
+import { Vignette } from "@/components/Visuels";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +20,7 @@ export const metadata: Metadata = {
 export default function ListeDesDonjons() {
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau("profondeurs-de-rochenoire")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Guides", href: "/guides/bien-demarrer/" }, { nom: "Liste des donjons" }]} />
           <h1>Liste des donjons et raids</h1>
@@ -38,7 +41,7 @@ export default function ListeDesDonjons() {
                   <thead><tr><th scope="col">Donjon</th><th scope="col">Dès le niveau</th><th scope="col">Zone</th></tr></thead>
                   <tbody>
                     {DONJONS.map((d) => (
-                      <tr key={d.slug}><td style={{ fontWeight: 600 }}><Link href={`/donjons/${d.slug}/`}>{d.nom}</Link></td><td>{d.niveau}</td><td className="doux">[À confirmer]</td></tr>
+                      <tr key={d.slug}><td style={{ fontWeight: 600 }}><span className="lien-icone">{ECRAN_DONJON[d.slug] ? <Vignette ecran={ECRAN_DONJON[d.slug]} /> : null}<Link href={`/donjons/${d.slug}/`}>{d.nom}</Link></span></td><td>{d.niveau}</td><td className="doux">[À confirmer]</td></tr>
                     ))}
                     <tr><td colSpan={3} className="doux">[Cinq autres donjons annoncés : noms et niveaux à compléter au lancement]</td></tr>
                   </tbody>
@@ -54,7 +57,7 @@ export default function ListeDesDonjons() {
                   <thead><tr><th scope="col">Donjon</th><th scope="col">Niveaux</th><th scope="col">Zone</th><th scope="col">Continent</th></tr></thead>
                   <tbody>
                     {DONJONS_ORIGINE.map((d) => (
-                      <tr key={d.nom}><td style={{ fontWeight: 600 }}>{d.nom}</td><td>{d.min}–{d.max}</td><td>{d.zone}</td><td className="doux">{d.continent}</td></tr>
+                      <tr key={d.nom}><td style={{ fontWeight: 600 }}><span className="lien-icone"><Vignette nom={d.nom} />{d.nom}</span></td><td>{d.min}–{d.max}</td><td>{d.zone}</td><td className="doux">{d.continent}</td></tr>
                     ))}
                   </tbody>
                 </table>
@@ -70,7 +73,7 @@ export default function ListeDesDonjons() {
                   <tbody>
                     {RAIDS.map((r) => (
                       <tr key={r.nom}>
-                        <td style={{ fontWeight: 600 }}>{r.lien ? <Link href={r.lien}>{r.nom}</Link> : r.nom}</td>
+                        <td style={{ fontWeight: 600 }}><span className="lien-icone"><Vignette nom={r.nom} />{r.lien ? <Link href={r.lien}>{r.nom}</Link> : r.nom}</span></td>
                         <td>{r.joueurs}</td>
                         <td>{r.zone}</td>
                         <td className="doux">{r.statut}</td>

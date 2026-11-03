@@ -3,6 +3,7 @@ import { compterPublies, listerPublies } from "@/modules/veille";
 import { Ariane } from "@/components/Ariane";
 import { Repertoire } from "@/components/Repertoire";
 import { pageDemandee } from "@/components/ListePaginee";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ export default async function Actualites({ searchParams }: { searchParams: Promi
   const [articles, total] = await Promise.all([listerPublies({ limite: PAR_PAGE, decalage: (page - 1) * PAR_PAGE }), compterPublies()]);
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau("cite-de-dalaran")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Actualités" }]} />
           <p className="surtitre">Le Comptoir · chaque matin, relu par Jobwow</p>

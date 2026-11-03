@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Ariane } from "@/components/Ariane";
 import { FormulaireLettre } from "./FormulaireLettre";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const metadata: Metadata = {
   title: "La Lettre de la Taverne : WoW Forever chaque dimanche",
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 export default function Lettre() {
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau("cite-de-dalaran")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Le Comptoir", href: "/actualites/" }, { nom: "La Lettre" }]} />
           <p className="surtitre">Chaque dimanche à 10 h</p>

@@ -4,6 +4,7 @@ import { TRANCHES, ZONES_NIVEAUX, ZONES_SANS_NIVEAU, DONJONS_ORIGINE, dansTranch
 import { Ariane } from "@/components/Ariane";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { AvertissementReference } from "@/components/AvertissementReference";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ function niveaux(min: number, max: number) {
 export default function ZonesParNiveau() {
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau("kalimdor")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Guides", href: "/guides/bien-demarrer/" }, { nom: "Zones par niveau" }]} />
           <h1>Zones par niveau</h1>

@@ -5,6 +5,7 @@ import { Ariane } from "@/components/Ariane";
 import { IconesRace } from "@/components/IconeRace";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { dateLongue } from "@/lib/site";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,7 @@ export default function Skyborne() {
   const s = SKYBORNE;
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau("ile-de-zephras")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Races", href: "/races/" }, { nom: "Skyborne" }]} />
           <div className="presentation-auteur">

@@ -5,6 +5,7 @@ import { trouverRubrique } from "@/config/taxonomie";
 import { Ariane } from "@/components/Ariane";
 import { Repertoire } from "@/components/Repertoire";
 import { pageDemandee } from "@/components/ListePaginee";
+import { ecranArticle, fondBandeau } from "@/lib/ecrans";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,7 @@ export default async function PageRubrique({ params, searchParams }: Props) {
   ]);
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau(ecranArticle({ pilier: null, rubrique: r.slug }))}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Actualités", href: "/actualites/" }, { nom: r.nom }]} />
           <p className="surtitre">{r.enseigne ?? "Rubrique"}</p>

@@ -5,6 +5,8 @@ import { DONJONS, NOTE_DONJONS } from "@/content/monde";
 import { estPilier } from "@/config/taxonomie";
 import { Ariane } from "@/components/Ariane";
 import { ArticlesLies } from "@/components/ArticlesLies";
+import { ECRAN_DONJON, fondBandeau } from "@/lib/ecrans";
+import { IllustrationEcran } from "@/components/Visuels";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +26,7 @@ export default async function PageDonjon({ params }: Props) {
   const pilier = `donjons/${d.slug}`;
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau(ECRAN_DONJON[d.slug] ?? "salle-des-thanes")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Donjons et raids", href: "/donjons/" }, { nom: d.nom }]} />
           <p className="surtitre">Nouveau donjon · dès le niveau {d.niveau}</p>
@@ -35,6 +37,7 @@ export default async function PageDonjon({ params }: Props) {
       <div className="wrap contenu">
         <div className="colonnes">
           <div className="colonne-principale">
+            {ECRAN_DONJON[d.slug] ? <IllustrationEcran ecran={ECRAN_DONJON[d.slug]} /> : null}
             <section aria-labelledby="t-acces">
               <h2 id="t-acces" className="section-titre" style={{ fontSize: 26 }}>Accès et préparation</h2>
               <p className="doux">[Emplacement de l&apos;entrée, quêtes à prendre avant d&apos;entrer, composition de groupe conseillée : à relever en jeu.]</p>

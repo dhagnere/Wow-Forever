@@ -4,6 +4,7 @@ import { categoriesObjets, chercherObjets, nomCategorie, OBJETS_PAR_PAGE, QUALIT
 import { Ariane } from "@/components/Ariane";
 import { TableauObjets } from "@/components/Objets";
 import { listeIndexable, lireFiltres, urlObjets } from "@/lib/objets";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +36,7 @@ export default async function ListeObjets({ searchParams }: Props) {
 
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau("excavations-les-paluns")}>
         <div className="wrap">
           <Ariane etapes={[
             { nom: "Base de données", href: "/base-de-donnees/" },

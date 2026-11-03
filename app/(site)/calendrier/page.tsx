@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ECHEANCES, MAJ_CALENDRIER } from "@/content/calendrier";
 import { Ariane } from "@/components/Ariane";
 import { dateLongue } from "@/lib/site";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const metadata: Metadata = {
   title: "WoW Forever : date et heure de sortie, raids, Hardcore",
@@ -21,7 +22,7 @@ function quand(debut: string | null, periode?: string): string {
 export default function Calendrier() {
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau("royaumes-de-l-est")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Le Comptoir", href: "/actualites/" }, { nom: "Calendrier" }]} />
           <p className="surtitre">Le Comptoir · dates clés</p>
