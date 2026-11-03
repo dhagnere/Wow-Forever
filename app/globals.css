@@ -572,3 +572,33 @@ a:hover > .icone-jeu, a:hover .icone-jeu { border-color: var(--or-pale); box-sha
 .utilise-pour { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px 20px; }
 .utilise-pour li { display: flex; flex-direction: column; gap: 2px; }
 .utilise-pour small { padding-left: 38px; font-size: 13px; }
+
+/* Sorts et talents des classes */
+.onglets-spe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 8px 0 24px; border-bottom: 1px solid var(--bordure); }
+.onglets-spe button { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 8px 6px 12px; background: none; border: 0; border-bottom: 3px solid transparent; color: var(--texte-doux); font: inherit; font-weight: 700; cursor: pointer; }
+.onglets-spe button img { width: 36px; height: 36px; }
+.onglets-spe button[aria-selected="true"] { color: var(--texte-titre); border-bottom-color: var(--or); }
+.onglets-spe button:hover { color: var(--texte); }
+.onglets-spe button:focus-visible { outline: 2px solid var(--or); outline-offset: 2px; }
+.spe-titre { display: flex; align-items: center; gap: 14px; margin: 0 0 18px; font-size: 24px; }
+.sous-titre-spe { margin: 28px 0 12px; font-size: 18px; color: var(--or-clair); }
+.sorts, .talents { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.sort { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: start; padding: 12px 14px; background: var(--surface); border: 1px solid var(--bordure); border-radius: 6px; }
+.sort h4, .sort h5 { margin: 0 0 2px; font-size: 17px; color: var(--texte-titre); }
+.sort h5 { font-size: 16px; }
+.icone-sort { width: 40px; height: 40px; }
+.icone-vide { display: block; border-radius: 10%; background: var(--surface-2); border: 2px solid var(--bordure); }
+.sort-meta { margin: 0 0 6px; font-size: 13px; color: var(--texte-doux); }
+.sort-desc { margin: 0; font-size: 15px; white-space: pre-line; color: #e2d3b3; }
+.badge-talent { display: inline-block; margin-left: 8px; padding: 1px 8px; border: 1px solid var(--or); border-radius: 3px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--or-clair); vertical-align: 2px; }
+.rangs { margin-top: 8px; font-size: 14px; }
+.rangs summary { cursor: pointer; color: var(--or-clair); min-height: 32px; display: inline-flex; align-items: center; }
+.rangs table td { vertical-align: top; font-size: 14px; }
+.rangs table td:first-child, .rangs table td:nth-child(2), .rangs table td:nth-child(3) { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.paliers-talents { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; }
+.palier-titre { margin: 0 0 8px; font-size: 16px; }
+@media (max-width: 600px) {
+  .onglets-spe button { flex-direction: column; gap: 4px; font-size: 13px; }
+  .sort { padding: 10px; gap: 10px; }
+  .rangs table th:nth-child(3), .rangs table td:nth-child(3) { display: none; }
+}

@@ -75,3 +75,6 @@ export { validerFiche, FACTIONS, TYPES_ROYAUME, OBJECTIFS, ROLES, CLASSES_GUILDE
 // Où trouver les objets (données communautaires de l'Azeroth d'origine).
 export type { OuTrouver, SourceMonstre, SourceDecor, SourceMarchand, SourceQuete, Emplacement } from "./objets/butin";
 export { ouTrouver, RANGS, sourceDesDonnees } from "./objets/butin";
+
+// Sorts et talents des classes (fichiers du jeu, npm run sorts:jeu → content/sorts-jeu.json).
+export type { Specialisation, Sort, Talent, RangSort } from "./sorts/conversion";

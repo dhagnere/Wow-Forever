@@ -40,6 +40,10 @@ Contenu déposé par des inconnus (`guildes/`). Chaque fiche passe par la relect
 
 Importée des fichiers du jeu par wago.tools (`objets/wago.ts`, produit `wowf`), en français. L'import remplace tout en une transaction et s'arrête si moins de 1 000 objets sont lus. Les objets internes (tests, équipement des monstres, objets périmés, niveau requis au-delà de 60) sont écartés par `objetInterne` (`objets/conversion.ts`). Les icônes ne sont demandées à wago.tools que pour un objet connu de la base, puis gardées en cache dans `objets_icones`. Garder le crédit wago.tools et la mention Blizzard (pages de la base et mentions légales). Les icônes de classes et de races, les écrans de chargement et les cartes du monde (`public/images/jeu/`) viennent de la même source : `npm run icones:jeu`, `npm run ecrans:jeu` et `npm run cartes:jeu` les refont. Les pages de lieux `/cartes/<lieu>/` relient les noms des guides (`content/reference.ts`) aux cartes par `lieuParNom` (`lib/cartes.ts`) : un nom qui diffère du jeu va dans `ALIAS` (le test `tests/cartes.test.ts` le signale). La liste des écrans est dans `config/ecrans.ts`, le choix de l'écran de chaque page dans `lib/ecrans.ts`. Chaque illustration porte la mention « © Blizzard Entertainment ».
 
+## Sorts et talents des classes
+
+Lus dans les fichiers du jeu par `npm run sorts:jeu` (`sorts/conversion.ts`), sans base de données : le script écrit `content/sorts-jeu.json` et les icônes `public/images/jeu/sorts/`, affichés sous chaque classe (`components/SortsClasse.tsx`, un onglet par spécialisation). Une spécialisation associe un arbre de talents à la ligne de compétence de son école (`SPECIALISATIONS`). Les descriptions du jeu sont des modèles (`$s1`, `$d`, `${…}`) remplis par `sorts/description.ts` pour un personnage sans talent ni équipement ; ce qui dépend de la puissance d'attaque ou de l'arme s'affiche « X ». Les fichiers ne contiennent que le premier rang des talents. Relancer le script à chaque version du jeu ; il s'arrête si moins de 200 sorts sont lus.
+
 ## Caractéristiques et sources des objets
 
 Les recettes des métiers (« Fabriqué par », « Utilisé pour fabriquer », « Apprend à fabriquer ») viennent aussi des fichiers du jeu, lues à l'import par `convertirRecettes` (table `objets_recettes`). Les bonus, l'armure et les dégâts sont calculés à l'import par `objets/caracteristiques.ts`, comme le fait le jeu (budget du niveau d'objet × part de chaque bonus) ; les légendaires gardent des dégâts propres, non calculés. « Où le trouver » vient des bases libres CMaNGOS classic-db (GPL v3) et AzerothCore (noms français, GPL v2) : `npm run base:butin` produit `objets/donnees/butin.json.gz`, lu par `ouTrouver`. Les positions sont converties sur les cartes du jeu, la zone d'un point étant tranchée par les zones d'exploration des cartes. Ne pas récupérer ces données sur Wowhead ou un site équivalent : leurs bases sont protégées. Garder le crédit sur les fiches et dans les mentions légales.
@@ -64,6 +68,7 @@ npm run base:butin -- <dump CMaNGOS> <db_world AzerothCore>  # « où le trouver
 npm run visuels:generer  # PNG de l'enseigne, de l'icône du site et de l'avatar de Jobwow, depuis visuels/
 npm run cartes:jeu       # cartes du monde (continents, zones, Zéphras) assemblées depuis les tuiles du jeu → public/images/jeu/cartes/
 npm run ecrans:jeu       # écrans de chargement du jeu (config/ecrans.ts) → public/images/jeu/ecrans/, en 1600 et 800 pixels
+npm run sorts:jeu        # sorts et talents de chaque classe par spécialisation (wago.tools) → content/sorts-jeu.json et public/images/jeu/sorts/
 npm run icones:jeu       # icônes officielles des classes et des races, découpées dans les fichiers du jeu (wago.tools) → public/images/jeu/
 ```
 

@@ -9,6 +9,8 @@ import { IconeRace } from "@/components/IconeRace";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { dateLongue } from "@/lib/site";
 import { ECRAN_CLASSE, fondBandeau } from "@/lib/ecrans";
+import { sortsDeClasse } from "@/lib/sorts";
+import { SortsClasse } from "@/components/SortsClasse";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!c) return {};
   return {
     title: `Guide du ${c.nom} sur WoW Forever`,
-    description: `${c.nom} sur WoW Forever : rôles (${c.roles.join(", ").toLowerCase()}), races possibles, conseils pour bien débuter et équipement.`,
+    description: `${c.nom} sur WoW Forever : rôles (${c.roles.join(", ").toLowerCase()}), races possibles, sorts et talents de chaque spécialisation, conseils pour bien débuter.`,
     alternates: { canonical: `/classes/${c.slug}/` },
   };
 }
@@ -28,6 +30,7 @@ export default async function PageClasse({ params }: Props) {
   const c = trouverClasse((await params).slug);
   if (!c) notFound();
   const pilier = `classes/${c.slug}`;
+  const sorts = sortsDeClasse(c.slug);
 
   return (
     <>
@@ -43,7 +46,8 @@ export default async function PageClasse({ params }: Props) {
               <li className="puce puce-douce">Armure : {c.armure}</li>
             </ul>
             <div className="actions-bandeau">
-              <Link href="/guides/liste-des-donjons/" className="btn btn-or" data-cta="donjons-classe">Voir les donjons à mon niveau</Link>
+              {sorts ? <a href="#sorts" className="btn btn-or" data-cta="sorts-classe">Sorts et talents</a> : null}
+              <Link href="/guides/liste-des-donjons/" className={sorts ? "btn btn-contour" : "btn btn-or"} data-cta="donjons-classe">Voir les donjons à mon niveau</Link>
               <Link href="/lettre/" className="btn btn-contour" data-cta="lettre-classe">Recevoir la Lettre</Link>
             </div>
           </div>
@@ -90,6 +94,8 @@ export default async function PageClasse({ params }: Props) {
                 {c.debuter.map((d) => <li key={d.titre}><strong>{d.titre}</strong> {d.texte}</li>)}
               </ol>
             </section>
+
+            {sorts ? <SortsClasse nomClasse={c.nom} version={sorts.version} specialisations={sorts.specialisations} /> : null}
 
             <section aria-labelledby="t-equip">
               <h2 id="t-equip" className="section-titre" style={{ fontSize: 26 }}>Équipement conseillé</h2>

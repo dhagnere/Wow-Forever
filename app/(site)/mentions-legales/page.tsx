@@ -51,6 +51,10 @@ export default function MentionsLegales() {
           et sont reproduits à titre informatif, dans le cadre d&apos;un site de fans non commercial.
         </p>
         <p>
+          Sorts et talents des pages de classe : noms, descriptions, valeurs et icônes proviennent des mêmes fichiers du jeu, lus grâce
+          à <a href="https://wago.tools" rel="noopener noreferrer">wago.tools</a>. Ils restent la propriété de Blizzard Entertainment.
+        </p>
+        <p>
           « Où le trouver » (monstres, taux de butin, marchands, coffres, quêtes et emplacements) : données de l&apos;Azeroth d&apos;origine tirées des bases
           communautaires libres <a href="https://github.com/cmangos/classic-db" rel="noopener noreferrer">CMaNGOS classic-db</a> (licence GPL v3) et{" "}
           <a href="https://github.com/azerothcore/azerothcore-wotlk" rel="noopener noreferrer">AzerothCore</a> pour les noms français (licence GPL v2).
