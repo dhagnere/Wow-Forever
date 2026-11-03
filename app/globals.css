@@ -72,7 +72,7 @@ a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(232, 192, 106, 
 .outils-entete a:hover { color: var(--or-pale); }
 .nav { display: flex; justify-content: center; align-items: stretch; gap: 4px 6px; flex-wrap: wrap; font-size: 15px; font-weight: 600; }
 .nav-groupe { display: flex; }
-.nav > a, .nav-groupe > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; color: #e9e2d0; text-decoration: none; cursor: pointer; list-style: none; border-bottom: 2px solid transparent; }
+.nav > a, .nav-groupe > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; color: #e9e2d0; text-decoration: none; cursor: pointer; list-style: none; border-bottom: 2px solid transparent; white-space: nowrap; }
 .nav-groupe > summary::-webkit-details-marker { display: none; }
 .nav > a:hover, .nav-groupe > summary:hover { color: #fff; }
 .nav > a[aria-current="page"], .nav-groupe[data-actif] > summary { color: var(--or-clair); border-bottom-color: var(--or); }
@@ -492,3 +492,4 @@ a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(236, 184, 90, 0
 .grille-champs { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
 .cases-guilde { display: flex; flex-wrap: wrap; gap: 10px 18px; }
 .lien-secret { padding: 10px 12px; background: var(--fond-nuit); border: 1px solid var(--bordure); border-radius: 4px; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .nav > a, .nav-groupe > summary { padding: 0 9px; font-size: 14px; } }
