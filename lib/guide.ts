@@ -194,3 +194,21 @@ export function planifier(z: { niveaux: [number, number]; hubs: Hub[]; etapes: E
   }
   return arrets;
 }
+
+let parZone: Map<string, { race: RaceGuide; classes: string[] }[]> | undefined;
+/** Guides (race et classes) dont la route passe par cette zone, pour proposer le guide depuis la page de la zone. */
+export function guidesPassantPar(lieu: string): { race: RaceGuide; classes: string[] }[] {
+  if (!parZone) {
+    parZone = new Map();
+    for (const { race, classe } of combinaisons()) {
+      for (const z of guidePour(race, classe.slug)) {
+        const liste: { race: RaceGuide; classes: string[] }[] = parZone.get(z.lieu) ?? [];
+        let e = liste.find((x) => x.race.slug === race.slug);
+        if (!e) { e = { race, classes: [] }; liste.push(e); }
+        if (!e.classes.includes(classe.slug)) e.classes.push(classe.slug);
+        parZone.set(z.lieu, liste);
+      }
+    }
+  }
+  return parZone.get(lieu) ?? [];
+}

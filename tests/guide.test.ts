@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { combinaisons, guidePour, planifier, raceGuide, cleGuide, libelleGuide, BITS_CLASSES } from "@/lib/guide";
+import { combinaisons, guidePour, guidesPassantPar, planifier, raceGuide, cleGuide, libelleGuide, BITS_CLASSES } from "@/lib/guide";
 import { courbe, segment } from "@/components/GuideParcours";
 import { carte } from "@/lib/cartes";
 import { cleGuideValide } from "@/modules/veille/joueurs/validation";
@@ -94,5 +94,17 @@ describe("guide de 1 à 60", () => {
     const cy = (d: string) => Number(d.split("Q")[1].split(" ")[0].split(",")[1]);
     expect(cy(aller)).not.toBeCloseTo(cy(retour));
     expect(aller.startsWith("M")).toBe(true);
+  });
+
+  it("propose depuis chaque zone les guides qui y passent, et seulement ceux-là", () => {
+    const races = (lieu: string) => guidesPassantPar(lieu).map((g) => g.race.slug).sort();
+    expect(races("durotar")).toEqual(["orc", "troll"]);
+    expect(races("foret-d-elwynn")).toEqual(["humain"]);
+    expect(races("dun-morogh")).toEqual(["gnome", "nain"]);
+    const tanaris = guidesPassantPar("tanaris");
+    expect(tanaris.length).toBeGreaterThanOrEqual(6);
+    // Chaque classe proposée existe bien pour cette race.
+    for (const g of tanaris) for (const c of g.classes) expect(combinaisons().some((x) => x.race.slug === g.race.slug && x.classe.slug === c)).toBe(true);
+    expect(guidesPassantPar("lieu-inconnu")).toEqual([]);
   });
 });

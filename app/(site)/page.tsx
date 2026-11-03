@@ -6,6 +6,7 @@ import { Visuel } from "@/components/Visuels";
 import { IconeClasse } from "@/components/IconeClasse";
 import { JsonLd } from "@/components/JsonLd";
 import { SITE } from "@/lib/site";
+import { ChoixGuideParClasse } from "@/components/ChoixGuide";
 
 export const dynamic = "force-dynamic";
 
@@ -49,12 +50,37 @@ export default async function Accueil() {
             <p className="surtitre" style={{ fontSize: 15, letterSpacing: "0.22em", marginBottom: 14 }}>5 novembre · minuit</p>
             <h1>L&apos;Azeroth d&apos;origine renaît</h1>
             <span className="ornement" aria-hidden="true" />
-            <p>L&apos;actualité de WoW Forever, servie chaque matin par Jobwow. Classes, quêtes, donjons et nouvelles terres, en français, de 1 à 60.</p>
+            <p>Le guide de 1 à 60 pour votre classe, quête par quête, et l&apos;actualité de WoW Forever servie chaque matin par Jobwow. En français.</p>
             <div className="boutons">
-              <Link href="/lettre/" className="btn btn-or" data-cta="lettre-accueil">Recevoir la Lettre de la Taverne</Link>
-              <Link href="/guides/bien-demarrer/" className="btn btn-contour" data-cta="debuter-accueil">Bien débuter sur WoW Forever</Link>
+              <a href="#guide-1-60" className="btn btn-or" data-cta="guide-heros">Suivre le guide de 1 à 60</a>
+              <Link href="/lettre/" className="btn btn-contour" data-cta="lettre-accueil">Recevoir la Lettre de la Taverne</Link>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section id="guide-1-60" className="accueil-guide" aria-labelledby="t-guide-accueil">
+        <div className="wrap">
+          <div className="accueil-guide-tete">
+            <div>
+              <p className="surtitre" style={{ margin: 0 }}>Le guide de la Taverne</p>
+              <h2 id="t-guide-accueil">De 1 à 60, quête par quête, pour votre classe</h2>
+              <p className="chapo" style={{ margin: 0 }}>
+                Chaque quête dans le bon ordre : la prendre, faire ses objectifs, la rendre, puis la suite. Les PNJ et les monstres sont placés
+                sur la carte de chaque zone, la route est tracée en flèches, et votre progression se sauvegarde jour après jour avec un compte gratuit.
+              </p>
+            </div>
+            <ul className="accueil-guide-points" aria-label="Ce que propose le guide">
+              <li><strong>Votre classe</strong> et vos quêtes de classe à leur place</li>
+              <li><strong>Cartes zoomables</strong> avec les PNJ, les monstres et la route</li>
+              <li><strong>Progression</strong> cochée et sauvegardée</li>
+            </ul>
+          </div>
+          <p className="accueil-guide-consigne">Choisissez votre classe, puis votre race :</p>
+          <ChoixGuideParClasse cta="guide-accueil" />
+          <p className="doux" style={{ margin: "16px 0 0", fontSize: 14 }}>
+            Ou parcourez <Link href="/guides/parcours/">la route de l&apos;Alliance et de la Horde</Link> et <Link href="/guides/quetes-de-classe/">les quêtes de classe</Link>.
+          </p>
         </div>
       </section>
 

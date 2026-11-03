@@ -9,6 +9,7 @@ import { dateLongue } from "@/lib/site";
 import { ECRAN_ZONE, fondBandeau, nomEcran } from "@/lib/ecrans";
 import { IllustrationEcran } from "@/components/Visuels";
 import { FigureCarte } from "@/components/Cartes";
+import { GuideDeLaZone } from "@/components/ChoixGuide";
 import { lieuParNom, pageLieu } from "@/lib/cartes";
 
 export const dynamic = "force-dynamic";
@@ -54,6 +55,7 @@ export default async function PageZone({ params }: Props) {
                 <h2 id="t-carte" className="section-titre" style={{ fontSize: 26 }}>Carte de la zone</h2>
                 <FigureCarte slug={lieuParNom(z.nom)!} legende={`Carte : ${z.nom}, dans les fichiers du jeu · cliquer pour agrandir`} />
                 <p style={{ marginTop: -12 }}><Link href={pageLieu(lieuParNom(z.nom)!)}>Voir le lieu sur les cartes du monde, avec ses voisines</Link></p>
+                <GuideDeLaZone lieu={lieuParNom(z.nom)!} nom={z.nom} />
               </section>
             ) : null}
             <section aria-labelledby="t-attend">

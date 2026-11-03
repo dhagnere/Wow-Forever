@@ -243,6 +243,19 @@ export function GuideParcours({ cle, titre, zones, retour }: { cle: string; titr
   const [popup, setPopup] = useState(false);
   const [actif, setActif] = useState<{ zone: number; arret: number } | null>(null);
   const [cadrage, setCadrage] = useState<{ zone: number; cle: string; points: [number, number][] } | null>(null);
+  // Zone demandée par l'adresse (#zone-durotar), depuis la page d'une zone.
+  const [demandee, setDemandee] = useState<string | null>(null);
+  useEffect(() => {
+    const lire = () => {
+      const m = /^#zone-([a-z0-9-]+)$/.exec(window.location.hash);
+      if (!m || !zones.some((z) => z.lieu === m[1])) return;
+      setDemandee(m[1]);
+      requestAnimationFrame(() => document.getElementById(`zone-${m[1]}`)?.scrollIntoView({ block: "start" }));
+    };
+    lire();
+    window.addEventListener("hashchange", lire);
+    return () => window.removeEventListener("hashchange", lire);
+  }, [zones]);
   const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
   const deja = useRef(false);
 
@@ -365,7 +378,7 @@ export function GuideParcours({ cle, titre, zones, retour }: { cle: string; titr
           const arretActif = actif?.zone === zi ? actif.arret : null;
           return (
             <li key={z.lieu} id={`zone-${z.lieu}`} className="zone-guide">
-              <details open={zi === Math.max(0, zoneEnCours)}>
+              <details open={demandee ? z.lieu === demandee || zi === Math.max(0, zoneEnCours) : zi === Math.max(0, zoneEnCours)}>
                 <summary>
                   <span className="numero-etape" aria-hidden="true">{zi + 1}</span>
                   <span className="zone-titre">

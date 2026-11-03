@@ -768,3 +768,23 @@ label.ligne-action { cursor: pointer; }
 .zoom-commandes button:disabled { opacity: 0.4; cursor: default; }
 .zoom-commandes button:focus-visible { outline: 2px solid var(--or); }
 .zoom-niveau { position: absolute; left: 8px; bottom: 8px; z-index: 3; padding: 2px 8px; background: rgba(32, 22, 15, 0.9); border-radius: 3px; font-size: 12px; color: var(--texte-titre); pointer-events: none; }
+
+/* Guide de 1 à 60 : accueil et pages de zone */
+.accueil-guide { padding: 40px 0 36px; background: linear-gradient(180deg, #2a1c12, #20160f); border-bottom: 1px solid var(--bordure); }
+.accueil-guide-tete { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 24px; align-items: center; margin-bottom: 20px; }
+.accueil-guide h2 { margin: 4px 0 10px; font-size: 32px; }
+.accueil-guide-points { list-style: none; margin: 0; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--or); border-radius: 6px; background: rgba(224, 162, 59, 0.07); }
+.accueil-guide-points li::before { content: "✓ "; color: #5fd35f; font-weight: 800; }
+.accueil-guide-consigne { margin: 0 0 12px; font-weight: 700; color: var(--or-clair); }
+.choix-classes { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 12px; }
+.choix-classe { padding: 12px 14px; background: var(--surface); border: 1px solid var(--bordure); border-top: 3px solid var(--teinte, var(--or)); border-radius: 6px; }
+.choix-classe-titre { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font-size: 18px; }
+.choix-classe ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.choix-classe a { gap: 6px; padding: 4px 10px 4px 4px; min-height: 36px; border: 1px solid var(--bordure-vive); border-radius: 18px; font-size: 14px; text-decoration: none; color: var(--texte); }
+.choix-classe a:hover, .choix-classe a:focus-visible { border-color: var(--or); color: var(--texte-titre); background: var(--surface-2); }
+.guide-zone { margin: 0 0 32px; padding: 18px 20px; }
+.guide-zone-races { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 10px 20px; }
+.guide-zone-race { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.guide-zone-classes { display: flex; flex-wrap: wrap; gap: 6px; }
+.guide-zone-classes a { display: inline-flex; border-radius: 10%; }
+@media (max-width: 800px) { .accueil-guide-tete { grid-template-columns: minmax(0, 1fr); } .accueil-guide h2 { font-size: 26px; } }

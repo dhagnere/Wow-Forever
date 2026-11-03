@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { GuideDeLaZone } from "@/components/ChoixGuide";
+import { guidesPassantPar } from "@/lib/guide";
 import { notFound } from "next/navigation";
 import { Ariane } from "@/components/Ariane";
 import { FigureCarte, LienLieu } from "@/components/Cartes";
@@ -41,9 +43,10 @@ export default async function PageLieu({ params }: Props) {
           <Ariane etapes={[{ nom: "Cartes du monde", href: "/cartes/" }, { nom: continent, href: `/cartes/${ancre}` }, { nom: l.carte.nom }]} />
           <p className="surtitre">{l.carte.type === "continent" ? "Continent" : continent}{l.niveau ? ` · niveaux ${niveaux(l.niveau.min, l.niveau.max)}` : ""}</p>
           <h1>{l.carte.nom}</h1>
-          {l.fiche ? (
+          {l.fiche || guidesPassantPar(l.slug).length ? (
             <div className="actions-bandeau">
-              <Link href={l.fiche.lien} className="btn btn-or" data-cta="fiche-lieu">Lire la fiche Forever : {l.fiche.nom}</Link>
+              {guidesPassantPar(l.slug).length ? <a href="#guide-1-60" className="btn btn-or" data-cta="guide-zone-bandeau">Faire cette zone avec le guide de 1 à 60</a> : null}
+              {l.fiche ? <Link href={l.fiche.lien} className={guidesPassantPar(l.slug).length ? "btn btn-contour" : "btn btn-or"} data-cta="fiche-lieu">Lire la fiche Forever : {l.fiche.nom}</Link> : null}
             </div>
           ) : null}
         </div>
@@ -59,6 +62,8 @@ export default async function PageLieu({ params }: Props) {
               <div className="encadre"><dt className="surtitre">Donjons</dt><dd style={{ margin: 0, fontWeight: 600 }}>{l.donjons.length + l.raids.length || "Aucun"}</dd></div>
               <div className="encadre"><dt className="surtitre">Nouveauté</dt><dd style={{ margin: 0, fontWeight: 600 }}>{l.niveau?.forever || l.fiche ? "Propre à Forever" : "Azeroth d'origine"}</dd></div>
             </dl>
+
+            <GuideDeLaZone lieu={l.slug} nom={l.carte.nom} />
 
             {l.departs.length ? (
               <section aria-labelledby="t-depart" style={{ marginBottom: 32 }}>
