@@ -33,11 +33,12 @@ const MENU: Entree[] = [
   },
   {
     label: "Explorer",
-    prefixe: ["/classes", "/races", "/zones", "/donjons", "/base-de-donnees"],
+    prefixe: ["/classes", "/races", "/zones", "/donjons", "/base-de-donnees", "/cartes"],
     liens: [
       { href: "/classes/", label: "L'Armurerie · Classes", detail: "Rôles, races possibles, conseils" },
       { href: "/races/", label: "Le Registre · Races", detail: "Dont les Skyborne" },
       { href: "/zones/", label: "La Salle des cartes · Zones", detail: "Les nouvelles terres de Forever" },
+      { href: "/cartes/", label: "Cartes du monde", detail: "Kalimdor, Royaumes de l'Est, Zéphras" },
       { href: "/donjons/", label: "La Cave · Donjons et raids", detail: "Repérés en bêta, annoncés" },
       { href: "/base-de-donnees/", label: "Base de données", detail: "Tous les objets du jeu, en français" },
     ],

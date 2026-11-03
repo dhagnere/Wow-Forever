@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Ariane } from "@/components/Ariane";
 import { SITE } from "@/lib/site";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const metadata: Metadata = {
   title: "Qui est Jobwow ?",
@@ -11,18 +12,23 @@ export const metadata: Metadata = {
 
 export default function APropos() {
   return (
-    <div className="wrap contenu">
-      <Ariane etapes={[{ nom: "Qui est Jobwow ?" }]} />
-      <article className="article corps">
-        <div className="presentation-auteur">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/jobwow-512.png" width={200} height={200} alt="Jobwow, gnome mage au chapeau étoilé, lunettes rondes et bâton à orbe lumineux" className="avatar-jobwow" />
-          <div>
-            <p className="surtitre">Le tavernier</p>
-            <h1>Qui est Jobwow ?</h1>
-            <p className="chapo-article">Gnome mage, lunettes rondes, chapeau étoilé : Jobwow tient le comptoir de la Taverne Éternelle et raconte ce qui se passe dans le monde.</p>
+    <>
+      <section className="bandeau-page" style={fondBandeau("cite-de-dalaran")}>
+        <div className="wrap">
+          <Ariane etapes={[{ nom: "Qui est Jobwow ?" }]} />
+          <div className="presentation-auteur">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/jobwow-512.png" width={200} height={200} alt="Jobwow, gnome mage au chapeau étoilé, lunettes rondes et bâton à orbe lumineux" className="avatar-jobwow" />
+            <div>
+              <p className="surtitre">Le tavernier</p>
+              <h1>Qui est Jobwow ?</h1>
+              <p className="chapo">Gnome mage, lunettes rondes, chapeau étoilé : Jobwow tient le comptoir de la Taverne Éternelle et raconte ce qui se passe dans le monde.</p>
+            </div>
           </div>
         </div>
+      </section>
+    <div className="wrap contenu">
+      <article className="article corps">
         <p>[Présentation de Jobwow : parcours de joueur, première découverte d&apos;Azeroth, ce qui l&apos;a ramené vers Forever.]</p>
         <h2>Pourquoi une taverne ?</h2>
         <p>
@@ -49,5 +55,6 @@ export default function APropos() {
         </p>
       </article>
     </div>
+    </>
   );
 }

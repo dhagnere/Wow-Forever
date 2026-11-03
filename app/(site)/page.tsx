@@ -124,6 +124,7 @@ export default async function Accueil() {
               </Link>
             ))}
           </div>
+          <p style={{ marginTop: 16 }}><Link href="/cartes/" data-cta="cartes-accueil">Toutes les cartes du monde : Kalimdor, Royaumes de l&apos;Est, île de Zéphras</Link></p>
         </section>
 
         <section className="encadre cadre" style={{ padding: "30px 34px", display: "flex", flexWrap: "wrap", gap: 20, alignItems: "center", justifyContent: "space-between" }}>

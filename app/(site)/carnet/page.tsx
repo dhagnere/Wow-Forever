@@ -16,7 +16,7 @@ export default async function Carnet() {
   const episodes = await listerPublies({ rubrique: "carnet", limite: 100 });
   return (
     <>
-      <section className="bandeau-page" style={{ background: "var(--surface-chaude)" }}>
+      <section className="bandeau-page">
         <div className="wrap">
           <Ariane etapes={[{ nom: "Le Carnet de Jobwow" }]} />
           <div className="presentation-auteur">

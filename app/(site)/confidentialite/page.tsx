@@ -2,15 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Ariane } from "@/components/Ariane";
 import { SITE } from "@/lib/site";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const metadata: Metadata = { title: "Politique de confidentialité", alternates: { canonical: "/confidentialite/" } };
 
 export default function Confidentialite() {
   return (
+    <>
+      <section className="bandeau-page bandeau-mince" style={fondBandeau("salle-des-thanes")}>
+        <div className="wrap">
+          <Ariane etapes={[{ nom: "Confidentialité" }]} />
+          
+          <h1>Politique de confidentialité</h1>
+        </div>
+      </section>
     <div className="wrap contenu">
-      <Ariane etapes={[{ nom: "Confidentialité" }]} />
       <article className="article corps">
-        <h1>Politique de confidentialité</h1>
         <p>La Taverne Éternelle collecte le moins de données possible. Voici lesquelles, pourquoi, et comment exercer vos droits.</p>
 
         <h2>Mesure d&apos;audience du site, sans cookie</h2>
@@ -47,5 +54,6 @@ export default function Confidentialite() {
         </p>
       </article>
     </div>
+    </>
   );
 }

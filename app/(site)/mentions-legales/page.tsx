@@ -1,15 +1,22 @@
 import type { Metadata } from "next";
 import { Ariane } from "@/components/Ariane";
 import { SITE } from "@/lib/site";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const metadata: Metadata = { title: "Mentions légales", alternates: { canonical: "/mentions-legales/" } };
 
 export default function MentionsLegales() {
   return (
+    <>
+      <section className="bandeau-page bandeau-mince" style={fondBandeau("ruines-de-lordaeron")}>
+        <div className="wrap">
+          <Ariane etapes={[{ nom: "Mentions légales" }]} />
+          
+          <h1>Mentions légales</h1>
+        </div>
+      </section>
     <div className="wrap contenu">
-      <Ariane etapes={[{ nom: "Mentions légales" }]} />
       <article className="article corps">
-        <h1>Mentions légales</h1>
         <h2>Éditeur</h2>
         <p>
           Site édité à titre non professionnel par Jobwow (pseudonyme). Conformément à la loi pour la confiance dans l&apos;économie numérique,
@@ -34,7 +41,7 @@ export default function MentionsLegales() {
         </p>
         <h2>Crédits</h2>
         <p>
-          Icônes des classes, des races et des objets, écrans de chargement qui illustrent les pages : fichiers du jeu World of Warcraft: Forever, lus grâce à{" "}
+          Icônes des classes, des races et des objets, écrans de chargement qui illustrent les pages, cartes du monde : fichiers du jeu World of Warcraft: Forever, lus grâce à{" "}
           <a href="https://wago.tools" rel="noopener noreferrer">wago.tools</a>. Elles restent la propriété de Blizzard Entertainment et sont
           utilisées dans le cadre de la tolérance accordée aux sites de fans.
         </p>
@@ -47,5 +54,6 @@ export default function MentionsLegales() {
         <p>Certains liens sont signalés comme affiliés : ils peuvent rapporter une commission au site, sans surcoût pour vous.</p>
       </article>
     </div>
+    </>
   );
 }

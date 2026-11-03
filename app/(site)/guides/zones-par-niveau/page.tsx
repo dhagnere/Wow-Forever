@@ -5,6 +5,8 @@ import { Ariane } from "@/components/Ariane";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { AvertissementReference } from "@/components/AvertissementReference";
 import { fondBandeau } from "@/lib/ecrans";
+import { LienLieu } from "@/components/Cartes";
+import { lieuParNom } from "@/lib/cartes";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +27,10 @@ export default function ZonesParNiveau() {
         <div className="wrap">
           <Ariane etapes={[{ nom: "Guides", href: "/guides/bien-demarrer/" }, { nom: "Zones par niveau" }]} />
           <h1>Zones par niveau</h1>
-          <p className="chapo">De 1 à 60, les zones à parcourir tranche par tranche, avec les donjons à portée.</p>
+          <p className="chapo">De 1 à 60, les zones à parcourir tranche par tranche, avec les donjons à portée. Cliquez sur une zone pour voir sa carte.</p>
+          <div className="actions-bandeau">
+            <Link href="/cartes/" className="btn btn-or" data-cta="cartes-niveaux">Voir les cartes du monde</Link>
+          </div>
         </div>
       </section>
       <div className="wrap contenu">
@@ -48,7 +53,8 @@ export default function ZonesParNiveau() {
                         {zones.map((z) => (
                           <tr key={z.nom}>
                             <td style={{ fontWeight: 600 }}>
-                              {z.lien ? <Link href={z.lien}>{z.nom}</Link> : z.nom}
+                              {lieuParNom(z.nom) ? <LienLieu slug={lieuParNom(z.nom)!} nom={z.nom} /> : z.lien ? <Link href={z.lien}>{z.nom}</Link> : z.nom}
+                              {z.lien ? <Link href={z.lien} className="doux" style={{ marginLeft: 8, fontSize: 13 }}>fiche</Link> : null}
                               {z.forever ? <span className="puce" style={{ marginLeft: 8, fontSize: 12 }}>Forever</span> : null}
                             </td>
                             <td>{niveaux(z.min, z.max)}{z.incertain ? <span className="doux"> (à confirmer)</span> : null}</td>

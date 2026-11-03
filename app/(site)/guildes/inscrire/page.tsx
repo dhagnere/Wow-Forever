@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Ariane } from "@/components/Ariane";
 import { LIBELLES_GUILDE } from "@/components/Guildes";
 import { FormulaireGuilde } from "../FormulaireGuilde";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const metadata: Metadata = {
   title: "Inscrire ma guilde au tableau",
@@ -12,11 +13,16 @@ export const metadata: Metadata = {
 
 export default function InscrireGuilde() {
   return (
+    <>
+      <section className="bandeau-page bandeau-mince" style={fondBandeau("vallee-d-alterac")}>
+        <div className="wrap">
+          <Ariane etapes={[{ nom: "Tableau des guildes", href: "/guildes/" }, { nom: "Inscrire ma guilde" }]} />
+          <p className="surtitre">Gratuit · relu sous 48 heures</p>
+          <h1>Inscrire ma guilde</h1>
+        </div>
+      </section>
     <div className="wrap contenu">
-      <Ariane etapes={[{ nom: "Tableau des guildes", href: "/guildes/" }, { nom: "Inscrire ma guilde" }]} />
       <div style={{ maxWidth: 820 }}>
-        <p className="surtitre">Gratuit · relu sous 48 heures</p>
-        <h1 className="titre" style={{ marginTop: 0 }}>Inscrire ma guilde</h1>
         <p>
           Une fiche par guilde. Une fois publiée, partagez son adresse à vos futures recrues. Pensez à la mettre à jour : les fiches récentes
           passent en tête du <Link href="/guildes/">tableau</Link>.
@@ -28,5 +34,6 @@ export default function InscrireGuilde() {
         </p>
       </div>
     </div>
+    </>
   );
 }

@@ -33,7 +33,7 @@ export const ZONES: Zone[] = [
     misAJour: "2026-10-31",
   },
   {
-    slug: "rives-claires", nom: "Rives Claires", nouvelle: true, continent: "[À confirmer]", niveau: "Environ 35 à 45", statut: "[À confirmer]",
+    slug: "rives-claires", nom: "Rives Claires", nouvelle: true, continent: "Royaumes de l'Est (carte du jeu)", niveau: "Environ 35 à 45", statut: "[À confirmer]",
     acces: "[À confirmer]",
     resume: "Nouvelle zone de progression de Forever, pour les personnages de milieu de parcours.",
     paragraphes: ["Les Rives Claires font partie des quatre zones ajoutées par Forever. Fiche complétée dès l'ouverture des serveurs."],
@@ -42,7 +42,7 @@ export const ZONES: Zone[] = [
     misAJour: "2026-10-31",
   },
   {
-    slug: "ile-de-zephras", nom: "Île de Zéphras", nouvelle: true, continent: "[À confirmer]", niveau: "Zone de départ", statut: "Une version par faction",
+    slug: "ile-de-zephras", nom: "Île de Zéphras", nouvelle: true, continent: "Île à l'écart des continents (carte du jeu)", niveau: "Zone de départ", statut: "Une version par faction",
     acces: "Zone de départ des Skyborne",
     resume: "Terre natale des Skyborne : tous y commencent leur aventure, au village de Thendal.",
     paragraphes: [
@@ -54,7 +54,7 @@ export const ZONES: Zone[] = [
     misAJour: "2026-10-31",
   },
   {
-    slug: "shendralar", nom: "Shen'dralar", nouvelle: true, continent: "[À confirmer]", niveau: "Encore incertain", statut: "[À confirmer]",
+    slug: "shendralar", nom: "Shen'dralar", nouvelle: true, continent: "Kalimdor (carte du jeu)", niveau: "Encore incertain", statut: "[À confirmer]",
     acces: "[À confirmer]",
     resume: "La quatrième nouvelle zone de Forever, dont les niveaux restent incertains.",
     paragraphes: ["Fiche complétée dès que Blizzard ou les premiers joueurs en diront plus."],

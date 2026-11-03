@@ -5,6 +5,8 @@ import { Ariane } from "@/components/Ariane";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { AvertissementReference } from "@/components/AvertissementReference";
 import { fondBandeau } from "@/lib/ecrans";
+import { LienLieu } from "@/components/Cartes";
+import { lieuParNom, pageLieu } from "@/lib/cartes";
 
 export const dynamic = "force-dynamic";
 
@@ -44,8 +46,8 @@ export default function ZonesDeDepart() {
                         </td>
                         <td>{z.faction}</td>
                         <td>{z.lieu}</td>
-                        <td>{z.lien ? <Link href={z.lien}>{z.zone}</Link> : z.zone}</td>
-                        <td>{z.capitale}</td>
+                        <td>{lieuParNom(z.zone) ? <LienLieu slug={lieuParNom(z.zone)!} nom={z.zone} /> : z.lien ? <Link href={z.lien}>{z.zone}</Link> : z.zone}</td>
+                        <td>{lieuParNom(z.capitale) ? <Link href={pageLieu(lieuParNom(z.capitale)!)}>{z.capitale}</Link> : z.capitale}</td>
                         <td className="doux">{z.continent}</td>
                       </tr>
                     ))}

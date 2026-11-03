@@ -24,7 +24,8 @@
     "base:importer": "tsx modules/veille/scripts/objets.ts",
     "visuels:generer": "node scripts/generer-visuels.mjs",
     "icones:jeu": "tsx modules/veille/scripts/icones-jeu.ts",
-    "ecrans:jeu": "tsx modules/veille/scripts/ecrans-jeu.ts"
+    "ecrans:jeu": "tsx modules/veille/scripts/ecrans-jeu.ts",
+    "cartes:jeu": "tsx modules/veille/scripts/cartes-jeu.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

@@ -4,6 +4,7 @@ import { RUBRIQUES } from "@/config/taxonomie";
 import { CLASSES } from "@/content/classes";
 import { ZONES, DONJONS } from "@/content/monde";
 import { SITE } from "@/lib/site";
+import { tousLesLieux } from "@/lib/cartes";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const fixes = [
     "/", "/actualites/", "/classes/", "/races/", "/races/skyborne/", "/zones/", "/donjons/", "/guides/bien-demarrer/",
     "/guides/zones-de-depart/", "/guides/zones-par-niveau/", "/guides/liste-des-donjons/",
-    "/base-de-donnees/", "/base-de-donnees/objets/", "/calendrier/", "/lettre/", "/communaute/", "/guildes/", "/guildes/inscrire/", "/soutenir/", "/contact/", "/confidentialite/", "/carnet/", "/a-propos/", "/plan-du-site/", "/mentions-legales/",
+    "/base-de-donnees/", "/base-de-donnees/objets/", "/cartes/", ...tousLesLieux().map((l) => `/cartes/${l}/`), "/calendrier/", "/lettre/", "/communaute/", "/guildes/", "/guildes/inscrire/", "/soutenir/", "/contact/", "/confidentialite/", "/carnet/", "/a-propos/", "/plan-du-site/", "/mentions-legales/",
     ...RUBRIQUES.map((r) => `/rubriques/${r.slug}/`),
     ...CLASSES.map((c) => `/classes/${c.slug}/`),
     ...ZONES.map((z) => `/zones/${z.slug}/`),

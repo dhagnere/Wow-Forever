@@ -8,6 +8,7 @@ import { AvertissementReference } from "@/components/AvertissementReference";
 import { fondBandeau } from "@/lib/ecrans";
 import { ECRAN_DONJON } from "@/lib/ecrans";
 import { Vignette } from "@/components/Visuels";
+import { lieuParNom, pageLieu } from "@/lib/cartes";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +58,7 @@ export default function ListeDesDonjons() {
                   <thead><tr><th scope="col">Donjon</th><th scope="col">Niveaux</th><th scope="col">Zone</th><th scope="col">Continent</th></tr></thead>
                   <tbody>
                     {DONJONS_ORIGINE.map((d) => (
-                      <tr key={d.nom}><td style={{ fontWeight: 600 }}><span className="lien-icone"><Vignette nom={d.nom} />{d.nom}</span></td><td>{d.min}–{d.max}</td><td>{d.zone}</td><td className="doux">{d.continent}</td></tr>
+                      <tr key={d.nom}><td style={{ fontWeight: 600 }}><span className="lien-icone"><Vignette nom={d.nom} />{d.nom}</span></td><td>{d.min}–{d.max}</td><td>{lieuParNom(d.zone) ? <Link href={pageLieu(lieuParNom(d.zone)!)}>{d.zone}</Link> : d.zone}</td><td className="doux">{d.continent}</td></tr>
                     ))}
                   </tbody>
                 </table>

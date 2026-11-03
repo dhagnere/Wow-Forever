@@ -38,7 +38,7 @@ Contenu déposé par des inconnus (`guildes/`). Chaque fiche passe par la relect
 
 ## Base d'objets
 
-Importée des fichiers du jeu par wago.tools (`objets/wago.ts`, produit `wowf`), en français. L'import remplace tout en une transaction et s'arrête si moins de 1 000 objets sont lus. Les objets internes (tests, équipement des monstres, objets périmés, niveau requis au-delà de 60) sont écartés par `objetInterne` (`objets/conversion.ts`). Les icônes ne sont demandées à wago.tools que pour un objet connu de la base, puis gardées en cache dans `objets_icones`. Garder le crédit wago.tools et la mention Blizzard (pages de la base et mentions légales). Les icônes de classes et de races et les écrans de chargement (`public/images/jeu/`) viennent de la même source : `npm run icones:jeu` et `npm run ecrans:jeu` les refont. La liste des écrans est dans `config/ecrans.ts`, le choix de l'écran de chaque page dans `lib/ecrans.ts`. Chaque illustration porte la mention « © Blizzard Entertainment ».
+Importée des fichiers du jeu par wago.tools (`objets/wago.ts`, produit `wowf`), en français. L'import remplace tout en une transaction et s'arrête si moins de 1 000 objets sont lus. Les objets internes (tests, équipement des monstres, objets périmés, niveau requis au-delà de 60) sont écartés par `objetInterne` (`objets/conversion.ts`). Les icônes ne sont demandées à wago.tools que pour un objet connu de la base, puis gardées en cache dans `objets_icones`. Garder le crédit wago.tools et la mention Blizzard (pages de la base et mentions légales). Les icônes de classes et de races, les écrans de chargement et les cartes du monde (`public/images/jeu/`) viennent de la même source : `npm run icones:jeu`, `npm run ecrans:jeu` et `npm run cartes:jeu` les refont. Les pages de lieux `/cartes/<lieu>/` relient les noms des guides (`content/reference.ts`) aux cartes par `lieuParNom` (`lib/cartes.ts`) : un nom qui diffère du jeu va dans `ALIAS` (le test `tests/cartes.test.ts` le signale). La liste des écrans est dans `config/ecrans.ts`, le choix de l'écran de chaque page dans `lib/ecrans.ts`. Chaque illustration porte la mention « © Blizzard Entertainment ».
 
 ## Commandes
 
@@ -56,6 +56,7 @@ npm run veille:dossier   # dossiers de référence sur 60 jours (zones-depart, d
 npm run veille:facebook  # relais Facebook
 npm run base:importer    # base d'objets depuis wago.tools (si nouvelle version du jeu ; --forcer, --icones)
 npm run visuels:generer  # PNG de l'enseigne, de l'icône du site et de l'avatar de Jobwow, depuis visuels/
+npm run cartes:jeu       # cartes du monde (continents, zones, Zéphras) assemblées depuis les tuiles du jeu → public/images/jeu/cartes/
 npm run ecrans:jeu       # écrans de chargement du jeu (config/ecrans.ts) → public/images/jeu/ecrans/, en 1600 et 800 pixels
 npm run icones:jeu       # icônes officielles des classes et des races, découpées dans les fichiers du jeu (wago.tools) → public/images/jeu/
 ```

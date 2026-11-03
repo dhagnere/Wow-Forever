@@ -7,7 +7,7 @@
 
 export const MISE_A_JOUR_REFERENCE = "2026-11-01";
 
-export type Continent = "Royaumes de l'Est" | "Kalimdor" | "[À confirmer]";
+export type Continent = "Royaumes de l'Est" | "Kalimdor" | "Hors des continents" | "[À confirmer]";
 
 export interface ZoneDepart {
   races: string;
@@ -27,7 +27,7 @@ export const ZONES_DEPART: ZoneDepart[] = [
   { races: "Orcs et Trolls", faction: "Horde", lieu: "Vallée des Épreuves", zone: "Durotar", capitale: "Orgrimmar", continent: "Kalimdor" },
   { races: "Taurens", faction: "Horde", lieu: "Camp Narache", zone: "Mulgore", capitale: "Les Pitons-du-Tonnerre", continent: "Kalimdor" },
   { races: "Morts-vivants", faction: "Horde", lieu: "Le Glas (Deathknell)", zone: "Clairières de Tirisfal", capitale: "Fossoyeuse", continent: "Royaumes de l'Est" },
-  { races: "Skyborne", faction: "Alliance ou Horde", lieu: "Village de Thendal", zone: "Île de Zéphras (une version par faction)", capitale: "[À confirmer]", continent: "[À confirmer]", lien: "/zones/ile-de-zephras/", forever: true },
+  { races: "Skyborne", faction: "Alliance ou Horde", lieu: "Village de Thendal", zone: "Île de Zéphras (une version par faction)", capitale: "[À confirmer]", continent: "Hors des continents", lien: "/zones/ile-de-zephras/", forever: true },
 ];
 
 export interface ZoneNiveau {
@@ -48,7 +48,7 @@ export const ZONES_NIVEAUX: ZoneNiveau[] = [
   { nom: "Teldrassil", min: 1, max: 10, continent: "Kalimdor" },
   { nom: "Durotar", min: 1, max: 10, continent: "Kalimdor" },
   { nom: "Mulgore", min: 1, max: 10, continent: "Kalimdor" },
-  { nom: "Île de Zéphras", min: 1, max: 10, continent: "[À confirmer]", lien: "/zones/ile-de-zephras/", forever: true, incertain: true },
+  { nom: "Île de Zéphras", min: 1, max: 10, continent: "Hors des continents", lien: "/zones/ile-de-zephras/", forever: true, incertain: true },
   { nom: "Marche de l'Ouest", min: 10, max: 20, continent: "Royaumes de l'Est" },
   { nom: "Loch Modan", min: 10, max: 20, continent: "Royaumes de l'Est" },
   { nom: "Forêt des Pins-Argentés", min: 10, max: 20, continent: "Royaumes de l'Est" },
@@ -65,7 +65,7 @@ export const ZONES_NIVEAUX: ZoneNiveau[] = [
   { nom: "Hautes-terres d'Arathi", min: 30, max: 40, continent: "Royaumes de l'Est" },
   { nom: "Montagnes d'Alterac", min: 30, max: 40, continent: "Royaumes de l'Est" },
   { nom: "Vallée de Strangleronce", min: 30, max: 45, continent: "Royaumes de l'Est" },
-  { nom: "Rives Claires", min: 35, max: 45, continent: "[À confirmer]", lien: "/zones/rives-claires/", forever: true, incertain: true },
+  { nom: "Rives Claires", min: 35, max: 45, continent: "Royaumes de l'Est", lien: "/zones/rives-claires/", forever: true, incertain: true },
   { nom: "Marécage d'Âprefange", min: 35, max: 45, continent: "Kalimdor" },
   { nom: "Terres ingrates", min: 35, max: 45, continent: "Royaumes de l'Est" },
   { nom: "Marais des Chagrins", min: 35, max: 45, continent: "Royaumes de l'Est" },

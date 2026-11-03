@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { rechercherPublies } from "@/modules/veille";
 import { Ariane } from "@/components/Ariane";
 import { Repertoire } from "@/components/Repertoire";
+import { fondBandeau } from "@/lib/ecrans";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export default async function Recherche({ searchParams }: { searchParams: Promis
   const articles = q ? await rechercherPublies(q, 50) : [];
   return (
     <>
-      <section className="bandeau-page">
+      <section className="bandeau-page" style={fondBandeau("gnomeregan")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Recherche" }]} />
           <p className="surtitre">Dans les articles du site</p>
