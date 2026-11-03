@@ -49,7 +49,7 @@ export default async function PageClasse({ params }: Props) {
             </ul>
             <div className="actions-bandeau">
               {sorts ? <a href="#sorts" className="btn btn-or" data-cta="sorts-classe">Sorts et talents</a> : null}
-              <Link href="/guides/liste-des-donjons/" className={sorts ? "btn btn-contour" : "btn btn-or"} data-cta="donjons-classe">Voir les donjons à mon niveau</Link>
+              <Link href={`/guides/quetes-de-classe/${c.slug}/`} className="btn btn-contour" data-cta="quetes-classe-fiche">Quêtes de classe</Link>
               {sorts ? <Link href={`/classes/${c.slug}/talents/`} className="btn btn-contour" data-cta="calculateur-classe">Calculateur de talents</Link> : null}
               <Link href="/lettre/" className="btn btn-contour" data-cta="lettre-classe">Recevoir la Lettre</Link>
             </div>

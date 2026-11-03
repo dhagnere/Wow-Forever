@@ -52,6 +52,10 @@ Calculateur de talents : `/classes/<classe>/talents/` (`components/CalculateurTa
 
 Les recettes des métiers (« Fabriqué par », « Utilisé pour fabriquer », « Apprend à fabriquer ») viennent aussi des fichiers du jeu, lues à l'import par `convertirRecettes` (table `objets_recettes`). Les bonus, l'armure et les dégâts sont calculés à l'import par `objets/caracteristiques.ts`, comme le fait le jeu (budget du niveau d'objet × part de chaque bonus) ; les légendaires gardent des dégâts propres, non calculés. « Où le trouver » vient des bases libres CMaNGOS classic-db (GPL v3) et AzerothCore (noms français, GPL v2) : `npm run base:butin` produit `objets/donnees/butin.json.gz`, lu par `ouTrouver`. Les positions sont converties sur les cartes du jeu, la zone d'un point étant tranchée par les zones d'exploration des cartes. Ne pas récupérer ces données sur Wowhead ou un site équivalent : leurs bases sont protégées. Garder le crédit sur les fiches et dans les mentions légales.
 
+## Guides de quêtes
+
+`npm run base:quetes -- <dump CMaNGOS> <db_world AzerothCore>` écrit `content/quetes-jeu.json` : quêtes de classe en chaînes (`/guides/quetes-de-classe/<classe>/`) et parcours de 1 à 60 par faction (`/guides/parcours/`). Seules les quêtes de l'Azeroth d'origine encore présentes dans les fichiers de Forever (table `QuestV2`) sont gardées. Ne reprendre aucun texte de quête : titres et noms seulement, objectifs rédigés à partir des données (« Rapporter 5 × … », « Vaincre 10 × … »). Ne pas s'appuyer sur des guides commerciaux (Zygor, etc.) ni sur Wowhead. Les outils communs aux scripts des bases libres (lecture du dump, positions sur les cartes, priorité aux capitales) sont dans `scripts/_bases-libres.ts`.
+
 ## Commandes
 
 ```bash
@@ -69,6 +73,7 @@ npm run veille:facebook  # relais Facebook
 npm run veille:liens     # remplace les liens Google News des sources par l'adresse directe des articles (aussi fait chaque matin)
 npm run base:importer    # base d'objets depuis wago.tools, caractéristiques comprises (si nouvelle version du jeu ; --forcer, --icones)
 npm run base:butin -- <dump CMaNGOS> <db_world AzerothCore>  # « où le trouver » → modules/veille/objets/donnees/butin.json.gz (fichier versionné)
+npm run base:quetes -- <dump CMaNGOS> <db_world AzerothCore> # quêtes de classe et parcours de 1 à 60 → content/quetes-jeu.json (fichier versionné)
 npm run visuels:generer  # PNG de l'enseigne, de l'icône du site et de l'avatar de Jobwow, depuis visuels/
 npm run cartes:jeu       # cartes du monde (continents, zones, Zéphras) assemblées depuis les tuiles du jeu → public/images/jeu/cartes/
 npm run ecrans:jeu       # écrans de chargement du jeu (config/ecrans.ts) → public/images/jeu/ecrans/, en 1600 et 800 pixels

@@ -656,3 +656,24 @@ a:hover > .icone-jeu, a:hover .icone-jeu { border-color: var(--or-pale); box-sha
 .race-traits h3 a { color: inherit; }
 .race-traits .sort-meta { margin: 0; }
 .traits .sort { background: var(--surface); }
+
+/* Guides de quêtes */
+.filtre-race { margin: 0 0 20px; }
+.filtre-race select { min-height: 40px; padding: 4px 10px; background: var(--surface); color: var(--texte); border: 1px solid var(--bordure-vive); border-radius: 4px; font: inherit; }
+.chaines { display: flex; flex-direction: column; gap: 16px; }
+.chaine-quetes { padding: 16px 18px; background: var(--surface); border: 1px solid var(--bordure); border-radius: 6px; }
+.chaine-quetes header h3 { margin: 0 0 2px; font-size: 20px; }
+.chaine-quetes header .sort-meta { margin: 0 0 12px; }
+.etapes-quetes, .route { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.etape-quete, .etape-route { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 12px; align-items: start; }
+.etape-route { padding: 12px 14px; background: var(--surface); border: 1px solid var(--bordure); border-radius: 6px; }
+.numero-etape { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--surface-chaude); border: 1px solid var(--or); color: var(--or-clair); font-weight: 700; font-variant-numeric: tabular-nums; }
+.etape-quete h4 { margin: 3px 0 6px; font-size: 16px; color: var(--texte-titre); }
+.details-quete { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; margin: 0; font-size: 15px; }
+.details-quete dt { color: var(--texte-doux); }
+.details-quete dd { margin: 0; }
+.etape-route h3 { margin: 0 0 4px; font-size: 18px; }
+.route-donneurs { margin: 4px 0 0; font-size: 14px; }
+.routes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; align-items: start; }
+@media (max-width: 900px) { .routes { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) { .details-quete { grid-template-columns: minmax(0, 1fr); } .details-quete dt { margin-top: 6px; } }

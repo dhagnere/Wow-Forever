@@ -27,7 +27,9 @@ const MENU: Entree[] = [
     liens: [
       { href: "/guides/bien-demarrer/", label: "Bien débuter", detail: "Race, classe, zone, premiers métiers" },
       { href: "/guides/zones-de-depart/", label: "Zones de départ", detail: "Où commence chaque race" },
-      { href: "/guides/zones-par-niveau/", label: "Zones par niveau", detail: "La route de 1 à 60" },
+      { href: "/guides/zones-par-niveau/", label: "Zones par niveau", detail: "Toutes les zones, de 1 à 60" },
+      { href: "/guides/parcours/", label: "Parcours de 1 à 60", detail: "La route de l'Alliance et de la Horde" },
+      { href: "/guides/quetes-de-classe/", label: "Quêtes de classe", detail: "Chaînes, donneurs et récompenses" },
       { href: "/guides/liste-des-donjons/", label: "Liste des donjons", detail: "Donjons et raids par niveau" },
     ],
   },
