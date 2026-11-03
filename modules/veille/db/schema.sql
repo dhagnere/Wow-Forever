@@ -220,3 +220,19 @@ ALTER TABLE objets ADD COLUMN IF NOT EXISTS caracteristiques JSONB NOT NULL DEFA
 ALTER TABLE objets ADD COLUMN IF NOT EXISTS armure INTEGER;
 ALTER TABLE objets ADD COLUMN IF NOT EXISTS degats_min INTEGER;
 ALTER TABLE objets ADD COLUMN IF NOT EXISTS degats_max INTEGER;
+
+-- Recettes des métiers (« Fabriqué par », « Composant de »), importées avec les objets.
+CREATE TABLE IF NOT EXISTS objets_recettes (
+  sort        INTEGER PRIMARY KEY,
+  nom         TEXT NOT NULL,
+  objet       INTEGER NOT NULL,
+  quantite    INTEGER NOT NULL DEFAULT 1,
+  metier      TEXT NOT NULL,
+  rang        INTEGER NOT NULL DEFAULT 0,
+  jaune       INTEGER NOT NULL DEFAULT 0,
+  gris        INTEGER NOT NULL DEFAULT 0,
+  composants  JSONB NOT NULL DEFAULT '[]'::jsonb,
+  recette     INTEGER
+);
+CREATE INDEX IF NOT EXISTS objets_recettes_objet_idx ON objets_recettes (objet);
+CREATE INDEX IF NOT EXISTS objets_recettes_composants_idx ON objets_recettes USING GIN (composants jsonb_path_ops);

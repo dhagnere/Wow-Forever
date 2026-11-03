@@ -46,7 +46,8 @@ export { COOKIE_SESSION, DUREE_SESSION_S, creerJeton, jetonValide, motDePasseCor
 
 // Base d'objets (wago.tools).
 export type { Objet, ObjetResume, Categorie, FiltresObjets, EtatBase } from "./objets/depot";
-export { categoriesObjets, chercherObjets, lireObjet, iconeObjet, etatBase, listerObjetsPourPlan, OBJETS_PAR_PAGE } from "./objets/depot";
+export { categoriesObjets, chercherObjets, lireObjet, iconeObjet, etatBase, listerObjetsPourPlan, recettesObjet, OBJETS_PAR_PAGE } from "./objets/depot";
+export type { Recette, Composant } from "./objets/depot";
 export { NOMS_CARACTERISTIQUES, bonusPrincipal } from "./objets/caracteristiques";
 export type { Caracteristique } from "./objets/caracteristiques";
 export {

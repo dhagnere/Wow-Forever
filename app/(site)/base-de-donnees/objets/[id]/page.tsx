@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { emplacement, etatBase, lireObjet, nomCategorie, ouTrouver, prixEnTexte, qualite } from "@/modules/veille";
+import { emplacement, etatBase, lireObjet, nomCategorie, ouTrouver, prixEnTexte, qualite, recettesObjet } from "@/modules/veille";
+import { Fabrication } from "@/components/Fabrication";
 import { OuTrouver } from "@/components/OuTrouver";
 import { Ariane } from "@/components/Ariane";
 import { FicheObjet, Prix, TableauObjets } from "@/components/Objets";
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function FicheObjetPage({ params }: Props) {
   const o = await charger((await params).id);
   if (!o) notFound();
-  const etat = await etatBase();
+  const [etat, recettes] = await Promise.all([etatBase(), recettesObjet(o.id)]);
   const autresPieces = o.ensemble?.objets.filter((p) => p.id !== o.id) ?? [];
   return (
     <>
@@ -66,7 +67,9 @@ export default async function FicheObjetPage({ params }: Props) {
           </div>
         </div>
 
-        <OuTrouver o={ouTrouver(o.id)} />
+        <OuTrouver o={ouTrouver(o.id)} fabrique={recettes.fabrication.length > 0} />
+
+        <Fabrication {...recettes} />
 
         {o.ensemble ? (
           <section aria-labelledby="t-ensemble" style={{ marginTop: 40 }}>

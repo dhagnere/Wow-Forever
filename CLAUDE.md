@@ -42,7 +42,7 @@ Importée des fichiers du jeu par wago.tools (`objets/wago.ts`, produit `wowf`),
 
 ## Caractéristiques et sources des objets
 
-Les bonus, l'armure et les dégâts sont calculés à l'import par `objets/caracteristiques.ts`, comme le fait le jeu (budget du niveau d'objet × part de chaque bonus) ; les légendaires gardent des dégâts propres, non calculés. « Où le trouver » vient des bases libres CMaNGOS classic-db (GPL v3) et AzerothCore (noms français, GPL v2) : `npm run base:butin` produit `objets/donnees/butin.json.gz`, lu par `ouTrouver`. Les positions sont converties sur les cartes du jeu, la zone d'un point étant tranchée par les zones d'exploration des cartes. Ne pas récupérer ces données sur Wowhead ou un site équivalent : leurs bases sont protégées. Garder le crédit sur les fiches et dans les mentions légales.
+Les recettes des métiers (« Fabriqué par », « Utilisé pour fabriquer », « Apprend à fabriquer ») viennent aussi des fichiers du jeu, lues à l'import par `convertirRecettes` (table `objets_recettes`). Les bonus, l'armure et les dégâts sont calculés à l'import par `objets/caracteristiques.ts`, comme le fait le jeu (budget du niveau d'objet × part de chaque bonus) ; les légendaires gardent des dégâts propres, non calculés. « Où le trouver » vient des bases libres CMaNGOS classic-db (GPL v3) et AzerothCore (noms français, GPL v2) : `npm run base:butin` produit `objets/donnees/butin.json.gz`, lu par `ouTrouver`. Les positions sont converties sur les cartes du jeu, la zone d'un point étant tranchée par les zones d'exploration des cartes. Ne pas récupérer ces données sur Wowhead ou un site équivalent : leurs bases sont protégées. Garder le crédit sur les fiches et dans les mentions légales.
 
 ## Commandes
 

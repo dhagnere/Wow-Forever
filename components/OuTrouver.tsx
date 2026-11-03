@@ -22,12 +22,16 @@ function points(nom: string, detail: string, cle: string, e: Emplacement): Point
   }));
 }
 
-export function OuTrouver({ o }: { o: Donnees | null }) {
+export function OuTrouver({ o, fabrique = false }: { o: Donnees | null; fabrique?: boolean }) {
   if (!o || (!o.monstres.length && !o.decor.length && !o.marchands.length && !o.quetes.length && !o.aleatoire)) {
     return (
       <section aria-labelledby="t-ou" className="ou-trouver">
         <h2 id="t-ou" className="section-titre" style={{ fontSize: 22 }}>Où le trouver</h2>
-        <p className="doux">Aucune source connue : objet fabriqué, nouveauté de Forever ou objet de boutique. [Source à relever en jeu.]</p>
+        <p className="doux">
+          {fabrique
+            ? "Cet objet ne tombe pas sur les monstres et ne se vend pas : il se fabrique (voir « Fabriqué par » ci-dessous)."
+            : "Aucune source connue : nouveauté de Forever, objet de boutique ou source encore inconnue. [Source à relever en jeu.]"}
+        </p>
       </section>
     );
   }

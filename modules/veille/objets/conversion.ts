@@ -149,3 +149,65 @@ export function convertirEnsembles(csv: string): LigneEnsemble[] {
   exigerColonnes("ItemSet", l[0], ["ID", "Name_lang"]);
   return l.map((e) => ({ id: entier(e.ID), nom: (e.Name_lang ?? "").trim() })).filter((e) => e.id > 0 && e.nom);
 }
+
+export interface LigneRecette {
+  sort: number;
+  nom: string;
+  objet: number;
+  quantite: number;
+  metier: string;
+  /** Rang de métier requis (indiqué par l'objet « Recette », sinon par la table du métier). */
+  rang: number;
+  /** La recette devient jaune, puis grise (plus de point de métier) à ces rangs. */
+  jaune: number;
+  gris: number;
+  composants: { o: number; n: number }[];
+  /** Objet « Recette » (plan, patron, formule…) qui l'apprend, s'il existe. */
+  recette: number | null;
+}
+
+/**
+ * Recettes des métiers : sort de fabrication (SkillLineAbility), objet créé (SpellEffect, effet 24), composants
+ * (SpellReagents), métier (SkillLine), objet qui apprend la recette (ItemEffect, déclenchement 6 ou sort « apprendre »).
+ */
+export function convertirRecettes(t: {
+  SkillLineAbility: string; SpellEffect: string; SpellReagents: string; SpellName: string; SkillLine: string; ItemEffect: string; ItemXItemEffect: string; ItemSparse: string;
+}, objetsConnus: Set<number>): LigneRecette[] {
+  const metiers = new Map(lignes(t.SkillLine).filter((s) => ["9", "11"].includes(s.CategoryID) && !/DNT|test/i.test(s.DisplayName_lang ?? ""))
+    .map((s) => [entier(s.ID), (s.DisplayName_lang ?? "").trim()]));
+  const cree = new Map<number, { objet: number; quantite: number }>();
+  const apprend = new Map<number, number>(); // sort « apprendre » → sort de fabrication
+  for (const e of lignes(t.SpellEffect)) {
+    if (e.Effect === "24" && entier(e.EffectItemType) > 0) cree.set(entier(e.SpellID), { objet: entier(e.EffectItemType), quantite: Math.max(1, Math.round(Number(e.EffectBasePointsF) || 1)) });
+    if (e.Effect === "36" && entier(e.EffectTriggerSpell) > 0) apprend.set(entier(e.SpellID), entier(e.EffectTriggerSpell));
+  }
+  const noms = new Map(lignes(t.SpellName).map((s) => [entier(s.ID), (s.Name_lang ?? "").trim()]));
+  const composants = new Map(lignes(t.SpellReagents).map((r) => [entier(r.SpellID),
+    [0, 1, 2, 3, 4, 5, 6, 7].map((k) => ({ o: entier(r[`Reagent_${k}`]), n: entier(r[`ReagentCount_${k}`]) })).filter((c) => c.o > 0 && c.n > 0)]));
+  const rangRequis = new Map(lignes(t.ItemSparse).map((s) => [entier(s.ID), entier(s.RequiredSkillRank)]));
+  const effetParId = new Map(lignes(t.ItemEffect).map((e) => [entier(e.ID), e]));
+  const recetteParSort = new Map<number, number>();
+  for (const x of lignes(t.ItemXItemEffect)) {
+    const e = effetParId.get(entier(x.ItemEffectID));
+    if (!e) continue;
+    const sort = e.TriggerType === "6" ? entier(e.SpellID) : apprend.get(entier(e.SpellID));
+    if (sort && !recetteParSort.has(sort) && objetsConnus.has(entier(x.ItemID))) recetteParSort.set(sort, entier(x.ItemID));
+  }
+  const vues = new Set<number>();
+  const resultat: LigneRecette[] = [];
+  for (const a of lignes(t.SkillLineAbility)) {
+    const sort = entier(a.Spell);
+    const metier = metiers.get(entier(a.SkillLine));
+    const c = cree.get(sort);
+    if (!metier || !c || vues.has(sort) || !objetsConnus.has(c.objet)) continue;
+    vues.add(sort);
+    const recette = recetteParSort.get(sort) ?? null;
+    const rangObjet = recette ? rangRequis.get(recette) ?? 0 : 0;
+    resultat.push({
+      sort, nom: noms.get(sort) ?? "", objet: c.objet, quantite: c.quantite, metier,
+      rang: rangObjet || entier(a.MinSkillLineRank), jaune: entier(a.TrivialSkillLineRankLow), gris: entier(a.TrivialSkillLineRankHigh),
+      composants: (composants.get(sort) ?? []).filter((x) => objetsConnus.has(x.o)), recette,
+    });
+  }
+  return resultat;
+}

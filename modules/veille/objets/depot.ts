@@ -2,7 +2,7 @@ import sharp from "sharp";
 import { pool } from "../db/pool";
 import { normaliser } from "../collecte/texte";
 import { decoderBlp } from "./blp";
-import { convertirCategories, convertirEnsembles, convertirObjets, type LigneObjet } from "./conversion";
+import { convertirCategories, convertirEnsembles, convertirObjets, convertirRecettes, type LigneObjet } from "./conversion";
 import { preparerTables, TABLES_CARACTERISTIQUES, type Caracteristique } from "./caracteristiques";
 import { derniereVersion, fichierBrut, tableCsv } from "./wago";
 
@@ -110,6 +110,10 @@ export async function importerObjets(options: { forcer?: boolean; version?: stri
     await Promise.all(TABLES_CARACTERISTIQUES.map(async (t) => [t, await tableCsv(t, version)] as const)),
   ) as Record<(typeof TABLES_CARACTERISTIQUES)[number], string>;
   const objets = convertirObjets(sparse, item, preparerTables(tablesCsv));
+  const recettesCsv = Object.fromEntries(
+    await Promise.all(["SkillLineAbility", "SpellEffect", "SpellReagents", "SpellName", "SkillLine", "ItemEffect", "ItemXItemEffect"].map(async (t) => [t, await tableCsv(t, version)] as const)),
+  ) as Record<"SkillLineAbility" | "SpellEffect" | "SpellReagents" | "SpellName" | "SkillLine" | "ItemEffect" | "ItemXItemEffect", string>;
+  const recettes = convertirRecettes({ ...recettesCsv, ItemSparse: sparse }, new Set(objets.map((o) => o.id)));
   const categories = convertirCategories(classes, sousClasses);
   const ensembles = convertirEnsembles(ensemblesCsv);
   // Garde-fou : une table quasi vide signale un incident chez wago.tools, pas une base de jeu vidée.
@@ -118,11 +122,13 @@ export async function importerObjets(options: { forcer?: boolean; version?: stri
   const client = await pool().connect();
   try {
     await client.query("BEGIN");
-    await client.query("TRUNCATE objets, objets_categories, objets_ensembles");
+    await client.query("TRUNCATE objets, objets_categories, objets_ensembles, objets_recettes");
     await insererParPaquets(client, "objets", COLONNES_OBJETS, objets.map(valeursObjet));
     await insererParPaquets(client, "objets_categories", ["classe", "sous_classe", "nom", "nom_long"],
       categories.map((c) => [c.classe, c.sousClasse, c.nom, c.nomLong]));
     await insererParPaquets(client, "objets_ensembles", ["id", "nom"], ensembles.map((e) => [e.id, e.nom]));
+    await insererParPaquets(client, "objets_recettes", ["sort", "nom", "objet", "quantite", "metier", "rang", "jaune", "gris", "composants", "recette"],
+      recettes.map((r) => [r.sort, r.nom, r.objet, r.quantite, r.metier, r.rang, r.jaune, r.gris, JSON.stringify(r.composants), r.recette]));
     await client.query(
       `INSERT INTO objets_import (id, version, nombre, importe_le) VALUES (1, $1, $2, now())
        ON CONFLICT (id) DO UPDATE SET version = EXCLUDED.version, nombre = EXCLUDED.nombre, importe_le = now()`,
@@ -303,4 +309,49 @@ export async function prechargerIcones(simultanes = 4): Promise<{ ajoutees: numb
     }),
   );
   return { ajoutees, echecs };
+}
+
+// ---------------------------------------------------------------- Recettes
+
+export interface Composant extends ObjetResume { quantite: number }
+export interface Recette {
+  sort: number;
+  nom: string;
+  metier: string;
+  rang: number;
+  jaune: number;
+  gris: number;
+  quantite: number;
+  produit: ObjetResume | null;
+  composants: Composant[];
+  recette: ObjetResume | null;
+}
+
+async function resumes(ids: number[]): Promise<Map<number, ObjetResume>> {
+  if (!ids.length) return new Map();
+  const { rows } = await pool().query<LigneResume>(`${SELECT_RESUME} WHERE o.id = ANY($1::int[])`, [[...new Set(ids)]]);
+  return new Map(rows.map((r) => [r.id, versResume(r)]));
+}
+
+async function enRecettes(rows: { sort: number; nom: string; objet: number; quantite: number; metier: string; rang: number; jaune: number; gris: number; composants: { o: number; n: number }[]; recette: number | null }[]): Promise<Recette[]> {
+  const objets = await resumes(rows.flatMap((r) => [r.objet, ...(r.recette ? [r.recette] : []), ...r.composants.map((c) => c.o)]));
+  return rows.map((r) => ({
+    sort: r.sort, nom: r.nom, metier: r.metier, rang: r.rang, jaune: r.jaune, gris: r.gris, quantite: r.quantite,
+    produit: objets.get(r.objet) ?? null,
+    composants: r.composants.flatMap((c) => (objets.get(c.o) ? [{ ...objets.get(c.o)!, quantite: c.n }] : [])),
+    recette: r.recette ? objets.get(r.recette) ?? null : null,
+  }));
+}
+
+/** Recettes qui fabriquent l'objet, et recettes dont il est un composant (les plus avancées d'abord). */
+export async function recettesObjet(id: number): Promise<{ fabrication: Recette[]; composantDe: Recette[]; composantDeTotal: number; apprend: Recette[] }> {
+  if (!Number.isSafeInteger(id) || id <= 0) return { fabrication: [], composantDe: [], composantDeTotal: 0, apprend: [] };
+  const colonnes = "sort, nom, objet, quantite, metier, rang, jaune, gris, composants, recette";
+  const [fab, comp, total, apprend] = await Promise.all([
+    pool().query(`SELECT ${colonnes} FROM objets_recettes WHERE objet = $1 ORDER BY rang`, [id]),
+    pool().query(`SELECT ${colonnes} FROM objets_recettes WHERE composants @> $1::jsonb ORDER BY gris DESC, nom LIMIT 12`, [JSON.stringify([{ o: id }])]),
+    pool().query<{ n: number }>("SELECT count(*)::int AS n FROM objets_recettes WHERE composants @> $1::jsonb", [JSON.stringify([{ o: id }])]),
+    pool().query(`SELECT ${colonnes} FROM objets_recettes WHERE recette = $1`, [id]),
+  ]);
+  return { fabrication: await enRecettes(fab.rows), composantDe: await enRecettes(comp.rows), composantDeTotal: total.rows[0]?.n ?? 0, apprend: await enRecettes(apprend.rows) };
 }

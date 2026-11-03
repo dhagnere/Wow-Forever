@@ -553,3 +553,22 @@ a:hover > .icone-jeu, a:hover .icone-jeu { border-color: var(--or-pale); box-sha
 .carte-sources-liste button span { color: var(--texte-doux); }
 .carte-sources-liste button[aria-pressed="true"] { border-color: var(--or); background: var(--surface-chaude); }
 @media (max-width: 900px) { .colonnes-ou { grid-template-columns: minmax(0, 1fr); } .carte-sources { position: static; } }
+
+/* Fabrication */
+.fabrication { margin-top: 40px; }
+.grille-recettes { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.carte-recette { padding: 16px 18px; background: var(--surface); border: 1px solid var(--bordure); border-radius: 6px; }
+.carte-recette h3 { margin: 4px 0 12px; font-size: 18px; }
+.composants { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.composants li { display: flex; align-items: center; gap: 10px; }
+.quantite { font-variant-numeric: tabular-nums; font-weight: 700; min-width: 34px; text-align: right; }
+.paliers { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0 0 10px; font-size: 13px; }
+.palier { display: inline-block; min-width: 40px; padding: 2px 6px; border-radius: 3px; text-align: center; font-weight: 700; color: #140d08; }
+.palier-orange { background: #ff8040; }
+.palier-jaune { background: #ffd100; }
+.palier-vert { background: #40c040; }
+.palier-gris { background: #9d9d9d; }
+.appris { margin: 0; font-size: 14px; }
+.utilise-pour { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px 20px; }
+.utilise-pour li { display: flex; flex-direction: column; gap: 2px; }
+.utilise-pour small { padding-left: 38px; font-size: 13px; }
