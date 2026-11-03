@@ -7,6 +7,7 @@ import { IconeClasse } from "@/components/IconeClasse";
 import { JsonLd } from "@/components/JsonLd";
 import { SITE } from "@/lib/site";
 import { ChoixGuideParClasse } from "@/components/ChoixGuide";
+import { HeureLocale } from "@/components/HeureLocale";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +48,7 @@ export default async function Accueil() {
         <p className="heros-credit">Capture de Jobwow · © Blizzard Entertainment</p>
         <div className="wrap">
           <div className="heros-carte cadre">
-            <p className="surtitre" style={{ fontSize: 15, letterSpacing: "0.22em", marginBottom: 14 }}>5 novembre · minuit</p>
+            <p className="surtitre" style={{ fontSize: 15, letterSpacing: "0.22em", marginBottom: 14 }}><HeureLocale iso="2026-11-05T00:00" format="court" /></p>
             <h1>L&apos;Azeroth d&apos;origine renaît</h1>
             <span className="ornement" aria-hidden="true" />
             <p>Le guide de 1 à 60 pour votre classe, quête par quête, et l&apos;actualité de WoW Forever servie chaque matin par Jobwow. En français.</p>

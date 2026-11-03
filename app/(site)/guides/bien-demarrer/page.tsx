@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HeureLocale } from "@/components/HeureLocale";
 import { Ariane } from "@/components/Ariane";
 import { SITE } from "@/lib/site";
 import { ArticlesLies } from "@/components/ArticlesLies";
@@ -27,7 +28,7 @@ export default function BienDemarrer() {
         <div className="colonnes">
           <article className="colonne-principale corps" style={{ gap: 0 }}>
             <h2>Quand peut-on jouer ?</h2>
-            <p>Le lancement est mondial : le 4 novembre à 15h, heure du Pacifique, soit le 5 novembre à minuit en France. Tous les serveurs ouvrent en même temps.</p>
+            <p>Le lancement est mondial : le 4 novembre à 15 h, heure du Pacifique, soit le 5 novembre à minuit en France. Tous les serveurs ouvrent en même temps. Chez vous, ce sera le <HeureLocale iso="2026-11-05T00:00" />.</p>
             <h2>Faut-il acheter le jeu ?</h2>
             <p>Non. Forever est compris dans l&apos;abonnement à World of Warcraft ou dans le temps de jeu. Les éditions vendues en boutique sont facultatives : elles ajoutent des bonus et des codes pour inviter des amis, qui pourront jouer gratuitement du 5 au 11 novembre. La nouvelle race <Link href="/races/skyborne/">Skyborne</Link> demande l&apos;une des éditions supérieures.</p>
             <h2>Quelle classe choisir ?</h2>

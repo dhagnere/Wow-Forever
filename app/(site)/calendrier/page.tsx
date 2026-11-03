@@ -4,6 +4,7 @@ import { ECHEANCES, MAJ_CALENDRIER } from "@/content/calendrier";
 import { Ariane } from "@/components/Ariane";
 import { dateLongue } from "@/lib/site";
 import { fondBandeau } from "@/lib/ecrans";
+import { HeureLocale } from "@/components/HeureLocale";
 
 export const metadata: Metadata = {
   title: "WoW Forever : date et heure de sortie, raids, Hardcore",
@@ -11,12 +12,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/calendrier/" },
 };
 
-function quand(debut: string | null, periode?: string): string {
+function quand(debut: string | null, periode?: string) {
   if (!debut) return periode ?? "Date à annoncer";
   if (/^\d{4}-\d{2}-\d{2}$/.test(debut)) return dateLongue(`${debut}T12:00:00Z`);
-  // Les heures sont déjà en heure de Paris.
-  const [jour, heure] = debut.split("T");
-  return `${dateLongue(`${jour}T12:00:00Z`)} à ${heure === "00:00" ? "minuit" : heure.replace(":", " h ")}`;
+  // Heure de Paris, affichée à l'heure du visiteur.
+  return <HeureLocale iso={debut} />;
 }
 
 export default function Calendrier() {
@@ -27,7 +27,7 @@ export default function Calendrier() {
           <Ariane etapes={[{ nom: "Le Comptoir", href: "/actualites/" }, { nom: "Calendrier" }]} />
           <p className="surtitre">Le Comptoir · dates clés</p>
           <h1>Le calendrier de <span className="accent">WoW Forever</span></h1>
-          <p className="chapo">Sortie, raids, Hardcore : toutes les dates annoncées, en heure de Paris. Ajoutez-les à votre agenda, il vous préviendra la veille.</p>
+          <p className="chapo">Sortie, raids, Hardcore : toutes les dates annoncées, à l&apos;heure de chez vous. Ajoutez-les à votre agenda, il vous préviendra la veille.</p>
           <p className="doux" style={{ margin: "12px 0 0", fontSize: 14 }}>Mis à jour le {dateLongue(`${MAJ_CALENDRIER}T12:00:00Z`)} par Jobwow</p>
           <div className="actions-bandeau">
             <a href="/agenda-taverne.ics" className="btn btn-or" data-cta="agenda-ics">Ajouter à mon agenda</a>
