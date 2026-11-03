@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { combinaisons, guidePour, guidesPassantPar, planifier, raceGuide, cleGuide, libelleGuide, BITS_CLASSES } from "@/lib/guide";
+import { combinaisons, guidePour, guidesPassantPar, nomRace, planifier, zoneZephras, ZEPHRAS, raceGuide, cleGuide, libelleGuide, BITS_CLASSES } from "@/lib/guide";
 import { courbe, segment } from "@/components/GuideParcours";
 import { carte } from "@/lib/cartes";
 import { cleGuideValide } from "@/modules/veille/joueurs/validation";
@@ -106,5 +106,34 @@ describe("guide de 1 à 60", () => {
     // Chaque classe proposée existe bien pour cette race.
     for (const g of tanaris) for (const c of g.classes) expect(combinaisons().some((x) => x.race.slug === g.race.slug && x.classe.slug === c)).toBe(true);
     expect(guidesPassantPar("lieu-inconnu")).toEqual([]);
+  });
+
+  it("fait partir les Skyborne de Zéphras, avec les classes de leur ordre, puis sur la route de leur faction", () => {
+    const sky = combinaisons().filter((c) => c.race.skyborne);
+    expect(sky.filter((c) => c.race.faction === "alliance").map((c) => c.classe.slug).sort()).toEqual(["chasseur", "druide", "guerrier", "mage", "voleur"]);
+    expect(sky.filter((c) => c.race.faction === "horde").map((c) => c.classe.slug).sort()).toEqual(["chaman", "chasseur", "druide", "guerrier", "voleur"]);
+    for (const { race, classe } of sky) {
+      const zones = guidePour(race, classe.slug);
+      expect(zones[0].lieu).toBe(ZEPHRAS);
+      expect(nomRace(race)).toMatch(/^Skyborne \((Alliance|Horde)\)$/);
+      // Ni zone de départ d'une autre race, ni quête réservée à une race en particulier.
+      for (const z of zones.slice(1)) {
+        expect(["foret-d-elwynn", "dun-morogh", "teldrassil", "durotar", "mulgore", "clairieres-de-tirisfal"]).not.toContain(z.lieu);
+        expect(z.niveaux[0]).toBeGreaterThanOrEqual(10);
+        for (const e of z.etapes) expect([0, race.faction === "alliance" ? 77 : 178]).toContain(e.ra);
+      }
+      expect(zones.at(-1)!.niveaux[1]).toBe(60);
+    }
+    expect(guidesPassantPar(ZEPHRAS).map((g) => g.race.slug).sort()).toEqual(["skyborne-alliance", "skyborne-horde"]);
+    // Les quêtes saisies pour l'île passent par le même ordre logique : la suite après le rendu de la première.
+    const alliance = sky.find((c) => c.race.faction === "alliance")!.race;
+    const z = zoneZephras(alliance, "mage", [
+      { id: 9000002, titre: "La suite", niveau: 3, donneur: { nom: "Ancien", x: 41, y: 23 }, objectifs: [], faction: null, avant: 9000001 },
+      { id: 9000001, titre: "Premiers pas", niveau: 1, donneur: { nom: "Ancien", x: 41, y: 23 }, objectifs: ["Vaincre 6 × Criailleuse"], cibles: [[60, 40], [62, 42]], faction: null },
+      { id: 9000003, titre: "Réservée à la Horde", niveau: 2, donneur: { nom: "Guide", x: 50, y: 50 }, objectifs: [], faction: "horde" },
+    ]);
+    expect(z.etapes.map((e) => e.t)).toEqual(["Premiers pas", "La suite"]);
+    const ordre = planifier(z).flatMap((a) => a.actions.map((x) => `${x.a} ${z.etapes[x.q].t}`));
+    expect(ordre).toEqual(["prendre Premiers pas", "faire Premiers pas", "rendre Premiers pas", "prendre La suite", "rendre La suite"]);
   });
 });

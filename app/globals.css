@@ -788,3 +788,7 @@ label.ligne-action { cursor: pointer; }
 .guide-zone-classes { display: flex; flex-wrap: wrap; gap: 6px; }
 .guide-zone-classes a { display: inline-flex; border-radius: 10%; }
 @media (max-width: 800px) { .accueil-guide-tete { grid-template-columns: minmax(0, 1fr); } .accueil-guide h2 { font-size: 26px; } }
+.lieu-carte { position: absolute; transform: translate(-50%, -50%); padding: 1px 6px; background: rgba(20, 14, 9, 0.72); border-radius: 3px; color: #f3e6c4; font-size: 11px; font-weight: 700; white-space: nowrap; pointer-events: none; text-shadow: 0 1px 2px #000; }
+.note-zone { margin: 0; padding: 12px 14px; border: 1px dashed var(--or); border-radius: 6px; background: rgba(224, 162, 59, 0.07); font-size: 15px; }
+.choix-pastille { gap: 6px; padding: 4px 10px 4px 4px; min-height: 34px; border: 1px solid var(--bordure-vive); border-radius: 18px; font-size: 14px; text-decoration: none; color: var(--texte); }
+.choix-pastille:hover, .choix-pastille:focus-visible { border-color: var(--or); background: var(--surface-2); }

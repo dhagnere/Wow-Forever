@@ -78,7 +78,7 @@ export default function Parcours() {
               <div key={r.slug} className="choix-race">
                 <p className="lien-icone" style={{ gap: 10, margin: "0 0 8px" }}>
                   <IconeRace race={r.nom} taille={36} />
-                  <strong>{r.nom}</strong> <span className="doux">· {r.faction === "alliance" ? "Alliance" : "Horde"}</span>
+                  <strong>{r.skyborne ? `Skyborne, ${r.skyborne.ordre.toLowerCase()}` : r.nom}</strong> <span className="doux">· {r.faction === "alliance" ? "Alliance" : "Horde"}</span>
                 </p>
                 <ul>
                   {combinaisons().filter((c) => c.race.slug === r.slug).map(({ classe }) => (

@@ -13,6 +13,10 @@ export interface ActionVue { a: "prendre" | "faire" | "rendre"; q: number }
 export interface ArretVue { x: number | null; y: number | null; type: "pnj" | "cible" | "ailleurs"; hub: number; actions: ActionVue[] }
 export interface ZoneVue {
   lieu: string; nom: string; carte: string; lienCarte: string; niveaux: [number, number]; hubs: HubVue[]; etapes: EtapeVue[]; arrets: ArretVue[];
+  /** Lieux nommés à afficher sur la carte (île de Zéphras). */
+  lieux?: { nom: string; x: number; y: number }[];
+  /** Message à la place des étapes, quand la zone n'a pas encore de quêtes relevées. */
+  note?: string;
 }
 
 type Jour = { jour: string; faites: number };
@@ -188,6 +192,10 @@ function CarteZone({ z, faites, voir, actif, onArret, cadrage }: {
             );
           })}
         </svg>
+        {(z.lieux ?? []).map((l) => {
+          const p = pos(l.x, l.y);
+          return p.visible ? <span key={l.nom} className="lieu-carte" style={{ left: `${p.gauche}%`, top: `${p.haut}%` }}>{l.nom}</span> : null;
+        })}
         {quetesVues.flatMap(({ e }) => e.cib!.p.map(([x, y], k) => {
           const p = pos(x, y);
           return p.visible ? <span key={`${e.id}-${k}`} className="cible-carte" style={{ left: `${p.gauche}%`, top: `${p.haut}%` }} title={`${e.t} : ${e.obj.join(" ; ")}`} aria-hidden="true" /> : null;
@@ -222,7 +230,7 @@ function CarteZone({ z, faites, voir, actif, onArret, cadrage }: {
         {v.s > 1 ? <span className="zoom-niveau" aria-live="polite">× {v.s.toFixed(1).replace(".", ",")}</span> : null}
       </div>
       <figcaption className="doux">
-        <span className="legende-pnj" aria-hidden="true" /> PNJ · <span className="legende-secteur" aria-hidden="true" /> objectifs · flèches : étapes {debut + 1} à {Math.min(fin + 1, z.arrets.length)}.
+        <span className="legende-pnj" aria-hidden="true" /> PNJ · <span className="legende-secteur" aria-hidden="true" /> objectifs{z.arrets.length ? ` · flèches : étapes ${debut + 1} à ${Math.min(fin + 1, z.arrets.length)}` : ""}.
         Molette ou deux doigts pour zoomer, glisser pour se déplacer, double clic pour approcher.{" "}
         <Link href={z.lienCarte}>Carte détaillée</Link> · © Blizzard Entertainment
       </figcaption>
@@ -340,7 +348,8 @@ export function GuideParcours({ cle, titre, zones, retour }: { cle: string; titr
   const total = zones.reduce((s, z) => s + z.etapes.length, 0);
   const nbFaites = zones.reduce((s, z) => s + z.etapes.filter((e) => faites.has(e.id)).length, 0);
   const duJour = jours.find((j) => j.jour === aujourdhui())?.faites ?? 0;
-  const zoneEnCours = zones.findIndex((z) => z.etapes.some((e) => !faites.has(e.id)));
+  // Joueur qui commence : la première zone (même sans quêtes relevées, comme Zéphras) ; sinon la première à terminer.
+  const zoneEnCours = nbFaites === 0 ? 0 : zones.findIndex((z) => z.etapes.some((e) => !faites.has(e.id)));
   const lienCompte = `/compte/?retour=${encodeURIComponent(retour)}`;
 
   return (
@@ -383,12 +392,15 @@ export function GuideParcours({ cle, titre, zones, retour }: { cle: string; titr
                   <span className="numero-etape" aria-hidden="true">{zi + 1}</span>
                   <span className="zone-titre">
                     <strong>{z.nom}</strong>
-                    <span className="doux"> · niveaux {z.niveaux[0]} à {z.niveaux[1]} · {nb}/{z.etapes.length} quêtes · {z.arrets.length} étapes</span>
+                    <span className="doux">
+                      {z.etapes.length ? ` · niveaux ${z.niveaux[0]} à ${z.niveaux[1]} · ${nb}/${z.etapes.length} quêtes · ${z.arrets.length} étapes` : " · zone de départ · quêtes à relever au lancement"}
+                    </span>
                   </span>
-                  {nb === z.etapes.length ? <span className="badge-talent">Terminée</span> : null}
+                  {z.etapes.length && nb === z.etapes.length ? <span className="badge-talent">Terminée</span> : null}
                 </summary>
                 <div className="zone-corps">
                   <CarteZone z={z} faites={faites} voir={voir} actif={arretActif} onArret={(n) => allerA(zi, n - 1)} cadrage={cadrage?.zone === zi ? cadrage : null} />
+                  {z.note ? <p className="note-zone">{z.note}</p> : null}
                   <ol className="arrets-guide">
                     {z.arrets.map((a, ai) => {
                       const lieu = a.type === "pnj" ? z.hubs[a.hub].n.slice(0, 3).join(", ")

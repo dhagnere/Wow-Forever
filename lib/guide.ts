@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { CLASSES } from "@/content/classes";
+import { SKYBORNE } from "@/content/monde";
+import { NIVEAUX_ZEPHRAS, QUETES_ZEPHRAS, type QueteZephras } from "@/content/zephras";
 import { carte } from "./cartes";
 
 /**
@@ -8,6 +10,8 @@ import { carte } from "./cartes";
  *  - départ dans la zone de sa race, sans passer par celles des autres races ;
  *  - jusqu'au niveau 30, zones du continent de départ seulement (on ne traverse pas l'océan au niveau 12) ;
  *  - quêtes réservées à d'autres races ou d'autres classes retirées, quêtes de classe gardées à leur place.
+ * Les Skyborne commencent sur l'île de Zéphras (quêtes saisies à la main dans content/zephras.ts), puis suivent la route de
+ * leur faction à partir du niveau 10, sur les deux continents (le port d'arrivée reste à confirmer).
  */
 
 export interface Hub { x: number; y: number; n: string[] }
@@ -19,7 +23,17 @@ export interface EtapeGuide {
 }
 export interface ZoneGuide { lieu: string; niveaux: [number, number]; hubs: Hub[]; etapes: EtapeGuide[] }
 
-export interface RaceGuide { slug: string; nom: string; faction: "alliance" | "horde"; bit: number; depart: string }
+export interface RaceGuide {
+  slug: string; nom: string; faction: "alliance" | "horde"; bit: number; depart: string;
+  /** Skyborne : ordre de la faction, et classes ouvertes par cet ordre. */
+  skyborne?: { ordre: string; classes: string[] };
+}
+
+const slugClasse = (nom: string) => CLASSES.find((c) => c.nom === nom)?.slug ?? "";
+const ordre = (faction: "Alliance" | "Horde") => SKYBORNE.ordres.find((o) => o.faction === faction)!;
+/** Masque des races de chaque faction, tel que le portent les quêtes réservées à toute une faction. */
+const MASQUE_FACTION = { alliance: 1 | 4 | 8 | 64, horde: 2 | 16 | 32 | 128 } as const;
+export const ZEPHRAS = "ile-de-zephras";
 
 export const RACES_GUIDE: RaceGuide[] = [
   { slug: "humain", nom: "Humain", faction: "alliance", bit: 1, depart: "foret-d-elwynn" },
@@ -30,13 +44,24 @@ export const RACES_GUIDE: RaceGuide[] = [
   { slug: "mort-vivant", nom: "Mort-vivant", faction: "horde", bit: 16, depart: "clairieres-de-tirisfal" },
   { slug: "tauren", nom: "Tauren", faction: "horde", bit: 32, depart: "mulgore" },
   { slug: "troll", nom: "Troll", faction: "horde", bit: 128, depart: "durotar" },
+  {
+    slug: "skyborne-alliance", nom: "Skyborne", faction: "alliance", bit: 0, depart: ZEPHRAS,
+    skyborne: { ordre: ordre("Alliance").nom, classes: ordre("Alliance").classes.map(slugClasse).filter(Boolean) },
+  },
+  {
+    slug: "skyborne-horde", nom: "Skyborne", faction: "horde", bit: 0, depart: ZEPHRAS,
+    skyborne: { ordre: ordre("Horde").nom, classes: ordre("Horde").classes.map(slugClasse).filter(Boolean) },
+  },
 ];
+
+/** Nom à afficher : « Skyborne (Alliance) » pour distinguer les deux ordres. */
+export const nomRace = (r: RaceGuide) => (r.skyborne ? `${r.nom} (${r.faction === "alliance" ? "Alliance" : "Horde"})` : r.nom);
 
 export const BITS_CLASSES: Record<string, number> = {
   guerrier: 1, paladin: 2, chasseur: 4, voleur: 8, pretre: 16, chaman: 64, mage: 128, demoniste: 256, druide: 1024,
 };
 
-const DEPARTS = new Set(RACES_GUIDE.map((r) => r.depart));
+const DEPARTS = new Set(RACES_GUIDE.filter((r) => !r.skyborne).map((r) => r.depart));
 
 let cache: { version: { jeu: string; source: string }; guide: Record<"alliance" | "horde", ZoneGuide[]> } | null | undefined;
 function donnees() {
@@ -57,7 +82,9 @@ export const raceGuide = (slug: string) => RACES_GUIDE.find((r) => r.slug === sl
 export function combinaisons(): { race: RaceGuide; classe: (typeof CLASSES)[number] }[] {
   const res: { race: RaceGuide; classe: (typeof CLASSES)[number] }[] = [];
   for (const race of RACES_GUIDE) {
-    for (const c of CLASSES) if (c.races.some((r) => r.race === race.nom)) res.push({ race, classe: c });
+    for (const c of CLASSES) {
+      if (race.skyborne ? race.skyborne.classes.includes(c.slug) : c.races.some((r) => r.race === race.nom)) res.push({ race, classe: c });
+    }
   }
   return res;
 }
@@ -68,12 +95,53 @@ export function libelleGuide(cle: string): { nom: string; lien: string } {
   const [, race, classe] = cle.split(":");
   const r = raceGuide(race);
   const c = CLASSES.find((x) => x.slug === classe);
-  return { nom: `Guide de 1 à 60 · ${r?.nom ?? race} ${c?.nom.toLowerCase() ?? classe}`, lien: `/guides/parcours/${race}/${classe}/` };
+  return { nom: `Guide de 1 à 60 · ${r ? nomRace(r) : race} ${c?.nom.toLowerCase() ?? classe}`, lien: `/guides/parcours/${race}/${classe}/` };
+}
+
+/**
+ * Étape de l'île de Zéphras, d'après les quêtes saisies dans content/zephras.ts (aucune tant que rien n'est relevé en jeu).
+ * Les PNJ d'un même village forment un point, comme ailleurs.
+ */
+export function zoneZephras(race: RaceGuide, classe: string, quetes: QueteZephras[] = QUETES_ZEPHRAS): ZoneGuide {
+  const hubs: Hub[] = [];
+  const hubDe = (p: { nom: string; x: number; y: number } | undefined) => {
+    if (!p) return -1;
+    let i = hubs.findIndex((h) => Math.hypot(h.x - p.x, h.y - p.y) < 4);
+    if (i < 0) { hubs.push({ x: p.x, y: p.y, n: [] }); i = hubs.length - 1; }
+    if (!hubs[i].n.includes(p.nom)) hubs[i].n.push(p.nom);
+    return i;
+  };
+  const etapes: EtapeGuide[] = quetes
+    .filter((q) => (!q.faction || q.faction === race.faction) && (!q.classes?.length || q.classes.includes(classe)))
+    .map((q) => {
+      const rendre = q.rendre ?? q.donneur;
+      const pts = q.cibles ?? [];
+      const c: [number, number] | null = pts.length
+        ? [Math.round((pts.reduce((s, p) => s + p[0], 0) / pts.length) * 10) / 10, Math.round((pts.reduce((s, p) => s + p[1], 0) / pts.length) * 10) / 10]
+        : null;
+      return {
+        id: q.id, t: q.titre, nv: q.niveau, min: q.min ?? 0, ra: 0, cl: q.classes?.length ? q.classes.reduce((m, s) => m | (BITS_CLASSES[s] ?? 0), 0) : 0,
+        grp: q.groupe ? 1 : 0, obj: q.objectifs, g: hubDe(q.donneur), gn: q.donneur.nom, r: hubDe(rendre), rn: rendre.nom, rl: null,
+        av: q.avant ?? 0, cib: c ? { p: pts, c } : null,
+      } as EtapeGuide;
+    })
+    .sort((a, b) => (a.min || a.nv) - (b.min || b.nv) || a.nv - b.nv || a.id - b.id);
+  return { lieu: ZEPHRAS, niveaux: NIVEAUX_ZEPHRAS ?? [1, 10], hubs, etapes };
 }
 
 export function guidePour(race: RaceGuide, classe: string): ZoneGuide[] {
   const d = donnees();
   const bitClasse = BITS_CLASSES[classe] ?? 0;
+  if (race.skyborne) {
+    // Après l'île : la route de la faction à partir du niveau 10, hors zones de départ des autres races ; seules les
+    // quêtes ouvertes à toute la faction (ou à tous) sont gardées, faute de masque de race propre aux Skyborne.
+    const masque = MASQUE_FACTION[race.faction];
+    const suite = (d?.guide[race.faction] ?? [])
+      .filter((z) => !DEPARTS.has(z.lieu) && z.niveaux[0] >= 10)
+      .map((z) => ({ ...z, etapes: z.etapes.filter((e) => (!e.ra || e.ra === masque) && (!e.cl || e.cl & bitClasse)) }))
+      .filter((z) => z.etapes.length >= 4);
+    return [zoneZephras(race, classe), ...suite];
+  }
   const continent = carte(race.depart)?.continent;
   if (!d) return [];
   return d.guide[race.faction]

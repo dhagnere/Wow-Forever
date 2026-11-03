@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CLASSES } from "@/content/classes";
-import { combinaisons, guidesPassantPar, raceGuide } from "@/lib/guide";
+import { combinaisons, guidesPassantPar, nomRace, raceGuide } from "@/lib/guide";
 import { IconeClasse } from "./IconeClasse";
 import { IconeRace } from "./IconeRace";
 
@@ -23,7 +23,7 @@ export function ChoixGuideParClasse({ cta = "guide-accueil" }: { cta?: string })
                 <li key={r.slug}>
                   <Link href={`/guides/parcours/${r.slug}/${classe.slug}/`} className="lien-icone" data-cta={cta}>
                     <IconeRace race={r.nom} taille={24} />
-                    {r.nom}
+                    {nomRace(r)}
                   </Link>
                 </li>
               ))}
@@ -52,13 +52,13 @@ export function GuideDeLaZone({ lieu, nom }: { lieu: string; nom: string }) {
           <div key={race.slug} className="guide-zone-race">
             <span className="lien-icone" style={{ gap: 8 }}>
               <IconeRace race={race.nom} taille={28} />
-              <strong>{raceGuide(race.slug)?.nom}</strong>
+              <strong>{nomRace(raceGuide(race.slug)!)}</strong>
             </span>
             <span className="guide-zone-classes">
               {classes.map((cl) => {
                 const c = CLASSES.find((x) => x.slug === cl)!;
                 return (
-                  <Link key={cl} href={`/guides/parcours/${race.slug}/${cl}/#zone-${lieu}`} title={`${race.nom} ${c.nom.toLowerCase()}`} aria-label={`Guide ${race.nom} ${c.nom.toLowerCase()}, ${nom}`} data-cta="guide-zone">
+                  <Link key={cl} href={`/guides/parcours/${race.slug}/${cl}/#zone-${lieu}`} title={`${nomRace(race)} ${c.nom.toLowerCase()}`} aria-label={`Guide ${nomRace(race)} ${c.nom.toLowerCase()}, ${nom}`} data-cta="guide-zone">
                     <IconeClasse slug={cl} couleur={c.couleur} taille={32} />
                   </Link>
                 );
@@ -68,5 +68,33 @@ export function GuideDeLaZone({ lieu, nom }: { lieu: string; nom: string }) {
         ))}
       </div>
     </section>
+  );
+}
+
+/** Guide Skyborne : un bloc par ordre, avec ses classes. */
+export function GuideSkyborne() {
+  const ordres = combinaisons().filter((c) => c.race.skyborne);
+  return (
+    <div className="guide-zone-races">
+      {(["skyborne-alliance", "skyborne-horde"] as const).map((slug) => {
+        const r = raceGuide(slug)!;
+        return (
+          <div key={slug} className="guide-zone-race">
+            <span className="lien-icone" style={{ gap: 8 }}>
+              <IconeRace race="Skyborne" taille={28} />
+              <strong>{r.skyborne!.ordre}</strong> <span className="doux">({r.faction === "alliance" ? "Alliance" : "Horde"})</span>
+            </span>
+            <span className="guide-zone-classes">
+              {ordres.filter((o) => o.race.slug === slug).map(({ classe }) => (
+                <Link key={classe.slug} href={`/guides/parcours/${slug}/${classe.slug}/`} className="lien-icone choix-pastille" data-cta="guide-skyborne">
+                  <IconeClasse slug={classe.slug} couleur={classe.couleur} taille={24} />
+                  {classe.nom}
+                </Link>
+              ))}
+            </span>
+          </div>
+        );
+      })}
+    </div>
   );
 }

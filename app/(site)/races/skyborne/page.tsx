@@ -8,6 +8,7 @@ import { dateLongue } from "@/lib/site";
 import { fondBandeau } from "@/lib/ecrans";
 import { traitsDeRace, versionSorts } from "@/lib/sorts";
 import { TraitsRaciaux } from "@/components/TraitsRaciaux";
+import { GuideSkyborne } from "@/components/ChoixGuide";
 
 export const dynamic = "force-dynamic";
 
@@ -65,6 +66,16 @@ export default function Skyborne() {
                 d&apos;après la bêta ; les autres sont communes à tous les Skyborne.
               </p>
               <TraitsRaciaux traits={traitsDeRace("skyborne")} factions={s.factionsCapacites} />
+            </section>
+
+            <section aria-labelledby="t-guide-skyborne" className="encadre-chaud guide-zone">
+              <p className="surtitre" style={{ margin: 0 }}>Guide de 1 à 60</p>
+              <h2 id="t-guide-skyborne" className="section-titre" style={{ fontSize: 26, margin: "4px 0 8px" }}>Monter un Skyborne de 1 à 60</h2>
+              <p style={{ margin: "0 0 14px" }}>
+                Départ sur l&apos;<Link href="/zones/ile-de-zephras/">île de Zéphras</Link>, puis la route de votre faction, quête par quête, avec les
+                PNJ et les monstres sur la carte et votre progression à cocher. Choisissez votre ordre et votre classe :
+              </p>
+              <GuideSkyborne />
             </section>
 
             <section aria-labelledby="t-acces">

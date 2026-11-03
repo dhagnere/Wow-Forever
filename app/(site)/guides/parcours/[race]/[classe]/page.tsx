@@ -9,7 +9,9 @@ import { GuideParcours, type ZoneVue } from "@/components/GuideParcours";
 import { ECRAN_CLASSE, fondBandeau } from "@/lib/ecrans";
 import { pageLieu, urlCarte } from "@/lib/cartes";
 import { nomLieu } from "@/lib/quetes";
-import { cleGuide, combinaisons, guidePour, planifier, raceGuide, versionGuide } from "@/lib/guide";
+import { cleGuide, combinaisons, guidePour, nomRace, planifier, raceGuide, versionGuide, ZEPHRAS } from "@/lib/guide";
+import { LIEUX_ZEPHRAS } from "@/content/zephras-jeu";
+import { SORTIE_ZEPHRAS } from "@/content/zephras";
 
 type Props = { params: Promise<{ race: string; classe: string }> };
 
@@ -41,9 +43,13 @@ export default async function GuideRaceClasse({ params }: Props) {
     lieu: z.lieu, nom: nomLieu(z.lieu), carte: urlCarte(z.lieu, 1000), lienCarte: pageLieu(z.lieu), niveaux: z.niveaux, hubs: z.hubs,
     etapes: z.etapes.map(({ id, t, nv, min, cl, grp, obj, g, gn, r, rn, rl, cib }) => ({ id, t, nv, min, cl, grp, obj, g, gn, r, rn, rl: rl ? nomLieu(rl) : null, cib })),
     arrets: planifier(z),
+    ...(z.lieu === ZEPHRAS ? { lieux: LIEUX_ZEPHRAS } : {}),
+    ...(z.lieu === ZEPHRAS && !z.etapes.length ? {
+      note: `Les quêtes de l'île ne figurent pas encore dans les fichiers du jeu : Jobwow les relève au lancement et les ajoute ici, avec leurs PNJ et leurs cibles sur la carte. En attendant, la carte montre les lieux de l'île. Partez du village de Thendal, faites les quêtes de l'île jusqu'à ce qu'elle soit terminée, puis prenez la route ${SORTIE_ZEPHRAS[c.race.faction] ? `vers ${SORTIE_ZEPHRAS[c.race.faction]}` : "de votre faction [point d'arrivée à confirmer au lancement]"} : la suite du guide reprend au niveau 10.`,
+    } : {}),
   }));
   if (!zones.length) notFound();
-  const titre = `${c.race.nom} ${c.classe.nom.toLowerCase()}`;
+  const titre = `${nomRace(c.race)} ${c.classe.nom.toLowerCase()}`;
   const chemin = `/guides/parcours/${c.race.slug}/${c.classe.slug}/`;
   const source = versionGuide();
   const nbClasse = zones.reduce((s, z) => s + z.etapes.filter((e) => e.cl).length, 0);
