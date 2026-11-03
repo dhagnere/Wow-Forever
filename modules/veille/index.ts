@@ -78,3 +78,13 @@ export { ouTrouver, RANGS, sourceDesDonnees } from "./objets/butin";
 
 // Sorts et talents des classes (fichiers du jeu, npm run sorts:jeu → content/sorts-jeu.json).
 export type { Specialisation, Sort, Talent, RangSort, TraitRacial, Familiers, FamilleFamilier, TechniqueFamilier } from "./sorts/conversion";
+
+// Comptes joueurs : connexion, Lettre, progression du guide de 1 à 60.
+export type { Joueur } from "./joueurs/depot";
+export type { Inscription } from "./joueurs/validation";
+export {
+  COOKIE_JOUEUR, DUREE_SESSION_JOUEUR_S, ErreurCompte, creerCompte, connecter, joueurDeSession, fermerSession, modifierCompte,
+  changerMotDePasse, supprimerCompte, demanderReinitialisation, reinitialiser, lireProgression, enregistrerProgression, guidesDuJoueur,
+} from "./joueurs/depot";
+export { validerInscription, erreurMotDePasse, normaliserCourriel, cleGuideValide } from "./joueurs/validation";
+export { MOT_DE_PASSE_MIN } from "./joueurs/motdepasse";

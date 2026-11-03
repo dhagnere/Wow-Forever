@@ -41,6 +41,20 @@ export default function Confidentialite() {
           clic, qui efface votre adresse de la liste.
         </p>
 
+        <h2>Votre compte joueur</h2>
+        <p>
+          Le compte est facultatif. Il sert à vous connecter, à sauvegarder votre progression dans le guide de 1 à 60 et, si vous cochez la case,
+          à recevoir la Lettre. Nous gardons votre pseudo, votre adresse électronique, une empreinte de votre mot de passe (jamais le mot de passe
+          lui-même), les quêtes que vous avez cochées et le nombre de quêtes faites chaque jour. Ces données sont hébergées chez Scalingo, en France,
+          et ne servent à rien d&apos;autre.
+        </p>
+        <p>
+          Rester connecté demande un cookie, <code>taverne_joueur</code>, déposé seulement quand vous vous connectez et valable trente jours. Il ne sert
+          qu&apos;à vous reconnaître et à aucune mesure d&apos;audience ; « Me déconnecter » l&apos;efface. Depuis la page « Mon compte », vous changez de mot de
+          passe, arrêtez la Lettre ou supprimez votre compte : tout est alors effacé, progression comprise. Une demande de nouveau mot de passe
+          passe par un message envoyé par Brevo, avec un lien valable une heure.
+        </p>
+
         <h2>Contenus intégrés</h2>
         <p>
           Les vidéos YouTube sont intégrées en mode « confidentialité renforcée » (youtube-nocookie.com) : YouTube ne dépose de cookie

@@ -56,6 +56,12 @@ Les recettes des métiers (« Fabriqué par », « Utilisé pour fabriquer », �
 
 `npm run base:quetes -- <dump CMaNGOS> <db_world AzerothCore>` écrit `content/quetes-jeu.json` : quêtes de classe en chaînes (`/guides/quetes-de-classe/<classe>/`) et parcours de 1 à 60 par faction (`/guides/parcours/`). Seules les quêtes de l'Azeroth d'origine encore présentes dans les fichiers de Forever (table `QuestV2`) sont gardées. Ne reprendre aucun texte de quête : titres et noms seulement, objectifs rédigés à partir des données (« Rapporter 5 × … », « Vaincre 10 × … »). Ne pas s'appuyer sur des guides commerciaux (Zygor, etc.) ni sur Wowhead. Les outils communs aux scripts des bases libres (lecture du dump, positions sur les cartes, priorité aux capitales) sont dans `scripts/_bases-libres.ts`.
 
+## Comptes joueurs et guide de 1 à 60
+
+Un joueur crée son compte sur `/compte/` (pseudo, adresse, mot de passe) ; le même formulaire l'inscrit à la Lettre s'il coche la case, toujours par la double validation Brevo (`lib/lettre.ts`). Module `joueurs/` : mot de passe en empreinte scrypt salée (`motdepasse.ts`), jamais en clair ni journalisé ; sessions et liens de réinitialisation gardés par l'empreinte de leur jeton ; cinq erreurs de mot de passe bloquent le compte quinze minutes ; cinq créations de compte par jour et par connexion au plus. Le cookie `taverne_joueur` (HttpOnly, SameSite=Lax, 30 jours) est un cookie de service : ne jamais s'en servir pour la mesure d'audience. La suppression du compte efface tout (ON DELETE CASCADE). Le mot de passe oublié passe par l'API transactionnelle de Brevo (`lib/courriel.ts`, variable `BREVO_EXPEDITEUR`).
+
+Guide de 1 à 60 par race et classe : `/guides/parcours/<race>/<classe>/` (`components/GuideParcours.tsx`, données `content/guide-jeu.json` produites par `npm run base:quetes`, adaptation dans `lib/guide.ts`). Sur chaque carte, les PNJ d'un même village forment un point numéroté et le trait suit l'ordre de passage (par tranche de deux niveaux, point le plus proche d'abord). La progression se sauvegarde par `/api/progression/` (joueur connecté seulement, journal par jour dans `progression_jours`) ; sans compte, une fenêtre propose d'en créer un, une fois par visite. Les pages du guide restent statiques : l'état du joueur est lu par le navigateur, pas à la compilation.
+
 ## Commandes
 
 ```bash

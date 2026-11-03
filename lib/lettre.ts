@@ -40,3 +40,16 @@ export async function inscrire(courriel: string, siteUrl: string): Promise<Resul
   console.error(`[lettre] Brevo a répondu ${r ? r.status : "sans réponse"}.`);
   return { ok: false, message: "L'inscription n'a pas abouti. Réessayez dans quelques minutes." };
 }
+
+/** Retire l'adresse de la liste des abonnés (choix fait depuis le compte joueur). Sans effet si la Lettre n'est pas configurée. */
+export async function desinscrire(courriel: string): Promise<boolean> {
+  if (!lettreConfiguree()) return false;
+  const r = await fetch(`https://api.brevo.com/v3/contacts/lists/${Number(process.env.BREVO_LISTE_ID)}/contacts/remove`, {
+    method: "POST",
+    headers: { "api-key": process.env.BREVO_API_KEY!, "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ emails: [courriel.trim().toLowerCase()] }),
+    signal: AbortSignal.timeout(15_000),
+  }).catch(() => null);
+  // 201 : retiré ; 400 : l'adresse n'était pas dans la liste.
+  return !!r && (r.status === 201 || r.status === 400);
+}

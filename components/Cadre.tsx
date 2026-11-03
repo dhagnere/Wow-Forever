@@ -27,6 +27,10 @@ export function Entete() {
         </Link>
         <div className="outils-entete">
           <Link href="/lettre/" className="btn btn-or btn-petit" data-cta="lettre-entete">Recevoir la Lettre</Link>
+          <Link href="/compte/" aria-label="Mon compte" data-cta="compte-entete">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
+            <span className="sr-only">Mon compte</span>
+          </Link>
           <Link href="/recherche/" aria-label="Rechercher dans les articles">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
             <span className="sr-only">Rechercher</span>

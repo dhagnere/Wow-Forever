@@ -236,3 +236,52 @@ CREATE TABLE IF NOT EXISTS objets_recettes (
 );
 CREATE INDEX IF NOT EXISTS objets_recettes_objet_idx ON objets_recettes (objet);
 CREATE INDEX IF NOT EXISTS objets_recettes_composants_idx ON objets_recettes USING GIN (composants jsonb_path_ops);
+
+-- Comptes joueurs : connexion, Lettre et progression du guide de 1 à 60.
+-- Mot de passe : empreinte scrypt salée, jamais le mot de passe lui-même. Sessions et liens de réinitialisation :
+-- seule l'empreinte du jeton est gardée. Tout s'efface avec le compte (ON DELETE CASCADE).
+CREATE TABLE IF NOT EXISTS joueurs (
+  id             SERIAL PRIMARY KEY,
+  pseudo         TEXT NOT NULL CHECK (char_length(pseudo) BETWEEN 3 AND 24),
+  courriel       TEXT NOT NULL UNIQUE CHECK (courriel = lower(courriel)),
+  mot_de_passe   TEXT NOT NULL,
+  lettre         BOOLEAN NOT NULL DEFAULT false,
+  race           TEXT NOT NULL DEFAULT '',
+  classe         TEXT NOT NULL DEFAULT '',
+  echecs         INTEGER NOT NULL DEFAULT 0,
+  bloque_jusqu   TIMESTAMPTZ,
+  depot_empreinte TEXT NOT NULL DEFAULT '',
+  cree_le        TIMESTAMPTZ NOT NULL DEFAULT now(),
+  vu_le          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS joueurs_pseudo_idx ON joueurs (lower(pseudo));
+
+CREATE TABLE IF NOT EXISTS joueurs_sessions (
+  empreinte  TEXT PRIMARY KEY,
+  joueur_id  INTEGER NOT NULL REFERENCES joueurs (id) ON DELETE CASCADE,
+  expire     TIMESTAMPTZ NOT NULL,
+  cree_le    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS joueurs_sessions_joueur_idx ON joueurs_sessions (joueur_id);
+
+CREATE TABLE IF NOT EXISTS joueurs_reinitialisations (
+  empreinte  TEXT PRIMARY KEY,
+  joueur_id  INTEGER NOT NULL REFERENCES joueurs (id) ON DELETE CASCADE,
+  expire     TIMESTAMPTZ NOT NULL
+);
+
+-- Progression : quêtes cochées par guide (« alliance:humain:mage »), et quêtes faites chaque jour.
+CREATE TABLE IF NOT EXISTS progression (
+  joueur_id  INTEGER NOT NULL REFERENCES joueurs (id) ON DELETE CASCADE,
+  guide      TEXT NOT NULL,
+  quetes     INTEGER[] NOT NULL DEFAULT '{}',
+  maj_le     TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (joueur_id, guide)
+);
+CREATE TABLE IF NOT EXISTS progression_jours (
+  joueur_id  INTEGER NOT NULL REFERENCES joueurs (id) ON DELETE CASCADE,
+  guide      TEXT NOT NULL,
+  jour       DATE NOT NULL,
+  faites     INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (joueur_id, guide, jour)
+);

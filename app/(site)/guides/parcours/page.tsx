@@ -5,6 +5,9 @@ import { LienLieu } from "@/components/Cartes";
 import { fondBandeau } from "@/lib/ecrans";
 import { carte, pageLieu } from "@/lib/cartes";
 import { nomLieu, parcours, versionQuetes, type EtapeParcours } from "@/lib/quetes";
+import { combinaisons, RACES_GUIDE } from "@/lib/guide";
+import { IconeClasse } from "@/components/IconeClasse";
+import { IconeRace } from "@/components/IconeRace";
 
 export const metadata: Metadata = {
   title: "Parcours de montée en niveau de 1 à 60 sur WoW Forever",
@@ -64,6 +67,35 @@ export default function Parcours() {
       </section>
 
       <div className="wrap contenu">
+        <section aria-labelledby="t-choix" style={{ marginBottom: 36 }}>
+          <h2 id="t-choix" className="section-titre" style={{ fontSize: 26 }}>Votre guide pas à pas</h2>
+          <p className="doux" style={{ marginTop: 0 }}>
+            Choisissez votre race et votre classe : chaque quête dans l&apos;ordre, les PNJ numérotés sur la carte de chaque zone, la route tracée,
+            et votre progression à cocher (sauvegardée avec un <Link href="/compte/">compte gratuit</Link>).
+          </p>
+          <div className="choix-guide">
+            {RACES_GUIDE.map((r) => (
+              <div key={r.slug} className="choix-race">
+                <p className="lien-icone" style={{ gap: 10, margin: "0 0 8px" }}>
+                  <IconeRace race={r.nom} taille={36} />
+                  <strong>{r.nom}</strong> <span className="doux">· {r.faction === "alliance" ? "Alliance" : "Horde"}</span>
+                </p>
+                <ul>
+                  {combinaisons().filter((c) => c.race.slug === r.slug).map(({ classe }) => (
+                    <li key={classe.slug}>
+                      <Link href={`/guides/parcours/${r.slug}/${classe.slug}/`} className="lien-icone" data-cta="guide-choix">
+                        <IconeClasse slug={classe.slug} couleur={classe.couleur} taille={28} />
+                        {classe.nom}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <h2 className="section-titre" style={{ fontSize: 26 }}>La route en un coup d&apos;œil</h2>
         <div className="encadre-chaud" style={{ marginBottom: 28 }}>
           <p style={{ margin: "0 0 8px" }}>
             <strong>Comment lire la route.</strong> Les zones sont rangées par niveau des quêtes qu&apos;on y trouve. La fourchette couvre l&apos;essentiel

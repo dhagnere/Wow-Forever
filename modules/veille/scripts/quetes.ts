@@ -213,7 +213,11 @@ lancer("base:quetes", async () => {
 
   // --- Parcours par faction : quêtes de tous, données par un personnage non hostile.
   const pourTous = [...quetes.values()].filter((q) => (!q.classes || (q.classes & TOUTES_CLASSES) === TOUTES_CLASSES) && q.niveau > 0 && !TYPES_HORS_PARCOURS.has(q.type) && !SAISONNIERES.has(q.zone));
-  for (const q of pourTous) for (const r of donneurs.get(q.id) ?? []) if (r.t === "pnj") pnjCites.add(r.id);
+  for (const q of pourTous) {
+    for (const r of donneurs.get(q.id) ?? []) citer(r);
+    // Le guide de 1 à 60 place aussi sur la carte le PNJ à qui l'on rend la quête.
+    for (const r of receveurs.get(q.id) ?? []) citer(r);
+  }
 
   const posPnj = await positions("creature", "creature_spawn_entry", pnjCites);
   const posDecor = await positions("gameobject", "gameobject_spawn_entry", decorCites);
@@ -276,6 +280,91 @@ lancer("base:quetes", async () => {
   }));
   const donnees = { version: { jeu: version, source: "CMaNGOS classic-db (GPL v3), titres et noms français AzerothCore (GPL v2)" }, classes, quetes: fiches, parcours };
   await writeFile(path.join(process.cwd(), "content/quetes-jeu.json"), JSON.stringify(donnees));
+
+  // --- Guide de 1 à 60 : pour chaque zone de la route, les quêtes dans l'ordre et les points de rassemblement.
+  type Hub = { x: number; y: number; n: string[] };
+  type EtapeGuide = {
+    id: number; t: string; nv: number; min: number; ra: number; cl: number; grp: 1 | 0; obj: string[];
+    g: number; gn: string; r: number; rn: string; rl: string | null; av: number;
+  };
+  const guide: Record<"alliance" | "horde", { lieu: string; niveaux: [number, number]; hubs: Hub[]; etapes: EtapeGuide[] }[]> = { alliance: [], horde: [] };
+  const quetesDeClasse = [...quetes.values()].filter((q) => q.classes && nbClasses(q.classes) <= 2 && !SAISONNIERES.has(q.zone) && q.niveau > 0 && q.niveau < 60);
+  const placer = (r: Ref | undefined) => {
+    if (!r) return null;
+    const p = r.t === "pnj" ? posPnj.get(r.id) : r.t === "decor" ? posDecor.get(r.id) : undefined;
+    return zoneDe(p);
+  };
+  for (const camp of ["alliance", "horde"] as const) {
+    const masque = camp === "alliance" ? ALLIANCE : HORDE;
+    for (const z of parcours[camp]) {
+      const [bas, haut] = [z.niveaux[0] - 2, z.niveaux[1] + 2];
+      const hubs: Hub[] = [];
+      // Deux PNJ à moins de 4 % de carte l'un de l'autre (un même village) forment un même point de rassemblement.
+      const hubDe = (lieu: { lieu: string; x: number; y: number } | null, nom: string) => {
+        if (!lieu || lieu.lieu !== z.lieu) return -1;
+        let i = hubs.findIndex((h) => Math.hypot(h.x - lieu.x, h.y - lieu.y) < 4);
+        if (i < 0) { hubs.push({ x: lieu.x, y: lieu.y, n: [] }); i = hubs.length - 1; }
+        if (nom && !hubs[i].n.includes(nom)) hubs[i].n.push(nom);
+        return i;
+      };
+      const etapes: EtapeGuide[] = [];
+      for (const q of [...pourTous, ...quetesDeClasse]) {
+        if (q.races && !(q.races & masque)) continue;
+        if (q.niveau < bas || q.niveau > haut) continue;
+        const d = (donneurs.get(q.id) ?? []).find((r) => r.t !== "pnj" || ouvertA(creatures.get(r.id)?.faction ?? 0, camp));
+        const ld = placer(d);
+        if (!d || !ld || ld.lieu !== z.lieu) continue;
+        const rec = (receveurs.get(q.id) ?? [])[0];
+        const lr = placer(rec);
+        etapes.push({
+          id: q.id, t: q.titre, nv: q.niveau, min: q.min, ra: q.races & (ALLIANCE | HORDE), cl: q.classes && nbClasses(q.classes) <= 2 ? q.classes : 0,
+          grp: q.type === 1 ? 1 : 0, obj: q.objectifs,
+          g: hubDe(ld, d.n), gn: d.n, r: hubDe(lr, rec?.n ?? ""), rn: rec?.n ?? "", rl: lr && lr.lieu !== z.lieu ? lr.lieu : null,
+          av: q.prev > 0 ? q.prev : 0,
+        });
+      }
+      // Ordre : par tranche de deux niveaux, on va au point de rassemblement le plus proche, on y prend tout ce qu'il
+      // propose, puis on passe au suivant ; on limite ainsi les allers-retours d'un bout à l'autre de la zone.
+      etapes.sort((a, b) => (a.min || a.nv) - (b.min || b.nv) || a.nv - b.nv || a.id - b.id);
+      const tranches = new Map<number, EtapeGuide[]>();
+      for (const e of etapes) {
+        const t = Math.floor((e.min || e.nv) / 2);
+        tranches.set(t, [...(tranches.get(t) ?? []), e]);
+      }
+      const ordonnees: EtapeGuide[] = [];
+      let ici: Hub | null = null;
+      for (const t of [...tranches.keys()].sort((a, b) => a - b)) {
+        const parHub = new Map<number, EtapeGuide[]>();
+        for (const e of tranches.get(t)!) parHub.set(e.g, [...(parHub.get(e.g) ?? []), e]);
+        while (parHub.size) {
+          const prochain: number = [...parHub.keys()].sort((a, b) => {
+            if (!ici || a < 0 || b < 0) return a - b;
+            return Math.hypot(hubs[a].x - ici.x, hubs[a].y - ici.y) - Math.hypot(hubs[b].x - ici.x, hubs[b].y - ici.y);
+          })[0];
+          const lot = parHub.get(prochain)!;
+          parHub.delete(prochain);
+          ordonnees.push(...lot);
+          // On repart du dernier receveur de ce point, sinon du point lui-même.
+          const dernier = lot[lot.length - 1];
+          const h = dernier.r >= 0 ? dernier.r : prochain;
+          if (h >= 0) ici = hubs[h];
+        }
+      }
+      etapes.splice(0, etapes.length, ...ordonnees);
+      // Une quête passe toujours après celle qu'elle demande d'avoir faite.
+      for (let tour = 0; tour < 5; tour++) {
+        let change = false;
+        for (let i = 0; i < etapes.length; i++) {
+          const j = etapes.findIndex((e) => e.id === etapes[i].av);
+          if (j > i) { const [e] = etapes.splice(i, 1); etapes.splice(j, 0, e); change = true; i--; }
+        }
+        if (!change) break;
+      }
+      if (etapes.length >= 5) guide[camp].push({ lieu: z.lieu, niveaux: z.niveaux, hubs, etapes });
+    }
+  }
+  await writeFile(path.join(process.cwd(), "content/guide-jeu.json"), JSON.stringify({ version: donnees.version, guide }));
+  console.log(`Guide 1-60 : ${(["alliance", "horde"] as const).map((c) => `${c} ${guide[c].length} zones, ${guide[c].reduce((s, z) => s + z.etapes.length, 0)} quêtes`).join(" ; ")}.`);
   console.log(`Quêtes de classe : ${Object.entries(classes).map(([c, ch]) => `${c} ${ch.reduce((s, x) => s + x.quetes.length, 0)} (${ch.length} chaînes)`).join(", ")}.`);
   console.log(`Parcours : Alliance ${parcours.alliance.length} zones, Horde ${parcours.horde.length} zones.`);
 });

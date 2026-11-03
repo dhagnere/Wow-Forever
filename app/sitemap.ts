@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { listerGuildesPourPlan, listerObjetsPourPlan, listerPourPlan } from "@/modules/veille";
 import { RUBRIQUES } from "@/config/taxonomie";
 import { CLASSES } from "@/content/classes";
+import { combinaisons } from "@/lib/guide";
 import { ZONES, DONJONS } from "@/content/monde";
 import { SITE } from "@/lib/site";
 import { tousLesLieux } from "@/lib/cartes";
@@ -17,6 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...CLASSES.map((c) => `/classes/${c.slug}/`),
     ...CLASSES.map((c) => `/classes/${c.slug}/talents/`),
     ...CLASSES.map((c) => `/guides/quetes-de-classe/${c.slug}/`),
+    ...combinaisons().map((c) => `/guides/parcours/${c.race.slug}/${c.classe.slug}/`),
     ...ZONES.map((z) => `/zones/${z.slug}/`),
     ...DONJONS.map((d) => `/donjons/${d.slug}/`),
   ].map((chemin) => ({ url: `${SITE.url}${chemin}` }));
