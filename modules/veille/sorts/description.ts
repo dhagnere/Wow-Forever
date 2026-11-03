@@ -61,18 +61,31 @@ const VALEURS_PERSONNAGE = new Set(["AP", "ap", "RAP", "rap", "apm", "APM", "mw"
 const FONCTIONS = new Set(["cond", "gt", "lt", "gte", "lte", "eq", "max", "min", "floor", "ceil", "abs", "clamp", "round"]);
 const LETTRES = "sSmMwWotTdDaAnhuxirRbeqFv";
 
+/** Langue des textes produits : « fr » (par défaut) ou « en » (version anglaise du site). */
+export type Langue = "fr" | "en";
+let LANGUE: Langue = "fr";
+export function definirLangue(l: Langue): void {
+  LANGUE = l;
+}
+export const langueActuelle = () => LANGUE;
+
+const INSECABLE = "\u00a0";
+
 export function nombreFr(n: number, decimales?: number): string {
   if (!Number.isFinite(n)) return "X";
   const v = decimales === undefined ? Math.round(n) : Number(n.toFixed(decimales));
-  return v.toLocaleString("fr-FR", { maximumFractionDigits: decimales ?? 0, minimumFractionDigits: 0 }).replace(/ /g, " ");
+  const t = v.toLocaleString(LANGUE === "en" ? "en-US" : "fr-FR", { maximumFractionDigits: decimales ?? 0, minimumFractionDigits: 0 });
+  return LANGUE === "en" ? t : t.replace(/\u202f/g, INSECABLE);
 }
 
 export function dureeFr(ms: number): string {
-  if (ms < 0) return "jusqu'à annulation";
+  const en = LANGUE === "en";
+  const esp = en ? " " : INSECABLE;
+  if (ms < 0) return en ? "until cancelled" : "jusqu'à annulation";
   const s = ms / 1000;
-  if (s >= 3600 && s % 360 === 0) return `${nombreFr(s / 3600, 1)} h`;
-  if (s >= 60 && s % 6 === 0) return `${nombreFr(s / 60, 1)} min`;
-  return `${nombreFr(s, 1)} s`;
+  if (s >= 3600 && s % 360 === 0) return `${nombreFr(s / 3600, 1)}${esp}${en ? "hr" : "h"}`;
+  if (s >= 60 && s % 6 === 0) return `${nombreFr(s / 60, 1)}${esp}min`;
+  return `${nombreFr(s, 1)}${esp}${en ? "sec" : "s"}`;
 }
 
 interface Contexte {
@@ -150,7 +163,7 @@ function texteJeton(lettre: string, cible: DonneesSort, index: number, facteur: 
   if ((lettre === "s" || lettre === "S") && e && e.variance && facteur === 1) {
     const min = Math.abs(arrondi(e.base * (1 - e.variance / 2)));
     const max = Math.abs(arrondi(e.base * (1 + e.variance / 2)));
-    return min === max ? nombreFr(min) : `${nombreFr(min)} à ${nombreFr(max)}`;
+    return min === max ? nombreFr(min) : `${nombreFr(min)} ${LANGUE === "en" ? "to" : "à"} ${nombreFr(max)}`;
   }
   if ((lettre === "d" || lettre === "D") && facteur === 1) {
     return cible.duree === null ? null : dureeFr(cible.duree);
@@ -237,7 +250,8 @@ function rendre(t: string, c: Contexte): string {
         const dernier = nombres ? Math.abs(Number(nombres[nombres.length - 1].replace(",", "."))) : 1;
         // Après une valeur inconnue (« X »), le pluriel se lit mieux.
         const apresX = /\bX[\s\u00a0]*$/.test(sortie);
-        sortie += apresX || dernier >= 2 ? lg[3] : lg[2];
+        // Pluriel : à partir de 2 en français, dès que ce n'est pas 1 en anglais.
+        sortie += apresX || (LANGUE === "en" ? dernier !== 1 : dernier >= 2) ? lg[3] : lg[2];
       }
       i += 1 + lg[0].length;
       continue;
@@ -268,7 +282,7 @@ function rendre(t: string, c: Contexte): string {
     if (mot === "PL" || mot === "pl") { sortie += String(NIVEAU_FORMULES); i += 1 + mot.length; continue; }
     if (VALEURS_NULLES.has(mot)) { sortie += "0"; i += 1 + mot.length; continue; }
     if (VALEURS_PERSONNAGE.has(mot)) { sortie += inconnu(mot); i += 1 + mot.length; continue; }
-    if (mot === "z" && !/^z\d/.test(reste)) { sortie += "votre foyer"; i += 2; continue; }
+    if (mot === "z" && !/^z\d/.test(reste)) { sortie += LANGUE === "en" ? "your home" : "votre foyer"; i += 2; continue; }
 
     // $/1000;S1, $*5;s1, $12345s1, $d, $s2…
     const j = /^(?:([/*])(\d+(?:\.\d+)?);)?(\d*)([A-Za-z])(\d?)/.exec(reste);

@@ -28,8 +28,8 @@ export async function derniereVersion(): Promise<string> {
 }
 
 /** Table de données du jeu, au format CSV, textes en français. */
-export async function tableCsv(nom: string, version: string): Promise<string> {
-  const p = new URLSearchParams({ build: version, locale: "frFR" });
+export async function tableCsv(nom: string, version: string, locale: "frFR" | "enUS" = "frFR"): Promise<string> {
+  const p = new URLSearchParams({ build: version, locale });
   return (await lire(`/db2/${encodeURIComponent(nom)}/csv?${p}`)).text();
 }
 

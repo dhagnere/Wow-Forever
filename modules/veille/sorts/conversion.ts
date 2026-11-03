@@ -1,5 +1,5 @@
 import { parse } from "csv-parse/sync";
-import { decrire, dureeFr, lireVariables, nombreFr, type DonneesSort, type EffetSort, type Variables } from "./description";
+import { decrire, definirLangue, dureeFr, lireVariables, nombreFr, type DonneesSort, type EffetSort, type Langue, type Variables } from "./description";
 
 /**
  * Sorts et talents de chaque classe, par spécialisation, lus dans les fichiers du jeu (wago.tools) :
@@ -139,6 +139,23 @@ export interface BilanSorts {
 /** Nom affiché d'un talent dont les fichiers ne donnent ni le nom ni l'effet. */
 export const TALENT_NON_PUBLIE = "[Talent pas encore publié]";
 
+/** Libellés des fiches, en français et en anglais (version anglaise du site). */
+const TEXTES = {
+  fr: {
+    passif: "Passif", canalise: "Canalisé", instantane: "Instantané", incantation: "Incantation", recharge: "Recharge", portee: "Portée", unite: "\u00a0m",
+    melee: "Corps à corps", manaBase: " % du mana de base", mana: "mana", rage: "rage", focalisation: "focalisation", energie: "énergie",
+    nonPublie: TALENT_NON_PUBLIE,
+    classes: ["Guerrier", "Paladin", "Chasseur", "Voleur", "Prêtre", "Chaman", "Mage", "Démoniste", "Druide"],
+  },
+  en: {
+    passif: "Passive", canalise: "Channeled", instantane: "Instant", incantation: "Cast", recharge: "Cooldown", portee: "Range", unite: " yd",
+    melee: "Melee range", manaBase: "% of base mana", mana: "mana", rage: "rage", focalisation: "focus", energie: "energy",
+    nonPublie: "[Talent not yet released]",
+    classes: ["Warrior", "Paladin", "Hunter", "Rogue", "Priest", "Shaman", "Mage", "Warlock", "Druid"],
+  },
+};
+let T: (typeof TEXTES)["fr"] = TEXTES.fr;
+
 const PASSIF = 0x40;
 const CACHE = 0x80;
 const CANALISE = 0x4 | 0x40;
@@ -152,18 +169,23 @@ function texteCout(p: Ligne | undefined): string | null {
   const type = n(p.PowerType);
   const valeur = n(p.ManaCost);
   const pct = n(p.PowerCostPct);
-  if (pct > 0) return `${nombreFr(pct, 1)} % du mana de base`;
+  if (pct > 0) return `${nombreFr(pct, 1)}${T.manaBase}`;
   if (valeur <= 0) return null;
   switch (type) {
-    case 0: return `${nombreFr(valeur)} mana`;
-    case 1: return `${nombreFr(valeur / 10)} rage`;
-    case 2: return `${nombreFr(valeur)} focalisation`;
-    case 3: return `${nombreFr(valeur)} énergie`;
+    case 0: return `${nombreFr(valeur)} ${T.mana}`;
+    case 1: return `${nombreFr(valeur / 10)} ${T.rage}`;
+    case 2: return `${nombreFr(valeur)} ${T.focalisation}`;
+    case 3: return `${nombreFr(valeur)} ${T.energie}`;
     default: return null;
   }
 }
 
-export function convertirSorts(csv: TablesSorts): BilanSorts {
+const nomClasse = (bit: number) => T.classes[CLASSES_MASQUE.findIndex(([b]) => b === bit)];
+
+/** Conversion dans une langue : « fr » avec les tables en français, « en » avec les tables en anglais. */
+export function convertirSorts(csv: TablesSorts, langue: Langue = "fr"): BilanSorts {
+  definirLangue(langue);
+  T = TEXTES[langue];
   // Apostrophes unifiées : « Invocation d’eau » et « Invocation d'eau » sont le même sort.
   const noms = new Map(lire(csv.SpellName).map((l) => [n(l.ID), (l.Name_lang ?? "").replace(/[’ʼ]/g, "'")]));
   const textes = new Map(lire(csv.Spell).map((l) => [n(l.ID), l]));
@@ -321,10 +343,10 @@ export function convertirSorts(csv: TablesSorts): BilanSorts {
       const portee = portees.get(n(m.RangeIndex)) ?? 0;
       sorts.push({
         nom, icone, talent: g.talent,
-        incantation: n(m.Attributes_0) & PASSIF ? "Passif" : canalise ? "Canalisé" : ms > 0 ? `Incantation ${dureeFr(ms)}` : "Instantané",
-        recharge: recharge >= 1500 ? `Recharge ${dureeFr(recharge)}` : null,
+        incantation: n(m.Attributes_0) & PASSIF ? T.passif : canalise ? T.canalise : ms > 0 ? `${T.incantation} ${dureeFr(ms)}` : T.instantane,
+        recharge: recharge >= 1500 ? `${T.recharge} ${dureeFr(recharge)}` : null,
         // 50 000 m : valeur interne du jeu pour « sans limite », sans intérêt pour le joueur.
-        portee: portee >= 1000 ? null : portee > 5 ? `Portée ${nombreFr(portee)} m` : portee > 0 ? "Corps à corps" : null,
+        portee: portee >= 1000 ? null : portee > 5 ? `${T.portee} ${nombreFr(portee)}${T.unite}` : portee > 0 ? T.melee : null,
         rangs: uniques,
       });
     }
@@ -338,13 +360,13 @@ export function convertirSorts(csv: TablesSorts): BilanSorts {
 
       // Talents de l'arbre.
       const lignes = talentsParArbre.get(spec.arbre) ?? [];
-      const nomTalent = new Map(lignes.map((t) => [n(t.ID), noms.get(n(t.SpellRank_0)) || TALENT_NON_PUBLIE]));
+      const nomTalent = new Map(lignes.map((t) => [n(t.ID), noms.get(n(t.SpellRank_0)) || T.nonPublie]));
       const talents: Talent[] = lignes.flatMap((t) => {
         const ids = Array.from({ length: 9 }, (_, k) => n(t[`SpellRank_${k}`])).filter(Boolean);
         if (!ids.length) return [];
         // Talent présent dans l'arbre mais dont le sort n'est pas encore publié (fichier chiffré) : gardé, pour que
         // l'arbre et les prérequis restent justes.
-        const nom = noms.get(ids[0]) || TALENT_NON_PUBLIE;
+        const nom = noms.get(ids[0]) || T.nonPublie;
         const m = divers.get(ids[0]);
         const icone = n(m?.SpellIconFileDataID);
         if (icone) icones.add(icone);
@@ -364,7 +386,8 @@ export function convertirSorts(csv: TablesSorts): BilanSorts {
       const arbre = arbres.get(spec.arbre);
       const icone = n(arbre?.SpellIconID);
       if (icone) icones.add(icone);
-      return { slug: slugifier(spec.nom), nom: spec.nom, icone, sorts, talents };
+      // Le slug reste le nom français (adresses et ancres stables) ; en anglais, le nom vient de l'arbre du jeu.
+      return { slug: slugifier(spec.nom), nom: langue === "en" ? arbre?.Name_lang || spec.nom : spec.nom, icone, sorts, talents };
     });
   }
 
@@ -409,7 +432,7 @@ export function convertirSorts(csv: TablesSorts): BilanSorts {
         .sort((a, b) => n(a.ID) - n(b.ID))
         .map((l) => (l.Name_lang ?? "").replace(/^\([^)]*\)\s*/, "").trim())
         // Les deux dernières lignes sont techniques (« Cap de loyauté », « Inutilisé »).
-        .filter((nom) => nom && !/^(cap de loyauté|inutilisé)$/i.test(nom)),
+        .filter((nom) => nom && !/^(cap de loyauté|inutilisé|loyalty cap|unused)$/i.test(nom)),
     },
     demoniste: {
       mode: "groupe",
@@ -431,7 +454,7 @@ export function convertirSorts(csv: TablesSorts): BilanSorts {
       if (!nom || !m || n(m.Attributes_0) & CACHE) return;
       const passif = (n(m.Attributes_0) & PASSIF) !== 0;
       const masque = n(c.ClassMask);
-      const classes = masque > 0 && (masque & 0x5df) !== 0x5df ? CLASSES_MASQUE.filter(([b]) => masque & b).map(([, x]) => x) : null;
+      const classes = masque > 0 && (masque & 0x5df) !== 0x5df ? CLASSES_MASQUE.filter(([b]) => masque & b).map(([b]) => nomClasse(b)) : null;
       const texte = description(id);
       const t = traits.get(nom) ?? (() => {
         const icone = n(m.SpellIconFileDataID);
@@ -441,9 +464,9 @@ export function convertirSorts(csv: TablesSorts): BilanSorts {
         const recharge = Math.max(n(rc?.RecoveryTime), n(rc?.CategoryRecoveryTime));
         const portee = portees.get(n(m.RangeIndex)) ?? 0;
         const details = passif ? [] : [
-          (n(m.Attributes_1) & CANALISE) ? "Canalisé" : ms > 0 ? `Incantation ${dureeFr(ms)}` : "Instantané",
-          recharge >= 1500 ? `Recharge ${dureeFr(recharge)}` : null,
-          portee > 5 && portee < 1000 ? `Portée ${nombreFr(portee)}\u00a0m` : null,
+          (n(m.Attributes_1) & CANALISE) ? T.canalise : ms > 0 ? `${T.incantation} ${dureeFr(ms)}` : T.instantane,
+          recharge >= 1500 ? `${T.recharge} ${dureeFr(recharge)}` : null,
+          portee > 5 && portee < 1000 ? `${T.portee} ${nombreFr(portee)}${T.unite}` : null,
           texteCout(couts.get(id)),
         ].filter((x): x is string => !!x);
         return { nom, icone, passif, details, variantes: [], ordre };
@@ -465,7 +488,7 @@ export function convertirSorts(csv: TablesSorts): BilanSorts {
         // Une variante qui couvre toutes les classes vaut pour tout le monde.
         variantes: t.variantes.map((v) => ({
           ...v,
-          classes: v.classes && v.classes.length < CLASSES_MASQUE.length ? CLASSES_MASQUE.map(([, x]) => x).filter((x) => v.classes!.includes(x)) : null,
+          classes: v.classes && v.classes.length < CLASSES_MASQUE.length ? CLASSES_MASQUE.map(([b]) => nomClasse(b)).filter((x) => v.classes!.includes(x)) : null,
         })),
       }));
   }

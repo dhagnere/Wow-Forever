@@ -9,7 +9,8 @@ import { lancer } from "./_lanceur";
 /**
  * Sorts et talents de chaque classe, par spécialisation, lus dans les fichiers du jeu (wago.tools, WoW Forever).
  *   npm run sorts:jeu
- * Écrit content/sorts-jeu.json (lu par les pages de classe, familiers du chasseur et du démoniste compris) et les icônes public/images/jeu/sorts/<fichier>.png (64 × 64).
+ * Écrit content/sorts-jeu.json (lu par les pages de classe, familiers du chasseur et du démoniste compris), sa version anglaise
+ * content/sorts-jeu.en.json et les icônes public/images/jeu/sorts/<fichier>.png (64 × 64).
  * Une icône déjà présente n'est pas retéléchargée. Noms, textes et icônes : © Blizzard Entertainment.
  */
 
@@ -46,6 +47,18 @@ lancer("sorts:jeu", async () => {
     JSON.stringify({ version, genere: new Date().toISOString().slice(0, 10), classes: bilan.classes, races: bilan.races, familiers: bilan.familiers }),
   );
   console.log(`${sorts} sorts, ${talents} talents ; ${bilan.incompletes} descriptions avec une valeur propre au personnage (« X »).`);
+
+  // Version anglaise du site : mêmes sorts, mêmes identifiants, tables du jeu en anglais.
+  const csvEn = Object.fromEntries(
+    await Promise.all(TABLES_SORTS.map(async (t) => [t, await tableCsv(t, version, "enUS")] as const)),
+  ) as TablesSorts;
+  const en = convertirSorts(csvEn, "en");
+  convertirSorts(csv, "fr"); // la langue par défaut redevient le français pour la suite
+  await writeFile(
+    path.join(process.cwd(), "content/sorts-jeu.en.json"),
+    JSON.stringify({ version, genere: new Date().toISOString().slice(0, 10), classes: en.classes, races: en.races, familiers: en.familiers }),
+  );
+  console.log(`Version anglaise écrite (${Object.values(en.classes).flat().reduce((n, s) => n + s.sorts.length, 0)} sorts).`);
 
   await mkdir(ICONES, { recursive: true });
   const aFaire: number[] = [];
