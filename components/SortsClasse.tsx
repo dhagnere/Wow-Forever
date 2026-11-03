@@ -5,7 +5,7 @@ import { OngletsSpe } from "./OngletsSpe";
 
 /** Sorts et talents d'une classe, un onglet par spécialisation (données des fichiers du jeu). */
 
-function IconeSort({ fichier, taille = 40 }: { fichier: number; taille?: number }) {
+export function IconeSort({ fichier, taille = 40 }: { fichier: number; taille?: number }) {
   if (!fichier) return <span className="icone-sort icone-vide" style={{ width: taille, height: taille }} aria-hidden="true" />;
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={iconeSort(fichier)} alt="" width={taille} height={taille} loading="lazy" className="icone-sort icone-jeu" />;
@@ -17,7 +17,7 @@ const niveaux = (s: Sort) => {
   return a === b ? `Niveau ${a}` : `Niveaux ${a} à ${b}`;
 };
 
-function LigneSort({ s }: { s: Sort }) {
+export function LigneSort({ s, complement }: { s: Sort; complement?: string }) {
   const dernier = s.rangs[s.rangs.length - 1];
   const meta = [niveaux(s), s.rangs.length > 1 ? `${s.rangs.length} rangs` : null, s.incantation, s.recharge, s.portee, dernier.cout].filter(Boolean);
   return (
@@ -29,6 +29,7 @@ function LigneSort({ s }: { s: Sort }) {
           {s.talent ? <span className="badge-talent">Talent</span> : null}
         </h4>
         <p className="sort-meta">{meta.join(" · ")}</p>
+        {complement ? <p className="sort-meta sort-familles">{complement}</p> : null}
         {dernier.description ? (
           <p className="sort-desc">
             {s.rangs.length > 1 ? <span className="doux">Rang {dernier.rang ?? s.rangs.length} : </span> : null}

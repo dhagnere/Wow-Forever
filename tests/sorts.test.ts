@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { decrire, dureeFr, evaluer, lireVariables, type DonneesSort, type EffetSort } from "@/modules/veille/sorts/description";
 import { SPECIALISATIONS } from "@/modules/veille/sorts/conversion";
-import type { Specialisation } from "@/modules/veille";
+import type { Familiers, Specialisation } from "@/modules/veille";
 
 const effet = (index: number, base: number, autres: Partial<EffetSort> = {}): EffetSort => ({
   index, effet: 2, aura: 0, base, variance: 0, periode: 0, ciblesChainees: 0, rayon: 0, pointsParRessource: 0,
@@ -66,7 +66,7 @@ describe("descriptions des sorts", () => {
 
 describe("sorts produits (content/sorts-jeu.json)", () => {
   const donnees = JSON.parse(readFileSync(path.join(process.cwd(), "content/sorts-jeu.json"), "utf8")) as {
-    version: string; classes: Record<string, Specialisation[]>;
+    version: string; classes: Record<string, Specialisation[]>; familiers: Record<string, Familiers>;
   };
 
   it("couvre les neuf classes, trois spécialisations chacune", () => {
@@ -96,6 +96,13 @@ describe("sorts produits (content/sorts-jeu.json)", () => {
         }
       }
     }
+    for (const f of Object.values(donnees.familiers)) {
+      for (const g of f.familles) icones.add(g.icone);
+      for (const t of f.techniques) {
+        icones.add(t.icone);
+        for (const r of t.rangs) textes.push(r.description);
+      }
+    }
     expect(textes.filter((t) => /\$|\{|\}/.test(t))).toEqual([]);
     const manquantes = [...icones].filter((id) => id && !existsSync(path.join(process.cwd(), `public/images/jeu/sorts/${id}.png`)));
     expect(manquantes).toEqual([]);
@@ -107,5 +114,28 @@ describe("sorts produits (content/sorts-jeu.json)", () => {
     expect(boule.rangs[0]).toMatchObject({ rang: 1, niveau: 1 });
     expect(boule.rangs.at(-1)!.description).toContain("425 à 541");
     expect(feu.sorts.some((s) => s.nom === "Éclair de givrefeu")).toBe(true);
+  });
+
+  it("liste les familles de bêtes du chasseur et leurs techniques", () => {
+    const f = donnees.familiers.chasseur;
+    expect(f.mode).toBe("partage");
+    expect(f.familles.length).toBeGreaterThanOrEqual(15);
+    const loup = f.familles.find((x) => x.nom === "Loup")!;
+    expect(loup.techniques).toEqual(expect.arrayContaining(["Morsure", "Hurlement furieux"]));
+    const hurlement = f.techniques.find((t) => t.nom === "Hurlement furieux")!;
+    expect(hurlement.familles).toEqual(["Loup"]);
+    // Les techniques communes viennent du dressage ; les sorts internes et les talents du chasseur n'y figurent pas.
+    const noms = f.techniques.map((t) => t.nom);
+    expect(f.techniques.find((t) => t.nom === "Grondement")!.familles).toBeNull();
+    expect(noms).not.toContain("Intimidation");
+    expect(noms.some((n) => /^Attaque (rapide|lente)/.test(n))).toBe(false);
+  });
+
+  it("donne ses sorts à chaque démon du démoniste", () => {
+    const f = donnees.familiers.demoniste;
+    expect(f.mode).toBe("groupe");
+    expect(f.familles.map((x) => x.nom)).toEqual(expect.arrayContaining(["Diablotin", "Marcheur du Vide", "Chasseur corrompu"]));
+    for (const d of f.familles) expect(d.techniques.length).toBeGreaterThanOrEqual(3);
+    expect(f.techniques.find((t) => t.nom === "Verrou magique")!.familles).toEqual(["Chasseur corrompu"]);
   });
 });

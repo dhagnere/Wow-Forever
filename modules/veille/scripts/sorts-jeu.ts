@@ -9,7 +9,7 @@ import { lancer } from "./_lanceur";
 /**
  * Sorts et talents de chaque classe, par spécialisation, lus dans les fichiers du jeu (wago.tools, WoW Forever).
  *   npm run sorts:jeu
- * Écrit content/sorts-jeu.json (lu par les pages de classe) et les icônes public/images/jeu/sorts/<fichier>.png (64 × 64).
+ * Écrit content/sorts-jeu.json (lu par les pages de classe, familiers du chasseur et du démoniste compris) et les icônes public/images/jeu/sorts/<fichier>.png (64 × 64).
  * Une icône déjà présente n'est pas retéléchargée. Noms, textes et icônes : © Blizzard Entertainment.
  */
 
@@ -35,11 +35,14 @@ lancer("sorts:jeu", async () => {
       talents += s.talents.length;
     }
   }
+  for (const [classe, f] of Object.entries(bilan.familiers)) {
+    console.log(`familiers du ${classe} : ${f.familles.length} familles, ${f.techniques.length} techniques`);
+  }
   if (sorts < 200 || talents < 200) throw new Error(`Lecture incomplète (${sorts} sorts, ${talents} talents) : fichier non remplacé.`);
 
   await writeFile(
     path.join(process.cwd(), "content/sorts-jeu.json"),
-    JSON.stringify({ version, genere: new Date().toISOString().slice(0, 10), classes: bilan.classes }),
+    JSON.stringify({ version, genere: new Date().toISOString().slice(0, 10), classes: bilan.classes, familiers: bilan.familiers }),
   );
   console.log(`${sorts} sorts, ${talents} talents ; ${bilan.incompletes} descriptions avec une valeur propre au personnage (« X »).`);
 

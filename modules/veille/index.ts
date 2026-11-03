@@ -77,4 +77,4 @@ export type { OuTrouver, SourceMonstre, SourceDecor, SourceMarchand, SourceQuete
 export { ouTrouver, RANGS, sourceDesDonnees } from "./objets/butin";
 
 // Sorts et talents des classes (fichiers du jeu, npm run sorts:jeu → content/sorts-jeu.json).
-export type { Specialisation, Sort, Talent, RangSort } from "./sorts/conversion";
+export type { Specialisation, Sort, Talent, RangSort, Familiers, FamilleFamilier, TechniqueFamilier } from "./sorts/conversion";

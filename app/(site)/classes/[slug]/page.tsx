@@ -9,8 +9,9 @@ import { IconeRace } from "@/components/IconeRace";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { dateLongue } from "@/lib/site";
 import { ECRAN_CLASSE, fondBandeau } from "@/lib/ecrans";
-import { sortsDeClasse } from "@/lib/sorts";
+import { familiersDeClasse, sortsDeClasse } from "@/lib/sorts";
 import { SortsClasse } from "@/components/SortsClasse";
+import { FamiliersClasse } from "@/components/FamiliersClasse";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,7 @@ export default async function PageClasse({ params }: Props) {
   if (!c) notFound();
   const pilier = `classes/${c.slug}`;
   const sorts = sortsDeClasse(c.slug);
+  const familiers = familiersDeClasse(c.slug);
 
   return (
     <>
@@ -96,6 +98,8 @@ export default async function PageClasse({ params }: Props) {
             </section>
 
             {sorts ? <SortsClasse nomClasse={c.nom} version={sorts.version} specialisations={sorts.specialisations} /> : null}
+
+            {familiers ? <FamiliersClasse classe={c.nom} familiers={familiers} /> : null}
 
             <section aria-labelledby="t-equip">
               <h2 id="t-equip" className="section-titre" style={{ fontSize: 26 }}>Équipement conseillé</h2>

@@ -17,7 +17,7 @@ const n = (v: string | undefined) => (Number.isFinite(Number(v)) ? Number(v) : 0
 export const TABLES_SORTS = [
   "SkillLineAbility", "SpellName", "Spell", "SpellLevels", "SpellMisc", "SpellEffect", "SpellDuration", "SpellCastTimes",
   "SpellRange", "SpellRadius", "SpellCooldowns", "SpellPower", "SpellAuraOptions", "SpellTargetRestrictions",
-  "SpellDescriptionVariables", "SpellXDescriptionVariables", "TalentTab", "Talent",
+  "SpellDescriptionVariables", "SpellXDescriptionVariables", "TalentTab", "Talent", "CreatureFamily",
 ] as const;
 export type TablesSorts = Record<(typeof TABLES_SORTS)[number], string>;
 
@@ -78,8 +78,31 @@ export interface Specialisation {
   talents: Talent[];
 }
 
+/** Technique de familier, avec les familles qui peuvent l'apprendre (null : toutes). */
+export interface TechniqueFamilier extends Sort {
+  familles: string[] | null;
+}
+
+export interface FamilleFamilier {
+  nom: string;
+  icone: number;
+  techniques: string[];
+}
+
+export interface Familiers {
+  /** « partage » : techniques communes à plusieurs familles (chasseur) ; « groupe » : propres à chaque démon (démoniste). */
+  mode: "partage" | "groupe";
+  familles: FamilleFamilier[];
+  techniques: TechniqueFamilier[];
+}
+
+/** Lignes du jeu : techniques apprises par le dressage du chasseur, et techniques communes à toutes les bêtes. */
+const DRESSAGE = 261;
+const COMMUNES_BETES = 270;
+
 export interface BilanSorts {
   classes: Record<string, Specialisation[]>;
+  familiers: Record<string, Familiers>;
   icones: number[];
   incompletes: number;
 }
@@ -195,74 +218,91 @@ export function convertirSorts(csv: TablesSorts): BilanSorts {
     talentsParArbre.get(arbre)!.push(t);
     for (let k = 0; k < 9; k++) if (n(t[`SpellRank_${k}`])) sortsDeTalent.add(n(t[`SpellRank_${k}`]));
   }
+  const nomsDeTalent = new Set([...sortsDeTalent].map((id) => noms.get(id)).filter((x): x is string => !!x));
   const arbres = new Map(lire(csv.TalentTab).map((l) => [n(l.ID), l]));
   const capacites = lire(csv.SkillLineAbility);
 
   const icones = new Set<number>();
   const classes: BilanSorts["classes"] = {};
 
-  for (const [slug, classe] of Object.entries(SPECIALISATIONS)) {
-    classes[slug] = classe.specs.map((spec) => {
-      // Sorts de la ligne de compétence, rangs regroupés par nom.
-      const groupes = new Map<string, { nom: string; talent: boolean; ids: number[] }>();
-      for (const c of capacites) {
-        if (n(c.SkillLine) !== spec.ligne) continue;
-        const masque = n(c.ClassMask);
-        if (masque && !(masque & classe.masque)) continue;
-        if (n(c.AcquireMethod) === 3) continue;
-        const id = n(c.Spell);
-        const nom = noms.get(id);
-        const m = divers.get(id);
-        const nv = niveaux.get(id);
-        if (!nom || !m || !nv || n(nv.SpellLevel) <= 0) continue;
-        if (n(m.Attributes_0) & (PASSIF | CACHE)) continue;
-        const talent = sortsDeTalent.has(id);
-        // Sans masque de classe, seul un sort au niveau d'apprentissage renseigné est un vrai sort (Innervation).
-        if (!talent && (declenches.has(id) || (!masque && n(nv.BaseLevel) <= 0))) continue;
-        // Effet secondaire d'un talent (« Transi », retour de mana…) : portée « partout », jamais lancé par le joueur.
-        if (!talent && (portees.get(n(m.RangeIndex)) ?? 0) >= 1000) continue;
-        // « Piège d'immolation » et « Piège d'Immolation » : même sort, la casse varie d'un rang à l'autre.
+  /** Sorts d'une ou plusieurs lignes de compétence, rangs regroupés par nom. masqueClasse 0 : familiers (aucun masque). */
+  const sortsDeLignes = (lignes: Set<number>, masqueClasse: number, exclus: Set<string> = new Set(), familier = false): Sort[] => {
+    const groupes = new Map<string, { nom: string; talent: boolean; ids: number[] }>();
+    for (const c of capacites) {
+      if (!lignes.has(n(c.SkillLine))) continue;
+      const masque = n(c.ClassMask);
+      if (masque && masqueClasse && !(masque & masqueClasse)) continue;
+      if (n(c.AcquireMethod) === 3) continue;
+      const id = n(c.Spell);
+      const nom = noms.get(id);
+      const m = divers.get(id);
+      const nv = niveaux.get(id);
+      if (!nom || !m || !nv || n(nv.SpellLevel) <= 0 || exclus.has(nom)) continue;
+      // Les techniques passives des familiers (résistances, armure naturelle) s'apprennent : on les garde.
+      if (n(m.Attributes_0) & (familier ? CACHE : PASSIF | CACHE)) continue;
+      const talent = sortsDeTalent.has(id);
+      // Familiers : les techniques du familier sont « déclenchées » par le dressage du chasseur, ce qui ne les écarte pas ;
+      // un talent du maître (Intimidation) n'est pas une technique du familier.
+      if (familier) {
+        if (talent || nomsDeTalent.has(nom)) continue;
         const cle = nom.toLocaleLowerCase("fr");
         const g = groupes.get(cle) ?? { nom, talent: false, ids: [] };
-        g.talent ||= talent;
         g.ids.push(id);
         groupes.set(cle, g);
+        continue;
       }
+      // Sans masque de classe, seul un sort au niveau d'apprentissage renseigné est un vrai sort (Innervation).
+      if (!talent && (declenches.has(id) || (!masque && n(nv.BaseLevel) <= 0))) continue;
+      // Effet secondaire d'un talent (« Transi », retour de mana…) : portée « partout », jamais lancé par le joueur.
+      if (!talent && (portees.get(n(m.RangeIndex)) ?? 0) >= 1000) continue;
+      // « Piège d'immolation » et « Piège d'Immolation » : même sort, la casse varie d'un rang à l'autre.
+      const cle = nom.toLocaleLowerCase("fr");
+      const g = groupes.get(cle) ?? { nom, talent: false, ids: [] };
+      g.talent ||= talent;
+      g.ids.push(id);
+      groupes.set(cle, g);
+    }
+    const sorts: Sort[] = [];
+    for (const { nom, ...g } of groupes.values()) {
+      const rangs = [...new Set(g.ids)].map((id) => {
+        const sousTitre = textes.get(id)?.NameSubtext_lang ?? "";
+        const r = /(\d+)/.exec(sousTitre);
+        const niveau = Math.max(n(niveaux.get(id)?.SpellLevel), niveauTalent.get(id) ?? 0);
+        return { id, rang: r ? Number(r[1]) : null, niveau, cout: texteCout(couts.get(id)), description: description(id) };
+      }).sort((a, b) => a.niveau - b.niveau || (a.rang ?? 0) - (b.rang ?? 0) || a.id - b.id);
+      // Un même rang en double (deux versions du sort) : on garde celle qui a une description.
+      const parRang = new Map<string, (typeof rangs)[number]>();
+      for (const r of rangs) {
+        const cle = `${r.rang ?? "-"}`;
+        const deja = parRang.get(cle);
+        if (!deja || (!deja.description && r.description)) parRang.set(cle, r);
+      }
+      const uniques = rangs.filter((r) => parRang.get(`${r.rang ?? "-"}`) === r);
+      const dernier = uniques[uniques.length - 1];
+      const m = divers.get(dernier.id)!;
+      const icone = n(m.SpellIconFileDataID);
+      if (icone) icones.add(icone);
+      const ms = incantations.get(n(m.CastingTimeIndex)) ?? 0;
+      const canalise = (n(m.Attributes_1) & CANALISE) !== 0;
+      const rc = recharges.get(dernier.id);
+      const recharge = Math.max(n(rc?.RecoveryTime), n(rc?.CategoryRecoveryTime));
+      const portee = portees.get(n(m.RangeIndex)) ?? 0;
+      sorts.push({
+        nom, icone, talent: g.talent,
+        incantation: n(m.Attributes_0) & PASSIF ? "Passif" : canalise ? "Canalisé" : ms > 0 ? `Incantation ${dureeFr(ms)}` : "Instantané",
+        recharge: recharge >= 1500 ? `Recharge ${dureeFr(recharge)}` : null,
+        // 50 000 m : valeur interne du jeu pour « sans limite », sans intérêt pour le joueur.
+        portee: portee >= 1000 ? null : portee > 5 ? `Portée ${nombreFr(portee)} m` : portee > 0 ? "Corps à corps" : null,
+        rangs: uniques,
+      });
+    }
+    sorts.sort((a, b) => a.rangs[0].niveau - b.rangs[0].niveau || a.nom.localeCompare(b.nom, "fr"));
+    return sorts;
+  };
 
-      const sorts: Sort[] = [];
-      for (const { nom, ...g } of groupes.values()) {
-        const rangs = [...new Set(g.ids)].map((id) => {
-          const sousTitre = textes.get(id)?.NameSubtext_lang ?? "";
-          const r = /(\d+)/.exec(sousTitre);
-          const niveau = Math.max(n(niveaux.get(id)?.SpellLevel), niveauTalent.get(id) ?? 0);
-          return { id, rang: r ? Number(r[1]) : null, niveau, cout: texteCout(couts.get(id)), description: description(id) };
-        }).sort((a, b) => a.niveau - b.niveau || (a.rang ?? 0) - (b.rang ?? 0) || a.id - b.id);
-        // Un même rang en double (deux versions du sort) : on garde la première.
-        const vus = new Set<string>();
-        const uniques = rangs.filter((r) => {
-          const cle = `${r.rang ?? "-"}`;
-          if (vus.has(cle)) return false;
-          vus.add(cle);
-          return true;
-        });
-        const dernier = uniques[uniques.length - 1];
-        const m = divers.get(dernier.id)!;
-        const icone = n(m.SpellIconFileDataID);
-        if (icone) icones.add(icone);
-        const ms = incantations.get(n(m.CastingTimeIndex)) ?? 0;
-        const canalise = (n(m.Attributes_1) & CANALISE) !== 0;
-        const rc = recharges.get(dernier.id);
-        const recharge = Math.max(n(rc?.RecoveryTime), n(rc?.CategoryRecoveryTime));
-        const portee = portees.get(n(m.RangeIndex)) ?? 0;
-        sorts.push({
-          nom, icone, talent: g.talent,
-          incantation: canalise ? "Canalisé" : ms > 0 ? `Incantation ${dureeFr(ms)}` : "Instantané",
-          recharge: recharge >= 1500 ? `Recharge ${dureeFr(recharge)}` : null,
-          portee: portee > 5 ? `Portée ${nombreFr(portee)} m` : portee > 0 ? "Corps à corps" : null,
-          rangs: uniques,
-        });
-      }
-      sorts.sort((a, b) => a.rangs[0].niveau - b.rangs[0].niveau || a.nom.localeCompare(b.nom, "fr"));
+  for (const [slug, classe] of Object.entries(SPECIALISATIONS)) {
+    classes[slug] = classe.specs.map((spec) => {
+      const sorts = sortsDeLignes(new Set([spec.ligne]), classe.masque);
 
       // Talents de l'arbre.
       const lignes = talentsParArbre.get(spec.arbre) ?? [];
@@ -292,5 +332,51 @@ export function convertirSorts(csv: TablesSorts): BilanSorts {
     });
   }
 
-  return { classes, icones: [...icones].sort((a, b) => a - b), incompletes };
+  // Familiers : bêtes du chasseur (familles apprivoisables) et démons du démoniste.
+  const familles = lire(csv.CreatureFamily).filter((f) => n(f.SkillLine_0) && f.Name_lang && n(f.ID) !== 28);
+  const parLigne = new Map<number, { noms: string[]; icone: number; bete: boolean }>();
+  for (const f of familles) {
+    const ligne = n(f.SkillLine_0);
+    const g = parLigne.get(ligne) ?? { noms: [], icone: n(f.IconFileID), bete: n(f.PetFoodMask) > 0 };
+    if (!g.noms.includes(f.Name_lang)) g.noms.push(f.Name_lang);
+    g.icone ||= n(f.IconFileID);
+    parLigne.set(ligne, g);
+  }
+  const groupe = (bete: boolean) => [...parLigne.entries()]
+    .filter(([, g]) => g.bete === bete)
+    .map(([ligne, g]) => ({ ligne, nom: g.noms.join(" / "), icone: g.icone, sorts: sortsDeLignes(new Set([ligne]), 0, new Set(), true) }))
+    .filter((g) => g.sorts.length)
+    .sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+
+  const betes = groupe(true);
+  const nomsBetes = new Set(betes.flatMap((b) => b.sorts.map((x) => x.nom)));
+  // Techniques communes à toutes les bêtes, puis celles que seul le dressage du chasseur connaît (résistances, armure…).
+  // Seules comptent les techniques que le dressage enseigne : la ligne commune porte aussi des sorts internes (« Attaque rapide IV »).
+  const enseignees = new Set(sortsDeLignes(new Set([DRESSAGE]), 0, new Set(), true).map((t) => t.nom));
+  const toutesBetes = sortsDeLignes(new Set([COMMUNES_BETES]), 0, nomsBetes, true).filter((t) => enseignees.has(t.nom));
+  const dressage = sortsDeLignes(new Set([DRESSAGE]), 0, new Set([...nomsBetes, ...toutesBetes.map((c) => c.nom), "Dressage des bêtes"]), true);
+  const techniquesBetes: TechniqueFamilier[] = [
+    ...sortsDeLignes(new Set(betes.map((b) => b.ligne)), 0, new Set(), true).map((t) => {
+      const ont = betes.filter((b) => b.sorts.some((x) => x.nom === t.nom)).map((b) => b.nom);
+      return { ...t, familles: ont.length === betes.length ? null : ont };
+    }),
+    ...[...toutesBetes, ...dressage].map((t) => ({ ...t, familles: null })),
+  ].sort((a, b) => a.rangs[0].niveau - b.rangs[0].niveau || a.nom.localeCompare(b.nom, "fr"));
+
+  const demons = groupe(false);
+  const familiers: BilanSorts["familiers"] = {
+    chasseur: {
+      mode: "partage",
+      familles: betes.map((b) => ({ nom: b.nom, icone: b.icone, techniques: b.sorts.map((x) => x.nom) })),
+      techniques: techniquesBetes,
+    },
+    demoniste: {
+      mode: "groupe",
+      familles: demons.map((d) => ({ nom: d.nom, icone: d.icone, techniques: d.sorts.map((x) => x.nom) })),
+      techniques: demons.flatMap((d) => d.sorts.map((x) => ({ ...x, familles: [d.nom] }))),
+    },
+  };
+  for (const f of Object.values(familiers)) for (const g of f.familles) if (g.icone) icones.add(g.icone);
+
+  return { classes, familiers, icones: [...icones].sort((a, b) => a - b), incompletes };
 }
