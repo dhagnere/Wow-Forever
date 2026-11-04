@@ -12,7 +12,11 @@ export const metadata: Metadata = {
   // Condition pour apparaître dans Google Discover avec une grande image.
   robots: { index: true, follow: true, "max-image-preview": "large", googleBot: { index: true, follow: true, "max-image-preview": "large" } },
   // Validation Google Search Console (méthode « Balise HTML ») : contenu de l'attribut content, sans guillemets.
-  verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
+  // Bing Webmaster Tools (balise msvalidate.01, doublée par public/BingSiteAuth.xml) ; BING_SITE_VERIFICATION la remplace si besoin.
+  verification: {
+    ...(process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : {}),
+    other: { "msvalidate.01": process.env.BING_SITE_VERIFICATION ?? "D0A5AE7B6D90D5C7E0D4D788612D894F" },
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
