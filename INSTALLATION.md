@@ -58,7 +58,7 @@ scalingo --region osc-fr1 --app wowforever env-set NOM=valeur
 | Service | Variables |
 |---|---|
 | Rédaction par IA | `ANTHROPIC_API_KEY` (fixer un plafond mensuel dans la console Anthropic) |
-| Facebook, Reels | `FACEBOOK_PAGE_ID`, `FACEBOOK_PAGE_TOKEN`, `NEXT_PUBLIC_FACEBOOK_URL` |
+| Facebook, Reels | `FACEBOOK_PAGE_ID`, `FACEBOOK_PAGE_TOKEN` (Page `facebook.com/taverneeternelle`, déjà inscrite dans le site ; `NEXT_PUBLIC_FACEBOOK_URL` seulement si elle change d'adresse) |
 | Instagram | `INSTAGRAM_TOKEN` (facultatif si le jeton de Page suffit) |
 | TikTok | `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` |
 | Lettre et comptes joueurs (Brevo) | `BREVO_API_KEY`, `BREVO_LISTE_ID`, `BREVO_MODELE_DOI`, `BREVO_EXPEDITEUR` (étape 9) |
@@ -190,7 +190,7 @@ Les liens déjà partagés, les favoris et les résultats de Google continuent a
 
 | Service | Où | Quoi |
 |---|---|---|
-| Page Facebook | Paramètres de la Page → *Informations* | Site web : `https://www.taverne-eternelle.fr` |
+| Page Facebook `facebook.com/taverneeternelle` | Paramètres de la Page → *Informations* | Site web : `https://www.taverne-eternelle.fr` |
 | Application Meta | developers.facebook.com → application → *Paramètres* → *Général* | Domaines de l'application : `taverne-eternelle.fr` ; URL de la politique de confidentialité : `https://www.taverne-eternelle.fr/confidentialite/` |
 | Instagram | Profil → *Modifier le profil* | Lien : `https://www.taverne-eternelle.fr` |
 | TikTok | developers.tiktok.com → application → *Login Kit* | Redirect URI : `https://www.taverne-eternelle.fr/reseaux/tiktok/retour/` ; puis relier à nouveau le compte depuis `/admin/reseaux/` |

@@ -5,7 +5,8 @@ export const SITE = {
   signatureArticle: "— Jobwow, au comptoir de la Taverne",
   auteur: "Jobwow",
   url: (process.env.SITE_URL ?? "http://localhost:3000").replace(/\/+$/, ""),
-  facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL ?? "https://www.facebook.com/",
+  /** Page Facebook de la Taverne ; NEXT_PUBLIC_FACEBOOK_URL la remplace si besoin. */
+  facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || "https://www.facebook.com/taverneeternelle",
   /** Conteneur Google Tag Manager. NEXT_PUBLIC_GTM_ID=off le désactive (développement local, par exemple). */
   gtmId: process.env.NEXT_PUBLIC_GTM_ID === "off" ? "" : (process.env.NEXT_PUBLIC_GTM_ID ?? "GTM-KMGBD5FD"),
   /** Discord de la Taverne (lien d'invitation) : sans valeur, les boutons Discord ne s'affichent pas. */
