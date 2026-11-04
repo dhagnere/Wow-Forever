@@ -155,11 +155,89 @@ function LegendeImage({ initiale, nomImage, proposer, auto }: {
   );
 }
 
+/**
+ * Accroche et texte du post Facebook. Pour un brouillon sans texte, une proposition de l'IA (ton de Jobwow, fidèle à l'article)
+ * est demandée d'office ; « Proposer un autre texte » en demande une nouvelle. Rien n'est enregistré sans « Enregistrer ».
+ */
+function TexteFacebook({ accrocheInitiale, texteInitial, proposer, auto }: {
+  accrocheInitiale: string; texteInitial: string; auto: boolean;
+  proposer: (contenu: { titre: string; chapo: string; corps: string }) => Promise<{ accroche?: string; texte?: string; erreur?: string }>;
+}) {
+  const [accroche, setAccroche] = useState(accrocheInitiale);
+  const [texte, setTexte] = useState(texteInitial);
+  const [erreur, setErreur] = useState("");
+  const [enCours, demarrer] = useTransition();
+  const ref = useRef<HTMLInputElement>(null);
+  const demander = () => {
+    setErreur("");
+    demarrer(async () => {
+      const form = ref.current?.form ?? null;
+      const r = await proposer({ titre: champ(form, "titre"), chapo: champ(form, "chapo"), corps: champ(form, "corps") });
+      if (r.accroche && r.texte) { setAccroche(r.accroche); setTexte(r.texte); }
+      else setErreur(r.erreur ?? "Proposition impossible.");
+    });
+  };
+  const demandee = useRef(false);
+  useEffect(() => {
+    if (auto && !accrocheInitiale && !texteInitial && !demandee.current) { demandee.current = true; demander(); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auto]);
+  return (
+    <>
+      <div className="champ">
+        <label htmlFor="accrocheFacebook">Accroche</label>
+        <small>90 caractères maximum, un emoji au plus.</small>
+        <input ref={ref} id="accrocheFacebook" name="accrocheFacebook" type="text" value={accroche} onChange={(e) => setAccroche(e.target.value)} maxLength={90} placeholder={enCours ? "Proposition en cours…" : ""} />
+      </div>
+      <div className="champ">
+        <label htmlFor="texteFacebook">Texte de présentation</label>
+        <small>2 à 3 phrases sympathiques sur l&apos;article, proposées par l&apos;IA : gardez-les ou reprenez-les. Le lien « Lire la suite à la Taverne », la phrase d&apos;appel et les mots-dièse sont ajoutés automatiquement.</small>
+        <textarea id="texteFacebook" name="texteFacebook" value={texte} onChange={(e) => setTexte(e.target.value)} style={{ minHeight: 90 }} />
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <button type="button" className="btn btn-contour btn-petit" onClick={demander} disabled={enCours}>
+            {enCours ? "Proposition…" : accroche || texte ? "Proposer un autre texte" : "Proposer un texte sympa"}
+          </button>
+          {erreur ? <small className="alerte" role="alert" style={{ padding: "2px 8px" }}>{erreur}</small> : null}
+        </div>
+      </div>
+    </>
+  );
+}
+
+/** Image du post Facebook : par défaut l'image de l'article (aperçu du lien), ou une image proposée (post photo). */
+function ImageFacebookProposee({ images, actuelle }: { images: ImageProposeeEditeur[]; actuelle: boolean }) {
+  const [choix, setChoix] = useState("");
+  if (!images.length) return null;
+  return (
+    <div className="champ">
+      <label>Image du post</label>
+      <small>
+        {actuelle ? "Le post utilise l'image ci-dessus." : "Par défaut, le post montre l'image de l'article, en aperçu du lien."} Une image choisie ici en fait un post photo.
+      </small>
+      <div className="images-proposees">
+        <label className={`image-proposee image-aucune${choix === "" ? " image-choisie" : ""}`}>
+          <input type="radio" name="imageFacebookProposee" value="" checked={choix === ""} onChange={() => setChoix("")} />
+          <span><strong>{actuelle ? "Garder l'image actuelle" : "Image de l'article"}</strong><small className="doux">{actuelle ? "post photo" : "aperçu du lien"}</small></span>
+        </label>
+        {images.map((i) => (
+          <label key={i.cle} className={`image-proposee${choix === i.cle ? " image-choisie" : ""}`}>
+            <input type="radio" name="imageFacebookProposee" value={i.cle} checked={choix === i.cle} onChange={() => setChoix(i.cle)} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={i.apercu} alt="" loading="lazy" />
+            <span><strong>{i.nom}</strong><small className="doux">{i.raison}</small></span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function Editeur({
-  action, proposerAvis, proposerLegende, valeurs, rubriques, piliers, publie, avisMinimum, sources, imagesProposees = [],
+  action, proposerAvis, proposerLegende, proposerTexteFacebook, valeurs, rubriques, piliers, publie, avisMinimum, sources, imagesProposees = [],
 }: {
   imagesProposees?: ImageProposeeEditeur[];
   proposerLegende: (contenu: { titre: string; chapo: string; corps: string }, image: string) => Promise<{ legende?: string; erreur?: string }>;
+  proposerTexteFacebook: (contenu: { titre: string; chapo: string; corps: string }) => Promise<{ accroche?: string; texte?: string; erreur?: string }>;
   sources: SourceEditeur[];
   action: (etat: EtatEdition, form: FormData) => Promise<EtatEdition>;
   proposerAvis: (contenu: { titre: string; chapo: string; corps: string }) => Promise<{ avis?: string; erreur?: string }>;
@@ -287,16 +365,7 @@ export function Editeur({
 
       <fieldset className="encadre" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <legend className="surtitre" style={{ padding: "0 6px" }}>Post Facebook</legend>
-        <div className="champ">
-          <label htmlFor="accrocheFacebook">Accroche</label>
-          <small>90 caractères maximum, un emoji au plus.</small>
-          <input id="accrocheFacebook" name="accrocheFacebook" type="text" defaultValue={valeurs.accrocheFacebook} maxLength={90} />
-        </div>
-        <div className="champ">
-          <label htmlFor="texteFacebook">Texte de présentation</label>
-          <small>2 à 3 phrases simples. Le lien « Lire la suite à la Taverne » et les mots-dièse sont ajoutés automatiquement.</small>
-          <textarea id="texteFacebook" name="texteFacebook" defaultValue={valeurs.texteFacebook} style={{ minHeight: 90 }} />
-        </div>
+        <TexteFacebook accrocheInitiale={valeurs.accrocheFacebook} texteInitial={valeurs.texteFacebook} proposer={proposerTexteFacebook} auto={!publie} />
         {valeurs.imageFacebookId ? (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "flex-start" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -306,6 +375,7 @@ export function Editeur({
             </label>
           </div>
         ) : null}
+        <ImageFacebookProposee images={imagesProposees} actuelle={!!valeurs.imageFacebookId} />
         <div className="champ">
           <label htmlFor="imageFacebook">{valeurs.imageFacebookId ? "Remplacer l'image du post" : "Image propre au post (facultatif)"}</label>
           <small>

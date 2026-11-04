@@ -22,6 +22,8 @@ export function verifierPublication(
     sources?: Article["sources"];
     origine?: Article["origine"];
   },
+  /** À la publication : une image d'en-tête est exigée (les articles déjà en ligne restent corrigeables sans). */
+  options: { exigerImage?: boolean } = {},
 ): string[] {
   const erreurs: string[] = [];
   if (a.titre.trim().length < 10) erreurs.push("Le titre est trop court.");
@@ -35,6 +37,8 @@ export function verifierPublication(
   // Droit d'auteur : un article tiré de la veille crédite au moins une des sources dont il reprend l'information.
   if (a.origine === "veille" && a.sources?.length && !sourcesPubliees(a.sources).length)
     erreurs.push("Affichez au moins une source : l'article reprend des informations d'autres sites, il doit les créditer.");
+  if (options.exigerImage && !a.image)
+    erreurs.push("Choisissez une image d'en-tête : une des images proposées (case de déclaration cochée) ou la vôtre.");
   if (a.image && a.image.alt.trim().length < 5)
     erreurs.push("Décrivez l'image d'en-tête en quelques mots (texte alternatif), pour les lecteurs malvoyants et pour Google.");
   return erreurs;

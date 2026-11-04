@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { estPilier, SLUGS_RUBRIQUES, type SlugRubrique } from "@/config/taxonomie";
 import {
   changerStatut, creerBrouillon, definirImage, enregistrerAvisPropose, enregistrerImage, ErreurImage, ErreurPublication, modifier,
-  proposerAvis, proposerLegende, publier,
+  proposerAvis, proposerLegende, proposerTexteFacebook, publier,
   TAILLE_MAX_OCTETS, type Modifications,
   empreinteTraduction, enregistrerTraduction, lireParId, supprimerTraduction, traduireArticle,
   renseignerImage,
@@ -71,6 +71,15 @@ async function traiterImages(id: number, form: FormData, m: Modifications): Prom
     } catch (e) {
       if (e instanceof ErreurImage) erreurs.push(`« ${f.name} » : ${e.message}`);
       else throw e;
+    }
+  }
+  // Image du post Facebook choisie parmi les images proposées (sinon : l'image d'en-tête, en aperçu du lien).
+  const proposeeFacebook = !facebook ? imageProposeeDepuisCle(String(form.get("imageFacebookProposee") ?? "")) : null;
+  if (proposeeFacebook) {
+    if (form.get("droitsImages") !== "on") {
+      erreurs.push(`Image du post « ${proposeeFacebook.nom} » non ajoutée : cochez la case de déclaration des images pour la garder.`);
+    } else {
+      await definirImage(id, "facebook", await enregistrerImage(await readFile(path.join(process.cwd(), "public", proposeeFacebook.fichier))));
     }
   }
   // Image proposée (illustration du jeu déjà sur le site) : même règle qu'un envoi, case de déclaration et réencodage compris.
@@ -172,6 +181,20 @@ export async function proposerAvisPour(
   if (!r.ok) return { erreur: r.raison };
   await enregistrerAvisPropose(id, r.avis);
   return { avis: r.avis };
+}
+
+/** Propose l'accroche et le texte du post Facebook, sans rien enregistrer : Jobwow les garde ou non. */
+export async function proposerTexteFacebookPour(
+  contenu: { titre: string; chapo: string; corps: string },
+): Promise<{ accroche?: string; texte?: string; erreur?: string }> {
+  await exigerAdmin();
+  if (!process.env.ANTHROPIC_API_KEY) return { erreur: "ANTHROPIC_API_KEY n'est pas renseignée : proposition impossible." };
+  const r = await proposerTexteFacebook({
+    titre: String(contenu.titre ?? "").slice(0, 300),
+    chapo: String(contenu.chapo ?? "").slice(0, 1000),
+    corps: String(contenu.corps ?? "").slice(0, 8000),
+  });
+  return r.ok ? { accroche: r.accroche, texte: r.texte } : { erreur: r.raison };
 }
 
 /** Propose une légende pour l'image d'en-tête (image retenue ou proposée), sans rien enregistrer : Jobwow la garde ou non. */

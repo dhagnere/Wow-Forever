@@ -7,7 +7,7 @@ import { exigerAdmin } from "@/lib/admin";
 import { dateLongue } from "@/lib/site";
 import { Editeur } from "./Editeur";
 import type { SourceEditeur } from "./Editeur";
-import { depublier, enregistrer, proposerAvisPour, proposerLegendePour, restaurer, supprimer } from "../actions";
+import { depublier, enregistrer, proposerAvisPour, proposerLegendePour, proposerTexteFacebookPour, restaurer, supprimer } from "../actions";
 import { VersionAnglaise } from "./VersionAnglaise";
 import { proposerImages } from "@/lib/imagesProposees";
 
@@ -44,6 +44,7 @@ export default async function EditerArticle({ params, searchParams }: { params: 
             }}
             proposerAvis={proposerAvisPour.bind(null, a.id)}
             proposerLegende={proposerLegendePour}
+            proposerTexteFacebook={proposerTexteFacebookPour}
             imagesProposees={proposerImages(a).map(({ cle, nom, apercu, alt, credit, raison }) => ({ cle, nom, apercu, alt, credit, raison }))}
             sources={a.sources.map((s): SourceEditeur => {
               const fr = lienFrancais(s.url, s.langue);

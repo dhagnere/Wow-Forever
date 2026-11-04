@@ -140,7 +140,7 @@ export class ErreurPublication extends Error {
 export async function publier(id: number): Promise<Article> {
   const a = await lireParId(id);
   if (!a) throw new Error("Article introuvable.");
-  const erreurs = verifierPublication(a);
+  const erreurs = verifierPublication(a, { exigerImage: true });
   if (erreurs.length) throw new ErreurPublication(erreurs);
   const { rows } = await pool().query<Ligne>(
     "UPDATE articles SET statut='publie', publie_le=COALESCE(publie_le, now()), modifie_le=now() WHERE id=$1 RETURNING *",

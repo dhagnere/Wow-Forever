@@ -43,7 +43,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={logo} alt="" width={120} height={120} />
             <div style={{ display: "flex", fontSize: 50, fontWeight: 700, letterSpacing: 5 }}>
-              LA TAVERNEAZEROTH&nbsp;<span style={{ color: "#e0a23b" }}>FOREVER</span>nbsp;<span style={{ color: "#e0a23b" }}>ÉTERNELLE</span>
+              LA TAVERNE&nbsp;<span style={{ color: "#e0a23b" }}>ÉTERNELLE</span>
             </div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 26, background: "rgba(20, 19, 18,0.82)", border: "2px solid rgba(217,169,74,0.55)", borderRadius: 18, padding: "44px 42px" }}>

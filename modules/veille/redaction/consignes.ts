@@ -17,6 +17,18 @@ Règles :
 - Pas de crochets, pas d'émoji, pas de mots-dièse, pas de titre.`;
 
 /**
+ * Accroche et texte du post Facebook proposés par l'IA, au ton de Jobwow : simple proposition, gardée ou reprise par
+ * Jobwow dans l'éditeur. Le lien vers l'article, la phrase d'appel et les mots-dièse sont ajoutés par texteReseau.
+ */
+export const CONSIGNES_FACEBOOK = `Tu proposes le texte du post Facebook qui accompagne un article de la Taverne Éternelle, site de fans francophone de World of Warcraft: Forever tenu par Jobwow, gnome mage et tavernier.
+
+Règles :
+- accroche : une phrase de 90 caractères au plus, qui donne envie de lire, un émoji au plus.
+- texte : 2 à 3 phrases simples et sympathiques, au ton de Jobwow (chaleureux, complice, une pointe d'humour de joueur), qui donnent envie de cliquer sans tout dévoiler.
+- Uniquement ce que dit l'article : n'invente aucun fait ; Jobwow n'a pas encore joué à ce qui est annoncé.
+- Pas de lien, pas de mot-dièse, pas de crochets, pas d'appel à s'abonner : le site les ajoute lui-même.`;
+
+/**
  * Légende proposée pour l'image d'en-tête : une phrase sympathique, au ton de Jobwow, sur le thème de l'article.
  * Simple proposition, que Jobwow garde, reprend ou efface dans l'éditeur.
  */

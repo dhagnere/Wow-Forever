@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
-import { lirePublie } from "@/modules/veille";
+import { cookies } from "next/headers";
+import { COOKIE_SESSION, jetonValide, lireParSlug } from "@/modules/veille";
 import { trouverRubrique } from "@/config/taxonomie";
 
 // Image d'ouverture fabriquée par le site : titre, rubrique et logo. Aucun visuel tiers.
@@ -7,7 +8,10 @@ import { trouverRubrique } from "@/config/taxonomie";
 const size = { width: 1200, height: 630 };
 
 export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const article = await lirePublie((await params).slug);
+  // Article en ligne pour tous ; brouillon seulement pour l'administration (aperçu du post dans l'éditeur).
+  const lu = await lireParSlug((await params).slug);
+  const visible = lu && lu.statut !== "supprime" && (lu.statut === "publie" || (await jetonValide((await cookies()).get(COOKIE_SESSION)?.value)));
+  const article = visible ? lu : null;
   const titre = article?.titre ?? "La Taverne Éternelle";
   const rubrique = article ? (trouverRubrique(article.rubrique)?.nom ?? "") : "WoW Forever en français";
   const taille = titre.length > 90 ? 50 : titre.length > 60 ? 58 : 66;
@@ -26,12 +30,13 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
         <div style={{ display: "flex", fontSize: taille, fontWeight: 700, lineHeight: 1.12 }}>{titre}</div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", fontSize: 40, fontWeight: 700, letterSpacing: 4 }}>
-            LA TAVERNEAZEROTH&nbsp;<span style={{ color: "#e0a23b" }}>FOREVER</span>nbsp;<span style={{ color: "#e0a23b" }}>ÉTERNELLE</span>
+            LA TAVERNE&nbsp;<span style={{ color: "#e0a23b" }}>ÉTERNELLE</span>
           </div>
-          <div style={{ display: "flex", fontSize: 26, color: "#b8ae99" }}>par Jobwow</div>
+          <div style={{ display: "flex", fontSize: 26, color: "#b8ae99", whiteSpace: "nowrap" }}>par Jobwow</div>
         </div>
       </div>
     ),
-    { ...size, headers: { "Cache-Control": "public, max-age=3600, s-maxage=86400" } },
+    // Un brouillon ne se met jamais en cache public.
+    { ...size, headers: { "Cache-Control": article && article.statut !== "publie" ? "private, no-store" : "public, max-age=3600, s-maxage=86400" } },
   );
 }

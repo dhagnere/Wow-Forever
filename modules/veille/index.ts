@@ -38,7 +38,7 @@ export { urlAutorisationTiktok, connecterTiktok, urlRetourTiktok } from "./resea
 export { lireJeton, supprimerJeton } from "./reseaux/jetons";
 export { compteInstagram } from "./reseaux/instagram";
 export { definirImage, enregistrerAvisPropose, renseignerImage } from "./articles/depot";
-export { proposerAvis, proposerLegende, nettoyerLegende } from "./redaction/redacteur";
+export { proposerAvis, proposerLegende, nettoyerLegende, proposerTexteFacebook, nettoyerTexteFacebook } from "./redaction/redacteur";
 // Version anglaise des articles.
 export { lirePublieEn, listerPubliesEn, compterPubliesEn, compterParRubriqueEn, listerTraduitsPourPlan, rechercherPubliesEn } from "./articles/depot";
 export { lireTraduction, enregistrerTraduction, supprimerTraduction, empreinte as empreinteTraduction } from "./traduction/depot";
