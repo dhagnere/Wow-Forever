@@ -158,22 +158,14 @@ Modes de publication :
 
 Variables : `BREVO_API_KEY`, `BREVO_LISTE_ID`, `BREVO_MODELE_DOI`, `BREVO_EXPEDITEUR` ; pour l'édition anglaise, `BREVO_LISTE_ID_EN` et `BREVO_MODELE_DOI_EN`.
 
-1. Authentifier le domaine `taverne-eternelle.fr` dans Brevo (`INSTALLATION.md`, étape 9) et créer l'expéditeur `contact@taverne-eternelle.fr`.
-2. *Contacts* → *Listes* → créer la liste « Lettre de la Taverne ». Son numéro donne `BREVO_LISTE_ID`.
-3. *Campagnes* → *Modèles* → créer un modèle de confirmation à partir du modèle *Double opt-in* de Brevo :
-   - objet : « Confirmez votre inscription à la Lettre de la Taverne » ;
-   - bouton : « Je confirme ».
-
-   Son numéro donne `BREVO_MODELE_DOI`. L'adresse de retour après confirmation est fournie par le site : ne rien saisir.
-4. *SMTP et API* → *Clés API* → créer une clé, à copier dans `BREVO_API_KEY`.
-5. `BREVO_EXPEDITEUR=contact@taverne-eternelle.fr`.
-6. **Édition anglaise** (`/en/newsletter/`) :
-   - créer une seconde liste, « Tavern newsletter (English) », dont le numéro donne `BREVO_LISTE_ID_EN` ;
-   - créer un second modèle de double confirmation, en anglais (objet « Confirm your subscription to the Tavern's newsletter », bouton « Confirm »), dont le numéro donne `BREVO_MODELE_DOI_EN` ;
-   - chaque dimanche, envoyer à cette liste la version anglaise de la Lettre : dupliquer la campagne française, puis la traduire.
-
-   Tant que ces deux variables sont vides, les inscrits de la page anglaise rejoignent la liste française, et la page l'annonce. Une désinscription depuis le compte joueur retire l'adresse des deux listes.
-7. Vérifier par une inscription test sur `/lettre/` et sur `/en/newsletter/`, puis par un « mot de passe oublié » sur `/compte/oubli/`.
+La procédure complète, étape par étape, est dans [`BREVO.md`](BREVO.md) :
+- domaine authentifié chez Gandi ;
+- expéditeur ;
+- listes française et anglaise ;
+- modèles de confirmation ;
+- clé d'API et adresses IP de Scalingo à autoriser ;
+- essais ;
+- Lettre du dimanche.
 
 ### 2.5 Rédaction par l'IA (Anthropic)
 

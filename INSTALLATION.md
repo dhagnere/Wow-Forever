@@ -172,17 +172,15 @@ Les liens déjà partagés, les favoris et les résultats de Google continuent a
 
 ## Étape 9 — Messagerie et envois Brevo (Gandi et Brevo)
 
-1. **Adresse de contact** `contact@taverne-eternelle.fr` : créer la boîte, ou une redirection vers votre messagerie, chez Gandi (*Boîtes e-mail* du domaine) ou chez le fournisseur de votre choix. Les enregistrements **MX** et le **SPF** (TXT) correspondants s'ajoutent dans la zone Gandi.
-2. **Authentifier le domaine dans Brevo**, pour que la Lettre et les messages « mot de passe oublié » n'arrivent pas en indésirables :
-   - Brevo → *Expéditeurs, domaines et IP dédiées* → *Domaines* → ajouter `taverne-eternelle.fr` ;
-   - Brevo fournit trois sortes d'enregistrements : code de vérification Brevo (TXT), DKIM et DMARC ;
-   - les copier un par un dans la zone Gandi (onglet *Enregistrements DNS*), tels quels ;
-   - revenir dans Brevo et cliquer sur *Authentifier*.
-3. Créer l'expéditeur `contact@taverne-eternelle.fr` dans Brevo, puis le saisir dans Scalingo :
-   ```bash
-   scalingo --region osc-fr1 --app wowforever env-set BREVO_EXPEDITEUR=contact@taverne-eternelle.fr
-   ```
-4. Rien à changer dans le modèle de double validation de la Lettre : l'adresse de retour (`/lettre/merci/`) est envoyée par le site à partir de `SITE_URL`.
+Suivre [`BREVO.md`](BREVO.md), étapes 1 à 9 :
+- l'adresse `contact@taverne-eternelle.fr` ;
+- l'authentification du domaine chez Gandi ;
+- l'expéditeur ;
+- les listes et les modèles de confirmation ;
+- la clé d'API, avec les adresses IP de Scalingo à autoriser ;
+- les variables Scalingo et les essais.
+
+Rien à changer dans les modèles quand l'adresse du site change : la page d'arrivée après confirmation est envoyée par le site à partir de `SITE_URL`.
 
 ---
 

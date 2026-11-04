@@ -52,6 +52,8 @@ Le site est publié à l'adresse **https://www.taverne-eternelle.fr** (applicati
 
 Page Facebook (textes, images de profil et de couverture) et connecteurs du site (Facebook, Instagram, TikTok, Brevo, Anthropic, Discord) : [`RESEAUX.md`](RESEAUX.md).
 
+Lettre, confirmations d'inscription et messages « mot de passe oublié » (Brevo), pas à pas : [`BREVO.md`](BREVO.md).
+
 ### Tâches planifiées (`cron.json`)
 
 | Tâche | Horaire | Remarque |
