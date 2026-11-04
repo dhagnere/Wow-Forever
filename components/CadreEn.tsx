@@ -24,6 +24,10 @@ function Entete() {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
             <span className="sr-only">My account</span>
           </Link>
+          <Link href="/en/search/" aria-label="Search the articles">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+            <span className="sr-only">Search</span>
+          </Link>
           <a href={SITE.facebook} rel="noopener noreferrer" aria-label="Facebook page of La Taverne Éternelle">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 3h-2a4 4 0 0 0-4 4v3H7v4h2v7h4v-7h3l1-4h-4V7a1 1 0 0 1 1-1h2z" /></svg>
           </a>
@@ -62,6 +66,9 @@ function Pied() {
             <Link href="/en/calendar/">Calendar</Link>
             <Link href="/en/community/">Community</Link>
             <Link href="/en/contact/">Contact</Link>
+            <Link href="/en/about/">Who is Jobwow?</Link>
+            <Link href="/en/support/">Support the Tavern</Link>
+            <Link href="/en/sitemap/">Site map</Link>
           </nav>
         </div>
         <div className="wrap pied-bas">

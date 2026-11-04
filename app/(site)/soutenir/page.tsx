@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { SITE } from "@/lib/site";
 import { fondBandeau } from "@/lib/ecrans";
@@ -7,7 +8,7 @@ import { fondBandeau } from "@/lib/ecrans";
 export const metadata: Metadata = {
   title: "Soutenir la Taverne",
   description: "La Taverne Éternelle est gratuite et sans publicité envahissante. Un don ponctuel ou mensuel paie l'hébergement et le temps passé.",
-  alternates: { canonical: "/soutenir/" },
+  alternates: { canonical: "/soutenir/", languages: languesDe("/soutenir/") },
 };
 
 const FINANCE: [string, string][] = [

@@ -434,3 +434,17 @@ export async function listerTraduitsPourPlan(): Promise<{ slug: string; modifieL
   );
   return rows.map((r) => ({ slug: r.slug, modifieLe: r.modifie_le }));
 }
+
+/** Recherche dans les articles traduits, sur le texte anglais (titre, chapô, corps, étiquettes). */
+export async function rechercherPubliesEn(requete: string, limite = 30): Promise<Article[]> {
+  const mots = requete.trim().split(/\s+/).filter((m) => m.length >= 2).slice(0, 6);
+  if (!mots.length) return [];
+  // Chaque mot doit apparaître ; les caractères spéciaux de LIKE sont neutralisés.
+  const motifs = mots.map((m) => `%${m.replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
+  const conditions = motifs.map((_, i) => `(e.titre ILIKE $${i + 1} OR e.chapo ILIKE $${i + 1} OR e.corps ILIKE $${i + 1} OR array_to_string(e.etiquettes, ' ') ILIKE $${i + 1})`);
+  const { rows } = await pool().query<LigneEn>(
+    `${SELECT_EN} AND ${conditions.join(" AND ")} ORDER BY (e.titre ILIKE $1) DESC, a.publie_le DESC LIMIT ${Math.min(Math.max(limite, 1), 100)}`,
+    motifs,
+  );
+  return rows.map(versArticleEn);
+}

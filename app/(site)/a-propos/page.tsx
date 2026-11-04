@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { SITE } from "@/lib/site";
 import { fondBandeau } from "@/lib/ecrans";
@@ -7,7 +8,7 @@ import { fondBandeau } from "@/lib/ecrans";
 export const metadata: Metadata = {
   title: "Qui est Jobwow ?",
   description: "Jobwow, gnome mage et tavernier de la Taverne Éternelle : qui il est, comment le site est fait, d'où viennent les informations.",
-  alternates: { canonical: "/a-propos/" },
+  alternates: { canonical: "/a-propos/", languages: languesDe("/a-propos/") },
 };
 
 export default function APropos() {

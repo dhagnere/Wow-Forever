@@ -40,7 +40,7 @@ export { compteInstagram } from "./reseaux/instagram";
 export { definirImage, enregistrerAvisPropose, renseignerImage } from "./articles/depot";
 export { proposerAvis, proposerLegende, nettoyerLegende } from "./redaction/redacteur";
 // Version anglaise des articles.
-export { lirePublieEn, listerPubliesEn, compterPubliesEn, compterParRubriqueEn, listerTraduitsPourPlan } from "./articles/depot";
+export { lirePublieEn, listerPubliesEn, compterPubliesEn, compterParRubriqueEn, listerTraduitsPourPlan, rechercherPubliesEn } from "./articles/depot";
 export { lireTraduction, enregistrerTraduction, supprimerTraduction, empreinte as empreinteTraduction } from "./traduction/depot";
 export type { Traduction } from "./traduction/depot";
 export { traduireArticle } from "./traduction/traducteur";

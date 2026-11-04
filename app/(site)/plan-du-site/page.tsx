@@ -3,10 +3,11 @@ import Link from "next/link";
 import { RUBRIQUES } from "@/config/taxonomie";
 import { CLASSES } from "@/content/classes";
 import { ZONES, DONJONS } from "@/content/monde";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { fondBandeau } from "@/lib/ecrans";
 
-export const metadata: Metadata = { title: "Plan du site", alternates: { canonical: "/plan-du-site/" } };
+export const metadata: Metadata = { title: "Plan du site", alternates: { canonical: "/plan-du-site/", languages: languesDe("/plan-du-site/") } };
 
 export default function PlanDuSite() {
   const blocs: { titre: string; liens: [string, string][] }[] = [

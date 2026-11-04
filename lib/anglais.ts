@@ -128,6 +128,10 @@ const GUIDES: [string, string][] = [
   ["/calendrier/", "/en/calendar/"],
   ["/communaute/", "/en/community/"],
   ["/contact/", "/en/contact/"],
+  ["/soutenir/", "/en/support/"],
+  ["/a-propos/", "/en/about/"],
+  ["/plan-du-site/", "/en/sitemap/"],
+  ["/recherche/", "/en/search/"],
 ];
 
 /** Rubriques des articles : slug français → slug, nom et description en anglais (/en/topics/<slug>/). */

@@ -5,7 +5,7 @@ import { RUBRIQUES_EN } from "@/lib/anglais";
 import { LignesArticles } from "./Articles";
 
 /** Répertoire des articles traduits (version anglaise) : rubriques à gauche, liste à droite. */
-export async function RepertoireEn({ actif, articles, total, page, base }: { actif?: string; articles: Article[]; total: number; page: number; base: string }) {
+export async function RepertoireEn({ actif, articles, total, page, base, requete }: { actif?: string; articles: Article[]; total: number; page: number; base: string; requete?: string }) {
   const compteurs = await compterParRubriqueEn();
   const totalSite = Object.values(compteurs).reduce((n, c) => n + c, 0);
   const pages = Math.max(1, Math.ceil(total / 20));
@@ -21,6 +21,11 @@ export async function RepertoireEn({ actif, articles, total, page, base }: { act
         ))}
       </nav>
       <div>
+        <form action="/en/search/" method="get" className="recherche" role="search">
+          <label htmlFor="q-repertoire-en" className="sr-only">Search the articles</label>
+          <input id="q-repertoire-en" name="q" type="search" placeholder="A class, a dungeon, a zone…" defaultValue={requete} />
+          <button type="submit" className="btn btn-or">Search</button>
+        </form>
         <p className="doux" style={{ fontSize: 14, margin: "0 0 10px" }}>{total} article{total === 1 ? "" : "s"}</p>
         <LignesArticles langue="en" articles={articles} vide="No article in this topic yet: articles are translated within an hour of their French publication." />
         {pages > 1 ? (

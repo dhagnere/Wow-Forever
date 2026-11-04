@@ -33,11 +33,15 @@ describe("version anglaise", () => {
   });
 
   it("n'invente pas de page anglaise", () => {
-    expect(cheminAnglais("/soutenir/")).toBeNull();
+    expect(cheminAnglais("/admin/veille/")).toBeNull();
     expect(cheminAnglais("/lettre/")).toBe("/en/newsletter/");
     expect(cheminAnglais("/carnet/")).toBe("/en/notebook/");
     expect(cheminAnglais("/classes/inconnue/")).toBeNull();
-    expect(languesDe("/plan-du-site/")).toBeUndefined();
+    expect(languesDe("/guildes/modifier/abc/")).toBeUndefined();
+    expect(cheminAnglais("/soutenir/")).toBe("/en/support/");
+    expect(cheminAnglais("/a-propos/")).toBe("/en/about/");
+    expect(cheminAnglais("/plan-du-site/")).toBe("/en/sitemap/");
+    expect(cheminAnglais("/recherche/")).toBe("/en/search/");
     expect(cheminAnglais("/calendrier/")).toBe("/en/calendar/");
     expect(cheminAnglais("/communaute/")).toBe("/en/community/");
     expect(cheminAnglais("/contact/")).toBe("/en/contact/");
