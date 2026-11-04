@@ -125,6 +125,9 @@ const GUIDES: [string, string][] = [
   ["/guildes/inscrire/", "/en/guilds/register/"],
   ["/mentions-legales/", "/en/legal-notice/"],
   ["/confidentialite/", "/en/privacy/"],
+  ["/calendrier/", "/en/calendar/"],
+  ["/communaute/", "/en/community/"],
+  ["/contact/", "/en/contact/"],
 ];
 
 /** Rubriques des articles : slug français → slug, nom et description en anglais (/en/topics/<slug>/). */

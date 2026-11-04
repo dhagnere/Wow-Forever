@@ -17,6 +17,19 @@ Règles :
 - Pas de crochets, pas d'émoji, pas de mots-dièse, pas de titre.`;
 
 /**
+ * Légende proposée pour l'image d'en-tête : une phrase sympathique, au ton de Jobwow, sur le thème de l'article.
+ * Simple proposition, que Jobwow garde, reprend ou efface dans l'éditeur.
+ */
+export const CONSIGNES_LEGENDE = `Tu proposes la légende de l'image d'en-tête d'un article de la Taverne Éternelle, site de fans francophone de World of Warcraft: Forever tenu par Jobwow, gnome mage et tavernier. La légende s'affiche sous l'image, avant son crédit.
+
+Règles :
+- Une seule phrase, 60 à 160 caractères, en français.
+- Ton de Jobwow : chaleureux, complice, une pointe d'humour de joueur (files d'attente, loot, wipe, tavernes), jamais moqueur envers qui que ce soit.
+- Elle relie ce que montre l'image (le lieu ou la carte nommés) au sujet de l'article.
+- N'invente aucun fait absent de l'article ; Jobwow n'a pas encore joué à ce qui est annoncé.
+- Pas de crochets, pas de guillemets autour de la phrase, pas de mot-dièse, un émoji au plus.`;
+
+/**
  * Consignes de rédaction. À ajuster après relecture des premiers brouillons si le ton ne convient pas.
  * Les règles de droit d'auteur (article neuf, une seule citation courte, sources créditées) ne doivent pas être assouplies.
  */

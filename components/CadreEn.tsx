@@ -59,7 +59,9 @@ function Pied() {
             <Link href="/en/guilds/">Guild board</Link>
             <Link href="/en/legal-notice/">Legal notice</Link>
             <Link href="/en/privacy/">Privacy policy</Link>
-            <Link href="/contact/" hrefLang="fr">Contact</Link>
+            <Link href="/en/calendar/">Calendar</Link>
+            <Link href="/en/community/">Community</Link>
+            <Link href="/en/contact/">Contact</Link>
           </nav>
         </div>
         <div className="wrap pied-bas">

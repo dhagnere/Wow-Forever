@@ -14,7 +14,7 @@ interface Ligne {
   score: number | null; origine: "veille" | "manuel"; cree_le: Date; modifie_le: Date;
   publie_le: Date | null; facebook_post_id: string | null; facebook_publie_le: Date | null;
   facebook_tentatives: number; facebook_erreur: string | null;
-  image_id: number | null; image_alt: string; image_credit: string; image_facebook_id: number | null;
+  image_id: number | null; image_alt: string; image_credit: string; image_legende: string; image_facebook_id: number | null;
   facebook_reel_id: string | null; facebook_reel_erreur: string | null;
   instagram_media_id: string | null; instagram_erreur: string | null;
   tiktok_publish_id: string | null; tiktok_erreur: string | null;
@@ -26,7 +26,7 @@ function versArticle(l: Ligne): Article {
     rubrique: l.rubrique as SlugRubrique, etiquettes: l.etiquettes, pilier: estPilier(l.pilier) ? l.pilier : null,
     description: l.description, accrocheFacebook: l.accroche_facebook, texteFacebook: l.texte_facebook,
     sources: l.sources,
-    image: l.image_id ? { id: l.image_id, alt: l.image_alt, credit: l.image_credit } : null,
+    image: l.image_id ? { id: l.image_id, alt: l.image_alt, credit: l.image_credit, legende: l.image_legende ?? "" } : null,
     imageFacebookId: l.image_facebook_id,
     facebookReelId: l.facebook_reel_id,
     facebookReelErreur: l.facebook_reel_erreur,
@@ -88,6 +88,8 @@ export async function creerBrouillon(b: NouveauBrouillon, cleSujet?: string): Pr
 export type Modifications = Pick<Article, "titre" | "chapo" | "corps" | "avisSilfax" | "rubrique" | "etiquettes" | "pilier" | "description" | "accrocheFacebook" | "texteFacebook"> & {
   imageAlt: string;
   imageCredit: string;
+  /** Légende affichée sous l'image d'en-tête (facultative). */
+  imageLegende?: string;
   /** Rangs (à partir de 0) des sources à afficher sur le site ; absent : choix inchangé. */
   sourcesAffichees?: number[];
 };
@@ -106,7 +108,7 @@ export async function modifier(id: number, m: Modifications): Promise<Article> {
         ...m,
         sources,
         origine: art.origine,
-        image: art.image_id ? { id: art.image_id, alt: m.imageAlt, credit: m.imageCredit } : null,
+        image: art.image_id ? { id: art.image_id, alt: m.imageAlt, credit: m.imageCredit, legende: m.imageLegende ?? "" } : null,
       });
       if (erreurs.length) throw new ErreurPublication(erreurs);
     }
@@ -115,10 +117,11 @@ export async function modifier(id: number, m: Modifications): Promise<Article> {
     const { rows } = await client.query<Ligne>(
       `UPDATE articles SET slug=$2, titre=$3, chapo=$4, corps=$5, avis_silfax=$6, rubrique=$7, etiquettes=$8,
          pilier=$9, description=$10, accroche_facebook=$11, texte_facebook=$12, image_alt=$13, image_credit=$14,
-         sources=$15, modifie_le=now()
+         sources=$15, image_legende=COALESCE($16, image_legende), modifie_le=now()
        WHERE id=$1 RETURNING *`,
       [id, slug, m.titre, m.chapo, m.corps, m.avisSilfax, m.rubrique, m.etiquettes, m.pilier,
-       m.description, m.accrocheFacebook, m.texteFacebook, m.imageAlt.trim(), m.imageCredit.trim(), JSON.stringify(sources)],
+       m.description, m.accrocheFacebook, m.texteFacebook, m.imageAlt.trim(), m.imageCredit.trim(), JSON.stringify(sources),
+       m.imageLegende === undefined ? null : m.imageLegende.trim().slice(0, 200)],
     );
     // Titre, accroche ou rubrique ont pu changer : la vidéo du Reel sera refabriquée au prochain besoin.
     await oublierVideo(id);
@@ -382,13 +385,17 @@ export async function remplacerSourcesCorrigees(id: number, corrigees: SourceCit
 
 /** Articles en ligne qui ont leur traduction anglaise, champs de texte remplacés par l'anglais. */
 const SELECT_EN = `SELECT a.*, e.titre AS en_titre, e.chapo AS en_chapo, e.corps AS en_corps, e.avis AS en_avis,
-    e.description AS en_description, e.etiquettes AS en_etiquettes
+    e.description AS en_description, e.etiquettes AS en_etiquettes, e.legende AS en_legende
   FROM articles a JOIN articles_en e ON e.article_id = a.id WHERE a.statut = 'publie'`;
 
-type LigneEn = Ligne & { en_titre: string; en_chapo: string; en_corps: string; en_avis: string; en_description: string; en_etiquettes: string[] };
-const versArticleEn = (l: LigneEn): Article => ({
-  ...versArticle(l), titre: l.en_titre, chapo: l.en_chapo, corps: l.en_corps, avisSilfax: l.en_avis, description: l.en_description, etiquettes: l.en_etiquettes,
-});
+type LigneEn = Ligne & { en_titre: string; en_chapo: string; en_corps: string; en_avis: string; en_description: string; en_etiquettes: string[]; en_legende: string };
+const versArticleEn = (l: LigneEn): Article => {
+  const a = versArticle(l);
+  return {
+    ...a, titre: l.en_titre, chapo: l.en_chapo, corps: l.en_corps, avisSilfax: l.en_avis, description: l.en_description, etiquettes: l.en_etiquettes,
+    image: a.image ? { ...a.image, legende: l.en_legende ?? "" } : null,
+  };
+};
 
 /** Article en ligne, en anglais ; null s'il n'est pas (encore) traduit. */
 export async function lirePublieEn(slug: string): Promise<Article | null> {

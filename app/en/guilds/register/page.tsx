@@ -30,7 +30,7 @@ export default function RegisterGuild() {
           <FormulaireGuilde libelles={LIBELLES_GUILDE_EN} langue="en" />
           <p className="doux" style={{ fontSize: 13, marginTop: 20 }}>
             No email address is required. The information entered becomes public once the listing is approved. To delete a listing,{" "}
-            <Link href="/contact/" hrefLang="fr">write to us</Link>.
+            <Link href="/en/contact/">write to us</Link>.
           </p>
         </div>
       </div>

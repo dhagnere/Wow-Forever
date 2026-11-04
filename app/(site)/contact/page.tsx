@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { SITE } from "@/lib/site";
 import { fondBandeau } from "@/lib/ecrans";
 
-export const metadata: Metadata = { title: "Contact", alternates: { canonical: "/contact/" } };
+export const metadata: Metadata = { title: "Contact", alternates: { canonical: "/contact/", languages: languesDe("/contact/") } };
 
 export default function Contact() {
   const sujet = encodeURIComponent("Message pour la Taverne Éternelle");

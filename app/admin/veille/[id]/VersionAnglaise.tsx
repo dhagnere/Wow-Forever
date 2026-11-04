@@ -50,6 +50,7 @@ export async function VersionAnglaise({ a, retour }: { a: Article; retour?: stri
                 <div className="champ"><label htmlFor="en-chapo">Standfirst</label><textarea id="en-chapo" name="chapo" rows={3} defaultValue={t.chapo} /></div>
                 <div className="champ"><label htmlFor="en-corps">Body (Markdown)</label><textarea id="en-corps" name="corps" rows={18} defaultValue={t.corps} /></div>
                 <div className="champ"><label htmlFor="en-avis">Jobwow&apos;s take (translation of the French avis)</label><textarea id="en-avis" name="avis" rows={5} defaultValue={t.avis} /></div>
+                <div className="champ"><label htmlFor="en-legende">Image caption</label><input id="en-legende" name="legende" defaultValue={t.legende} maxLength={200} /></div>
                 <div className="champ"><label htmlFor="en-description">Google description</label><input id="en-description" name="description" defaultValue={t.description} maxLength={170} /></div>
                 <div className="champ"><label htmlFor="en-etiquettes">Tags (comma-separated)</label><input id="en-etiquettes" name="etiquettes" defaultValue={t.etiquettes.join(", ")} /></div>
                 <button type="submit" className="btn btn-or">Enregistrer la version anglaise</button>

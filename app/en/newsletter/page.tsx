@@ -33,7 +33,7 @@ export default function NewsletterEn() {
             <li><strong>Jobwow&apos;s column</strong>: what he saw pass by the bar this week.</li>
             <li><strong>The five news</strong> you should not have missed.</li>
             <li><strong>The tip</strong>: a gameplay trick, tested and explained.</li>
-            <li><strong>The next date</strong> from the <Link href="/calendrier/" hrefLang="fr">calendar</Link>.</li>
+            <li><strong>The next date</strong> from the <Link href="/en/calendar/">calendar</Link>.</li>
           </ul>
           <p className="doux">Free, no ads. A confirmation is sent by email: your sign-up only counts after your click.</p>
           {enFrancais ? <p className="info" role="note">The English edition is being set up: until then, the newsletter and its confirmation email are sent in French.</p> : null}

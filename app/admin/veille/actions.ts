@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { estPilier, SLUGS_RUBRIQUES, type SlugRubrique } from "@/config/taxonomie";
 import {
   changerStatut, creerBrouillon, definirImage, enregistrerAvisPropose, enregistrerImage, ErreurImage, ErreurPublication, modifier,
-  proposerAvis, publier,
+  proposerAvis, proposerLegende, publier,
   TAILLE_MAX_OCTETS, type Modifications,
   empreinteTraduction, enregistrerTraduction, lireParId, supprimerTraduction, traduireArticle,
   renseignerImage,
@@ -37,6 +37,7 @@ function lireFormulaire(form: FormData): Modifications {
     texteFacebook: texte("texteFacebook"),
     imageAlt: texte("imageAlt"),
     imageCredit: texte("imageCredit"),
+    imageLegende: texte("imageLegende"),
     // Le formulaire signale la présence des cases par un champ caché : sans lui, le choix des sources reste inchangé.
     sourcesAffichees: form.has("sourcesPresentes") ? form.getAll("sourceAffichee").map(Number).filter(Number.isInteger) : undefined,
   };
@@ -173,6 +174,21 @@ export async function proposerAvisPour(
   return { avis: r.avis };
 }
 
+/** Propose une légende pour l'image d'en-tête (image retenue ou proposée), sans rien enregistrer : Jobwow la garde ou non. */
+export async function proposerLegendePour(
+  contenu: { titre: string; chapo: string; corps: string },
+  image: string,
+): Promise<{ legende?: string; erreur?: string }> {
+  await exigerAdmin();
+  if (!process.env.ANTHROPIC_API_KEY) return { erreur: "ANTHROPIC_API_KEY n'est pas renseignée : proposition impossible." };
+  const r = await proposerLegende({
+    titre: String(contenu.titre ?? "").slice(0, 300),
+    chapo: String(contenu.chapo ?? "").slice(0, 1000),
+    corps: String(contenu.corps ?? "").slice(0, 6000),
+  }, String(image ?? "").slice(0, 200));
+  return r.ok ? { legende: r.legende } : { erreur: r.raison };
+}
+
 // ---------------------------------------------------------------- Version anglaise
 
 /** Traduit (ou retraduit) l'article en ligne en anglais, tout de suite. La traduction redevient automatique. */
@@ -195,7 +211,7 @@ export async function enregistrerAnglais(id: number, form: FormData): Promise<vo
     redirect(`/admin/veille/${id}/?anglais=${encodeURIComponent("Titre, corps ou avis anglais trop courts : rien n'a été enregistré.")}#anglais`);
   }
   await enregistrerTraduction(id, {
-    titre: texte("titre"), chapo: texte("chapo"), corps: texte("corps"), avis: texte("avis"), description: texte("description"),
+    titre: texte("titre"), chapo: texte("chapo"), corps: texte("corps"), avis: texte("avis"), description: texte("description"), legende: texte("legende"),
     etiquettes: [...new Set(texte("etiquettes").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean))].slice(0, 6),
     empreinte: empreinteTraduction(a),
   }, true);

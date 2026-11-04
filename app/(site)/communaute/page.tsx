@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { SITE } from "@/lib/site";
 import { fondBandeau } from "@/lib/ecrans";
@@ -7,7 +8,7 @@ import { fondBandeau } from "@/lib/ecrans";
 export const metadata: Metadata = {
   title: "Communauté : le Discord et la Page de la Taverne",
   description: "Rejoignez les joueurs francophones de WoW Forever : entraide aux débutants, recrutement de guildes, captures et Hardcore sur le Discord de la Taverne.",
-  alternates: { canonical: "/communaute/" },
+  alternates: { canonical: "/communaute/", languages: languesDe("/communaute/") },
 };
 
 const SALONS: [string, string][] = [

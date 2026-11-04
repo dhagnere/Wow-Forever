@@ -17,4 +17,5 @@ Règles impératives :
 Champs :
 - titre : 140 caractères au plus.
 - description : 120 à 155 caractères pour Google, avec « WoW Forever » si naturel.
-- etiquettes : la traduction des étiquettes, en minuscules, dans le même ordre.`;
+- etiquettes : la traduction des étiquettes, en minuscules, dans le même ordre.
+- legende : la traduction de la légende de l'image (même ton, 200 caractères au plus) ; vide si la légende fournie est vide.`;

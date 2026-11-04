@@ -99,7 +99,7 @@ export default async function GuildsEn({ searchParams }: { searchParams: Promise
 
         <p className="doux" style={{ fontSize: 13, marginTop: 32, maxWidth: 760 }}>
           Listings are written by the guilds and reviewed by Jobwow before publication. The Tavern guarantees neither their accuracy nor what
-          happens on their Discord servers. A problem with a listing? <Link href="/contact/" hrefLang="fr">Report it</Link>.
+          happens on their Discord servers. A problem with a listing? <Link href="/en/contact/">Report it</Link>.
         </p>
       </div>
     </>

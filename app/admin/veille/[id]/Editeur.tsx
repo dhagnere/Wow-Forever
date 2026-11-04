@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState, useRef, useState, useTransition } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import type { EtatEdition } from "../actions";
 
 interface Valeurs {
   titre: string; chapo: string; corps: string; avisSilfax: string; rubrique: string; etiquettes: string;
   pilier: string; description: string; accrocheFacebook: string; texteFacebook: string;
-  imageId: number | null; imageAlt: string; imageCredit: string; imageFacebookId: number | null;
+  imageId: number | null; imageAlt: string; imageCredit: string; imageLegende: string; imageFacebookId: number | null;
   avisPropose: string;
 }
 
@@ -85,8 +85,7 @@ function PropositionAvis({
 export interface ImageProposeeEditeur { cle: string; nom: string; apercu: string; alt: string; credit: string; raison: string }
 
 /** Images proposées : la première est cochée d'office quand l'article n'a pas encore d'image ; elle n'est ajoutée qu'à l'enregistrement. */
-function ImagesProposees({ images, sansImage }: { images: ImageProposeeEditeur[]; sansImage: boolean }) {
-  const [choix, setChoix] = useState(sansImage ? images[0]?.cle ?? "" : "");
+function ImagesProposees({ images, sansImage, choix, setChoix }: { images: ImageProposeeEditeur[]; sansImage: boolean; choix: string; setChoix: (c: string) => void }) {
   if (!images.length) return null;
   return (
     <div className="champ">
@@ -113,10 +112,54 @@ function ImagesProposees({ images, sansImage }: { images: ImageProposeeEditeur[]
   );
 }
 
+/**
+ * Légende de l'image d'en-tête, affichée sous l'image avant le crédit. Pour un brouillon sans légende, une proposition de l'IA
+ * (ton de Jobwow, sur le thème de l'article) est demandée d'office ; elle reste modifiable, et rien n'est enregistré sans « Enregistrer ».
+ */
+function LegendeImage({ initiale, nomImage, proposer, auto }: {
+  initiale: string; nomImage: string; auto: boolean;
+  proposer: (contenu: { titre: string; chapo: string; corps: string }, image: string) => Promise<{ legende?: string; erreur?: string }>;
+}) {
+  const [legende, setLegende] = useState(initiale);
+  const [erreur, setErreur] = useState("");
+  const [enCours, demarrer] = useTransition();
+  const ref = useRef<HTMLInputElement>(null);
+  const demander = () => {
+    if (!nomImage) return;
+    setErreur("");
+    demarrer(async () => {
+      const form = ref.current?.form ?? null;
+      const r = await proposer({ titre: champ(form, "titre"), chapo: champ(form, "chapo"), corps: champ(form, "corps") }, nomImage);
+      if (r.legende) setLegende(r.legende);
+      else setErreur(r.erreur ?? "Proposition impossible.");
+    });
+  };
+  const demandee = useRef(false);
+  useEffect(() => {
+    if (auto && !initiale && nomImage && !demandee.current) { demandee.current = true; demander(); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auto, nomImage]);
+  return (
+    <div className="champ">
+      <label htmlFor="imageLegende">Légende</label>
+      <small>Affichée sous l&apos;image, avant le crédit. Une phrase sympathique sur le thème de l&apos;article, proposée par l&apos;IA : gardez-la, reprenez-la ou effacez-la.</small>
+      <input ref={ref} id="imageLegende" name="imageLegende" type="text" value={legende} onChange={(e) => setLegende(e.target.value)} maxLength={200} placeholder={enCours ? "Proposition en cours…" : ""} />
+      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+        <button type="button" className="btn btn-contour btn-petit" onClick={demander} disabled={enCours || !nomImage}>
+          {enCours ? "Proposition…" : legende ? "Proposer une autre légende" : "Proposer une légende"}
+        </button>
+        {!nomImage ? <small className="doux">Choisissez d&apos;abord une image.</small> : null}
+        {erreur ? <small className="alerte" role="alert" style={{ padding: "2px 8px" }}>{erreur}</small> : null}
+      </div>
+    </div>
+  );
+}
+
 export function Editeur({
-  action, proposerAvis, valeurs, rubriques, piliers, publie, avisMinimum, sources, imagesProposees = [],
+  action, proposerAvis, proposerLegende, valeurs, rubriques, piliers, publie, avisMinimum, sources, imagesProposees = [],
 }: {
   imagesProposees?: ImageProposeeEditeur[];
+  proposerLegende: (contenu: { titre: string; chapo: string; corps: string }, image: string) => Promise<{ legende?: string; erreur?: string }>;
   sources: SourceEditeur[];
   action: (etat: EtatEdition, form: FormData) => Promise<EtatEdition>;
   proposerAvis: (contenu: { titre: string; chapo: string; corps: string }) => Promise<{ avis?: string; erreur?: string }>;
@@ -128,6 +171,9 @@ export function Editeur({
 }) {
   const [etat, envoyer, enCours] = useActionState(action, { erreurs: [] });
   const avisRef = useRef<HTMLTextAreaElement>(null);
+  const [choixImage, setChoixImage] = useState(valeurs.imageId ? "" : imagesProposees[0]?.cle ?? "");
+  // Image dont parle la légende : l'image proposée cochée, sinon l'image déjà en place (d'après sa description).
+  const nomImage = imagesProposees.find((i) => i.cle === choixImage)?.nom ?? (valeurs.imageId ? valeurs.imageAlt || "image d'en-tête" : "");
   return (
     <form action={envoyer} className="formulaire">
       {etat.erreurs.length ? (
@@ -151,7 +197,7 @@ export function Editeur({
         ) : (
           <small className="doux">Aucune image : le site affiche un visuel généré, et Facebook une image aux couleurs du site.</small>
         )}
-        <ImagesProposees images={imagesProposees} sansImage={!valeurs.imageId} />
+        <ImagesProposees images={imagesProposees} sansImage={!valeurs.imageId} choix={choixImage} setChoix={setChoixImage} />
         <div className="champ">
           <label htmlFor="image">{valeurs.imageId ? "Remplacer par une autre image" : "Ou envoyer une image"}</label>
           <small>JPEG, PNG ou WebP, 8 Mo au maximum, 1200 px de large conseillés. L&apos;image est recadrée automatiquement pour Facebook.</small>
@@ -167,6 +213,7 @@ export function Editeur({
           <small>Affiché sous l&apos;image. Exemple : « Capture de Jobwow · © Blizzard Entertainment ».</small>
           <input id="imageCredit" name="imageCredit" type="text" defaultValue={valeurs.imageCredit} maxLength={160} />
         </div>
+        <LegendeImage initiale={valeurs.imageLegende} nomImage={nomImage} proposer={proposerLegende} auto={!publie} />
       </fieldset>
 
       <div className="champ">

@@ -20,6 +20,9 @@ const dateEn = (d: Date) => new Intl.DateTimeFormat("en-GB", { day: "numeric", m
 /** HTML déjà filtré par markdownVersHtml : seuls les liens internes changent, vers leur page anglaise quand elle existe. */
 const liensAnglais = (html: string) => html.replace(/href="(\/[^"#?]*)/g, (m, chemin: string) => (chemin.startsWith("/en/") ? m : `href="${cheminAnglais(chemin) ?? chemin}`));
 
+/** Crédits courants de la Taverne, en anglais ; un autre crédit reste tel quel. */
+const creditEn = (c: string) => c.replace("Écran de chargement du jeu", "Game loading screen").replace("Carte du jeu", "Game map").replace("Capture de Jobwow", "Screenshot by Jobwow");
+
 const imageOuverture = (a: { image: { id: number } | null; slug: string }) => (a.image ? `${SITE.url}/medias/${a.image.id}/og/` : `${SITE.url}/articles/${a.slug}/image/`);
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -105,7 +108,7 @@ export default async function ArticleEn({ params }: Props) {
             <figure className="image-une">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={`/medias/${a.image.id}/`} alt={a.image.alt} fetchPriority="high" />
-              {a.image.credit ? <figcaption>{a.image.credit}</figcaption> : null}
+              {a.image.legende || a.image.credit ? <figcaption>{[a.image.legende, creditEn(a.image.credit)].filter(Boolean).join(" · ")}</figcaption> : null}
             </figure>
           ) : (
             <IllustrationEcran ecran={ecranArticle(a)} langue="en" />

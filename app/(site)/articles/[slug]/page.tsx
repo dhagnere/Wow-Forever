@@ -93,7 +93,9 @@ export default async function PageArticle({ params }: Props) {
             <figure className="image-une">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={`/medias/${article.image.id}/`} alt={article.image.alt} fetchPriority="high" />
-              {article.image.credit ? <figcaption>{article.image.credit}</figcaption> : null}
+              {article.image.legende || article.image.credit ? (
+                <figcaption>{[article.image.legende, article.image.credit].filter(Boolean).join(" · ")}</figcaption>
+              ) : null}
             </figure>
           ) : (
             <IllustrationEcran ecran={ecranArticle(article)} legende={`Illustration : ${nomEcran(ecranArticle(article))}, écran de chargement du jeu`} />

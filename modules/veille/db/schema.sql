@@ -327,3 +327,7 @@ CREATE TABLE IF NOT EXISTS articles_en (
   traduit_le   TIMESTAMPTZ NOT NULL DEFAULT now(),
   erreur       TEXT
 );
+
+-- Légende de l'image d'en-tête (affichée sous l'image, avant le crédit), et sa traduction anglaise.
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS image_legende TEXT NOT NULL DEFAULT '';
+ALTER TABLE articles_en ADD COLUMN IF NOT EXISTS legende TEXT NOT NULL DEFAULT '';

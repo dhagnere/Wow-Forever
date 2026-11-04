@@ -29,7 +29,7 @@ export interface Article {
   texteFacebook: string;
   sources: SourceCitee[];
   /** Image d'en-tête envoyée par Jobwow (absente : visuel généré par le site). */
-  image: { id: number; alt: string; credit: string } | null;
+  image: { id: number; alt: string; credit: string; /** Légende affichée sous l'image, avant le crédit. */ legende?: string } | null;
   /** Image propre au post Facebook (absente : l'image d'en-tête sert d'aperçu du lien). */
   imageFacebookId: number | null;
   statut: Statut;

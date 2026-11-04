@@ -29,3 +29,18 @@ describe("images proposées pour un brouillon", () => {
     expect(imageProposeeDepuisCle("carte:durotar")?.fichier).toBe("images/jeu/cartes/durotar-1000.jpg");
   });
 });
+
+describe("légende de l'image d'en-tête", () => {
+  it("garde une phrase propre, sans crochets ni guillemets d'encadrement", async () => {
+    const { nettoyerLegende } = await import("@/modules/veille");
+    expect(nettoyerLegende("« Les Mortemines [à vérifier] : Van Cleef range sa cave. »")).toBe("Les Mortemines à vérifier : Van Cleef range sa cave.");
+    expect(nettoyerLegende("x".repeat(400)).length).toBeLessThanOrEqual(160);
+  });
+
+  it("ne change pas l'empreinte des traductions faites avant la légende", async () => {
+    const { empreinteTraduction } = await import("@/modules/veille");
+    const a = { titre: "T", chapo: "C", corps: "Corps", avisSilfax: "Avis", description: "D", etiquettes: [] };
+    expect(empreinteTraduction({ ...a, image: { id: 1, alt: "a", credit: "c", legende: "" } })).toBe(empreinteTraduction(a));
+    expect(empreinteTraduction({ ...a, image: { id: 1, alt: "a", credit: "c", legende: "Une légende" } })).not.toBe(empreinteTraduction(a));
+  });
+});

@@ -7,7 +7,7 @@ import { exigerAdmin } from "@/lib/admin";
 import { dateLongue } from "@/lib/site";
 import { Editeur } from "./Editeur";
 import type { SourceEditeur } from "./Editeur";
-import { depublier, enregistrer, proposerAvisPour, restaurer, supprimer } from "../actions";
+import { depublier, enregistrer, proposerAvisPour, proposerLegendePour, restaurer, supprimer } from "../actions";
 import { VersionAnglaise } from "./VersionAnglaise";
 import { proposerImages } from "@/lib/imagesProposees";
 
@@ -38,11 +38,12 @@ export default async function EditerArticle({ params, searchParams }: { params: 
               titre: a.titre, chapo: a.chapo, corps: a.corps, avisSilfax: a.avisSilfax, rubrique: a.rubrique,
               etiquettes: a.etiquettes.join(", "), pilier: a.pilier ?? "", description: a.description,
               accrocheFacebook: a.accrocheFacebook, texteFacebook: a.texteFacebook,
-              imageId: a.image?.id ?? null, imageAlt: a.image?.alt ?? "", imageCredit: a.image?.credit ?? "",
+              imageId: a.image?.id ?? null, imageAlt: a.image?.alt ?? "", imageCredit: a.image?.credit ?? "", imageLegende: a.image?.legende ?? "",
               imageFacebookId: a.imageFacebookId,
               avisPropose: a.avisPropose,
             }}
             proposerAvis={proposerAvisPour.bind(null, a.id)}
+            proposerLegende={proposerLegendePour}
             imagesProposees={proposerImages(a).map(({ cle, nom, apercu, alt, credit, raison }) => ({ cle, nom, apercu, alt, credit, raison }))}
             sources={a.sources.map((s): SourceEditeur => {
               const fr = lienFrancais(s.url, s.langue);

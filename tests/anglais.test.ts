@@ -37,7 +37,10 @@ describe("version anglaise", () => {
     expect(cheminAnglais("/lettre/")).toBe("/en/newsletter/");
     expect(cheminAnglais("/carnet/")).toBe("/en/notebook/");
     expect(cheminAnglais("/classes/inconnue/")).toBeNull();
-    expect(languesDe("/calendrier/")).toBeUndefined();
+    expect(languesDe("/plan-du-site/")).toBeUndefined();
+    expect(cheminAnglais("/calendrier/")).toBe("/en/calendar/");
+    expect(cheminAnglais("/communaute/")).toBe("/en/community/");
+    expect(cheminAnglais("/contact/")).toBe("/en/contact/");
     expect(cheminAnglais("/guildes/modifier/")).toBeNull();
     expect(cheminAnglais("/guildes/les-gardiens/")).toBe("/en/guilds/les-gardiens/");
     expect(cheminAnglais("/mentions-legales/")).toBe("/en/legal-notice/");
@@ -160,5 +163,19 @@ describe("guildes en anglais", () => {
     expect(cheminMesurable("/en/guilds/edit/abc/")).toBeNull();
     expect(cheminMesurable("/guildes/modifier/abc/")).toBeNull();
     expect(cheminMesurable("/en/guilds/")).toBe("/en/guilds/");
+  });
+});
+
+describe("calendrier en anglais", () => {
+  it("donne un agenda anglais, liens vers les pages anglaises, mêmes dates", async () => {
+    const { fichierAgenda } = await import("@/lib/agenda");
+    const { ECHEANCES } = await import("@/content/calendrier");
+    const ics = fichierAgenda("https://www.taverne-eternelle.fr", new Date("2026-11-03T12:00:00Z"), "en");
+    expect(ics).toContain("SUMMARY:WoW Forever launch — WoW Forever");
+    expect(ics).toContain("URL:https://www.taverne-eternelle.fr/en/guides/getting-started/");
+    expect(ics).toContain("URL:https://www.taverne-eternelle.fr/en/dungeons/#raids");
+    expect(ics).toContain("DTSTART;TZID=Europe/Paris:20261105T000000");
+    for (const e of ECHEANCES) expect(e.en.titre.length, e.id).toBeGreaterThan(3);
+    for (const ligne of ics.split("\r\n")) expect(Buffer.byteLength(ligne)).toBeLessThanOrEqual(75);
   });
 });
