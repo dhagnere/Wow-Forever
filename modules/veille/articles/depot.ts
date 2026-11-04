@@ -163,6 +163,11 @@ export async function definirImage(id: number, emplacement: "une" | "facebook", 
   if (emplacement === "une") await oublierVideo(id);
 }
 
+/** Description et crédit de l'image d'en-tête (image proposée par le site, ajoutée à l'enregistrement). */
+export async function renseignerImage(id: number, alt: string, credit: string): Promise<void> {
+  await pool().query("UPDATE articles SET image_alt = $2, image_credit = $3 WHERE id = $1", [id, alt.trim().slice(0, 200), credit.trim().slice(0, 160)]);
+}
+
 /** Conserve la dernière proposition d'avis de l'IA (n'écrit jamais dans l'avis de Jobwow). */
 export async function enregistrerAvisPropose(id: number, avis: string): Promise<void> {
   await pool().query("UPDATE articles SET avis_propose = $2 WHERE id = $1", [id, avis]);

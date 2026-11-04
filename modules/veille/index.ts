@@ -37,7 +37,7 @@ export { obtenirVideo, lireVideoStockee } from "./reels/stockage";
 export { urlAutorisationTiktok, connecterTiktok, urlRetourTiktok } from "./reseaux/tiktok";
 export { lireJeton, supprimerJeton } from "./reseaux/jetons";
 export { compteInstagram } from "./reseaux/instagram";
-export { definirImage, enregistrerAvisPropose } from "./articles/depot";
+export { definirImage, enregistrerAvisPropose, renseignerImage } from "./articles/depot";
 export { proposerAvis } from "./redaction/redacteur";
 // Version anglaise des articles.
 export { lirePublieEn, listerPubliesEn, compterPubliesEn, compterParRubriqueEn, listerTraduitsPourPlan } from "./articles/depot";

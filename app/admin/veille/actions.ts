@@ -8,8 +8,12 @@ import {
   proposerAvis, publier,
   TAILLE_MAX_OCTETS, type Modifications,
   empreinteTraduction, enregistrerTraduction, lireParId, supprimerTraduction, traduireArticle,
+  renseignerImage,
 } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { imageProposeeDepuisCle } from "@/lib/imagesProposees";
 
 export interface EtatEdition {
   erreurs: string[];
@@ -66,6 +70,18 @@ async function traiterImages(id: number, form: FormData, m: Modifications): Prom
     } catch (e) {
       if (e instanceof ErreurImage) erreurs.push(`« ${f.name} » : ${e.message}`);
       else throw e;
+    }
+  }
+  // Image proposée (illustration du jeu déjà sur le site) : même règle qu'un envoi, case de déclaration et réencodage compris.
+  const proposee = !une ? imageProposeeDepuisCle(String(form.get("imageProposee") ?? "")) : null;
+  if (proposee) {
+    if (form.get("droitsImages") !== "on") {
+      erreurs.push(`Image proposée « ${proposee.nom} » non ajoutée : cochez la case de déclaration des images pour la garder.`);
+    } else {
+      const mediaId = await enregistrerImage(await readFile(path.join(process.cwd(), "public", proposee.fichier)));
+      await definirImage(id, "une", mediaId);
+      await renseignerImage(id, m.imageAlt || proposee.alt, m.imageCredit || proposee.credit);
+      return erreurs;
     }
   }
   if (!une && form.get("retirerImage") === "on") await definirImage(id, "une", null);

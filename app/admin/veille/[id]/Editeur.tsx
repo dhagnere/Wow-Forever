@@ -81,9 +81,42 @@ function PropositionAvis({
   );
 }
 
+/** Image d'en-tête proposée (illustrations du jeu déjà présentes sur le site), calculée côté serveur. */
+export interface ImageProposeeEditeur { cle: string; nom: string; apercu: string; alt: string; credit: string; raison: string }
+
+/** Images proposées : la première est cochée d'office quand l'article n'a pas encore d'image ; elle n'est ajoutée qu'à l'enregistrement. */
+function ImagesProposees({ images, sansImage }: { images: ImageProposeeEditeur[]; sansImage: boolean }) {
+  const [choix, setChoix] = useState(sansImage ? images[0]?.cle ?? "" : "");
+  if (!images.length) return null;
+  return (
+    <div className="champ">
+      <label>{sansImage ? "Images proposées pour cet article" : "Remplacer par une image proposée"}</label>
+      <small>
+        Illustrations du jeu déjà présentes sur le site (écrans de chargement, cartes), choisies d&apos;après les lieux, donjons et classes cités.
+        {sansImage ? " La première est retenue d'office : elle sera ajoutée à l'enregistrement, avec la case de déclaration cochée." : ""}
+      </small>
+      <div className="images-proposees">
+        {images.map((i) => (
+          <label key={i.cle} className={`image-proposee${choix === i.cle ? " image-choisie" : ""}`}>
+            <input type="radio" name="imageProposee" value={i.cle} checked={choix === i.cle} onChange={() => setChoix(i.cle)} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={i.apercu} alt="" loading="lazy" />
+            <span><strong>{i.nom}</strong><small className="doux">{i.raison}</small></span>
+          </label>
+        ))}
+        <label className={`image-proposee image-aucune${choix === "" ? " image-choisie" : ""}`}>
+          <input type="radio" name="imageProposee" value="" checked={choix === ""} onChange={() => setChoix("")} />
+          <span><strong>Aucune</strong><small className="doux">{sansImage ? "visuel généré par le site" : "garder l'image actuelle"}</small></span>
+        </label>
+      </div>
+    </div>
+  );
+}
+
 export function Editeur({
-  action, proposerAvis, valeurs, rubriques, piliers, publie, avisMinimum, sources,
+  action, proposerAvis, valeurs, rubriques, piliers, publie, avisMinimum, sources, imagesProposees = [],
 }: {
+  imagesProposees?: ImageProposeeEditeur[];
   sources: SourceEditeur[];
   action: (etat: EtatEdition, form: FormData) => Promise<EtatEdition>;
   proposerAvis: (contenu: { titre: string; chapo: string; corps: string }) => Promise<{ avis?: string; erreur?: string }>;
@@ -118,14 +151,15 @@ export function Editeur({
         ) : (
           <small className="doux">Aucune image : le site affiche un visuel généré, et Facebook une image aux couleurs du site.</small>
         )}
+        <ImagesProposees images={imagesProposees} sansImage={!valeurs.imageId} />
         <div className="champ">
-          <label htmlFor="image">{valeurs.imageId ? "Remplacer par une autre image" : "Envoyer une image"}</label>
+          <label htmlFor="image">{valeurs.imageId ? "Remplacer par une autre image" : "Ou envoyer une image"}</label>
           <small>JPEG, PNG ou WebP, 8 Mo au maximum, 1200 px de large conseillés. L&apos;image est recadrée automatiquement pour Facebook.</small>
           <input id="image" name="image" type="file" accept={TYPES_IMAGES} />
         </div>
         <div className="champ">
           <label htmlFor="imageAlt">Description de l&apos;image</label>
-          <small>Obligatoire avec une image : ce qu&apos;elle montre, en une phrase (lue aux malvoyants et par Google).</small>
+          <small>Obligatoire avec une image : ce qu&apos;elle montre, en une phrase (lue aux malvoyants et par Google). Vide avec une image proposée : sa description est reprise.</small>
           <input id="imageAlt" name="imageAlt" type="text" defaultValue={valeurs.imageAlt} maxLength={200} />
         </div>
         <div className="champ">
