@@ -72,7 +72,7 @@ export function cheminMesurable(chemin: unknown): string | null {
   if (typeof chemin !== "string" || !chemin.startsWith("/") || chemin.startsWith("//")) return null;
   const propre = chemin.split(/[?#]/)[0].slice(0, 300);
   // /guildes/modifier/… contient le lien secret d'une fiche : jamais mesuré.
-  if (/^\/(admin|reseaux|api|_next|medias)(\/|$)/.test(propre) || propre.startsWith("/guildes/modifier")) return null;
+  if (/^\/(admin|reseaux|api|_next|medias)(\/|$)/.test(propre) || propre.startsWith("/guildes/modifier") || propre.startsWith("/en/guilds/edit")) return null;
   return propre;
 }
 

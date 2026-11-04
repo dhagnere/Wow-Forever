@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { LIBELLES_GUILDE } from "@/components/Guildes";
 import { FormulaireGuilde } from "../FormulaireGuilde";
@@ -8,7 +9,7 @@ import { fondBandeau } from "@/lib/ecrans";
 export const metadata: Metadata = {
   title: "Inscrire ma guilde au tableau",
   description: "Inscription gratuite des guildes francophones de WoW Forever au tableau de la Taverne Éternelle.",
-  alternates: { canonical: "/guildes/inscrire/" },
+  alternates: { canonical: "/guildes/inscrire/", languages: languesDe("/guildes/inscrire/") },
 };
 
 export default function InscrireGuilde() {

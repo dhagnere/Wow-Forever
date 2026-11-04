@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { SITE } from "@/lib/site";
 import { fondBandeau } from "@/lib/ecrans";
 
-export const metadata: Metadata = { title: "Politique de confidentialité", alternates: { canonical: "/confidentialite/" } };
+export const metadata: Metadata = { title: "Politique de confidentialité", alternates: { canonical: "/confidentialite/", languages: languesDe("/confidentialite/") } };
 
 export default function Confidentialite() {
   return (
@@ -41,7 +42,7 @@ export default function Confidentialite() {
         <p>
           Votre adresse électronique sert uniquement à l&apos;envoi de la Lettre. Elle est conservée par notre prestataire Brevo, entreprise française,
           jamais revendue ni prêtée. L&apos;inscription se fait en double validation ; chaque Lettre contient un lien de désinscription en un
-          clic, qui efface votre adresse de la liste.
+          clic, qui efface votre adresse de la liste. Les abonnés de l&apos;édition anglaise sont gardés dans une liste à part, avec les mêmes règles.
         </p>
 
         <h2>Votre compte joueur</h2>
@@ -56,6 +57,12 @@ export default function Confidentialite() {
           qu&apos;à vous reconnaître et à aucune mesure d&apos;audience ; « Me déconnecter » l&apos;efface. Depuis la page « Mon compte », vous changez de mot de
           passe, arrêtez la Lettre ou supprimez votre compte : tout est alors effacé, progression comprise. Une demande de nouveau mot de passe
           passe par un message envoyé par Brevo, avec un lien valable une heure.
+        </p>
+
+        <h2>Tableau des guildes</h2>
+        <p>
+          Les guildes s&apos;inscrivent sans compte ni adresse électronique. Les informations saisies sont publiques une fois la fiche validée.
+          Une empreinte de la connexion, sans l&apos;adresse IP en clair, limite le nombre de fiches déposées par jour.
         </p>
 
         <h2>Contenus intégrés</h2>

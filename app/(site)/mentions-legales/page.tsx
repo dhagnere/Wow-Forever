@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { SITE } from "@/lib/site";
 import { fondBandeau } from "@/lib/ecrans";
 
-export const metadata: Metadata = { title: "Mentions légales", alternates: { canonical: "/mentions-legales/" } };
+export const metadata: Metadata = { title: "Mentions légales", alternates: { canonical: "/mentions-legales/", languages: languesDe("/mentions-legales/") } };
 
 export default function MentionsLegales() {
   return (
@@ -60,6 +61,10 @@ export default function MentionsLegales() {
           <a href="https://github.com/azerothcore/azerothcore-wotlk" rel="noopener noreferrer">AzerothCore</a> pour les noms français (licence GPL v2).
           Elles peuvent différer dans WoW Forever. Les guides de quêtes n&apos;en reprennent que les titres, les noms et les positions ; les objectifs
           sont résumés par la Taverne, sans reprendre les textes du jeu.
+        </p>
+        <p>
+          Les articles en anglais sont traduits des articles français à l&apos;aide d&apos;un modèle d&apos;intelligence artificielle, puis publiés sous la même
+          responsabilité. L&apos;avis de Jobwow y est la traduction fidèle de l&apos;avis français.
         </p>
         <h2>Liens affiliés</h2>
         <p>Certains liens sont signalés comme affiliés : ils peuvent rapporter une commission au site, sans surcoût pour vous.</p>

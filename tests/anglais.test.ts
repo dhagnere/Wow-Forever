@@ -37,7 +37,11 @@ describe("version anglaise", () => {
     expect(cheminAnglais("/lettre/")).toBe("/en/newsletter/");
     expect(cheminAnglais("/carnet/")).toBe("/en/notebook/");
     expect(cheminAnglais("/classes/inconnue/")).toBeNull();
-    expect(languesDe("/guildes/")).toBeUndefined();
+    expect(languesDe("/calendrier/")).toBeUndefined();
+    expect(cheminAnglais("/guildes/modifier/")).toBeNull();
+    expect(cheminAnglais("/guildes/les-gardiens/")).toBe("/en/guilds/les-gardiens/");
+    expect(cheminAnglais("/mentions-legales/")).toBe("/en/legal-notice/");
+    expect(cheminAnglais("/confidentialite/")).toBe("/en/privacy/");
     expect(cheminFrancais("/en/inconnue/")).toBe("/");
     expect(languesDe("/races/")).toEqual({ fr: "/races/", en: "/en/races/", "x-default": "/races/" });
   });
@@ -137,5 +141,24 @@ describe("articles en anglais", () => {
     expect(CONSIGNES_TRADUCTION).toMatch(/ne change ni le sens, ni les faits, ni les chiffres/);
     expect(CONSIGNES_TRADUCTION).toMatch(/unique citation/);
     expect(CONSIGNES_TRADUCTION).toMatch(/N'invente aucune opinion/);
+  });
+});
+
+describe("guildes en anglais", () => {
+  it("traduit les erreurs de la fiche, nom de champ compris", async () => {
+    const { messageEn } = await import("@/lib/messages-en");
+    const { validerFiche } = await import("@/modules/veille");
+    const r = validerFiche({ nom: "", faction: "", serveur: "", typeRoyaume: "", description: "voir https://exemple.fr", discord: "", site: "", contactJeu: "", horaires: "", recrute: "" }, { objectifs: [], classes: [], roles: [] });
+    expect(r.ok).toBe(false);
+    const en = (r as { erreurs: string[] }).erreurs.map(messageEn);
+    for (const m of en) expect(m, m).not.toMatch(/[éèà]|Choisissez|Indiquez/);
+    expect(en).toContain("No link in the “presentation” field: use the Discord and website fields.");
+  });
+
+  it("ne mesure jamais la page anglaise de modification d'une guilde, qui contient un secret", async () => {
+    const { cheminMesurable } = await import("@/modules/veille/statistiques/classement");
+    expect(cheminMesurable("/en/guilds/edit/abc/")).toBeNull();
+    expect(cheminMesurable("/guildes/modifier/abc/")).toBeNull();
+    expect(cheminMesurable("/en/guilds/")).toBe("/en/guilds/");
   });
 });

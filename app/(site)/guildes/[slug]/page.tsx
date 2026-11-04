@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FACTIONS, lireGuilde } from "@/modules/veille";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { CarteGuilde } from "@/components/Guildes";
 
@@ -15,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${g.nom} (${FACTIONS[g.faction]}, ${g.serveur}) — guilde WoW Forever`,
     description: g.description.slice(0, 155),
-    alternates: { canonical: `/guildes/${g.slug}/` },
+    alternates: { canonical: `/guildes/${g.slug}/`, languages: languesDe(`/guildes/${g.slug}/`) },
   };
 }
 

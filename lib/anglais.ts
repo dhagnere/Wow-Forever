@@ -121,6 +121,10 @@ const GUIDES: [string, string][] = [
   ["/races/skyborne/", "/en/races/skyborne/"],
   ["/lettre/", "/en/newsletter/"],
   ["/carnet/", "/en/notebook/"],
+  ["/guildes/", "/en/guilds/"],
+  ["/guildes/inscrire/", "/en/guilds/register/"],
+  ["/mentions-legales/", "/en/legal-notice/"],
+  ["/confidentialite/", "/en/privacy/"],
 ];
 
 /** Rubriques des articles : slug français → slug, nom et description en anglais (/en/topics/<slug>/). */
@@ -165,6 +169,8 @@ export function cheminAnglais(chemin: string): string | null {
   const g = GUIDES.find(([fr]) => fr === c);
   if (g) return g[1];
   if (c === "/actualites/") return "/en/news/";
+  const gu = /^\/guildes\/([a-z0-9-]+)\/$/.exec(c);
+  if (gu && gu[1] !== "modifier") return `/en/guilds/${gu[1]}/`;
   let r = /^\/rubriques\/([a-z-]+)\/$/.exec(c);
   if (r && RUBRIQUES_EN[r[1]]) return `/en/topics/${RUBRIQUES_EN[r[1]].slug}/`;
   r = /^\/articles\/([a-z0-9-]+)\/$/.exec(c);
@@ -199,6 +205,8 @@ export function cheminFrancais(chemin: string): string {
   const g = GUIDES.find(([, en]) => en === c);
   if (g) return g[0];
   if (c === "/en/news/") return "/actualites/";
+  const gu = /^\/en\/guilds\/([a-z0-9-]+)\/$/.exec(c);
+  if (gu && gu[1] !== "edit") return `/guildes/${gu[1]}/`;
   let r = /^\/en\/topics\/([a-z-]+)\/$/.exec(c);
   if (r && rubriqueDepuisEn(r[1])) return `/rubriques/${rubriqueDepuisEn(r[1])}/`;
   r = /^\/en\/articles\/([a-z0-9-]+)\/$/.exec(c);

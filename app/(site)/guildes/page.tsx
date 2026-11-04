@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CLASSES_GUILDE, DUREE_VALIDITE_JOURS, FACTIONS, listerGuildes, OBJECTIFS, TYPES_ROYAUME } from "@/modules/veille";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { CarteGuilde } from "@/components/Guildes";
 import { fondBandeau } from "@/lib/ecrans";
@@ -10,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Tableau des guildes francophones de WoW Forever",
   description: "Les guildes francophones de WoW Forever qui recrutent : Alliance ou Horde, JcE, JcJ, RP ou Hardcore. Inscription gratuite pour les guildes.",
-  alternates: { canonical: "/guildes/" },
+  alternates: { canonical: "/guildes/", languages: languesDe("/guildes/") },
 };
 
 type Params = Record<string, string | string[] | undefined>;

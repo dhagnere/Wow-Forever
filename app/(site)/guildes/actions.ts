@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { confirmerGuilde, deposerGuilde, empreinteDepot, ErreurGuilde, modifierGuilde, validerFiche } from "@/modules/veille";
 import { SITE } from "@/lib/site";
+import { messageEn } from "@/lib/messages-en";
 
 /** saisie : ce que la guilde a tapé, réaffiché après une erreur pour ne rien lui faire ressaisir. */
 export type EtatGuilde = { erreurs: string[]; lien?: string; message?: string; saisie?: Saisie } | null;
@@ -22,7 +23,16 @@ function lire(form: FormData) {
   return validerFiche(champs, { objectifs: form.getAll("objectifs"), classes: form.getAll("classes"), roles: form.getAll("roles") });
 }
 
-export async function inscrireGuilde(_etat: EtatGuilde, form: FormData): Promise<EtatGuilde> {
+/** Formulaire de la version anglaise (/en/guilds/) : messages traduits, lien de modification vers la page anglaise. */
+const anglais = (form: FormData) => form.get("langue") === "en";
+const traduire = (form: FormData, e: EtatGuilde): EtatGuilde =>
+  e && anglais(form) ? { ...e, erreurs: e.erreurs.map(messageEn), message: e.message ? messageEn(e.message) : e.message } : e;
+
+export async function inscrireGuilde(etat: EtatGuilde, form: FormData): Promise<EtatGuilde> {
+  return traduire(form, await inscrire(etat, form));
+}
+
+async function inscrire(_etat: EtatGuilde, form: FormData): Promise<EtatGuilde> {
   // Champ piège invisible : un robot le remplit, un humain non.
   if (String(form.get("site_web") ?? "")) return { erreurs: [], message: "Merci, la fiche est en relecture." };
   if (form.get("charte") !== "oui") return { erreurs: ["Cochez la case : vous représentez la guilde et acceptez les règles du tableau."], saisie: saisie(form) };
@@ -32,14 +42,18 @@ export async function inscrireGuilde(_etat: EtatGuilde, form: FormData): Promise
   const ip = (h.get("x-forwarded-for") ?? "").split(",")[0].trim() || "0.0.0.0";
   try {
     const { jeton } = await deposerGuilde(fiche.valeur, empreinteDepot(ip, h.get("user-agent") ?? ""));
-    return { erreurs: [], lien: `${SITE.url}/guildes/modifier/${jeton}/` };
+    return { erreurs: [], lien: `${SITE.url}${anglais(form) ? "/en/guilds/edit" : "/guildes/modifier"}/${jeton}/` };
   } catch (e) {
     if (e instanceof ErreurGuilde) return { erreurs: [e.message], saisie: saisie(form) };
     throw e;
   }
 }
 
-export async function mettreAJourGuilde(_etat: EtatGuilde, form: FormData): Promise<EtatGuilde> {
+export async function mettreAJourGuilde(etat: EtatGuilde, form: FormData): Promise<EtatGuilde> {
+  return traduire(form, await mettreAJour(etat, form));
+}
+
+async function mettreAJour(_etat: EtatGuilde, form: FormData): Promise<EtatGuilde> {
   const jeton = String(form.get("jeton") ?? "");
   const fiche = lire(form);
   if (!fiche.ok) return { erreurs: fiche.erreurs, saisie: saisie(form) };
@@ -59,5 +73,5 @@ export async function confirmerActivite(form: FormData): Promise<void> {
   } catch (e) {
     if (!(e instanceof ErreurGuilde)) throw e;
   }
-  redirect(`/guildes/modifier/${encodeURIComponent(jeton)}/?confirme=1`);
+  redirect(`${anglais(form) ? "/en/guilds/edit" : "/guildes/modifier"}/${encodeURIComponent(jeton)}/?confirme=1`);
 }

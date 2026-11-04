@@ -56,8 +56,9 @@ function Pied() {
           <nav aria-label="Footer" className="pied-liens">
             {MENU_EN.map((m) => <Link key={m.href} href={m.href}>{m.label}</Link>)}
             <Link href="/en/account/">My account</Link>
-            <Link href="/mentions-legales/" hrefLang="fr">Legal notice (French)</Link>
-            <Link href="/confidentialite/" hrefLang="fr">Privacy policy (French)</Link>
+            <Link href="/en/guilds/">Guild board</Link>
+            <Link href="/en/legal-notice/">Legal notice</Link>
+            <Link href="/en/privacy/">Privacy policy</Link>
             <Link href="/contact/" hrefLang="fr">Contact</Link>
           </nav>
         </div>

@@ -43,6 +43,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       : [{ url: `${SITE.url}/articles/${a.slug}/`, lastModified: a.modifieLe }]);
   // Fiches d'objets : qualité « bonne » et au-delà, pour ne pas noyer le plan sous les objets gris et blancs.
   const objets = (await listerObjetsPourPlan().catch(() => [])).flatMap((o) => avecTraduction(`/base-de-donnees/objets/${o.id}/`));
-  const guildes = (await listerGuildesPourPlan().catch(() => [])).map((g) => ({ url: `${SITE.url}/guildes/${g.slug}/`, lastModified: g.majLe }));
+  const guildes = (await listerGuildesPourPlan().catch(() => [])).flatMap((g) => avecTraduction(`/guildes/${g.slug}/`, { lastModified: g.majLe }));
   return [...fixes, ...articles, ...guildes, ...objets];
 }
