@@ -3,7 +3,7 @@ import "server-only";
 /**
  * Messages transactionnels (réinitialisation du mot de passe) par l'API Brevo.
  *   BREVO_API_KEY        clé d'API (la même que pour la Lettre)
- *   BREVO_EXPEDITEUR     adresse d'expédition validée dans Brevo (par exemple contact@azeroth-forever.fr)
+ *   BREVO_EXPEDITEUR     adresse d'expédition validée dans Brevo (par exemple contact@taverne-eternelle.fr)
  * Sans ces variables, le message n'est pas envoyé et le site le dit. L'adresse du destinataire n'est pas journalisée.
  */
 

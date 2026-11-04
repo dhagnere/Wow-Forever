@@ -32,43 +32,23 @@ Score d'un sujet : poids des sites qui en parlent (un site compte une fois, mêm
 - **Tableau des guildes** : `/guildes/`. Les guildes s'inscrivent sans compte ni adresse électronique ; chaque fiche est relue dans `/admin/guildes/` avant publication. Le responsable reçoit un lien secret pour modifier sa fiche ou confirmer qu'elle est active ; une fiche non confirmée depuis 90 jours n'est plus affichée. Trois dépôts par jour et par connexion au plus.
 - **Soutenir** : `/soutenir/`. Les boutons de don n'apparaissent qu'une fois `NEXT_PUBLIC_DON_PONCTUEL_URL` ou `NEXT_PUBLIC_DON_MENSUEL_URL` renseignées (et `NEXT_PUBLIC_DON_PLATEFORME`, par exemple « Tipeee »). Agent public : obtenir l'autorisation de cumul d'activités avant la première recette.
 
-### Changer de nom de domaine
+## Mise en ligne : Scalingo et Gandi
 
-1. Déclarer `www.taverne-eternelle.fr` dans Scalingo (onglet *Domains*), en domaine principal.
-2. Chez le registraire : `www` en CNAME vers la cible donnée par Scalingo ; l'adresse sans `www` et les `.com` en redirection permanente (301) vers `https://www.taverne-eternelle.fr`.
-3. Changer `SITE_URL` chez Scalingo. Le domaine affiché dans la phrase d'appel des réseaux, les liens Facebook, le plan du site et l'agenda suivent seuls.
+Le site est publié à l'adresse **https://www.taverne-eternelle.fr** (application Scalingo `wowforever`, région Paris `osc-fr1`, domaine chez Gandi). La procédure complète, pas à pas, est dans [`INSTALLATION.md`](INSTALLATION.md) :
 
-## Mise en service sur Scalingo
-
-1. Créer l'application (région Paris) et ajouter l'extension **PostgreSQL**.
-2. Saisir les variables listées dans `.env.example` : `SITE_URL`, `ADMIN_PASSWORD`, `SESSION_SECRET` d'abord ; `ANTHROPIC_API_KEY` et les variables Facebook ensuite.
-3. Relier le dépôt GitHub à l'application. Chaque envoi déclenche un déploiement ; la base est créée ou mise à jour par la commande `postdeploy` du `Procfile`.
-4. Vérifier les sources :
-   ```bash
-   scalingo --app wowforever run npm run veille:sources
-   ```
-   Retirer ou corriger dans `config/sources.ts` les flux en échec.
-5. Voir le classement du jour, sans coût :
-   ```bash
-   scalingo --app wowforever run npm run veille:essai
-   ```
-6. Premier passage complet, puis relecture dans `/admin/veille` :
-   ```bash
-   scalingo --app wowforever run npm run veille:quotidien
-   ```
-   Pour transformer en brouillons les sujets d'une revue déjà faite (par `veille:essai`), sans refaire la collecte : cocher les sujets dans `/admin/veille/revue` et cliquer sur « Rédiger les sujets cochés », ou lancer `npm run veille:revue`.
-7. Créer l'application Meta, obtenir un jeton de Page longue durée avec la permission `pages_manage_posts`, saisir `FACEBOOK_PAGE_ID` et `FACEBOOK_PAGE_TOKEN`. Le relais horaire s'active seul.
-8. Contrôler l'aperçu d'un article avec le Débogueur de partage de Meta.
-9. Google Search Console : ajouter une propriété de type **Préfixe de l'URL** (adresse exacte du site, avec `https://`), choisir la validation **Balise HTML**, copier la valeur de `content="…"` dans la variable `GOOGLE_SITE_VERIFICATION`, attendre le redémarrage de l'application, puis cliquer sur « Valider ». Envoyer ensuite `sitemap.xml` dans la rubrique Sitemaps. La propriété de type **Domaine** n'est possible qu'avec un nom de domaine à vous (validation par un enregistrement DNS), pas avec l'adresse `scalingo.io`.
-10. Bing Webmaster Tools : deux méthodes de validation sont en place, la balise `msvalidate.01` dans l'en-tête de chaque page (`app/layout.tsx`, variable `BING_SITE_VERIFICATION` pour la changer) et le fichier `public/BingSiteAuth.xml` servi à l'adresse `/BingSiteAuth.xml`. Dans Bing, choisir l'une ou l'autre, cliquer sur « Vérifier », puis envoyer `https://www.azeroth-forever.fr/sitemap.xml` dans la rubrique Sitemaps (Bing peut aussi importer la propriété depuis Google Search Console).
-
-10. Base d'objets : premier import, icônes comprises (5 minutes environ), puis la tâche quotidienne suit les nouvelles versions du jeu :
-   ```bash
-   scalingo --app wowforever run npm run base:importer -- --icones
-   ```
-
-11. Lettre de la Taverne (Brevo) : créer une liste, un modèle de confirmation « double opt-in », puis saisir `BREVO_API_KEY`, `BREVO_LISTE_ID` et `BREVO_MODELE_DOI`. Dans les campagnes, activer le suivi Google Analytics de Brevo avec `utm_source=lettre` : les visites venues de la Lettre apparaissent alors dans les statistiques.
-12. Statistiques : saisir `STATS_SEL` (32 caractères aléatoires). Discord : `NEXT_PUBLIC_DISCORD_URL` (lien d'invitation) ; sans lui, les boutons Discord restent masqués.
+1. outils ;
+2. création de l'application ;
+3. variables ;
+4. domaines sur Scalingo ;
+5. enregistrements DNS chez Gandi ;
+6. certificat et HTTPS ;
+7. ancien domaine ;
+8. bascule de `SITE_URL` ;
+9. messagerie et Brevo ;
+10. services reliés (Meta, TikTok…) ;
+11. Google et Bing ;
+12. premier remplissage ;
+13. contrôle final.
 
 ### Tâches planifiées (`cron.json`)
 
