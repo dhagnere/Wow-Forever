@@ -33,9 +33,9 @@ describe("version anglaise", () => {
   });
 
   it("n'invente pas de page anglaise", () => {
-    expect(cheminAnglais("/actualites/")).toBeNull();
+    expect(cheminAnglais("/lettre/")).toBeNull();
     expect(cheminAnglais("/classes/inconnue/")).toBeNull();
-    expect(languesDe("/actualites/")).toBeUndefined();
+    expect(languesDe("/guildes/")).toBeUndefined();
     expect(cheminFrancais("/en/inconnue/")).toBe("/");
     expect(languesDe("/races/")).toEqual({ fr: "/races/", en: "/en/races/", "x-default": "/races/" });
   });
@@ -99,5 +99,41 @@ describe("version anglaise", () => {
     const arbre = [{ id: 1, palier: 0, colonne: 0, rangs: 1, prerequisId: null }, { id: 2, palier: 1, colonne: 0, rangs: 1, prerequisId: null }];
     expect(blocageAjout([arbre], [[0, 0]], 0, 1, { arbre: "Fire", talent: () => "", en: true })).toBe("Requires 5 points in Fire.");
     expect(blocageRetrait([arbre], [[0, 0]], 0, 0, true)).toBe("No point to remove.");
+  });
+});
+
+describe("articles en anglais", () => {
+  it("relie actualités, rubriques et articles à leur page anglaise", async () => {
+    const { cheminAnglais, cheminFrancais, RUBRIQUES_EN } = await import("@/lib/anglais");
+    const { RUBRIQUES } = await import("@/config/taxonomie");
+    expect(cheminAnglais("/actualites/")).toBe("/en/news/");
+    expect(cheminAnglais("/articles/bilan-beta/")).toBe("/en/articles/bilan-beta/");
+    expect(cheminFrancais("/en/articles/bilan-beta/")).toBe("/articles/bilan-beta/");
+    for (const r of RUBRIQUES) {
+      expect(RUBRIQUES_EN[r.slug], r.slug).toBeDefined();
+      expect(cheminFrancais(cheminAnglais(`/rubriques/${r.slug}/`)!)).toBe(`/rubriques/${r.slug}/`);
+    }
+    expect(new Set(Object.values(RUBRIQUES_EN).map((r) => r.slug)).size).toBe(RUBRIQUES.length);
+  });
+
+  it("refait la traduction quand le texte français change, avis compris", async () => {
+    const { empreinteTraduction } = await import("@/modules/veille");
+    const a = { titre: "Titre", chapo: "Chapô", corps: "Corps", avisSilfax: "Avis de Jobwow", description: "Description", etiquettes: ["a"] };
+    expect(empreinteTraduction(a)).toBe(empreinteTraduction({ ...a }));
+    expect(empreinteTraduction({ ...a, avisSilfax: "Autre avis" })).not.toBe(empreinteTraduction(a));
+    expect(empreinteTraduction({ ...a, corps: "Corps corrigé" })).not.toBe(empreinteTraduction(a));
+  });
+
+  it("ne traduit jamais un brouillon : l'avis anglais suit toujours un avis validé par Jobwow", async () => {
+    const { traduireArticle } = await import("@/modules/veille");
+    const brouillon = { id: 1, statut: "brouillon", avisSilfax: "", titre: "t", chapo: "", corps: "", description: "", etiquettes: [] } as never;
+    expect(await traduireArticle(brouillon)).toEqual({ ok: false, raison: "Seuls les articles en ligne sont traduits." });
+  });
+
+  it("garde dans les consignes de traduction la fidélité et la citation unique", async () => {
+    const { CONSIGNES_TRADUCTION } = await import("@/modules/veille/traduction/consignes");
+    expect(CONSIGNES_TRADUCTION).toMatch(/ne change ni le sens, ni les faits, ni les chiffres/);
+    expect(CONSIGNES_TRADUCTION).toMatch(/unique citation/);
+    expect(CONSIGNES_TRADUCTION).toMatch(/N'invente aucune opinion/);
   });
 });

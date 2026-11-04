@@ -7,6 +7,7 @@ import {
   changerStatut, creerBrouillon, definirImage, enregistrerAvisPropose, enregistrerImage, ErreurImage, ErreurPublication, modifier,
   proposerAvis, publier,
   TAILLE_MAX_OCTETS, type Modifications,
+  empreinteTraduction, enregistrerTraduction, lireParId, supprimerTraduction, traduireArticle,
 } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
 
@@ -154,4 +155,40 @@ export async function proposerAvisPour(
   if (!r.ok) return { erreur: r.raison };
   await enregistrerAvisPropose(id, r.avis);
   return { avis: r.avis };
+}
+
+// ---------------------------------------------------------------- Version anglaise
+
+/** Traduit (ou retraduit) l'article en ligne en anglais, tout de suite. La traduction redevient automatique. */
+export async function traduireMaintenant(id: number): Promise<void> {
+  await exigerAdmin();
+  const a = await lireParId(id);
+  if (!a) redirect("/admin/veille/");
+  const r = await traduireArticle(a);
+  revalidatePath(`/en/articles/${a.slug}/`);
+  redirect(`/admin/veille/${id}/?anglais=${r.ok ? "traduit" : encodeURIComponent(r.raison)}#anglais`);
+}
+
+/** Enregistre la version anglaise corrigée à la main : la traduction automatique ne l'écrase plus. */
+export async function enregistrerAnglais(id: number, form: FormData): Promise<void> {
+  await exigerAdmin();
+  const a = await lireParId(id);
+  if (!a) redirect("/admin/veille/");
+  const texte = (nom: string) => String(form.get(nom) ?? "").trim();
+  if (texte("titre").length < 10 || texte("corps").length < 200 || texte("avis").length < 40) {
+    redirect(`/admin/veille/${id}/?anglais=${encodeURIComponent("Titre, corps ou avis anglais trop courts : rien n'a été enregistré.")}#anglais`);
+  }
+  await enregistrerTraduction(id, {
+    titre: texte("titre"), chapo: texte("chapo"), corps: texte("corps"), avis: texte("avis"), description: texte("description"),
+    etiquettes: [...new Set(texte("etiquettes").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean))].slice(0, 6),
+    empreinte: empreinteTraduction(a),
+  }, true);
+  revalidatePath(`/en/articles/${a.slug}/`);
+  redirect(`/admin/veille/${id}/?anglais=enregistre#anglais`);
+}
+
+export async function retirerAnglais(id: number): Promise<void> {
+  await exigerAdmin();
+  await supprimerTraduction(id);
+  redirect(`/admin/veille/${id}/?anglais=retire#anglais`);
 }

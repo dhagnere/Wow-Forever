@@ -10,6 +10,7 @@ import { lieuParNom } from "./cartes";
 /** Menu de la version anglaise. */
 export const MENU_EN: { href: string; label: string }[] = [
   { href: "/en/", label: "Home" },
+  { href: "/en/news/", label: "News" },
   { href: "/en/leveling-guide/", label: "Leveling guide 1-60" },
   { href: "/en/classes/", label: "Classes & talents" },
   { href: "/en/races/", label: "Races" },
@@ -118,6 +119,28 @@ const GUIDES: [string, string][] = [
   ["/races/skyborne/", "/en/races/skyborne/"],
 ];
 
+/** Rubriques des articles : slug français → slug, nom et description en anglais (/en/topics/<slug>/). */
+export const RUBRIQUES_EN: Record<string, { slug: string; nom: string; description: string }> = {
+  actualites: { slug: "news", nom: "News", description: "Announcements, dates, editions: the latest WoW Forever news." },
+  patchs: { slug: "patches", nom: "Patches and hotfixes", description: "Patch notes and hotfixes, explained." },
+  videos: { slug: "videos", nom: "Videos", description: "Trailers and official videos, presented and discussed." },
+  communaute: { slug: "community", nom: "Community", description: "What gets players talking: discoveries, debates, events." },
+  classes: { slug: "classes", nom: "Classes", description: "Roles, talents and gear of the nine classes." },
+  races: { slug: "races", nom: "Races", description: "Playable races, racial traits and race and class combinations." },
+  quetes: { slug: "quests", nom: "Quests", description: "Quest chains, rewards and pitfalls to avoid." },
+  "donjons-raids": { slug: "dungeons-raids", nom: "Dungeons and raids", description: "New dungeons, 10 and 20-player raids, strategies." },
+  zones: { slug: "zones", nom: "Zones", description: "The lands of Azeroth, old and new." },
+  metiers: { slug: "professions", nom: "Professions and economy", description: "Professions, the auction house and good deals." },
+  jcj: { slug: "pvp", nom: "PvP", description: "Battlegrounds and player versus player combat." },
+  lore: { slug: "lore", nom: "Lore and history", description: "The history of Azeroth and its peoples." },
+  carnet: { slug: "jobwows-notebook", nom: "Jobwow's Notebook", description: "From 1 to 60, one week after another." },
+  tests: { slug: "reviews", nom: "Reviews", description: "Jobwow's take on editions, addons and new features." },
+};
+const RUBRIQUES_FR = Object.fromEntries(Object.entries(RUBRIQUES_EN).map(([fr, r]) => [r.slug, fr]));
+export const rubriqueDepuisEn = (s: string): string | undefined => RUBRIQUES_FR[s];
+export const nomRubriqueEn = (fr: string) => RUBRIQUES_EN[fr]?.nom ?? fr;
+export const pageRubriqueEn = (fr: string) => (RUBRIQUES_EN[fr] ? `/en/topics/${RUBRIQUES_EN[fr].slug}/` : "/en/news/");
+
 /** Races des zones de départ (content/reference.ts), en anglais. */
 export const RACES_DEPART_EN: Record<string, string> = {
   Humains: "Humans", "Nains et Gnomes": "Dwarves and Gnomes", "Elfes de la nuit": "Night Elves", "Orcs et Trolls": "Orcs and Trolls",
@@ -137,6 +160,11 @@ export function cheminAnglais(chemin: string): string | null {
   if (c === "/cartes/") return "/en/maps/";
   const g = GUIDES.find(([fr]) => fr === c);
   if (g) return g[1];
+  if (c === "/actualites/") return "/en/news/";
+  let r = /^\/rubriques\/([a-z-]+)\/$/.exec(c);
+  if (r && RUBRIQUES_EN[r[1]]) return `/en/topics/${RUBRIQUES_EN[r[1]].slug}/`;
+  r = /^\/articles\/([a-z0-9-]+)\/$/.exec(c);
+  if (r) return `/en/articles/${r[1]}/`;
   let z = /^\/zones\/([a-z0-9-]+)\/$/.exec(c);
   if (z && ZONES_EN[z[1]]) return `/en/zones/${ZONES_EN[z[1]].slug}/`;
   z = /^\/donjons\/([a-z0-9-]+)\/$/.exec(c);
@@ -166,6 +194,11 @@ export function cheminFrancais(chemin: string): string {
   if (c === "/en/maps/") return "/cartes/";
   const g = GUIDES.find(([, en]) => en === c);
   if (g) return g[0];
+  if (c === "/en/news/") return "/actualites/";
+  let r = /^\/en\/topics\/([a-z-]+)\/$/.exec(c);
+  if (r && rubriqueDepuisEn(r[1])) return `/rubriques/${rubriqueDepuisEn(r[1])}/`;
+  r = /^\/en\/articles\/([a-z0-9-]+)\/$/.exec(c);
+  if (r) return `/articles/${r[1]}/`;
   let z = /^\/en\/zones\/([a-z0-9-]+)\/$/.exec(c);
   if (z && zoneDepuisEn(z[1])) return `/zones/${zoneDepuisEn(z[1])}/`;
   z = /^\/en\/dungeons\/([a-z0-9-]+)\/$/.exec(c);

@@ -32,7 +32,7 @@ Dans les commandes ci-dessous, la région est précisée à chaque fois (`--regi
 3. Relier le dépôt : application → *Deploy* → *Configuration* → GitHub, dépôt `dhagnere/Wow-Forever`, branche à déployer. Activer le déploiement automatique : chaque envoi sur cette branche met le site à jour.
 4. Rien à faire pour la base ni pour les tâches planifiées :
    - le `Procfile` lance `npm run db:migrate` après chaque déploiement (création et mise à jour des tables) ;
-   - `cron.json` déclare les trois tâches (veille du matin, relais Facebook horaire, import des objets chaque nuit).
+   - `cron.json` déclare les quatre tâches (veille du matin, relais des réseaux et traduction anglaise des articles chaque heure, import des objets chaque nuit).
 
 ---
 
@@ -57,7 +57,7 @@ scalingo --region osc-fr1 --app wowforever env-set NOM=valeur
 
 | Service | Variables |
 |---|---|
-| Rédaction par IA | `ANTHROPIC_API_KEY` (fixer un plafond mensuel dans la console Anthropic) |
+| Rédaction et traduction anglaise par IA | `ANTHROPIC_API_KEY` (fixer un plafond mensuel dans la console Anthropic) |
 | Facebook, Reels | `FACEBOOK_PAGE_ID`, `FACEBOOK_PAGE_TOKEN` (Page `facebook.com/taverneeternelle`, déjà inscrite dans le site ; `NEXT_PUBLIC_FACEBOOK_URL` seulement si elle change d'adresse) |
 | Instagram | `INSTAGRAM_TOKEN` (facultatif si le jeton de Page suffit) |
 | TikTok | `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` |

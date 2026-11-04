@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { lirePublie, listerPublies, markdownVersHtml, sourcesPubliees } from "@/modules/veille";
+import { lirePublie, lirePublieEn, listerPublies, markdownVersHtml, sourcesPubliees } from "@/modules/veille";
 import { CarteArticle, nomRubrique } from "@/components/Articles";
 import { Ariane } from "@/components/Ariane";
 import { JsonLd } from "@/components/JsonLd";
@@ -24,10 +24,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = await lirePublie((await params).slug);
   if (!article) return { title: "Article introuvable" };
   const url = `/articles/${article.slug}/`;
+  // Balises hreflang seulement quand la version anglaise existe.
+  const en = (await lirePublieEn(article.slug)) ? `/en/articles/${article.slug}/` : null;
   return {
     title: article.titre,
     description: article.description,
-    alternates: { canonical: url },
+    alternates: { canonical: url, ...(en ? { languages: { fr: url, en, "x-default": url } } : {}) },
     openGraph: {
       type: "article",
       url,

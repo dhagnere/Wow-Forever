@@ -58,6 +58,7 @@ Page Facebook (textes, images de profil et de couverture) et connecteurs du site
 |---|---|---|
 | `veille:quotidien` | `37 5 * * *` | Le planificateur Scalingo tourne en UTC : 6h37 à Paris en hiver, 7h37 en été. |
 | `veille:facebook` | toutes les heures, à la 5e minute | La plage 8h-22h (heure de Paris) est contrôlée par le code, changement d'heure compris. |
+| `veille:traduire` | toutes les heures, à la 25e minute | Traduit en anglais les articles en ligne sans version anglaise à jour (8 par passage). |
 | `base:importer` | `17 4 * * *` | Réimporte la base d'objets seulement si une nouvelle version de Forever est sortie. |
 
 Fixer un plafond mensuel de dépense dans la console Anthropic dès le départ.

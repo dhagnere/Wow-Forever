@@ -54,9 +54,9 @@ const MENU_EN: Entree[] = [
   { href: "/en/", label: "Home", prefixe: [] },
   {
     label: "The Bar",
-    prefixe: [],
+    prefixe: ["/en/news", "/en/topics", "/en/articles"],
     liens: [
-      { href: "/actualites/", label: "News", detail: "Daily news, patches, announcements", fr: true },
+      { href: "/en/news/", label: "News", detail: "Daily news, patches, announcements" },
       { href: "/calendrier/", label: "Calendar", detail: "Launch, raids, Hardcore, summer 2027", fr: true },
       { href: "/lettre/", label: "The Tavern's newsletter", detail: "Every Sunday at 10 am", fr: true },
       { href: "/guildes/", label: "Guild board", detail: "French-speaking guilds recruiting", fr: true },

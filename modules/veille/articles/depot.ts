@@ -372,3 +372,53 @@ export async function remplacerSourcesCorrigees(id: number, corrigees: SourceCit
   });
   await pool().query("UPDATE articles SET sources = $2 WHERE id = $1", [id, JSON.stringify(sources)]);
 }
+
+// ---------------------------------------------------------------- Version anglaise (table articles_en)
+
+/** Articles en ligne qui ont leur traduction anglaise, champs de texte remplacés par l'anglais. */
+const SELECT_EN = `SELECT a.*, e.titre AS en_titre, e.chapo AS en_chapo, e.corps AS en_corps, e.avis AS en_avis,
+    e.description AS en_description, e.etiquettes AS en_etiquettes
+  FROM articles a JOIN articles_en e ON e.article_id = a.id WHERE a.statut = 'publie'`;
+
+type LigneEn = Ligne & { en_titre: string; en_chapo: string; en_corps: string; en_avis: string; en_description: string; en_etiquettes: string[] };
+const versArticleEn = (l: LigneEn): Article => ({
+  ...versArticle(l), titre: l.en_titre, chapo: l.en_chapo, corps: l.en_corps, avisSilfax: l.en_avis, description: l.en_description, etiquettes: l.en_etiquettes,
+});
+
+/** Article en ligne, en anglais ; null s'il n'est pas (encore) traduit. */
+export async function lirePublieEn(slug: string): Promise<Article | null> {
+  const { rows } = await pool().query<LigneEn>(`${SELECT_EN} AND a.slug = $1`, [slug]);
+  return rows[0] ? versArticleEn(rows[0]) : null;
+}
+
+export async function listerPubliesEn(f: FiltrePublies = {}): Promise<Article[]> {
+  const { rows } = await pool().query<LigneEn>(
+    `${SELECT_EN} AND ($1::text IS NULL OR a.rubrique=$1) AND ($2::text IS NULL OR a.pilier=$2) AND ($3::int IS NULL OR a.id<>$3)
+     ORDER BY a.publie_le DESC LIMIT $4 OFFSET $5`,
+    [f.rubrique ?? null, f.pilier ?? null, f.sauf ?? null, f.limite ?? 20, f.decalage ?? 0],
+  );
+  return rows.map(versArticleEn);
+}
+
+export async function compterPubliesEn(rubrique?: string): Promise<number> {
+  const { rows } = await pool().query<{ n: number }>(
+    "SELECT count(*)::int AS n FROM articles a JOIN articles_en e ON e.article_id = a.id WHERE a.statut='publie' AND ($1::text IS NULL OR a.rubrique=$1)",
+    [rubrique ?? null],
+  );
+  return rows[0]?.n ?? 0;
+}
+
+export async function compterParRubriqueEn(): Promise<Record<string, number>> {
+  const { rows } = await pool().query<{ rubrique: string; n: number }>(
+    "SELECT a.rubrique, count(*)::int AS n FROM articles a JOIN articles_en e ON e.article_id = a.id WHERE a.statut='publie' GROUP BY a.rubrique",
+  );
+  return Object.fromEntries(rows.map((r) => [r.rubrique, r.n]));
+}
+
+/** Pour le plan du site : les articles en ligne qui ont leur version anglaise. */
+export async function listerTraduitsPourPlan(): Promise<{ slug: string; modifieLe: Date }[]> {
+  const { rows } = await pool().query<{ slug: string; modifie_le: Date }>(
+    "SELECT a.slug, GREATEST(a.modifie_le, e.traduit_le) AS modifie_le FROM articles a JOIN articles_en e ON e.article_id = a.id WHERE a.statut='publie'",
+  );
+  return rows.map((r) => ({ slug: r.slug, modifieLe: r.modifie_le }));
+}

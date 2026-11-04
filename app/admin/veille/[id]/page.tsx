@@ -8,11 +8,13 @@ import { dateLongue } from "@/lib/site";
 import { Editeur } from "./Editeur";
 import type { SourceEditeur } from "./Editeur";
 import { depublier, enregistrer, proposerAvisPour, restaurer, supprimer } from "../actions";
+import { VersionAnglaise } from "./VersionAnglaise";
 
 export const dynamic = "force-dynamic";
 
-export default async function EditerArticle({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditerArticle({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ anglais?: string }> }) {
   await exigerAdmin();
+  const retourAnglais = (await searchParams).anglais;
   const id = Number((await params).id);
   if (!Number.isInteger(id)) notFound();
   const a = await lireParId(id);
@@ -57,6 +59,7 @@ export default async function EditerArticle({ params }: { params: Promise<{ id: 
             publie={a.statut === "publie"}
             avisMinimum={AVIS_MINIMUM}
           />
+          <VersionAnglaise a={a} retour={retourAnglais} />
         </div>
         <aside className="colonne-laterale">
 

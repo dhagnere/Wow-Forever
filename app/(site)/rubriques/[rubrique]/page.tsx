@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { compterPublies, listerPublies } from "@/modules/veille";
 import { trouverRubrique } from "@/config/taxonomie";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { Repertoire } from "@/components/Repertoire";
 import { pageDemandee } from "@/components/ListePaginee";
@@ -14,7 +15,7 @@ type Props = { params: Promise<{ rubrique: string }>; searchParams: Promise<{ pa
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const r = trouverRubrique((await params).rubrique);
   if (!r) return {};
-  return { title: `${r.nom} — WoW Forever`, description: r.description, alternates: { canonical: `/rubriques/${r.slug}/` } };
+  return { title: `${r.nom} — WoW Forever`, description: r.description, alternates: { canonical: `/rubriques/${r.slug}/`, languages: languesDe(`/rubriques/${r.slug}/`) } };
 }
 
 const PAR_PAGE = 20;

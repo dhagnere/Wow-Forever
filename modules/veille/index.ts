@@ -39,6 +39,11 @@ export { lireJeton, supprimerJeton } from "./reseaux/jetons";
 export { compteInstagram } from "./reseaux/instagram";
 export { definirImage, enregistrerAvisPropose } from "./articles/depot";
 export { proposerAvis } from "./redaction/redacteur";
+// Version anglaise des articles.
+export { lirePublieEn, listerPubliesEn, compterPubliesEn, compterParRubriqueEn, listerTraduitsPourPlan } from "./articles/depot";
+export { lireTraduction, enregistrerTraduction, supprimerTraduction, empreinte as empreinteTraduction } from "./traduction/depot";
+export type { Traduction } from "./traduction/depot";
+export { traduireArticle } from "./traduction/traducteur";
 export { enregistrerImage, lireImage, ErreurImage, TAILLE_MAX_OCTETS, LARGEUR_MIN } from "./medias/images";
 import { config as configVeille } from "./config";
 export const brouillonsParJour = (): number => configVeille.brouillonsParJour();

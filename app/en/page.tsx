@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CLASSES } from "@/content/classes";
+import { listerPubliesEn } from "@/modules/veille";
+import { CarteArticle } from "@/components/Articles";
 import { IconeClasse } from "@/components/IconeClasse";
 import { JsonLd } from "@/components/JsonLd";
 import { ChoixGuideParClasseEn } from "@/components/ChoixGuideEn";
@@ -13,7 +15,10 @@ export const metadata: Metadata = {
   alternates: { canonical: "/en/", languages: { fr: "/", en: "/en/", "x-default": "/" } },
 };
 
-export default function AccueilAnglais() {
+export const dynamic = "force-dynamic";
+
+export default async function AccueilAnglais() {
+  const nouvelles = await listerPubliesEn({ limite: 3 }).catch(() => []);
   return (
     <>
       <JsonLd donnees={{ "@context": "https://schema.org", "@type": "WebSite", name: SITE.nom, url: `${SITE.url}/en/`, inLanguage: "en" }} />
@@ -68,6 +73,14 @@ export default function AccueilAnglais() {
       </section>
 
       <div className="wrap contenu sections">
+        {nouvelles.length ? (
+          <section aria-labelledby="t-une">
+            <h2 id="t-une" className="section-titre">Latest news</h2>
+            <div className="une">{nouvelles.map((a, i) => <CarteArticle key={a.id} article={a} grande={i === 0} langue="en" />)}</div>
+            <p style={{ marginTop: 16 }}><Link href="/en/news/">All WoW Forever news</Link></p>
+          </section>
+        ) : null}
+
         <section aria-labelledby="t-voie" className="centre">
           <h2 id="t-voie" className="section-titre" style={{ fontSize: 34, marginBottom: 8 }}>Choose your path</h2>
           <span className="ornement" aria-hidden="true" />
@@ -91,7 +104,7 @@ export default function AccueilAnglais() {
             leveling guide, classes, talents, races, the <Link href="/en/item-database/">item database</Link>, the{" "}
             <Link href="/en/maps/">world maps</Link>, the <Link href="/en/zones/">new zones</Link>, the <Link href="/en/dungeons/">dungeons</Link>{" "}
             and the <Link href="/en/guides/getting-started/">guides</Link>, with names taken from the English game files. Daily news and articles
-            are in French on the <Link href="/" hrefLang="fr">main site</Link>.
+            are translated from the French edition, usually within an hour of publication.
           </p>
         </section>
       </div>

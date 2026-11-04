@@ -310,3 +310,20 @@ ALTER TABLE objets_categories ADD COLUMN IF NOT EXISTS nom_long_en TEXT NOT NULL
 ALTER TABLE objets_ensembles ADD COLUMN IF NOT EXISTS nom_en TEXT NOT NULL DEFAULT '';
 ALTER TABLE objets_recettes ADD COLUMN IF NOT EXISTS nom_en TEXT NOT NULL DEFAULT '';
 ALTER TABLE objets_recettes ADD COLUMN IF NOT EXISTS metier_en TEXT NOT NULL DEFAULT '';
+
+-- Version anglaise des articles en ligne (/en/articles/<slug>/), traduite par l'IA après publication.
+-- L'avis anglais est la traduction de l'avis de Jobwow (avis_silfax), jamais un texte produit sans lui.
+-- empreinte : condensé des champs français traduits ; s'il change, la traduction est à refaire.
+CREATE TABLE IF NOT EXISTS articles_en (
+  article_id   INTEGER PRIMARY KEY REFERENCES articles(id) ON DELETE CASCADE,
+  titre        TEXT NOT NULL,
+  chapo        TEXT NOT NULL DEFAULT '',
+  corps        TEXT NOT NULL DEFAULT '',
+  avis         TEXT NOT NULL DEFAULT '',
+  description  TEXT NOT NULL DEFAULT '',
+  etiquettes   TEXT[] NOT NULL DEFAULT '{}',
+  empreinte    TEXT NOT NULL,
+  manuel       BOOLEAN NOT NULL DEFAULT false,
+  traduit_le   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  erreur       TEXT
+);

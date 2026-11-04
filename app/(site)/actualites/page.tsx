@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { compterPublies, listerPublies } from "@/modules/veille";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { Repertoire } from "@/components/Repertoire";
 import { pageDemandee } from "@/components/ListePaginee";
@@ -10,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Actualités de WoW Forever",
   description: "Toute l'actualité de World of Warcraft: Forever en français : annonces, patchs, donjons, classes et nouvelles zones.",
-  alternates: { canonical: "/actualites/" },
+  alternates: { canonical: "/actualites/", languages: languesDe("/actualites/") },
 };
 
 const PAR_PAGE = 20;

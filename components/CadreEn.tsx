@@ -50,7 +50,7 @@ function Pied() {
             <p className="logo" style={{ fontSize: 20, margin: 0 }}>
               <NomSite />
             </p>
-            <p>A French fan site about WoW Forever, run by Jobwow. The English section covers the leveling guide, classes, talents and races.</p>
+            <p>A fan site about WoW Forever, run by Jobwow: daily news translated from the French edition, the 1-60 leveling guide, classes, items and maps.</p>
           </div>
           <nav aria-label="Footer" className="pied-liens">
             {MENU_EN.map((m) => <Link key={m.href} href={m.href}>{m.label}</Link>)}
