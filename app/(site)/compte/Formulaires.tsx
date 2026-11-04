@@ -20,7 +20,7 @@ const TXT = {
   en: {
     nouveau: "New password", mdp: "Password", min: `(at least ${MIN} characters)`, confirmez: "Confirm the password", pseudo: "Username",
     courriel: "Email address", piege: "Leave empty",
-    lettre: "I also want to receive the Tavern's Sunday newsletter (in French; optional, one-click unsubscribe).",
+    lettre: "I also want to receive the Tavern's newsletter every Sunday (optional, one-click unsubscribe).",
     creation: "Creating…", creer: "Create my account", usage: ["Your address is used to log in, and to receive the newsletter if you asked for it. Details in the", "privacy policy (in French)"],
     connexion: "Logging in…", connecter: "Log in", oubli: "Forgot your password? (page in French)", compte: "Account", ongletNouveau: "New account", ongletDeja: "I already have an account",
   },

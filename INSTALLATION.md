@@ -61,7 +61,7 @@ scalingo --region osc-fr1 --app wowforever env-set NOM=valeur
 | Facebook, Reels | `FACEBOOK_PAGE_ID`, `FACEBOOK_PAGE_TOKEN` (Page `facebook.com/taverneeternelle`, déjà inscrite dans le site ; `NEXT_PUBLIC_FACEBOOK_URL` seulement si elle change d'adresse) |
 | Instagram | `INSTAGRAM_TOKEN` (facultatif si le jeton de Page suffit) |
 | TikTok | `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` |
-| Lettre et comptes joueurs (Brevo) | `BREVO_API_KEY`, `BREVO_LISTE_ID`, `BREVO_MODELE_DOI`, `BREVO_EXPEDITEUR` (étape 9) |
+| Lettre et comptes joueurs (Brevo) | `BREVO_API_KEY`, `BREVO_LISTE_ID`, `BREVO_MODELE_DOI`, `BREVO_EXPEDITEUR` (étape 9) ; édition anglaise : `BREVO_LISTE_ID_EN`, `BREVO_MODELE_DOI_EN` |
 | Moteurs de recherche | `GOOGLE_SITE_VERIFICATION` (étape 11) ; Bing : rien à saisir, la balise est déjà dans le site |
 | Communauté | `NEXT_PUBLIC_DISCORD_URL`, `NEXT_PUBLIC_CONTACT_EMAIL` (par défaut `contact@taverne-eternelle.fr`) |
 

@@ -18,6 +18,7 @@ function Entete() {
           <NomSite />
         </Link>
         <div className="outils-entete">
+          <Link href="/en/newsletter/" className="btn btn-or btn-petit" data-cta="lettre-entete-en">Get the newsletter</Link>
           <ChoixLangue langue="en" />
           <Link href="/en/account/" aria-label="My account" data-cta="compte-entete">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>

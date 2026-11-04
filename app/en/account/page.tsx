@@ -45,7 +45,7 @@ export default async function CompteEn({ searchParams }: Props) {
               <ul className="liste-lettre">
                 <li><strong>Your progress saved</strong> in the <Link href="/en/leveling-guide/">1-60 leveling guide</Link>, quest by quest, on all your devices.</li>
                 <li><strong>A daily tally</strong>: how many quests you turned in each day.</li>
-                <li><strong>The newsletter</strong> (in French) every Sunday, if you tick the box.</li>
+                <li><strong>The newsletter</strong> every Sunday, if you tick the box.</li>
               </ul>
               <p className="doux">Free, no ads. Your account can be deleted in one click, progress included. The same account works on the French site.</p>
             </div>

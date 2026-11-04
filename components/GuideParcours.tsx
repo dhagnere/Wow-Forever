@@ -84,7 +84,7 @@ const TXT = {
     depart: " · starting zone · quests to be recorded at launch",
     popupTitre: "Keep your progress",
     popup: (t: string) => `With a free account at the Tavern, every quest you tick in “${t}” is saved, day after day, on all your devices. Without an account, your ticks are cleared when you leave the page.`,
-    popupLettre: "The same form can also sign you up for our Sunday newsletter (in French), if you wish.",
+    popupLettre: "The same form can also sign you up for our Sunday newsletter, if you wish.",
     creer: "Create my account", connexion: "Log in", plusTard: "Later", nombre: "en-GB", decimal: ".", dp: ": ", pv: "; ",
   },
 } as const;

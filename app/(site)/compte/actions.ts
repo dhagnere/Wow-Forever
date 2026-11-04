@@ -42,7 +42,7 @@ async function creerCompteJoueur(_e: EtatCompte, d: FormData): Promise<EtatCompt
   // La Lettre demande sa propre confirmation par courriel (double validation Brevo).
   let lettre = "";
   if (v.valeur.lettre) {
-    const r = await inscrire(v.valeur.courriel, SITE.url);
+    const r = await inscrire(v.valeur.courriel, SITE.url, anglais(d) ? "en" : "fr");
     lettre = r.ok ? "lettre" : "lettre-plus-tard";
   }
   const u = new URL(retourSur(d.get("retour"), anglais(d) ? "/en/account/" : "/compte/"), SITE.url);

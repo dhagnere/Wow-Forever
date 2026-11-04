@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listerPublies } from "@/modules/veille";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { SITE, dateLongue } from "@/lib/site";
 
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Le Carnet de Jobwow — de 1 à 60 sur WoW Forever",
   description: "Chaque dimanche à 18h, le récit de la semaine de Jobwow sur WoW Forever : quêtes marquantes, pièges évités, rencontres de la route.",
-  alternates: { canonical: "/carnet/" },
+  alternates: { canonical: "/carnet/", languages: languesDe("/carnet/") },
 };
 
 export default async function Carnet() {

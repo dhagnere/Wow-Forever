@@ -54,11 +54,11 @@ const MENU_EN: Entree[] = [
   { href: "/en/", label: "Home", prefixe: [] },
   {
     label: "The Bar",
-    prefixe: ["/en/news", "/en/topics", "/en/articles"],
+    prefixe: ["/en/news", "/en/topics", "/en/articles", "/en/newsletter"],
     liens: [
       { href: "/en/news/", label: "News", detail: "Daily news, patches, announcements" },
       { href: "/calendrier/", label: "Calendar", detail: "Launch, raids, Hardcore, summer 2027", fr: true },
-      { href: "/lettre/", label: "The Tavern's newsletter", detail: "Every Sunday at 10 am", fr: true },
+      { href: "/en/newsletter/", label: "The Tavern's newsletter", detail: "Every Sunday at 10 am" },
       { href: "/guildes/", label: "Guild board", detail: "French-speaking guilds recruiting", fr: true },
       { href: "/communaute/", label: "Community", detail: "Discord, Facebook page", fr: true },
     ],
@@ -89,7 +89,7 @@ const MENU_EN: Entree[] = [
       { href: "/en/item-database/", label: "Item database", detail: "Every item in the game" },
     ],
   },
-  { href: "/carnet/", label: "Jobwow's notebook", prefixe: ["/carnet"], silfax: true, fr: true },
+  { href: "/en/notebook/", label: "Jobwow's notebook", prefixe: ["/en/notebook"], silfax: true },
 ];
 
 function actif(chemin: string, prefixe: string[], href?: string) {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { FormulaireLettre } from "./FormulaireLettre";
 import { fondBandeau } from "@/lib/ecrans";
@@ -7,7 +8,7 @@ import { fondBandeau } from "@/lib/ecrans";
 export const metadata: Metadata = {
   title: "La Lettre de la Taverne : WoW Forever chaque dimanche",
   description: "Chaque dimanche à 10 h : le billet de Jobwow, les cinq nouvelles de la semaine sur WoW Forever, un tuyau de jeu et la prochaine date à retenir.",
-  alternates: { canonical: "/lettre/" },
+  alternates: { canonical: "/lettre/", languages: languesDe("/lettre/") },
 };
 
 export default function Lettre() {

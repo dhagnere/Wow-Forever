@@ -156,7 +156,7 @@ Modes de publication :
 
 ### 2.4 Brevo : la Lettre et les messages des comptes joueurs
 
-Variables : `BREVO_API_KEY`, `BREVO_LISTE_ID`, `BREVO_MODELE_DOI`, `BREVO_EXPEDITEUR`.
+Variables : `BREVO_API_KEY`, `BREVO_LISTE_ID`, `BREVO_MODELE_DOI`, `BREVO_EXPEDITEUR` ; pour l'édition anglaise, `BREVO_LISTE_ID_EN` et `BREVO_MODELE_DOI_EN`.
 
 1. Authentifier le domaine `taverne-eternelle.fr` dans Brevo (`INSTALLATION.md`, étape 9) et créer l'expéditeur `contact@taverne-eternelle.fr`.
 2. *Contacts* → *Listes* → créer la liste « Lettre de la Taverne ». Son numéro donne `BREVO_LISTE_ID`.
@@ -167,7 +167,13 @@ Variables : `BREVO_API_KEY`, `BREVO_LISTE_ID`, `BREVO_MODELE_DOI`, `BREVO_EXPEDI
    Son numéro donne `BREVO_MODELE_DOI`. L'adresse de retour après confirmation est fournie par le site : ne rien saisir.
 4. *SMTP et API* → *Clés API* → créer une clé, à copier dans `BREVO_API_KEY`.
 5. `BREVO_EXPEDITEUR=contact@taverne-eternelle.fr`.
-6. Vérifier par une inscription test sur `/lettre/`, puis par un « mot de passe oublié » sur `/compte/oubli/`.
+6. **Édition anglaise** (`/en/newsletter/`) :
+   - créer une seconde liste, « Tavern newsletter (English) », dont le numéro donne `BREVO_LISTE_ID_EN` ;
+   - créer un second modèle de double confirmation, en anglais (objet « Confirm your subscription to the Tavern's newsletter », bouton « Confirm »), dont le numéro donne `BREVO_MODELE_DOI_EN` ;
+   - chaque dimanche, envoyer à cette liste la version anglaise de la Lettre : dupliquer la campagne française, puis la traduire.
+
+   Tant que ces deux variables sont vides, les inscrits de la page anglaise rejoignent la liste française, et la page l'annonce. Une désinscription depuis le compte joueur retire l'adresse des deux listes.
+7. Vérifier par une inscription test sur `/lettre/` et sur `/en/newsletter/`, puis par un « mot de passe oublié » sur `/compte/oubli/`.
 
 ### 2.5 Rédaction par l'IA (Anthropic)
 
@@ -202,7 +208,7 @@ Voir `INSTALLATION.md`, étape 11.
 | Facebook et Reels | `FACEBOOK_PAGE_ID`, `FACEBOOK_PAGE_TOKEN` | `/admin/reseaux/` |
 | Instagram | aucune (jeton de Page) | `/admin/reseaux/` |
 | TikTok | `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` (+ `TIKTOK_MODE`) | `/admin/reseaux/`, bouton « Relier » |
-| Lettre et comptes | `BREVO_API_KEY`, `BREVO_LISTE_ID`, `BREVO_MODELE_DOI`, `BREVO_EXPEDITEUR` | inscription test sur `/lettre/` |
+| Lettre et comptes | `BREVO_API_KEY`, `BREVO_LISTE_ID`, `BREVO_MODELE_DOI`, `BREVO_EXPEDITEUR` (+ `BREVO_LISTE_ID_EN`, `BREVO_MODELE_DOI_EN` pour l'édition anglaise) | inscription test sur `/lettre/` et `/en/newsletter/` |
 | Rédaction IA | `ANTHROPIC_API_KEY` | `npm run veille:quotidien` |
 | Discord | `NEXT_PUBLIC_DISCORD_URL` | bouton Discord sur `/communaute/` |
 | Google | `GOOGLE_SITE_VERIFICATION` (ou TXT chez Gandi) | Search Console |

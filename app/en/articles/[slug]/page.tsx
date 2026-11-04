@@ -129,10 +129,10 @@ export default async function ArticleEn({ params }: Props) {
           </p>
 
           <div className="appel-lettre">
-            <p><strong>Enjoyed it?</strong> Share it with your guild, and follow the Tavern on Facebook for every morning&apos;s news.</p>
+            <p><strong>A week of WoW Forever, every Sunday at 10 am.</strong> Jobwow&apos;s column, the five news to remember and a gameplay tip.</p>
             <div className="partage">
+              <Link href="/en/newsletter/" className="btn btn-or" data-cta="lettre-article-en">Get the news every Sunday</Link>
               <a href={partageFacebook} className="btn btn-facebook" rel="noopener noreferrer" target="_blank" data-cta="partage-article-en">Share on Facebook</a>
-              <Link href="/en/leveling-guide/" className="btn btn-contour" data-cta="guide-article-en">Leveling guide 1-60</Link>
             </div>
           </div>
 

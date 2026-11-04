@@ -16,6 +16,8 @@ export const MENU_EN: { href: string; label: string }[] = [
   { href: "/en/races/", label: "Races" },
   { href: "/en/maps/", label: "Maps" },
   { href: "/en/item-database/", label: "Item database" },
+  { href: "/en/newsletter/", label: "Newsletter" },
+  { href: "/en/notebook/", label: "Jobwow's Notebook" },
 ];
 
 /** Classes : slug français → slug et nom anglais. */
@@ -117,6 +119,8 @@ const GUIDES: [string, string][] = [
   ["/zones/", "/en/zones/"],
   ["/donjons/", "/en/dungeons/"],
   ["/races/skyborne/", "/en/races/skyborne/"],
+  ["/lettre/", "/en/newsletter/"],
+  ["/carnet/", "/en/notebook/"],
 ];
 
 /** Rubriques des articles : slug français → slug, nom et description en anglais (/en/topics/<slug>/). */
