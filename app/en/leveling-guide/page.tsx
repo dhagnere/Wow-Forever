@@ -3,7 +3,9 @@ import Link from "next/link";
 import { Ariane } from "@/components/Ariane";
 import { ChoixGuideParRaceEn } from "@/components/ChoixGuideEn";
 import { fondBandeau } from "@/lib/ecrans";
-import { pageLieu } from "@/lib/cartes";
+import { carte } from "@/lib/cartes";
+import { LienLieu } from "@/components/Cartes";
+import { pageLieuEn } from "@/lib/anglais";
 import { nomLieu, parcours, versionQuetes, type EtapeParcours } from "@/lib/quetes";
 
 export const metadata: Metadata = {
@@ -19,14 +21,14 @@ function Route({ camp, etapes }: { camp: "alliance" | "horde"; etapes: EtapeParc
         <li key={e.lieu} className="etape-route">
           <span className="numero-etape" aria-hidden="true">{i + 1}</span>
           <div>
-            <h3>{nomLieu(e.lieu, "en")}</h3>
+            <h3>{carte(e.lieu) ? <LienLieu slug={e.lieu} nom={nomLieu(e.lieu, "en")} langue="en" /> : nomLieu(e.lieu, "en")}</h3>
             <p className="sort-meta">Levels {e.niveaux[0]} to {e.niveaux[1]} · {e.quetes} quests for the {camp === "alliance" ? "Alliance" : "Horde"}</p>
             <p className="route-donneurs">
               <span className="doux">Main quest givers: </span>
               {e.donneurs.slice(0, 4).map((d, k) => (
                 <span key={d.id}>
                   {k ? ", " : ""}
-                  <strong>{d.n}</strong> <span className="doux">({d.quetes} quests, <Link href={pageLieu(e.lieu)} hrefLang="fr">{d.x.toLocaleString("en-GB")} · {d.y.toLocaleString("en-GB")}</Link>)</span>
+                  <strong>{d.n}</strong> <span className="doux">({d.quetes} quests, <Link href={pageLieuEn(e.lieu)}>{d.x.toLocaleString("en-GB")} · {d.y.toLocaleString("en-GB")}</Link>)</span>
                 </span>
               ))}
             </p>

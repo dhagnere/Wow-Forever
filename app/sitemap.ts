@@ -5,7 +5,7 @@ import { CLASSES } from "@/content/classes";
 import { combinaisons } from "@/lib/guide";
 import { ZONES, DONJONS } from "@/content/monde";
 import { SITE } from "@/lib/site";
-import { CLASSES_EN, lienGuideEn } from "@/lib/anglais";
+import { CLASSES_EN, LIEUX_EN, lienGuideEn } from "@/lib/anglais";
 import { tousLesLieux } from "@/lib/cartes";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +22,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...combinaisons().map((c) => `/guides/parcours/${c.race.slug}/${c.classe.slug}/`),
     ...ZONES.map((z) => `/zones/${z.slug}/`),
     // Version anglaise
-    "/en/", "/en/leveling-guide/", "/en/classes/", "/en/races/",
+    "/en/", "/en/leveling-guide/", "/en/classes/", "/en/races/", "/en/maps/", "/en/item-database/", "/en/item-database/items/",
+    ...tousLesLieux().filter((l) => LIEUX_EN[l]).map((l) => `/en/maps/${LIEUX_EN[l]}/`),
     ...CLASSES.map((c) => `/en/classes/${CLASSES_EN[c.slug].slug}/`),
     ...CLASSES.map((c) => `/en/classes/${CLASSES_EN[c.slug].slug}/talents/`),
     ...combinaisons().map((c) => lienGuideEn(c.race.slug, c.classe.slug)),
@@ -30,7 +31,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ].map((chemin) => ({ url: `${SITE.url}${chemin}` }));
   const articles = (await listerPourPlan()).map((a) => ({ url: `${SITE.url}/articles/${a.slug}/`, lastModified: a.modifieLe }));
   // Fiches d'objets : qualité « bonne » et au-delà, pour ne pas noyer le plan sous les objets gris et blancs.
-  const objets = (await listerObjetsPourPlan().catch(() => [])).map((o) => ({ url: `${SITE.url}/base-de-donnees/objets/${o.id}/` }));
+  const objets = (await listerObjetsPourPlan().catch(() => [])).flatMap((o) => [
+    { url: `${SITE.url}/base-de-donnees/objets/${o.id}/` }, { url: `${SITE.url}/en/item-database/items/${o.id}/` },
+  ]);
   const guildes = (await listerGuildesPourPlan().catch(() => [])).map((g) => ({ url: `${SITE.url}/guildes/${g.slug}/`, lastModified: g.majLe }));
   return [...fixes, ...articles, ...guildes, ...objets];
 }

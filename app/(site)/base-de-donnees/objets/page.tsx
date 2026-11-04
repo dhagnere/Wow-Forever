@@ -3,7 +3,7 @@ import Link from "next/link";
 import { categoriesObjets, chercherObjets, nomCategorie, OBJETS_PAR_PAGE, QUALITES } from "@/modules/veille";
 import { Ariane } from "@/components/Ariane";
 import { TableauObjets } from "@/components/Objets";
-import { listeIndexable, lireFiltres, urlObjets } from "@/lib/objets";
+import { listeIndexable, lireFiltres, urlObjets, urlObjetsEn } from "@/lib/objets";
 import { fondBandeau } from "@/lib/ecrans";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +19,10 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   return {
     title: f.q ? `Objets : « ${f.q} »` : `${nom} — objets de WoW Forever`,
     description: `${nom} de WoW Forever : liste complète en français, avec niveau, qualité et fiche détaillée.`,
-    alternates: { canonical: urlObjets({ classe: f.classe, sousClasse: f.sousClasse }) },
+    alternates: {
+      canonical: urlObjets({ classe: f.classe, sousClasse: f.sousClasse }),
+      languages: { fr: urlObjets({ classe: f.classe, sousClasse: f.sousClasse }), en: urlObjetsEn({ classe: f.classe, sousClasse: f.sousClasse }), "x-default": urlObjets({ classe: f.classe, sousClasse: f.sousClasse }) },
+    },
     robots: listeIndexable(f) ? undefined : { index: false, follow: true },
   };
 }

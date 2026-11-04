@@ -3,6 +3,7 @@ import Link from "next/link";
 import { GuideDeLaZone } from "@/components/ChoixGuide";
 import { guidesPassantPar } from "@/lib/guide";
 import { notFound } from "next/navigation";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { FigureCarte, LienLieu } from "@/components/Cartes";
 import { Vignette } from "@/components/Visuels";
@@ -26,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${l.carte.nom} : carte et guide — WoW Forever`,
     description: `${l.carte.nom} dans WoW Forever, carte du jeu (${l.carte.continent}${niv}) : donjons, zones de départ et zones voisines pour poursuivre la route.`,
-    alternates: { canonical: pageLieu(l.slug) },
+    alternates: { canonical: pageLieu(l.slug), languages: languesDe(pageLieu(l.slug)) },
   };
 }
 

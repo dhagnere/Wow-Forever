@@ -40,9 +40,11 @@ export interface LigneEnsemble { id: number; nom: string }
 type Ligne = Record<string, string>;
 
 /** Les catégories abandonnées par le jeu gardent un nom anglais suivi de « (OBSOLETE) » : elles deviennent « Autres ». */
-function nomLisible(nom: string, sousCategorie: boolean): string {
+function nomLisible(nom: string, sousCategorie: boolean, en = false): string {
   const n = nom.trim();
-  return /\(OBSOLETE\)/i.test(n) ? (sousCategorie ? "Autres" : "Autres objets") : n;
+  if (!/\(OBSOLETE\)/i.test(n)) return n;
+  if (en) return sousCategorie ? "Other" : "Other items";
+  return sousCategorie ? "Autres" : "Autres objets";
 }
 
 function lignes(csv: string): Ligne[] {
@@ -119,7 +121,8 @@ export function convertirObjets(sparseCsv: string, itemCsv: string, tables?: Tab
   return resultat;
 }
 
-export function convertirCategories(classesCsv: string, sousClassesCsv: string): LigneCategorie[] {
+/** `en` : tables lues en anglais (version anglaise du site). */
+export function convertirCategories(classesCsv: string, sousClassesCsv: string, en = false): LigneCategorie[] {
   const classes = lignes(classesCsv);
   const sous = lignes(sousClassesCsv);
   exigerColonnes("ItemClass", classes[0], ["ClassID", "ClassName_lang"]);
@@ -132,12 +135,12 @@ export function convertirCategories(classesCsv: string, sousClassesCsv: string):
     vues.add(cle);
     resultat.push(l);
   };
-  for (const c of classes) ajouter({ classe: entier(c.ClassID), sousClasse: -1, nom: nomLisible(c.ClassName_lang ?? "", false), nomLong: "" });
+  for (const c of classes) ajouter({ classe: entier(c.ClassID), sousClasse: -1, nom: nomLisible(c.ClassName_lang ?? "", false, en), nomLong: "" });
   for (const s of sous) {
     ajouter({
       classe: entier(s.ClassID),
       sousClasse: entier(s.SubClassID),
-      nom: nomLisible(s.DisplayName_lang ?? "", true),
+      nom: nomLisible(s.DisplayName_lang ?? "", true, en),
       nomLong: /\(OBSOLETE\)/i.test(s.DisplayName_lang ?? "") ? "" : (s.VerboseName_lang ?? "").trim(),
     });
   }

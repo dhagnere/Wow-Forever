@@ -44,3 +44,8 @@ export function urlObjets(f: FiltresObjets, changements: Partial<FiltresObjets> 
 export function listeIndexable(f: FiltresObjets): boolean {
   return !f.q && f.qualite === undefined && f.niveauMin === undefined && f.niveauMax === undefined && (f.page ?? 1) === 1;
 }
+
+/** Même adresse, dans la version anglaise de la base (/en/item-database/items/). */
+export function urlObjetsEn(f: FiltresObjets, changements: Partial<FiltresObjets> = {}): string {
+  return urlObjets(f, changements).replace("/base-de-donnees/objets/", "/en/item-database/items/");
+}

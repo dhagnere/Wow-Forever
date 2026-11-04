@@ -303,3 +303,10 @@ CREATE INDEX IF NOT EXISTS stats_recherches_date_idx ON stats_recherches (cree_l
 -- Version anglaise du site : noms et descriptions des objets en anglais, remplis à l'import.
 ALTER TABLE objets ADD COLUMN IF NOT EXISTS nom_en TEXT NOT NULL DEFAULT '';
 ALTER TABLE objets ADD COLUMN IF NOT EXISTS description_en TEXT NOT NULL DEFAULT '';
+-- Version anglaise de la base d'objets : catégories, ensembles et recettes en anglais, recherche sur le nom anglais.
+ALTER TABLE objets ADD COLUMN IF NOT EXISTS nom_recherche_en TEXT NOT NULL DEFAULT '';
+ALTER TABLE objets_categories ADD COLUMN IF NOT EXISTS nom_en TEXT NOT NULL DEFAULT '';
+ALTER TABLE objets_categories ADD COLUMN IF NOT EXISTS nom_long_en TEXT NOT NULL DEFAULT '';
+ALTER TABLE objets_ensembles ADD COLUMN IF NOT EXISTS nom_en TEXT NOT NULL DEFAULT '';
+ALTER TABLE objets_recettes ADD COLUMN IF NOT EXISTS nom_en TEXT NOT NULL DEFAULT '';
+ALTER TABLE objets_recettes ADD COLUMN IF NOT EXISTS metier_en TEXT NOT NULL DEFAULT '';

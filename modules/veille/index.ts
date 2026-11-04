@@ -45,13 +45,13 @@ export const brouillonsParJour = (): number => configVeille.brouillonsParJour();
 export { COOKIE_SESSION, DUREE_SESSION_S, creerJeton, jetonValide, motDePasseCorrect } from "./auth/session";
 
 // Base d'objets (wago.tools).
-export type { Objet, ObjetResume, Categorie, FiltresObjets, EtatBase } from "./objets/depot";
+export type { Objet, ObjetResume, Categorie, FiltresObjets, EtatBase, LangueObjets } from "./objets/depot";
 export { categoriesObjets, chercherObjets, lireObjet, iconeObjet, etatBase, listerObjetsPourPlan, recettesObjet, OBJETS_PAR_PAGE } from "./objets/depot";
 export type { Recette, Composant } from "./objets/depot";
-export { NOMS_CARACTERISTIQUES, bonusPrincipal } from "./objets/caracteristiques";
+export { NOMS_CARACTERISTIQUES, NOMS_CARACTERISTIQUES_EN, bonusPrincipal } from "./objets/caracteristiques";
 export type { Caracteristique } from "./objets/caracteristiques";
 export {
-  qualite, QUALITES, emplacement, lien as lienObjet, classesAutorisees, decouperPrix, prixEnTexte, vitesse as vitesseArme, nomCategorie,
+  qualite, qualites, QUALITES, emplacement, lien as lienObjet, classesAutorisees, decouperPrix, prixEnTexte, vitesse as vitesseArme, nomCategorie,
 } from "./objets/libelles";
 
 // Statistiques d'audience (sans cookie).
@@ -74,7 +74,7 @@ export { validerFiche, FACTIONS, TYPES_ROYAUME, OBJECTIFS, ROLES, CLASSES_GUILDE
 
 // Où trouver les objets (données communautaires de l'Azeroth d'origine).
 export type { OuTrouver, SourceMonstre, SourceDecor, SourceMarchand, SourceQuete, Emplacement } from "./objets/butin";
-export { ouTrouver, RANGS, sourceDesDonnees } from "./objets/butin";
+export { ouTrouver, RANGS, RANGS_EN, sourceDesDonnees } from "./objets/butin";
 
 // Sorts et talents des classes (fichiers du jeu, npm run sorts:jeu → content/sorts-jeu.json).
 export type { Specialisation, Sort, Talent, RangSort, TraitRacial, Familiers, FamilleFamilier, TechniqueFamilier } from "./sorts/conversion";

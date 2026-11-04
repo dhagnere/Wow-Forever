@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { CLASSES } from "@/content/classes";
-import { cheminAnglais, cheminFrancais, CLASSES_EN, languesDe, lienGuideEn, RACES_EN } from "@/lib/anglais";
+import { cheminAnglais, cheminFrancais, CLASSES_EN, languesDe, lienGuideEn, LIEUX_EN, nomDonjonEn, RACES_EN } from "@/lib/anglais";
+import { tousLesLieux } from "@/lib/cartes";
+import { DONJONS_ORIGINE, RAIDS } from "@/content/reference";
+import { prixEnTexte, qualite, emplacement } from "@/modules/veille";
 import { combinaisons, guidePour } from "@/lib/guide";
 import { messageEn, erreursEn } from "@/lib/messages-en";
 import { blocageAjout, blocageRetrait } from "@/lib/calculateur";
@@ -11,6 +14,8 @@ describe("version anglaise", () => {
       "/", "/guides/parcours/", "/classes/", "/races/",
       ...CLASSES.flatMap((c) => [`/classes/${c.slug}/`, `/classes/${c.slug}/talents/`]),
       ...combinaisons().map((c) => `/guides/parcours/${c.race.slug}/${c.classe.slug}/`),
+      "/cartes/", "/base-de-donnees/", "/base-de-donnees/objets/", "/base-de-donnees/objets/19019/",
+      ...tousLesLieux().map((l) => `/cartes/${l}/`),
     ];
     for (const fr of pages) {
       const en = cheminAnglais(fr);
@@ -36,6 +41,28 @@ describe("version anglaise", () => {
     for (const c of CLASSES) expect(CLASSES_EN[c.slug], c.slug).toBeDefined();
     const liens = combinaisons().map((c) => lienGuideEn(c.race.slug, c.classe.slug));
     expect(new Set(liens).size).toBe(liens.length);
+  });
+
+  it("donne une adresse anglaise unique à chaque carte, tirée de son nom anglais", () => {
+    expect(Object.keys(LIEUX_EN).length).toBe(tousLesLieux().length);
+    expect(new Set(Object.values(LIEUX_EN)).size).toBe(tousLesLieux().length);
+    expect(LIEUX_EN["foret-d-elwynn"]).toBe("elwynn-forest");
+    expect(cheminAnglais("/cartes/royaumes-de-l-est/")).toBe("/en/maps/eastern-kingdoms/");
+  });
+
+  it("trouve dans les fichiers du jeu le nom anglais de chaque donjon et raid des guides", () => {
+    for (const d of [...DONJONS_ORIGINE, ...RAIDS].filter((x) => !x.nom.startsWith("["))) expect(nomDonjonEn(d.nom), d.nom).toBeTruthy();
+    expect(nomDonjonEn("Les Mortemines")).toBe("Deadmines");
+    expect(nomDonjonEn("Temple d'Atal'Hakkar")).toBe("Sunken Temple");
+    expect(nomDonjonEn("[Raid du Mont Hyjal, nom à confirmer]")).toBeNull();
+  });
+
+  it("traduit les libellés des objets", () => {
+    expect(qualite(4, "en").nom).toBe("Epic");
+    expect(qualite(4).nom).toBe("Épique");
+    expect(emplacement(17, "en")).toBe("Two-Hand");
+    expect(prixEnTexte(25_53_55, "en")).toBe("25g 53s 55c");
+    expect(prixEnTexte(25_53_55)).toBe("25 po 53 pa 55 pc");
   });
 
   it("garde dans le guide anglais les mêmes quêtes que dans le guide français", () => {

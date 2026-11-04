@@ -64,6 +64,7 @@ function emplacement(l: Lieu | undefined): Emplacement {
 }
 
 export const RANGS: Record<number, string> = { 1: "Élite", 2: "Rare élite", 3: "Boss", 4: "Rare" };
+export const RANGS_EN: Record<number, string> = { 1: "Elite", 2: "Rare Elite", 3: "Boss", 4: "Rare" };
 
 export function ouTrouver(idObjet: number, langue: Langue = "fr"): OuTrouver | null {
   const d = donnees(langue);

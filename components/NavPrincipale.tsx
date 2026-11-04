@@ -78,15 +78,15 @@ const MENU_EN: Entree[] = [
   },
   {
     label: "Explore",
-    prefixe: ["/en/classes", "/en/races"],
+    prefixe: ["/en/classes", "/en/races", "/en/maps", "/en/item-database"],
     liens: [
       { href: "/en/classes/", label: "The Armoury · Classes", detail: "Spells, talents, calculator" },
       { href: "/en/races/", label: "The Register · Races", detail: "Racial traits, Skyborne included" },
       { href: "/races/skyborne/", label: "Skyborne", detail: "The new playable race", fr: true },
       { href: "/zones/", label: "The Map Room · Zones", detail: "Forever's new lands", fr: true },
-      { href: "/cartes/", label: "World maps", detail: "Kalimdor, Eastern Kingdoms, Zephras", fr: true },
+      { href: "/en/maps/", label: "World maps", detail: "Kalimdor, Eastern Kingdoms, Zephras Isle" },
       { href: "/donjons/", label: "The Cellar · Dungeons and raids", detail: "Spotted in beta, announced", fr: true },
-      { href: "/base-de-donnees/", label: "Item database", detail: "Every item in the game", fr: true },
+      { href: "/en/item-database/", label: "Item database", detail: "Every item in the game" },
     ],
   },
   { href: "/carnet/", label: "Jobwow's notebook", prefixe: ["/carnet"], silfax: true, fr: true },

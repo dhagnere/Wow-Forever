@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { categoriesObjets, etatBase, nomCategorie, QUALITES } from "@/modules/veille";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { AvertissementDonnees } from "./AvertissementDonnees";
 import { fondBandeau } from "@/lib/ecrans";
@@ -10,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Base de données des objets de WoW Forever",
   description: "Armes, armures, consommables, recettes : tous les objets de WoW Forever en français, avec leur niveau, leur qualité et leur prix de vente.",
-  alternates: { canonical: "/base-de-donnees/" },
+  alternates: { canonical: "/base-de-donnees/", languages: languesDe("/base-de-donnees/") },
 };
 
 export default async function BaseDeDonnees() {

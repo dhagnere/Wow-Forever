@@ -17,8 +17,21 @@ export const QUALITES: Record<number, Qualite> = {
   7: { nom: "Héritage", couleur: "#00ccff" },
 };
 
-export function qualite(code: number): Qualite {
-  return QUALITES[code] ?? QUALITES[1];
+/** Noms anglais des qualités (version anglaise du site), tels qu'ils figurent dans le jeu. */
+const QUALITES_EN: Record<number, string> = {
+  0: "Poor", 1: "Common", 2: "Uncommon", 3: "Rare", 4: "Epic", 5: "Legendary", 6: "Artifact", 7: "Heirloom",
+};
+
+export type LangueLibelle = "fr" | "en";
+
+export function qualite(code: number, langue: LangueLibelle = "fr"): Qualite {
+  const q = QUALITES[code] ?? QUALITES[1];
+  return langue === "en" ? { ...q, nom: QUALITES_EN[code] ?? QUALITES_EN[1] } : q;
+}
+
+/** Les qualités dans la langue voulue, pour les listes de filtres. */
+export function qualites(langue: LangueLibelle = "fr"): [number, Qualite][] {
+  return Object.keys(QUALITES).map((k) => [Number(k), qualite(Number(k), langue)]);
 }
 
 /** Emplacement d'équipement (InventoryType). 0 : objet non équipable. */
@@ -29,8 +42,15 @@ export const EMPLACEMENTS: Record<number, string> = {
   23: "Tenu(e) en main gauche", 24: "Projectile", 25: "Armes de jet", 26: "À distance", 27: "Carquois", 28: "Relique",
 };
 
-export function emplacement(code: number): string | null {
-  return EMPLACEMENTS[code] ?? null;
+const EMPLACEMENTS_EN: Record<number, string> = {
+  1: "Head", 2: "Neck", 3: "Shoulder", 4: "Shirt", 5: "Chest", 6: "Waist", 7: "Legs", 8: "Feet",
+  9: "Wrist", 10: "Hands", 11: "Finger", 12: "Trinket", 13: "One-Hand", 14: "Off Hand", 15: "Ranged",
+  16: "Back", 17: "Two-Hand", 18: "Bag", 19: "Tabard", 20: "Chest", 21: "Main Hand", 22: "Off Hand",
+  23: "Held In Off-hand", 24: "Projectile", 25: "Thrown", 26: "Ranged", 27: "Quiver", 28: "Relic",
+};
+
+export function emplacement(code: number, langue: LangueLibelle = "fr"): string | null {
+  return (langue === "en" ? EMPLACEMENTS_EN : EMPLACEMENTS)[code] ?? null;
 }
 
 export const LIENS: Record<number, string> = {
@@ -41,8 +61,12 @@ export const LIENS: Record<number, string> = {
   5: "Objet de quête",
 };
 
-export function lien(code: number): string | null {
-  return LIENS[code] ?? null;
+const LIENS_EN: Record<number, string> = {
+  1: "Binds when picked up", 2: "Binds when equipped", 3: "Binds when used", 4: "Quest Item", 5: "Quest Item",
+};
+
+export function lien(code: number, langue: LangueLibelle = "fr"): string | null {
+  return (langue === "en" ? LIENS_EN : LIENS)[code] ?? null;
 }
 
 /** Les neuf classes de Forever : bit du masque AllowableClass et page du site. */
@@ -76,16 +100,17 @@ export function decouperPrix(cuivre: number): Prix {
   return { or: Math.floor(c / 10000), argent: Math.floor((c % 10000) / 100), cuivre: c % 100 };
 }
 
-/** « 25 po 53 pa 55 pc » ; les montants nuls sont omis. */
-export function prixEnTexte(cuivre: number): string {
+/** « 25 po 53 pa 55 pc » (en anglais « 25g 53s 55c ») ; les montants nuls sont omis. */
+export function prixEnTexte(cuivre: number, langue: LangueLibelle = "fr"): string {
   const p = decouperPrix(cuivre);
-  const morceaux = [p.or ? `${p.or} po` : "", p.argent ? `${p.argent} pa` : "", p.cuivre ? `${p.cuivre} pc` : ""].filter(Boolean);
-  return morceaux.join(" ") || "0 pc";
+  const [o, a, c] = langue === "en" ? ["g", "s", "c"] : [" po", " pa", " pc"];
+  const morceaux = [p.or ? `${p.or}${o}` : "", p.argent ? `${p.argent}${a}` : "", p.cuivre ? `${p.cuivre}${c}` : ""].filter(Boolean);
+  return morceaux.join(" ") || `0${c}`;
 }
 
-/** Vitesse d'arme : 1900 ms → « 1,90 ». */
-export function vitesse(ms: number): string {
-  return (ms / 1000).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+/** Vitesse d'arme : 1900 ms → « 1,90 » (« 1.90 » en anglais). */
+export function vitesse(ms: number, langue: LangueLibelle = "fr"): string {
+  return (ms / 1000).toLocaleString(langue === "en" ? "en-GB" : "fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 /** Nom de catégorie lisible : les catégories abandonnées par le jeu sont marquées « (OBSOLETE) ». */

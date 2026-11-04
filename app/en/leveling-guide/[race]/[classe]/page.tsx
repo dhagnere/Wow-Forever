@@ -7,10 +7,10 @@ import { IconeClasse } from "@/components/IconeClasse";
 import { IconeRace } from "@/components/IconeRace";
 import { GuideParcours, type ZoneVue } from "@/components/GuideParcours";
 import { ECRAN_CLASSE, fondBandeau } from "@/lib/ecrans";
-import { pageLieu, urlCarte } from "@/lib/cartes";
+import { urlCarte } from "@/lib/cartes";
 import { nomLieu } from "@/lib/quetes";
 import { cleGuide, combinaisons, guidePour, planifier, raceGuide, versionGuide, ZEPHRAS } from "@/lib/guide";
-import { CLASSES_EN, classeDepuisEn, lienGuideEn, nomClasseEn, nomRaceEn, raceDepuisEn, RACES_EN } from "@/lib/anglais";
+import { CLASSES_EN, classeDepuisEn, lienGuideEn, nomClasseEn, nomRaceEn, pageLieuEn, raceDepuisEn, RACES_EN } from "@/lib/anglais";
 import { LIEUX_ZEPHRAS } from "@/content/zephras-jeu";
 import { LIEUX_ZEPHRAS_EN } from "@/content/lieux-en";
 import { SORTIE_ZEPHRAS } from "@/content/zephras";
@@ -45,7 +45,7 @@ export default async function GuideRaceClasseEn({ params }: Props) {
   const c = lire(await params);
   if (!c) notFound();
   const zones: ZoneVue[] = guidePour(c.race, c.classe.slug, "en").map((z) => ({
-    lieu: z.lieu, nom: nomLieu(z.lieu, "en"), carte: urlCarte(z.lieu, 1000), lienCarte: pageLieu(z.lieu), niveaux: z.niveaux, hubs: z.hubs,
+    lieu: z.lieu, nom: nomLieu(z.lieu, "en"), carte: urlCarte(z.lieu, 1000), lienCarte: pageLieuEn(z.lieu), niveaux: z.niveaux, hubs: z.hubs,
     etapes: z.etapes.map(({ id, t, nv, min, cl, grp, obj, g, gn, r, rn, rl, cib }) => ({ id, t, nv, min, cl, grp, obj, g, gn, r, rn, rl: rl ? nomLieu(rl, "en") : null, cib })),
     arrets: planifier(z),
     ...(z.lieu === ZEPHRAS ? { lieux: LIEUX_ZEPHRAS.map((l) => ({ ...l, nom: LIEUX_ZEPHRAS_EN[l.nom] ?? l.nom })) } : {}),
@@ -91,7 +91,6 @@ export default async function GuideRaceClasseEn({ params }: Props) {
         <p className="doux note-donnees">
           Quests, NPCs and positions: free community databases ({source?.source ?? "CMaNGOS, AzerothCore"}), cross-checked with Forever&apos;s files
           (version {source?.jeu ?? "?"}). Order and objectives written by the Tavern. Maps and names: © Blizzard Entertainment.
-          Detailed maps open on the French site.
         </p>
         <p>
           <Link href={`/en/classes/${slugClasseEn}/`}>{nomClasseEn(c.classe.slug)} spells and talents</Link>

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { emplacement, etatBase, lireObjet, nomCategorie, ouTrouver, prixEnTexte, qualite, recettesObjet } from "@/modules/veille";
 import { Fabrication } from "@/components/Fabrication";
 import { OuTrouver } from "@/components/OuTrouver";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { FicheObjet, Prix, TableauObjets } from "@/components/Objets";
 import { urlObjets } from "@/lib/objets";
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${o.nom} — objet de WoW Forever`,
     description: `${o.nom} dans WoW Forever : ${details}.${o.prixVente ? ` Se vend ${prixEnTexte(o.prixVente)}.` : ""}`,
-    alternates: { canonical: `/base-de-donnees/objets/${o.id}/` },
+    alternates: { canonical: `/base-de-donnees/objets/${o.id}/`, languages: languesDe(`/base-de-donnees/objets/${o.id}/`) },
   };
 }
 

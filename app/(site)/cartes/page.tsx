@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { CarteLieu, FigureCarte } from "@/components/Cartes";
 import { fondBandeau } from "@/lib/ecrans";
@@ -8,7 +9,7 @@ import { pageLieu, zonesDuContinent } from "@/lib/cartes";
 export const metadata: Metadata = {
   title: "Cartes du monde de WoW Forever : Kalimdor, Royaumes de l'Est, Zéphras",
   description: "Les cartes de Kalimdor, des Royaumes de l'Est et de l'île de Zéphras dans WoW Forever, et chaque zone avec son niveau, ses donjons et ses voisines.",
-  alternates: { canonical: "/cartes/" },
+  alternates: { canonical: "/cartes/", languages: languesDe("/cartes/") },
 };
 
 const VILLES = ["hurlevent", "forgefer", "darnassus", "orgrimmar", "thunder-bluff", "fossoyeuse"];

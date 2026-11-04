@@ -130,6 +130,16 @@ export const NOMS_CARACTERISTIQUES: Record<number, string> = {
   51: "Résistance au Feu", 52: "Résistance au Givre", 53: "Résistance au Sacré", 54: "Résistance à l'Ombre", 55: "Résistance à la Nature", 56: "Résistance aux Arcanes",
 };
 
+/** Noms anglais des caractéristiques (version anglaise du site). */
+export const NOMS_CARACTERISTIQUES_EN: Record<number, string> = {
+  0: "Mana", 1: "Health", 3: "Agility", 4: "Strength", 5: "Intellect", 6: "Spirit", 7: "Stamina",
+  12: "Defense Rating", 13: "Dodge Rating", 14: "Parry Rating", 15: "Block Rating",
+  31: "Hit Rating", 32: "Critical Strike Rating", 35: "Resilience Rating", 36: "Haste Rating", 37: "Expertise Rating",
+  38: "Attack Power", 39: "Ranged Attack Power", 41: "Healing", 42: "Spell Damage", 43: "Mana every 5 sec",
+  45: "Spell Power", 46: "Health every 5 sec", 47: "Spell Penetration", 48: "Block Value", 50: "Bonus Armor",
+  51: "Fire Resistance", 52: "Frost Resistance", 53: "Holy Resistance", 54: "Shadow Resistance", 55: "Nature Resistance", 56: "Arcane Resistance",
+};
+
 /** Les bonus principaux s'affichent en blanc (« +8 Endurance »), les autres en vert, comme dans le jeu. */
 export function bonusPrincipal(type: number): boolean {
   return [0, 1, 3, 4, 5, 6, 7, 51, 52, 53, 54, 55, 56].includes(type);
