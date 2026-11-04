@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
-interface Lien { href: string; label: string; detail?: string }
+/** `fr` : page encore en français seulement, signalée dans le menu anglais. */
+interface Lien { href: string; label: string; detail?: string; fr?: boolean }
 interface Groupe { label: string; prefixe: string[]; liens: Lien[] }
 type Entree = (Lien & { prefixe: string[]; silfax?: boolean }) | Groupe;
 
@@ -48,12 +49,58 @@ const MENU: Entree[] = [
   { href: "/carnet/", label: "Le Carnet de Jobwow", prefixe: ["/carnet"], silfax: true },
 ];
 
+/** Menu de la version anglaise : mêmes rubriques ; les pages pas encore traduites mènent au site français. */
+const MENU_EN: Entree[] = [
+  { href: "/en/", label: "Home", prefixe: [] },
+  {
+    label: "The Bar",
+    prefixe: [],
+    liens: [
+      { href: "/actualites/", label: "News", detail: "Daily news, patches, announcements", fr: true },
+      { href: "/calendrier/", label: "Calendar", detail: "Launch, raids, Hardcore, summer 2027", fr: true },
+      { href: "/lettre/", label: "The Tavern's newsletter", detail: "Every Sunday at 10 am", fr: true },
+      { href: "/guildes/", label: "Guild board", detail: "French-speaking guilds recruiting", fr: true },
+      { href: "/communaute/", label: "Community", detail: "Discord, Facebook page", fr: true },
+    ],
+  },
+  {
+    label: "Guides",
+    prefixe: ["/en/leveling-guide"],
+    liens: [
+      { href: "/en/leveling-guide/", label: "Leveling guide 1-60", detail: "Quest by quest, for your race and class" },
+      { href: "/en/leveling-guide/#alliance", label: "Alliance and Horde routes", detail: "Zones in order, from 1 to 60" },
+      { href: "/guides/bien-demarrer/", label: "Getting started", detail: "Race, class, zone, first professions", fr: true },
+      { href: "/guides/zones-de-depart/", label: "Starting zones", detail: "Where each race begins", fr: true },
+      { href: "/guides/zones-par-niveau/", label: "Zones by level", detail: "Every zone, from 1 to 60", fr: true },
+      { href: "/guides/quetes-de-classe/", label: "Class quests", detail: "Chains, quest givers and rewards", fr: true },
+      { href: "/guides/liste-des-donjons/", label: "Dungeon list", detail: "Dungeons and raids by level", fr: true },
+    ],
+  },
+  {
+    label: "Explore",
+    prefixe: ["/en/classes", "/en/races"],
+    liens: [
+      { href: "/en/classes/", label: "The Armoury · Classes", detail: "Spells, talents, calculator" },
+      { href: "/en/races/", label: "The Register · Races", detail: "Racial traits, Skyborne included" },
+      { href: "/races/skyborne/", label: "Skyborne", detail: "The new playable race", fr: true },
+      { href: "/zones/", label: "The Map Room · Zones", detail: "Forever's new lands", fr: true },
+      { href: "/cartes/", label: "World maps", detail: "Kalimdor, Eastern Kingdoms, Zephras", fr: true },
+      { href: "/donjons/", label: "The Cellar · Dungeons and raids", detail: "Spotted in beta, announced", fr: true },
+      { href: "/base-de-donnees/", label: "Item database", detail: "Every item in the game", fr: true },
+    ],
+  },
+  { href: "/carnet/", label: "Jobwow's notebook", prefixe: ["/carnet"], silfax: true, fr: true },
+];
+
 function actif(chemin: string, prefixe: string[], href?: string) {
-  return href === "/" ? chemin === "/" : prefixe.some((p) => chemin.startsWith(p));
+  if (href === "/" || href === "/en/") return chemin === href || chemin === href.slice(0, -1);
+  return prefixe.some((p) => chemin.startsWith(p));
 }
 
-export function NavPrincipale() {
+export function NavPrincipale({ langue = "fr" }: { langue?: "fr" | "en" }) {
   const chemin = usePathname() ?? "/";
+  const menu = langue === "en" ? MENU_EN : MENU;
+  const enFrancais = langue === "en" ? " (in French)" : "";
   const nav = useRef<HTMLElement>(null);
 
   // Ferme les sous-menus au changement de page, au clic ailleurs et à la touche Échap.
@@ -75,8 +122,8 @@ export function NavPrincipale() {
   }, []);
 
   return (
-    <nav className="nav" aria-label="Rubriques" ref={nav}>
-      {MENU.map((e) =>
+    <nav className="nav" aria-label={langue === "en" ? "Sections" : "Rubriques"} ref={nav}>
+      {menu.map((e) =>
         "liens" in e ? (
           <details
             key={e.label}
@@ -92,15 +139,15 @@ export function NavPrincipale() {
             <summary>{e.label}</summary>
             <div className="nav-sousmenu">
               {e.liens.map((l) => (
-                <Link key={l.href} href={l.href} aria-current={chemin.startsWith(l.href) ? "page" : undefined}>
+                <Link key={l.href} href={l.href} hrefLang={l.fr && langue === "en" ? "fr" : undefined} aria-current={chemin.startsWith(l.href) ? "page" : undefined}>
                   {l.label}
-                  {l.detail ? <small>{l.detail}</small> : null}
+                  {l.detail || (l.fr && enFrancais) ? <small>{l.detail}{l.fr ? enFrancais : ""}</small> : null}
                 </Link>
               ))}
             </div>
           </details>
         ) : (
-          <Link key={e.href} href={e.href} aria-current={actif(chemin, e.prefixe, e.href) ? "page" : undefined} className={e.silfax ? "nav-silfax" : undefined}>
+          <Link key={e.href} href={e.href} aria-current={actif(chemin, e.prefixe, e.href) ? "page" : undefined} className={e.silfax ? "nav-silfax" : undefined} hrefLang={e.fr && langue === "en" ? "fr" : undefined}>
             {e.label}
           </Link>
         ),

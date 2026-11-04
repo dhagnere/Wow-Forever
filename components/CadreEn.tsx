@@ -3,7 +3,7 @@ import { SITE } from "@/lib/site";
 import { Medaillon, NomSite } from "./Cadre";
 import { ChoixLangue } from "./ChoixLangue";
 import { Decompte } from "./Decompte";
-import { NavEn } from "./NavEn";
+import { NavPrincipale } from "./NavPrincipale";
 import { MENU_EN } from "@/lib/anglais";
 
 /** Cadre de la version anglaise (/en/) : en-tête, menu et pied de page en anglais. */
@@ -30,7 +30,7 @@ function Entete() {
       </div>
       <div className="entete-menu">
         <div className="wrap">
-          <NavEn />
+          <NavPrincipale langue="en" />
         </div>
       </div>
     </header>
