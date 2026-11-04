@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-const ALLIANCE = ["Humain", "Nain", "Elfe de la nuit", "Gnome"];
+const ALLIANCE = ["Humain", "Nain", "Elfe de la nuit", "Gnome", "Human", "Dwarf", "Night Elf"];
 
 /**
  * Filtre des quêtes de classe par race : masque les chaînes réservées à d'autres races (attribut data-races :
  * noms de races, « Alliance » ou « Horde » ; vide pour toutes). Sans JavaScript, tout reste affiché.
  */
-export function FiltreRace({ races, children }: { races: string[]; children: ReactNode }) {
+export function FiltreRace({ races, children, langue = "fr" }: { races: string[]; children: ReactNode; langue?: "fr" | "en" }) {
   const [race, setRace] = useState("");
   const boite = useRef<HTMLDivElement>(null);
 
@@ -30,9 +30,9 @@ export function FiltreRace({ races, children }: { races: string[]; children: Rea
     <div ref={boite}>
       <p className="filtre-race">
         <label>
-          Ma race :{" "}
+          {langue === "en" ? "My race:" : "Ma race :"}{" "}
           <select value={race} onChange={(e) => setRace(e.target.value)}>
-            <option value="">Toutes</option>
+            <option value="">{langue === "en" ? "All" : "Toutes"}</option>
             {races.map((r) => <option key={r} value={r}>{r}</option>)}
           </select>
         </label>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DONJONS, NOTE_DONJONS } from "@/content/monde";
 import { estPilier } from "@/config/taxonomie";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { ECRAN_DONJON, fondBandeau } from "@/lib/ecrans";
@@ -16,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const slug = (await params).slug;
   const d = DONJONS.find((x) => x.slug === slug);
   if (!d) return {};
-  return { title: `${d.nom} — donjon de WoW Forever`, description: `${d.nom}, nouveau donjon de WoW Forever accessible dès le niveau ${d.niveau} : accès, boss et butin.`, alternates: { canonical: `/donjons/${d.slug}/` } };
+  return { title: `${d.nom} — donjon de WoW Forever`, description: `${d.nom}, nouveau donjon de WoW Forever accessible dès le niveau ${d.niveau} : accès, boss et butin.`, alternates: { canonical: `/donjons/${d.slug}/`, languages: languesDe(`/donjons/${d.slug}/`) } };
 }
 
 export default async function PageDonjon({ params }: Props) {

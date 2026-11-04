@@ -8,7 +8,7 @@ import { Vignette } from "@/components/Visuels";
 import { guidesPassantPar } from "@/lib/guide";
 import { lieu, lieuParNom, tousLesLieux } from "@/lib/cartes";
 import { ecranParNom, fondBandeau } from "@/lib/ecrans";
-import { CONTINENTS_EN, lieuDepuisEn, LIEUX_EN, nomDonjonEn, nomLieuEn, pageLieuEn, RACES_DEPART_EN } from "@/lib/anglais";
+import { CONTINENTS_EN, joueursEn, lienEn, lieuDepuisEn, LIEUX_EN, nomDonjonEn, nomLieuEn, pageLieuEn, RACES_DEPART_EN } from "@/lib/anglais";
 
 type Props = { params: Promise<{ lieu: string }> };
 
@@ -20,8 +20,6 @@ const niveaux = (min: number, max: number) => (min === max ? `${min}` : `${min} 
 const lire = (slugEn: string) => lieu(lieuDepuisEn(slugEn) ?? "");
 /** Nom anglais d'un donjon ; à défaut (raid pas encore nommé), une mention à compléter plutôt qu'un nom inventé. */
 const donjonEn = (nom: string) => nomDonjonEn(nom) ?? (nom.startsWith("[") ? "[Name to be confirmed]" : nom);
-/** « 40 dans l'Azeroth d'origine » → « 40 in original Azeroth ». */
-const joueursEn = (j: string) => j.replace(/^(\d+)( dans l'Azeroth d'origine)?$/, (_, n, o) => `${n} players${o ? " in original Azeroth" : ""}`);
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const l = lire((await params).lieu);
@@ -56,7 +54,7 @@ export default async function LieuEn({ params }: Props) {
           {l.fiche || guides ? (
             <div className="actions-bandeau">
               {guides ? <a href="#guide-1-60" className="btn btn-or" data-cta="guide-zone-bandeau-en">Do this zone with the 1-60 guide</a> : null}
-              {l.fiche ? <Link href={l.fiche.lien} hrefLang="fr" className={guides ? "btn btn-contour" : "btn btn-or"} data-cta="fiche-lieu-en">Forever zone page (in French)</Link> : null}
+              {l.fiche ? <Link href={lienEn(l.fiche.lien)} className={guides ? "btn btn-contour" : "btn btn-or"} data-cta="fiche-lieu-en">Read the Forever zone page</Link> : null}
             </div>
           ) : null}
         </div>

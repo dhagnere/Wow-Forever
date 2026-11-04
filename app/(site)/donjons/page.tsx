@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DONJONS, NOTE_DONJONS } from "@/content/monde";
 import { listerPublies } from "@/modules/veille";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { FilArticles } from "@/components/Articles";
 import { dateLongue } from "@/lib/site";
@@ -13,7 +14,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Donjons et raids de WoW Forever",
   description: "Les nouveaux donjons de WoW Forever repérés en bêta, leur niveau d'accès, et les raids à 10 et 20 joueurs annoncés.",
-  alternates: { canonical: "/donjons/" },
+  alternates: { canonical: "/donjons/", languages: languesDe("/donjons/") },
 };
 
 export default async function Donjons() {

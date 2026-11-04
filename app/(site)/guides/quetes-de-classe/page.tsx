@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CLASSES } from "@/content/classes";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { IconeClasse } from "@/components/IconeClasse";
 import { fondBandeau } from "@/lib/ecrans";
@@ -9,7 +10,7 @@ import { chainesDeClasse } from "@/lib/quetes";
 export const metadata: Metadata = {
   title: "Quêtes de classe de WoW Forever",
   description: "Les quêtes de classe de WoW Forever, classe par classe : chaînes, donneurs et positions, objectifs et récompenses.",
-  alternates: { canonical: "/guides/quetes-de-classe/" },
+  alternates: { canonical: "/guides/quetes-de-classe/", languages: languesDe("/guides/quetes-de-classe/") },
 };
 
 export default function QuetesDeClasseIndex() {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { TRANCHES, ZONES_NIVEAUX, ZONES_SANS_NIVEAU, DONJONS_ORIGINE, dansTranche } from "@/content/reference";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { AvertissementReference } from "@/components/AvertissementReference";
@@ -13,7 +14,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Zones par niveau de WoW Forever, de 1 à 60",
   description: "Toutes les zones de WoW Forever classées par niveau, de 1 à 60, avec leur continent et les donjons de chaque tranche.",
-  alternates: { canonical: "/guides/zones-par-niveau/" },
+  alternates: { canonical: "/guides/zones-par-niveau/", languages: languesDe("/guides/zones-par-niveau/") },
 };
 
 function niveaux(min: number, max: number) {

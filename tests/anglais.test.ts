@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { CLASSES } from "@/content/classes";
 import { cheminAnglais, cheminFrancais, CLASSES_EN, languesDe, lienGuideEn, LIEUX_EN, nomDonjonEn, RACES_EN } from "@/lib/anglais";
 import { tousLesLieux } from "@/lib/cartes";
+import { DONJONS, ZONES } from "@/content/monde";
+import { ZONES_EN } from "@/content/monde-en";
 import { DONJONS_ORIGINE, RAIDS } from "@/content/reference";
 import { prixEnTexte, qualite, emplacement } from "@/modules/veille";
 import { combinaisons, guidePour } from "@/lib/guide";
@@ -15,6 +17,10 @@ describe("version anglaise", () => {
       ...CLASSES.flatMap((c) => [`/classes/${c.slug}/`, `/classes/${c.slug}/talents/`]),
       ...combinaisons().map((c) => `/guides/parcours/${c.race.slug}/${c.classe.slug}/`),
       "/cartes/", "/base-de-donnees/", "/base-de-donnees/objets/", "/base-de-donnees/objets/19019/",
+      "/zones/", "/donjons/", "/races/skyborne/", "/guides/bien-demarrer/", "/guides/zones-de-depart/", "/guides/zones-par-niveau/",
+      "/guides/liste-des-donjons/", "/guides/quetes-de-classe/",
+      ...ZONES.map((z) => `/zones/${z.slug}/`), ...DONJONS.map((d) => `/donjons/${d.slug}/`),
+      ...CLASSES.map((c) => `/guides/quetes-de-classe/${c.slug}/`),
       ...tousLesLieux().map((l) => `/cartes/${l}/`),
     ];
     for (const fr of pages) {
@@ -55,6 +61,13 @@ describe("version anglaise", () => {
     expect(nomDonjonEn("Les Mortemines")).toBe("Deadmines");
     expect(nomDonjonEn("Temple d'Atal'Hakkar")).toBe("Sunken Temple");
     expect(nomDonjonEn("[Raid du Mont Hyjal, nom à confirmer]")).toBeNull();
+  });
+
+  it("a une fiche anglaise pour chaque zone et chaque nouveau donjon de Forever", () => {
+    for (const z of ZONES) expect(ZONES_EN[z.slug], z.slug).toBeDefined();
+    for (const d of DONJONS) expect(nomDonjonEn(d.nom), d.nom).toBeTruthy();
+    expect(cheminAnglais("/zones/rives-claires/")).toBe("/en/zones/riverglades/");
+    expect(cheminAnglais("/guides/quetes-de-classe/demoniste/")).toBe("/en/guides/class-quests/warlock/");
   });
 
   it("traduit les libellés des objets", () => {

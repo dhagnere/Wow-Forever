@@ -5,10 +5,22 @@ import { CLASSES } from "@/content/classes";
 import { combinaisons } from "@/lib/guide";
 import { ZONES, DONJONS } from "@/content/monde";
 import { SITE } from "@/lib/site";
-import { CLASSES_EN, LIEUX_EN, lienGuideEn } from "@/lib/anglais";
+import { cheminAnglais } from "@/lib/anglais";
 import { tousLesLieux } from "@/lib/cartes";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Plan du site (sitemap.xml), déclaré dans robots.txt et à soumettre dans Google Search Console et Bing Webmaster Tools.
+ * Chaque page française qui a sa version anglaise apparaît avec elle, et les deux s'annoncent l'une l'autre
+ * (balises xhtml:link hreflang fr / en / x-default), comme dans l'en-tête des pages.
+ */
+function avecTraduction(chemin: string, extra: Partial<MetadataRoute.Sitemap[number]> = {}): MetadataRoute.Sitemap {
+  const en = cheminAnglais(chemin);
+  if (!en) return [{ url: `${SITE.url}${chemin}`, ...extra }];
+  const alternates = { languages: { fr: `${SITE.url}${chemin}`, en: `${SITE.url}${en}`, "x-default": `${SITE.url}${chemin}` } };
+  return [{ url: `${SITE.url}${chemin}`, alternates, ...extra }, { url: `${SITE.url}${en}`, alternates, ...extra }];
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const fixes = [
@@ -21,19 +33,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...CLASSES.map((c) => `/guides/quetes-de-classe/${c.slug}/`),
     ...combinaisons().map((c) => `/guides/parcours/${c.race.slug}/${c.classe.slug}/`),
     ...ZONES.map((z) => `/zones/${z.slug}/`),
-    // Version anglaise
-    "/en/", "/en/leveling-guide/", "/en/classes/", "/en/races/", "/en/maps/", "/en/item-database/", "/en/item-database/items/",
-    ...tousLesLieux().filter((l) => LIEUX_EN[l]).map((l) => `/en/maps/${LIEUX_EN[l]}/`),
-    ...CLASSES.map((c) => `/en/classes/${CLASSES_EN[c.slug].slug}/`),
-    ...CLASSES.map((c) => `/en/classes/${CLASSES_EN[c.slug].slug}/talents/`),
-    ...combinaisons().map((c) => lienGuideEn(c.race.slug, c.classe.slug)),
     ...DONJONS.map((d) => `/donjons/${d.slug}/`),
-  ].map((chemin) => ({ url: `${SITE.url}${chemin}` }));
+  ].flatMap((chemin) => avecTraduction(chemin));
   const articles = (await listerPourPlan()).map((a) => ({ url: `${SITE.url}/articles/${a.slug}/`, lastModified: a.modifieLe }));
   // Fiches d'objets : qualité « bonne » et au-delà, pour ne pas noyer le plan sous les objets gris et blancs.
-  const objets = (await listerObjetsPourPlan().catch(() => [])).flatMap((o) => [
-    { url: `${SITE.url}/base-de-donnees/objets/${o.id}/` }, { url: `${SITE.url}/en/item-database/items/${o.id}/` },
-  ]);
+  const objets = (await listerObjetsPourPlan().catch(() => [])).flatMap((o) => avecTraduction(`/base-de-donnees/objets/${o.id}/`));
   const guildes = (await listerGuildesPourPlan().catch(() => [])).map((g) => ({ url: `${SITE.url}/guildes/${g.slug}/`, lastModified: g.majLe }));
   return [...fixes, ...articles, ...guildes, ...objets];
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CLASSES, trouverClasse } from "@/content/classes";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { IconeClasse } from "@/components/IconeClasse";
 import { ChaineQuetes } from "@/components/Quetes";
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `Quêtes de classe du ${c.nom} sur WoW Forever`,
     description: `Toutes les quêtes de classe du ${c.nom.toLowerCase()} sur WoW Forever, chaîne par chaîne : niveau, donneur et position sur la carte, objectifs et récompenses.`,
-    alternates: { canonical: `/guides/quetes-de-classe/${c.slug}/` },
+    alternates: { canonical: `/guides/quetes-de-classe/${c.slug}/`, languages: languesDe(`/guides/quetes-de-classe/${c.slug}/`) },
   };
 }
 

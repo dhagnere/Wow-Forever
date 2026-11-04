@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ZONES_DEPART } from "@/content/reference";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { AvertissementReference } from "@/components/AvertissementReference";
@@ -13,7 +14,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Zones de départ de WoW Forever, race par race",
   description: "Où commence chaque race dans WoW Forever : lieu de départ, zone des niveaux 1 à 10, capitale et continent, Skyborne compris.",
-  alternates: { canonical: "/guides/zones-de-depart/" },
+  alternates: { canonical: "/guides/zones-de-depart/", languages: languesDe("/guides/zones-de-depart/") },
 };
 
 export default function ZonesDeDepart() {

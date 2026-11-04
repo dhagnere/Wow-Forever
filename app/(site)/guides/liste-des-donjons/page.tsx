@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DONJONS, NOTE_DONJONS } from "@/content/monde";
 import { DONJONS_ORIGINE, RAIDS } from "@/content/reference";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { AvertissementReference } from "@/components/AvertissementReference";
@@ -15,7 +16,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Liste des donjons et raids de WoW Forever",
   description: "Tous les donjons de WoW Forever par niveau : nouveaux donjons repérés en bêta, donjons de l'Azeroth d'origine et raids annoncés.",
-  alternates: { canonical: "/guides/liste-des-donjons/" },
+  alternates: { canonical: "/guides/liste-des-donjons/", languages: languesDe("/guides/liste-des-donjons/") },
 };
 
 export default function ListeDesDonjons() {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { HeureLocale } from "@/components/HeureLocale";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { SITE } from "@/lib/site";
 import { ArticlesLies } from "@/components/ArticlesLies";
@@ -11,7 +12,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Bien démarrer sur WoW Forever",
   description: "Date et heure de sortie, abonnement, choix de la classe, de la race et du serveur : tout pour bien démarrer sur WoW Forever.",
-  alternates: { canonical: "/guides/bien-demarrer/" },
+  alternates: { canonical: "/guides/bien-demarrer/", languages: languesDe("/guides/bien-demarrer/") },
 };
 
 export default function BienDemarrer() {

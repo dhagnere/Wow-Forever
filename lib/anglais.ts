@@ -4,6 +4,8 @@
  */
 
 import { CARTES_EN, DONJONS_EN } from "@/content/lieux-en";
+import { DONJONS_TEXTE_EN, ZONES_EN, ZONES_HORS_CARTE_EN } from "@/content/monde-en";
+import { lieuParNom } from "./cartes";
 
 /** Menu de la version anglaise. */
 export const MENU_EN: { href: string; label: string }[] = [
@@ -85,6 +87,37 @@ export function nomDonjonEn(nom: string): string | null {
   return DONJONS_EN[ALIAS_DONJONS[cle] ?? cle] ?? null;
 }
 
+/** Nom anglais d'une zone citée par son nom français dans les guides (carte du jeu, sinon table des repères). */
+export function nomZoneEn(nom: string): string {
+  const slug = lieuParNom(nom);
+  return (slug ? CARTES_EN[slug] : undefined) ?? ZONES_HORS_CARTE_EN[nom] ?? nom;
+}
+
+/** « 40 dans l'Azeroth d'origine » → « 40 players in original Azeroth ». */
+export const joueursEn = (j: string) => j.replace(/^(\d+)( dans l'Azeroth d'origine)?$/, (_, n, o) => `${n} players${o ? " in original Azeroth" : ""}`);
+
+/** Fiches Forever : zones et nouveaux donjons, slug français ↔ slug anglais. */
+const ZONES_FR = Object.fromEntries(Object.entries(ZONES_EN).map(([fr, z]) => [z.slug, fr]));
+const DONJONS_FR = Object.fromEntries(Object.entries(DONJONS_TEXTE_EN).map(([fr, d]) => [d.slug, fr]));
+export const zoneDepuisEn = (s: string): string | undefined => ZONES_FR[s];
+export const donjonDepuisEn = (s: string): string | undefined => DONJONS_FR[s];
+export const pageZoneEn = (fr: string) => (ZONES_EN[fr] ? `/en/zones/${ZONES_EN[fr].slug}/` : `/zones/${fr}/`);
+export const pageDonjonEn = (fr: string) => (DONJONS_TEXTE_EN[fr] ? `/en/dungeons/${DONJONS_TEXTE_EN[fr].slug}/` : `/donjons/${fr}/`);
+/** Adresse anglaise d'un lien des repères (« /zones/mont-hyjal/ »). */
+export const lienEn = (lien: string) => cheminAnglais(lien) ?? lien;
+
+/** Pages de guides : adresse française → adresse anglaise. */
+const GUIDES: [string, string][] = [
+  ["/guides/bien-demarrer/", "/en/guides/getting-started/"],
+  ["/guides/zones-de-depart/", "/en/guides/starting-zones/"],
+  ["/guides/zones-par-niveau/", "/en/guides/zones-by-level/"],
+  ["/guides/liste-des-donjons/", "/en/guides/dungeon-list/"],
+  ["/guides/quetes-de-classe/", "/en/guides/class-quests/"],
+  ["/zones/", "/en/zones/"],
+  ["/donjons/", "/en/dungeons/"],
+  ["/races/skyborne/", "/en/races/skyborne/"],
+];
+
 /** Races des zones de départ (content/reference.ts), en anglais. */
 export const RACES_DEPART_EN: Record<string, string> = {
   Humains: "Humans", "Nains et Gnomes": "Dwarves and Gnomes", "Elfes de la nuit": "Night Elves", "Orcs et Trolls": "Orcs and Trolls",
@@ -102,6 +135,14 @@ export function cheminAnglais(chemin: string): string | null {
   if (c === "/classes/") return "/en/classes/";
   if (c === "/races/") return "/en/races/";
   if (c === "/cartes/") return "/en/maps/";
+  const g = GUIDES.find(([fr]) => fr === c);
+  if (g) return g[1];
+  let z = /^\/zones\/([a-z0-9-]+)\/$/.exec(c);
+  if (z && ZONES_EN[z[1]]) return `/en/zones/${ZONES_EN[z[1]].slug}/`;
+  z = /^\/donjons\/([a-z0-9-]+)\/$/.exec(c);
+  if (z && DONJONS_TEXTE_EN[z[1]]) return `/en/dungeons/${DONJONS_TEXTE_EN[z[1]].slug}/`;
+  z = /^\/guides\/quetes-de-classe\/([a-z]+)\/$/.exec(c);
+  if (z && CLASSES_EN[z[1]]) return `/en/guides/class-quests/${CLASSES_EN[z[1]].slug}/`;
   if (c === "/base-de-donnees/") return "/en/item-database/";
   if (c === "/base-de-donnees/objets/") return "/en/item-database/items/";
   let m = /^\/cartes\/([a-z0-9-]+)\/$/.exec(c);
@@ -123,6 +164,14 @@ export function cheminFrancais(chemin: string): string {
   if (c === "/en/classes/") return "/classes/";
   if (c === "/en/races/") return "/races/";
   if (c === "/en/maps/") return "/cartes/";
+  const g = GUIDES.find(([, en]) => en === c);
+  if (g) return g[0];
+  let z = /^\/en\/zones\/([a-z0-9-]+)\/$/.exec(c);
+  if (z && zoneDepuisEn(z[1])) return `/zones/${zoneDepuisEn(z[1])}/`;
+  z = /^\/en\/dungeons\/([a-z0-9-]+)\/$/.exec(c);
+  if (z && donjonDepuisEn(z[1])) return `/donjons/${donjonDepuisEn(z[1])}/`;
+  z = /^\/en\/guides\/class-quests\/([a-z]+)\/$/.exec(c);
+  if (z && classeDepuisEn(z[1])) return `/guides/quetes-de-classe/${classeDepuisEn(z[1])}/`;
   if (c === "/en/item-database/") return "/base-de-donnees/";
   if (c === "/en/item-database/items/") return "/base-de-donnees/objets/";
   let m = /^\/en\/maps\/([a-z0-9-]+)\/$/.exec(c);

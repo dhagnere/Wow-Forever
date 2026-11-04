@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ZONES } from "@/content/monde";
 import { estPilier } from "@/config/taxonomie";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { dateLongue } from "@/lib/site";
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const slug = (await params).slug;
   const zone = ZONES.find((x) => x.slug === slug);
   if (!zone) return {};
-  return { title: `${zone.nom} — zone de WoW Forever`, description: zone.resume, alternates: { canonical: `/zones/${zone.slug}/` } };
+  return { title: `${zone.nom} — zone de WoW Forever`, description: zone.resume, alternates: { canonical: `/zones/${zone.slug}/`, languages: languesDe(`/zones/${zone.slug}/`) } };
 }
 
 export default async function PageZone({ params }: Props) {

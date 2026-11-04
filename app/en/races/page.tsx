@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { RACES_ORIGINE } from "@/content/monde";
 import { Ariane } from "@/components/Ariane";
 import { IconesRace } from "@/components/IconeRace";
@@ -50,7 +51,7 @@ export default function RacesEn() {
             <header className="lien-icone">
               <IconesRace race="Skyborne" taille={44} />
               <div>
-                <h3>Skyborne</h3>
+                <h3><Link href="/en/races/skyborne/">Skyborne</Link></h3>
                 <p className="sort-meta">Alliance or Horde</p>
               </div>
             </header>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ZONES } from "@/content/monde";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { Visuel } from "@/components/Visuels";
 import { fondBandeau } from "@/lib/ecrans";
@@ -9,7 +10,7 @@ import { ECRAN_ZONE } from "@/lib/ecrans";
 export const metadata: Metadata = {
   title: "Les zones de WoW Forever",
   description: "Mont Hyjal, Rives Claires, île de Zéphras, Shen'dralar : les nouvelles zones de World of Warcraft: Forever.",
-  alternates: { canonical: "/zones/" },
+  alternates: { canonical: "/zones/", languages: languesDe("/zones/") },
 };
 
 export default function Zones() {

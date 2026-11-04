@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SKYBORNE } from "@/content/monde";
+import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { IconesRace } from "@/components/IconeRace";
 import { ArticlesLies } from "@/components/ArticlesLies";
@@ -15,7 +16,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Skyborne (Éolides) : la nouvelle race de WoW Forever",
   description: "Skyborne, ou Éolides : origines, classes par faction, capacités raciales et comment débloquer la nouvelle race de WoW Forever.",
-  alternates: { canonical: "/races/skyborne/" },
+  alternates: { canonical: "/races/skyborne/", languages: languesDe("/races/skyborne/") },
 };
 
 export default function Skyborne() {
