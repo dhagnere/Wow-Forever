@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { lirePublie, lirePublieEn, listerPublies, markdownVersHtml, sourcesPubliees } from "@/modules/veille";
+import { lirePublie, lirePublieEn, listerPublies, markdownVersHtml, sourcesPubliees, texteReseau } from "@/modules/veille";
+import { PartageFacebook } from "@/components/PartageFacebook";
 import { CarteArticle, nomRubrique } from "@/components/Articles";
 import { Ariane } from "@/components/Ariane";
 import { JsonLd } from "@/components/JsonLd";
@@ -50,7 +51,6 @@ export default async function PageArticle({ params }: Props) {
   if (!article) notFound();
   const memeTheme = await listerPublies({ rubrique: article.rubrique, limite: 3, sauf: article.id });
   const url = `${SITE.url}/articles/${article.slug}/`;
-  const partageFacebook = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
 
   return (
     <div className="wrap contenu">
@@ -119,7 +119,7 @@ export default async function PageArticle({ params }: Props) {
             <p><strong>Une semaine de WoW Forever, chaque dimanche à 10 h.</strong> Le billet de Jobwow, les cinq nouvelles à retenir et un tuyau de jeu.</p>
             <div className="partage">
               <Link href="/lettre/" className="btn btn-or" data-cta="lettre-article">Recevoir les nouvelles chaque dimanche</Link>
-              <a href={partageFacebook} className="btn btn-facebook" rel="noopener noreferrer" target="_blank" data-cta="partage-article">Partager sur Facebook</a>
+              <PartageFacebook url={url} texte={texteReseau("facebook", article)} cta="partage-article" />
             </div>
           </div>
 

@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PartageFacebook } from "@/components/PartageFacebook";
 import { AVIS_MINIMUM, DUREE_REEL_S, lienFrancais, lireParId, longueurX, messageFacebook, nomLangue, texteReseau } from "@/modules/veille";
 import { TexteACopier } from "./Copier";
 import { PILIERS, RUBRIQUES } from "@/config/taxonomie";
 import { exigerAdmin } from "@/lib/admin";
-import { dateLongue } from "@/lib/site";
+import { SITE, dateLongue } from "@/lib/site";
 import { Editeur } from "./Editeur";
 import type { SourceEditeur } from "./Editeur";
 import { depublier, enregistrer, proposerAvisPour, proposerLegendePour, proposerTexteFacebookPour, restaurer, supprimer } from "../actions";
@@ -79,6 +80,11 @@ export default async function EditerArticle({ params, searchParams }: { params: 
               style={{ width: "100%", borderRadius: 6, display: "block", marginBottom: 10 }}
             />
             <p style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: 15 }}>{messageFacebook(a)}</p>
+            {a.statut === "publie" ? (
+              <div className="partage" style={{ margin: "12px 0 0" }}>
+                <PartageFacebook url={`${SITE.url}/articles/${a.slug}/`} texte={messageFacebook(a)} libelle="Partager à la main sur Facebook" />
+              </div>
+            ) : null}
             {a.facebookErreur ? <p className="alerte" style={{ marginTop: 12, fontSize: 14 }}>Dernier échec : {a.facebookErreur}</p> : null}
           </div>
           <div className="encadre" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
