@@ -57,7 +57,7 @@ export default async function NotebookEn() {
           <aside className="colonne-laterale">
             <section className="encadre-nuit" aria-labelledby="t-fiche">
               <h2 id="t-fiche" className="titre" style={{ margin: "0 0 4px", fontSize: 22 }}>Jobwow</h2>
-              <p style={{ margin: "0 0 14px", fontSize: 14, color: "#cfc7b4" }}>[Race] · [Class] · [Faction]</p>
+              <p style={{ margin: "0 0 14px", fontSize: 14, color: "#cfc7b4" }}>Undead · Mage · Horde</p>
               <dl style={{ margin: 0, display: "grid", gridTemplateColumns: "auto 1fr", gap: "6px 16px", fontSize: 15 }}>
                 <dt style={{ color: "#cfc7b4" }}>Realm</dt><dd style={{ margin: 0 }}>[Realm name]</dd>
                 <dt style={{ color: "#cfc7b4" }}>Guild</dt><dd style={{ margin: 0 }}>[Name or “none”]</dd>
