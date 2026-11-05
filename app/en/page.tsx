@@ -100,7 +100,7 @@ export default async function AccueilAnglais() {
         <section className="encadre-chaud" aria-labelledby="t-francais">
           <h2 id="t-francais" style={{ marginTop: 0, fontSize: 22 }}>About this site</h2>
           <p style={{ margin: 0 }}>
-            La Taverne Éternelle is a French fan site about WoW Forever, written by Jobwow, a gnome mage and innkeeper. The English section covers the
+            La Taverne Éternelle is a French fan site about WoW Forever, written by Jobwow, a Horde troll mage and innkeeper. The English section covers the
             leveling guide, classes, talents, races, the <Link href="/en/item-database/">item database</Link>, the{" "}
             <Link href="/en/maps/">world maps</Link>, the <Link href="/en/zones/">new zones</Link>, the <Link href="/en/dungeons/">dungeons</Link>{" "}
             and the <Link href="/en/guides/getting-started/">guides</Link>, with names taken from the English game files. Daily news and articles

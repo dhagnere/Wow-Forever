@@ -7,7 +7,7 @@ import { fondBandeau } from "@/lib/ecrans";
 
 export const metadata: Metadata = {
   title: "Qui est Jobwow ?",
-  description: "Jobwow, gnome mage et tavernier de la Taverne Éternelle : qui il est, comment le site est fait, d'où viennent les informations.",
+  description: "Jobwow, troll mage de la Horde et tavernier de la Taverne Éternelle : qui il est, comment le site est fait, d'où viennent les informations.",
   alternates: { canonical: "/a-propos/", languages: languesDe("/a-propos/") },
 };
 
@@ -19,11 +19,11 @@ export default function APropos() {
           <Ariane etapes={[{ nom: "Qui est Jobwow ?" }]} />
           <div className="presentation-auteur">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/jobwow-512.png" width={200} height={200} alt="Jobwow, gnome mage au chapeau étoilé, lunettes rondes et bâton à orbe lumineux" className="avatar-jobwow" />
+            <img src="/images/jobwow-512.png" width={200} height={200} alt="Avatar de Jobwow : mage au chapeau étoilé, lunettes rondes et bâton à orbe lumineux" className="avatar-jobwow" />
             <div>
               <p className="surtitre">Le tavernier</p>
               <h1>Qui est Jobwow ?</h1>
-              <p className="chapo">Gnome mage, lunettes rondes, chapeau étoilé : Jobwow tient le comptoir de la Taverne Éternelle et raconte ce qui se passe dans le monde.</p>
+              <p className="chapo">Troll mage de la Horde : Jobwow tient le comptoir de la Taverne Éternelle et raconte ce qui se passe dans le monde, aux joueurs des deux factions.</p>
             </div>
           </div>
         </div>

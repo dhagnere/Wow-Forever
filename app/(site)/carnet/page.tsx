@@ -22,7 +22,7 @@ export default async function Carnet() {
           <Ariane etapes={[{ nom: "Le Carnet de Jobwow" }]} />
           <div className="presentation-auteur">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/jobwow-512.png" width={140} height={140} alt="Jobwow, gnome mage au chapeau étoilé" className="avatar-jobwow" />
+            <img src="/images/jobwow-512.png" width={140} height={140} alt="Avatar de Jobwow : mage au chapeau étoilé" className="avatar-jobwow" />
             <div>
               <p className="surtitre">Chaque dimanche à 18h</p>
               <h1>Le Carnet de Jobwow</h1>

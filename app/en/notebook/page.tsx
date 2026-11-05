@@ -23,7 +23,7 @@ export default async function NotebookEn() {
           <Ariane langue="en" etapes={[{ nom: "Jobwow's Notebook" }]} />
           <div className="presentation-auteur">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/jobwow-512.png" width={140} height={140} alt="Jobwow, a gnome mage with a starry hat" className="avatar-jobwow" />
+            <img src="/images/jobwow-512.png" width={140} height={140} alt="Jobwow's avatar: a mage with a starry hat" className="avatar-jobwow" />
             <div>
               <p className="surtitre">Every Sunday at 6 pm, Paris time</p>
               <h1>Jobwow&apos;s Notebook</h1>
