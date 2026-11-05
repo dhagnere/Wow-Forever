@@ -18,9 +18,14 @@ export interface Classe {
 }
 
 const ORIGINE = "Héritée de l'Azeroth d'origine";
+export const NOUVELLE_COMBINAISON = "Nouvelle combinaison de Forever";
 
-function races(liste: [string, string][], skyborne?: string) {
-  const lignes: Classe["races"] = liste.map(([race, faction]) => ({ race, faction, statut: ORIGINE }));
+/** Races d'une classe. `nouvelles` : combinaisons ajoutées par Forever (table CharBaseInfo des fichiers du jeu). */
+function races(liste: [string, string][], skyborne?: string, nouvelles: [string, string][] = []) {
+  const lignes: Classe["races"] = [
+    ...liste.map(([race, faction]) => ({ race, faction, statut: ORIGINE })),
+    ...nouvelles.map(([race, faction]) => ({ race, faction, statut: NOUVELLE_COMBINAISON })),
+  ];
   if (skyborne) lignes.push({ race: "Skyborne", faction: skyborne, statut: "Nouvelle race de Forever", lien: "/races/skyborne/" });
   return lignes;
 }
@@ -56,13 +61,13 @@ export const CLASSES: Classe[] = [
       { titre: "Vous voulez survivre seul", texte: "Soins, bouclier divin : le paladin se tire de bien des mauvais pas." },
       { titre: "Vous jouez dans l'Alliance", texte: "Dans l'Azeroth d'origine, la classe est réservée à l'Alliance." },
     ],
-    races: races([["Humain", "Alliance"], ["Nain", "Alliance"]]),
+    races: races([["Humain", "Alliance"], ["Nain", "Alliance"]], undefined, [["Mort-vivant", "Horde"]]),
     debuter: [
       { titre: "Choisir sa voie de talents.", texte: A_COMPLETER },
       { titre: "Garder la bonne bénédiction active.", texte: "Elle dure plusieurs minutes : pensez à la renouveler avant un combat." },
       { titre: "Se soigner entre les combats.", texte: "Une pause courte vaut mieux qu'une mort coûteuse en réparations." },
     ],
-    misAJour: "2026-10-31",
+    misAJour: "2026-11-05",
   },
   {
     slug: "chasseur", nom: "Chasseur", couleur: "#aad372", roles: ["Dégâts"],
@@ -74,13 +79,13 @@ export const CLASSES: Classe[] = [
       { titre: "Vous aimez collectionner", texte: "Chaque familier apprivoisable a son apparence et ses techniques." },
       { titre: "Vous jouez souvent en solo", texte: "Peu de temps morts, une progression régulière." },
     ],
-    races: races([["Nain", "Alliance"], ["Elfe de la nuit", "Alliance"], ["Orc", "Horde"], ["Tauren", "Horde"], ["Troll", "Horde"]], "Alliance ou Horde"),
+    races: races([["Nain", "Alliance"], ["Elfe de la nuit", "Alliance"], ["Orc", "Horde"], ["Tauren", "Horde"], ["Troll", "Horde"]], "Alliance ou Horde", [["Humain", "Alliance"]]),
     debuter: [
       { titre: "Apprivoiser un familier dès le niveau 10.", texte: "La quête de classe est disponible auprès de votre maître des chasseurs." },
       { titre: "Garder des munitions d'avance.", texte: "Flèches ou balles s'épuisent vite : prévoyez large." },
       { titre: "Nourrir son familier.", texte: A_COMPLETER },
     ],
-    misAJour: "2026-10-31",
+    misAJour: "2026-11-05",
   },
   {
     slug: "voleur", nom: "Voleur", couleur: "#fff468", roles: ["Dégâts"],
@@ -110,13 +115,13 @@ export const CLASSES: Classe[] = [
       { titre: "Vous voulez trouver un groupe vite", texte: "Un soigneur ne reste jamais longtemps seul en recherche de donjon." },
       { titre: "Vous aimez les deux faces", texte: "Sacré pour soigner, Ombre pour attaquer : deux styles en un." },
     ],
-    races: races([["Humain", "Alliance"], ["Nain", "Alliance"], ["Elfe de la nuit", "Alliance"], ["Mort-vivant", "Horde"], ["Troll", "Horde"]]),
+    races: races([["Humain", "Alliance"], ["Nain", "Alliance"], ["Elfe de la nuit", "Alliance"], ["Mort-vivant", "Horde"], ["Troll", "Horde"]], undefined, [["Gnome", "Alliance"]]),
     debuter: [
       { titre: "Monter de niveau en Ombre.", texte: A_COMPLETER },
       { titre: "Utiliser la baguette.", texte: "Elle économise la mana pour finir les combats." },
       { titre: "Garder le mot de pouvoir : Bouclier.", texte: "Il évite bien des interruptions pendant les soins." },
     ],
-    misAJour: "2026-10-31",
+    misAJour: "2026-11-05",
   },
   {
     slug: "chaman", nom: "Chaman", couleur: "#0070dd", roles: ["Soins", "Dégâts"],
@@ -128,13 +133,13 @@ export const CLASSES: Classe[] = [
       { titre: "Vous jouez dans la Horde", texte: "Dans l'Azeroth d'origine, la classe est réservée à la Horde." },
       { titre: "Vous aimez soutenir sans tout sacrifier", texte: "Les totems aident le groupe tout en laissant frapper." },
     ],
-    races: races([["Orc", "Horde"], ["Tauren", "Horde"], ["Troll", "Horde"]], "Horde (ordre des vents)"),
+    races: races([["Orc", "Horde"], ["Tauren", "Horde"], ["Troll", "Horde"]], "Horde (ordre des vents)", [["Nain", "Alliance"]]),
     debuter: [
       { titre: "Récupérer chaque totem par sa quête.", texte: "Terre, feu, eau et air s'obtiennent par des quêtes de classe." },
       { titre: "Choisir son arme.", texte: A_COMPLETER },
       { titre: "Adapter ses totems au combat.", texte: "Un totem bien choisi vaut mieux que quatre posés au hasard." },
     ],
-    misAJour: "2026-10-31",
+    misAJour: "2026-11-05",
   },
   {
     slug: "mage", nom: "Mage", couleur: "#3fc7eb", roles: ["Dégâts"],
@@ -146,13 +151,13 @@ export const CLASSES: Classe[] = [
       { titre: "Vous voyagez beaucoup", texte: "Portails et téléportations vers les capitales." },
       { titre: "Vous aimez contrôler le combat", texte: "Métamorphose, nova de givre : le mage garde ses ennemis à distance." },
     ],
-    races: races([["Humain", "Alliance"], ["Gnome", "Alliance"], ["Mort-vivant", "Horde"], ["Troll", "Horde"]], "Alliance (ordre des savants)"),
+    races: races([["Humain", "Alliance"], ["Gnome", "Alliance"], ["Mort-vivant", "Horde"], ["Troll", "Horde"]], "Alliance (ordre des savants)", [["Orc", "Horde"]]),
     debuter: [
       { titre: "Monter en Givre.", texte: A_COMPLETER },
       { titre: "Conjurer sa nourriture et son eau.", texte: "Aucune dépense, et de quoi dépanner le groupe." },
       { titre: "Garder ses distances.", texte: "Le tissu protège peu : ralentissez, puis reculez." },
     ],
-    misAJour: "2026-10-31",
+    misAJour: "2026-11-05",
   },
   {
     slug: "demoniste", nom: "Démoniste", couleur: "#8788ee", roles: ["Dégâts"],
@@ -164,13 +169,13 @@ export const CLASSES: Classe[] = [
       { titre: "Vous jouez seul", texte: "Le marcheur du Vide encaisse à votre place." },
       { titre: "Vous aimez rendre service", texte: "Pierres de soins, rituel d'invocation : le groupe vous attend." },
     ],
-    races: races([["Humain", "Alliance"], ["Gnome", "Alliance"], ["Orc", "Horde"], ["Mort-vivant", "Horde"]]),
+    races: races([["Humain", "Alliance"], ["Gnome", "Alliance"], ["Orc", "Horde"], ["Mort-vivant", "Horde"]], undefined, [["Troll", "Horde"]]),
     debuter: [
       { titre: "Obtenir le marcheur du Vide au niveau 10.", texte: "Une quête de classe le débloque : votre meilleur allié pour progresser." },
       { titre: "Gérer ses fragments d'âme.", texte: "Gardez-en toujours quelques-uns en réserve." },
       { titre: "Utiliser Connexion.", texte: A_COMPLETER },
     ],
-    misAJour: "2026-10-31",
+    misAJour: "2026-11-05",
   },
   {
     slug: "druide", nom: "Druide", couleur: "#ff7c0a", roles: ["Tank", "Soins", "Dégâts"],

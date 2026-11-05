@@ -1,6 +1,6 @@
 /** Fichier généré par npm run zephras:jeu : ne pas modifier à la main. Noms et carte © Blizzard Entertainment, lus grâce à wago.tools. */
 
-export const VERSION_ZEPHRAS_JEU = "1.60.1.70755";
+export const VERSION_ZEPHRAS_JEU = "1.60.1.70790";
 
 /** Lieux de l'île placés sur sa carte (centre de leur zone d'exploration, en % de la carte). */
 export const LIEUX_ZEPHRAS: { nom: string; x: number; y: number }[] = [

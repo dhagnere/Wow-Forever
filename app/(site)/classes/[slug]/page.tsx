@@ -86,7 +86,6 @@ export default async function PageClasse({ params }: Props) {
                         <td className="doux">{r.statut}</td>
                       </tr>
                     ))}
-                    <tr><td colSpan={3} className="doux">[Autres combinaisons annoncées par Forever : à compléter dès confirmation]</td></tr>
                   </tbody>
                 </table>
               </div>

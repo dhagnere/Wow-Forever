@@ -31,7 +31,7 @@ export const ZONES_EN: Record<string, ZoneEn> = {
     activites: [
       { titre: "Quests", texte: "[Main quest chains and rewards: to be recorded in game.]" },
       { titre: "Reputation", texte: "[Faction tied to the zone, if any: to be confirmed.]" },
-      { titre: "Raid", texte: "A 20-player raid bears the name of the summit. Opening announced for December, date to be confirmed." },
+      { titre: "Raid", texte: "A 20-player raid, Hyjal Summit, opens on 9 December 2026, the same day as Barrow Deeps (10 players) and Onyxia's Lair (40 players)." },
     ],
     fiabilite: "Continent and status recorded during the beta. Level and raid from the roadmap published by Blizzard. Page reviewed when the servers open.",
   },
@@ -118,8 +118,14 @@ export const ZONES_HORS_CARTE_EN: Record<string, string> = {
   "[À confirmer]": "[To be confirmed]",
 };
 
+/** Noms anglais des raids de Forever dont le nom français n'est pas encore connu. */
+export const RAIDS_FOREVER_EN: Record<string, string> = {
+  "[Raid du Mont Hyjal : Hyjal Summit en anglais, nom français à confirmer]": "Hyjal Summit",
+  "[Raid à 10 joueurs : Barrow Deeps en anglais, nom français à confirmer]": "Barrow Deeps",
+};
+
 /** Statut des raids. */
 export const STATUTS_RAIDS_EN: Record<string, string> = {
-  "Annoncé dans Forever, ouverture prévue en décembre (date à confirmer)": "Announced in Forever, opening planned for December (date to be confirmed)",
+  "Annoncé dans Forever, ouverture le 9 décembre 2026": "Announced in Forever, opening on 9 December 2026",
   "Présence dans Forever non confirmée": "Presence in Forever not confirmed",
 };

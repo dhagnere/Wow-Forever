@@ -136,8 +136,9 @@ export interface RaidReference {
 }
 
 export const RAIDS: RaidReference[] = [
-  { nom: "[Raid du Mont Hyjal, nom à confirmer]", joueurs: "20", zone: "Mont Hyjal", statut: "Annoncé dans Forever, ouverture prévue en décembre (date à confirmer)", lien: "/zones/mont-hyjal/" },
-  { nom: "Repaire d'Onyxia", joueurs: "40 dans l'Azeroth d'origine", zone: "Marécage d'Âprefange", statut: "Présence dans Forever non confirmée" },
+  { nom: "[Raid à 10 joueurs : Barrow Deeps en anglais, nom français à confirmer]", joueurs: "10", zone: "[À confirmer]", statut: "Annoncé dans Forever, ouverture le 9 décembre 2026" },
+  { nom: "[Raid du Mont Hyjal : Hyjal Summit en anglais, nom français à confirmer]", joueurs: "20", zone: "Mont Hyjal", statut: "Annoncé dans Forever, ouverture le 9 décembre 2026", lien: "/zones/mont-hyjal/" },
+  { nom: "Repaire d'Onyxia", joueurs: "40", zone: "Marécage d'Âprefange", statut: "Annoncé dans Forever, ouverture le 9 décembre 2026" },
   { nom: "Cœur du Magma", joueurs: "40 dans l'Azeroth d'origine", zone: "Mont Rochenoire", statut: "Présence dans Forever non confirmée" },
   { nom: "Repaire de l'Aile noire", joueurs: "40 dans l'Azeroth d'origine", zone: "Mont Rochenoire", statut: "Présence dans Forever non confirmée" },
   { nom: "Zul'Gurub", joueurs: "20 dans l'Azeroth d'origine", zone: "Vallée de Strangleronce", statut: "Présence dans Forever non confirmée" },

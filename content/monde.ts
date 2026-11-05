@@ -27,10 +27,10 @@ export const ZONES: Zone[] = [
     activites: [
       { titre: "Quêtes", texte: "[Chaînes de quêtes principales et récompenses : à relever en jeu.]" },
       { titre: "Réputation", texte: "[Faction liée à la zone, s'il y en a une : à confirmer.]" },
-      { titre: "Raid", texte: "Un raid à 20 joueurs porte le nom du sommet. Ouverture annoncée pour décembre, date à confirmer." },
+      { titre: "Raid", texte: "Un raid à 20 joueurs, Hyjal Summit en anglais, ouvre le 9 décembre 2026, le même jour qu'un raid à 10 joueurs (Barrow Deeps) et le Repaire d'Onyxia (40 joueurs)." },
     ],
     fiabilite: "Continent et statut relevés pendant la bêta. Niveau et raid d'après la feuille de route publiée par Blizzard. Fiche revue à l'ouverture des serveurs.",
-    misAJour: "2026-10-31",
+    misAJour: "2026-11-05",
   },
   {
     slug: "rives-claires", nom: "Rives Claires", nouvelle: true, continent: "Royaumes de l'Est (carte du jeu)", niveau: "Environ 35 à 45", statut: "[À confirmer]",

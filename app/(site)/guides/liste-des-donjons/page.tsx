@@ -68,7 +68,7 @@ export default function ListeDesDonjons() {
 
             <section aria-labelledby="t-raids">
               <h2 id="t-raids" className="section-titre" style={{ fontSize: 26 }}>Raids</h2>
-              <p className="doux" style={{ marginTop: 0 }}>Forever annonce des raids à 10 et 20 joueurs. Les raids d&apos;origine sont listés pour mémoire.</p>
+              <p className="doux" style={{ marginTop: 0 }}>Forever ouvre trois raids le 9 décembre 2026 : à 10, 20 et 40 joueurs. Les autres raids d&apos;origine sont listés pour mémoire.</p>
               <div className="tableau-boite">
                 <table>
                   <thead><tr><th scope="col">Raid</th><th scope="col">Joueurs</th><th scope="col">Zone</th><th scope="col">Statut</th></tr></thead>

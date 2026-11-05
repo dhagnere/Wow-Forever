@@ -18,7 +18,7 @@ export interface Echeance {
   en: { titre: string; description: string; periode?: string };
 }
 
-export const MAJ_CALENDRIER = "2026-11-03";
+export const MAJ_CALENDRIER = "2026-11-05";
 
 export const ECHEANCES: Echeance[] = [
   {
@@ -33,18 +33,18 @@ export const ECHEANCES: Echeance[] = [
     id: "raids",
     titre: "Ouverture des premiers raids",
     debut: "2026-12-09",
-    description: "Les premiers raids à 10 et 20 joueurs ouvrent, dont le raid du Mont Hyjal. Les guides paraissent avant l'ouverture.",
+    description: "Trois raids ouvrent : un raid à 10 joueurs (Barrow Deeps en anglais), le raid du Mont Hyjal à 20 joueurs (Hyjal Summit) et le Repaire d'Onyxia à 40. Les guides paraissent avant l'ouverture.",
     lien: "/donjons/#raids",
-    en: { titre: "First raids open", description: "The first 10 and 20-player raids open, including the Mount Hyjal raid. Guides are published before the opening." },
+    en: { titre: "First raids open", description: "Three raids open: Barrow Deeps (10 players), Hyjal Summit (20 players) and Onyxia's Lair (40 players). Guides are published before the opening." },
   },
   {
     id: "hardcore",
     titre: "Mode Hardcore",
     debut: null,
     periode: "Hiver 2026-2027",
-    description: "Annoncé pour l'hiver, sans date précise. La date sera ajoutée ici et dans l'agenda dès son annonce.",
+    description: "Annoncé pour l'hiver, peu après l'ouverture des raids d'après la feuille de route, sans date précise. La date sera ajoutée ici et dans l'agenda dès son annonce.",
     lien: "/actualites/",
-    en: { titre: "Hardcore mode", periode: "Winter 2026-2027", description: "Announced for the winter, without a precise date. The date will be added here and to the calendar as soon as it is announced." },
+    en: { titre: "Hardcore mode", periode: "Winter 2026-2027", description: "Announced for the winter, shortly after the raids open according to the roadmap, without a precise date. The date will be added here and to the calendar as soon as it is announced." },
   },
   {
     id: "ete-2027",

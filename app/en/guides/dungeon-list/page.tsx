@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DONJONS } from "@/content/monde";
-import { NOTE_DONJONS_EN, STATUTS_RAIDS_EN } from "@/content/monde-en";
+import { NOTE_DONJONS_EN, RAIDS_FOREVER_EN, STATUTS_RAIDS_EN } from "@/content/monde-en";
 import { DONJONS_ORIGINE, RAIDS } from "@/content/reference";
 import { Ariane } from "@/components/Ariane";
 import { AvertissementReferenceEn } from "@/components/AvertissementReferenceEn";
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 /** Nom anglais ; un raid pas encore nommé garde sa mention à compléter. */
-const nom = (n: string) => nomDonjonEn(n) ?? (n.startsWith("[") ? "[Mount Hyjal raid, name to be confirmed]" : n);
+const nom = (n: string) => RAIDS_FOREVER_EN[n] ?? nomDonjonEn(n) ?? n;
 const zone = (z: string) => (lieuParNom(z) ? <Link href={pageLieuEn(lieuParNom(z)!)}>{nomZoneEn(z)}</Link> : nomZoneEn(z));
 
 export default function DungeonList() {
@@ -69,7 +69,7 @@ export default function DungeonList() {
 
             <section aria-labelledby="t-raids">
               <h2 id="t-raids" className="section-titre" style={{ fontSize: 26 }}>Raids</h2>
-              <p className="doux" style={{ marginTop: 0 }}>Forever announces raids for 10 and 20 players. The original raids are listed for reference.</p>
+              <p className="doux" style={{ marginTop: 0 }}>Forever opens three raids on 9 December 2026: for 10, 20 and 40 players. The other original raids are listed for reference.</p>
               <div className="tableau-boite">
                 <table>
                   <thead><tr><th scope="col">Raid</th><th scope="col">Players</th><th scope="col">Zone</th><th scope="col">Status</th></tr></thead>
