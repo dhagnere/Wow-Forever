@@ -1,49 +1,29 @@
-import { after } from "next/server";
-import { ErreurVideo, lireParId, lireVideoStockee, obtenirVideo } from "@/modules/veille";
+import { demanderVideo, etatVideo, lireParId, lireVideoStockee } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
-import { imageReel } from "@/lib/imageReel";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 300;
-
-/**
- * Fabrications en cours ou échouées, par article. La vidéo se fabrique après la réponse (`after`) : une requête
- * qui attendrait ffmpeg dépasserait le délai de l'hébergeur et s'arrêterait sans fichier.
- */
-const enCours = new Set<number>();
-const echecs = new Map<number, string>();
 
 function echapper(t: string): string {
   return t.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
-function page(titre: string, texte: string, recharger: boolean, id: number): Response {
+function page(id: number, titre: string, paragraphes: string[], opts: { recharger?: boolean; reessayer?: boolean } = {}): Response {
+  const adresse = `/admin/veille/${id}/reel/`;
   const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-${recharger ? '<meta http-equiv="refresh" content="4">' : ""}<meta name="robots" content="noindex, nofollow"><title>${echapper(titre)}</title>
+${opts.recharger ? `<meta http-equiv="refresh" content="30;url=${adresse}">` : ""}<meta name="robots" content="noindex, nofollow"><title>${echapper(titre)}</title>
 <style>body{font-family:system-ui,sans-serif;background:#141312;color:#fbf1da;max-width:560px;margin:15vh auto;padding:0 16px;line-height:1.5}a{color:#e8c06a}</style></head>
-<body><h1 style="font-size:1.4rem">${echapper(titre)}</h1><p>${echapper(texte)}</p><p><a href="/admin/veille/${id}/">← Retour à l'article</a></p></body></html>`;
-  return new Response(html, { status: recharger ? 202 : 500, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
+<body><h1 style="font-size:1.4rem">${echapper(titre)}</h1>${paragraphes.map((p) => `<p>${echapper(p)}</p>`).join("")}
+${opts.reessayer ? `<p><a href="${adresse}?relancer=1">Relancer la fabrication</a></p>` : ""}<p><a href="/admin/veille/${id}/">← Retour à l'article</a></p></body></html>`;
+  return new Response(html, { status: opts.recharger ? 202 : 200, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
 }
 
 /**
  * Vidéo du Reel d'un article (MP4 1080 × 1920), à télécharger pour la poster à la main (Instagram, TikTok…).
- * Déjà fabriquée : envoyée tout de suite. Sinon : fabrication lancée en arrière-plan et page d'attente qui se
- * recharge toutes les 4 secondes ; le fichier part dès qu'il est prêt.
+ * Prête : envoyée tout de suite. Sinon : demande déposée pour la tâche planifiée veille:videos, qui la fabrique dans
+ * son propre conteneur (ffmpeg ferait tomber celui du site) ; la page d'attente revérifie toutes les 30 secondes.
  */
-export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await exigerAdmin();
-  try {
-    return await telecharger(ctx);
-  } catch (e) {
-    // Page réservée à l'administration : le motif s'affiche plutôt qu'une page 500 vide, et part dans les journaux.
-    const motif = e instanceof Error ? `${e.name} : ${e.message}` : String(e);
-    console.error(`[reel] ${new URL(req.url).pathname} :`, e);
-    const id = Number((await ctx.params).id);
-    return page("Erreur pendant la préparation de la vidéo", motif, false, Number.isInteger(id) ? id : 0);
-  }
-}
-
-async function telecharger({ params }: { params: Promise<{ id: string }> }): Promise<Response> {
   const id = Number((await params).id);
   if (!Number.isInteger(id)) return new Response("Article introuvable", { status: 404 });
   const a = await lireParId(id);
@@ -51,7 +31,6 @@ async function telecharger({ params }: { params: Promise<{ id: string }> }): Pro
 
   const video = await lireVideoStockee(a.id);
   if (video) {
-    echecs.delete(a.id);
     return new Response(new Uint8Array(video), {
       headers: {
         "Content-Type": "video/mp4",
@@ -62,23 +41,14 @@ async function telecharger({ params }: { params: Promise<{ id: string }> }): Pro
     });
   }
 
-  const echec = echecs.get(a.id);
-  if (echec && !enCours.has(a.id)) {
-    echecs.delete(a.id); // Le prochain clic relance la fabrication.
-    return page("Vidéo impossible à fabriquer", echec, false, a.id);
+  const etat = await etatVideo(a.id);
+  const relancer = new URL(req.url).searchParams.has("relancer");
+  if (etat.erreur && !relancer) {
+    return page(a.id, "Vidéo impossible à fabriquer", [etat.erreur], { reessayer: true });
   }
-
-  if (!enCours.has(a.id)) {
-    enCours.add(a.id);
-    after(async () => {
-      try {
-        await obtenirVideo(a, { image: () => imageReel(a) });
-      } catch (e) {
-        echecs.set(a.id, e instanceof ErreurVideo || e instanceof Error ? e.message : String(e));
-      } finally {
-        enCours.delete(a.id);
-      }
-    });
-  }
-  return page("Vidéo en préparation…", "La vidéo du Reel se fabrique (une minute au plus la première fois). Le téléchargement démarre tout seul quand elle est prête : gardez cette page ouverte.", true, a.id);
+  if (!etat.demandeLe || relancer) await demanderVideo(a.id);
+  return page(a.id, "Vidéo en préparation…", [
+    "La vidéo se fabrique en arrière-plan, par une tâche qui passe toutes les dix minutes : comptez dix à quinze minutes au plus.",
+    "Vous pouvez garder cette page ouverte (elle revérifie toutes les 30 secondes et le téléchargement démarre tout seul) ou revenir plus tard : la demande est enregistrée.",
+  ], { recharger: true });
 }

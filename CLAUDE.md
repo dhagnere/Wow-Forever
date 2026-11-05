@@ -84,6 +84,7 @@ npm run veille:quotidien # passage complet : brouillons rédigés par l'IA
 npm run veille:revue     # rédige les meilleurs sujets de la dernière revue, sans refaire la collecte
 npm run veille:dossier   # dossiers de référence sur 60 jours (zones-depart, donjons, zones-niveaux), sans coût d'API
 npm run veille:facebook  # relais Facebook
+npm run veille:videos    # vidéos des Reels demandées depuis l'éditeur et des articles de moins de 7 jours (toutes les 10 minutes, conteneur L à part : jamais ffmpeg dans le conteneur du site)
 npm run veille:liens     # remplace les liens Google News des sources par l'adresse directe des articles (aussi fait chaque matin)
 npm run base:importer    # base d'objets depuis wago.tools, caractéristiques comprises (si nouvelle version du jeu ; --forcer, --icones)
 npm run base:butin -- <dump CMaNGOS> <db_world AzerothCore>  # « où le trouver » → modules/veille/objets/donnees/butin.json.gz (fichier versionné)

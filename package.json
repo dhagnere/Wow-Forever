@@ -19,6 +19,7 @@
     "veille:quotidien": "tsx modules/veille/scripts/quotidien.ts",
     "veille:revue": "tsx modules/veille/scripts/revue.ts",
     "veille:facebook": "tsx modules/veille/scripts/facebook.ts",
+    "veille:videos": "tsx modules/veille/scripts/videos.ts",
     "veille:dossier": "tsx modules/veille/scripts/dossier.ts",
     "base:explorer": "tsx scripts/explorer-wago.ts",
     "base:importer": "tsx modules/veille/scripts/objets.ts",

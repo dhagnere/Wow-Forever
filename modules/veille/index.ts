@@ -34,7 +34,8 @@ export { derniereRevue, etatRedaction, preparerRedaction, redigerSujets, MAX_PAR
 export { urlArticle, messageFacebook, requeteFacebook, urlMedia } from "./facebook/relais";
 export { texteReseau, longueurX } from "./reseaux/textes";
 export { videoReel, ErreurVideo, DUREE_REEL_S } from "./reels/video";
-export { obtenirVideo, lireVideoStockee } from "./reels/stockage";
+export { obtenirVideo, lireVideoStockee, etatVideo, demanderVideo } from "./reels/stockage";
+export type { EtatVideo } from "./reels/stockage";
 export { urlAutorisationTiktok, connecterTiktok, urlRetourTiktok } from "./reseaux/tiktok";
 export { lireJeton, supprimerJeton } from "./reseaux/jetons";
 export { compteInstagram } from "./reseaux/instagram";

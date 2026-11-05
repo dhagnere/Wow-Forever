@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PartageFacebook } from "@/components/PartageFacebook";
-import { AVIS_MINIMUM, DUREE_REEL_S, lienFrancais, lireParId, longueurX, messageFacebook, nomLangue, texteReseau } from "@/modules/veille";
+import { AVIS_MINIMUM, DUREE_REEL_S, etatVideo, lienFrancais, lireParId, longueurX, messageFacebook, nomLangue, texteReseau } from "@/modules/veille";
 import { TexteACopier } from "./Copier";
 import { PILIERS, RUBRIQUES } from "@/config/taxonomie";
 import { exigerAdmin } from "@/lib/admin";
@@ -21,6 +21,7 @@ export default async function EditerArticle({ params, searchParams }: { params: 
   if (!Number.isInteger(id)) notFound();
   const a = await lireParId(id);
   if (!a) notFound();
+  const video = await etatVideo(a.id);
   const enEchec =
     (!a.facebookPostId && !!a.facebookErreur) || (!a.facebookReelId && !!a.facebookReelErreur) ||
     (!a.instagramMediaId && !!a.instagramErreur) || (!a.tiktokPublishId && !!a.tiktokErreur);
@@ -107,7 +108,18 @@ export default async function EditerArticle({ params, searchParams }: { params: 
             </p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`/articles/${a.slug}/reel/`} alt="Image du Reel" style={{ width: 160, borderRadius: 8, display: "block" }} />
-            <a href={`/admin/veille/${a.id}/reel/`} className="btn btn-contour" style={{ alignSelf: "flex-start" }}>Télécharger la vidéo (MP4)</a>
+            <a href={`/admin/veille/${a.id}/reel/`} className="btn btn-contour" style={{ alignSelf: "flex-start" }}>
+              {video.prete ? "Télécharger la vidéo (MP4)" : "Préparer et télécharger la vidéo (MP4)"}
+            </a>
+            <p className="doux" style={{ margin: 0, fontSize: 13 }}>
+              {video.prete
+                ? "Vidéo prête."
+                : video.erreur
+                  ? `Dernier échec de fabrication : ${video.erreur}`
+                  : video.demandeLe
+                    ? `En préparation depuis le ${dateLongue(video.demandeLe)} (tâche toutes les dix minutes).`
+                    : "Fabriquée à la demande, en dix à quinze minutes au plus."}
+            </p>
             <p style={{ margin: 0, fontSize: 14 }}>
               Instagram : {a.instagramMediaId ? "publié ✓" : a.instagramErreur ? `échec — ${a.instagramErreur}` : a.statut === "publie" ? "en attente" : "après publication"}
               <br />

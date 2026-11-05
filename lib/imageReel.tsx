@@ -8,8 +8,7 @@ import { domaineSite, phraseAppel } from "@/config/reseaux";
 
 /**
  * Image verticale 1080 × 1920 du Reel : image d'en-tête en fond, logo, rubrique, titre, accroche, phrase d'appel.
- * Servie par /articles/<slug>/reel/ et fabriquée sur place pour la vidéo (téléchargement de l'éditeur, adresse
- * publique de la vidéo), sans que le serveur ait à s'appeler lui-même.
+ * Servie par /articles/<slug>/reel/ ; la tâche veille:videos la télécharge pour fabriquer la vidéo.
  */
 export async function reponseImageReel(article: Article): Promise<ImageResponse> {
   // Images fournies en données intégrées : aucune requête réseau (le générateur refuse les adresses locales).
@@ -55,7 +54,3 @@ export async function reponseImageReel(article: Article): Promise<ImageResponse>
   );
 }
 
-/** Même image, en PNG, pour fabriquer la vidéo. */
-export async function imageReel(article: Article): Promise<Buffer> {
-  return Buffer.from(await (await reponseImageReel(article)).arrayBuffer());
-}

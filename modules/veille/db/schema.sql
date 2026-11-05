@@ -334,3 +334,10 @@ ALTER TABLE articles_en ADD COLUMN IF NOT EXISTS legende TEXT NOT NULL DEFAULT '
 
 -- Relance manuelle des publications en échec sur les réseaux (bouton de l'éditeur) : rouvre la fenêtre de 7 jours.
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS relais_relance_le TIMESTAMPTZ;
+
+-- Vidéos de Reel à fabriquer par la tâche planifiée (veille:videos), jamais dans le conteneur du site.
+CREATE TABLE IF NOT EXISTS reels_demandes (
+  article_id  INTEGER PRIMARY KEY REFERENCES articles(id) ON DELETE CASCADE,
+  demande_le  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  erreur      TEXT
+);
