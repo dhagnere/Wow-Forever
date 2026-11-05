@@ -85,7 +85,8 @@ export default async function EditerArticle({ params, searchParams }: { params: 
             <p style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: 15 }}>{messageFacebook(a)}</p>
             {a.statut === "publie" ? (
               <div className="partage" style={{ margin: "12px 0 0" }}>
-                <PartageFacebook url={`${SITE.url}/articles/${a.slug}/`} texte={messageFacebook(a)} libelle="Partager à la main sur Facebook" />
+                <PartageFacebook url={`${SITE.url}/articles/${a.slug}/`} texte={messageFacebook(a)} libelle="Publier depuis la Page Facebook" page={SITE.facebook} />
+                <PartageFacebook url={`${SITE.url}/articles/${a.slug}/`} texte={messageFacebook(a)} libelle="Fenêtre de partage" className="btn btn-contour" />
               </div>
             ) : null}
             {a.facebookErreur ? <p className="alerte" style={{ marginTop: 12, fontSize: 14 }}>Dernier échec : {a.facebookErreur}</p> : null}
