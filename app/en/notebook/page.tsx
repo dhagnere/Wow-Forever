@@ -59,9 +59,9 @@ export default async function NotebookEn() {
               <h2 id="t-fiche" className="titre" style={{ margin: "0 0 4px", fontSize: 22 }}>Jobwow</h2>
               <p style={{ margin: "0 0 14px", fontSize: 14, color: "#cfc7b4" }}>Undead · Mage · Horde</p>
               <dl style={{ margin: 0, display: "grid", gridTemplateColumns: "auto 1fr", gap: "6px 16px", fontSize: 15 }}>
-                <dt style={{ color: "#cfc7b4" }}>Realm</dt><dd style={{ margin: 0 }}>[Realm name]</dd>
-                <dt style={{ color: "#cfc7b4" }}>Guild</dt><dd style={{ margin: 0 }}>[Name or “none”]</dd>
-                <dt style={{ color: "#cfc7b4" }}>Professions</dt><dd style={{ margin: 0 }}>[Profession 1] · [Profession 2]</dd>
+                <dt style={{ color: "#cfc7b4" }}>Realm</dt><dd style={{ margin: 0 }}>Normal</dd>
+                <dt style={{ color: "#cfc7b4" }}>Guild</dt><dd style={{ margin: 0 }}>CODEX</dd>
+                <dt style={{ color: "#cfc7b4" }}>Professions</dt><dd style={{ margin: 0 }}>Herbalism · [Profession 2]</dd>
               </dl>
             </section>
             <div className="encadre">

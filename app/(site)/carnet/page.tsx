@@ -58,9 +58,9 @@ export default async function Carnet() {
               <h2 id="t-fiche" className="titre" style={{ margin: "0 0 4px", fontSize: 22 }}>Jobwow</h2>
               <p style={{ margin: "0 0 14px", fontSize: 14, color: "#cfc7b4" }}>Mort-vivant · Mage · Horde</p>
               <dl style={{ margin: 0, display: "grid", gridTemplateColumns: "auto 1fr", gap: "6px 16px", fontSize: 15 }}>
-                <dt style={{ color: "#cfc7b4" }}>Serveur</dt><dd style={{ margin: 0 }}>[Nom du serveur]</dd>
-                <dt style={{ color: "#cfc7b4" }}>Guilde</dt><dd style={{ margin: 0 }}>[Nom ou « aucune »]</dd>
-                <dt style={{ color: "#cfc7b4" }}>Métiers</dt><dd style={{ margin: 0 }}>[Métier 1] · [Métier 2]</dd>
+                <dt style={{ color: "#cfc7b4" }}>Serveur</dt><dd style={{ margin: 0 }}>Normal</dd>
+                <dt style={{ color: "#cfc7b4" }}>Guilde</dt><dd style={{ margin: 0 }}>CODEX</dd>
+                <dt style={{ color: "#cfc7b4" }}>Métiers</dt><dd style={{ margin: 0 }}>Herboristerie · [Métier 2]</dd>
               </dl>
             </section>
             <div className="encadre">
