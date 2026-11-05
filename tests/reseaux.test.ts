@@ -77,3 +77,17 @@ describe("publication du Reel", () => {
     expect(decodeURIComponent(appels[2].corps.replace(/\+/g, " "))).toContain("Abonne-toi à la Taverne Éternelle");
   });
 });
+
+describe("vidéo du Reel : mémoire bornée", async () => {
+  const { argumentsFfmpeg, motifEchec } = await import("@/modules/veille/reels/video");
+  it("limite les fils de calcul, quel que soit le nombre de processeurs de la machine", () => {
+    const a = argumentsFfmpeg("image.png", "reel.mp4");
+    expect(a[a.indexOf("-threads") + 1]).toBe("2");
+    expect(a[a.indexOf("-filter_threads") + 1]).toBe("1");
+  });
+  it("explique un arrêt de ffmpeg par le système ou par le délai", () => {
+    expect(motifEchec({ signal: "SIGKILL", message: "Command failed" }, "")).toMatch(/mémoire/);
+    expect(motifEchec({ killed: true, signal: "SIGTERM", message: "Command failed" }, "")).toMatch(/délai/);
+    expect(motifEchec({ code: 1, message: "Command failed: …" }, "Invalid argument")).toBe("ffmpeg : Invalid argument (code 1)");
+  });
+});

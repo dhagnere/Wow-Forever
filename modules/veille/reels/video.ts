@@ -10,11 +10,19 @@ const IMAGES_PAR_S = 30;
 
 export class ErreurVideo extends Error {}
 
+/**
+ * Fils de calcul de l'encodeur. Laissé libre, x264 en ouvre une fois et demie le nombre de processeurs que voit
+ * le conteneur, ceux de toute la machine chez l'hébergeur : plus d'1 Go de mémoire avec 48 fils, et ffmpeg est
+ * tué par le système. Avec 2 fils et une file d'attente courte, il reste vers 230 Mo, en quelques secondes.
+ */
+const FILS = "2";
+
 /** Paramètres ffmpeg : léger zoom avant sur l'image fixe, piste audio silencieuse, H.264 + AAC, 1080 × 1920. */
 export function argumentsFfmpeg(image: string, sortie: string, duree = DUREE_REEL_S): string[] {
   const images = duree * IMAGES_PAR_S;
   return [
     "-hide_banner", "-loglevel", "error", "-y",
+    "-filter_threads", "1", "-filter_complex_threads", "1",
     "-loop", "1", "-i", image,
     "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo",
     "-filter_complex",
@@ -22,10 +30,19 @@ export function argumentsFfmpeg(image: string, sortie: string, duree = DUREE_REE
     "-map", "[v]", "-map", "1:a",
     "-t", String(duree),
     "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-profile:v", "high", "-r", String(IMAGES_PAR_S),
+    "-threads", FILS, "-x264-params", "rc-lookahead=10:sync-lookahead=0:sliced-threads=1",
     "-c:a", "aac", "-b:a", "64k",
     "-shortest", "-movflags", "+faststart",
     sortie,
   ];
+}
+
+/** Motif lisible d'un échec de ffmpeg (sans la ligne de commande, trop longue pour être utile). */
+export function motifEchec(e: { killed?: boolean; signal?: NodeJS.Signals | null; code?: number | string | null; message: string }, sortieErreur: string): string {
+  if (e.signal === "SIGKILL") return "ffmpeg arrêté par le système, sans doute faute de mémoire dans le conteneur.";
+  if (e.killed) return "ffmpeg n'a pas fini dans le délai de 120 secondes.";
+  const detail = sortieErreur.trim() || e.message.split("\n")[0];
+  return `ffmpeg : ${detail.slice(0, 500)}${e.signal ? ` (signal ${e.signal})` : e.code != null ? ` (code ${e.code})` : ""}`;
 }
 
 /** Fabrique la vidéo MP4 du Reel à partir de son image verticale (PNG ou JPEG). */
@@ -37,7 +54,7 @@ export async function videoDepuisImage(image: Buffer, duree = DUREE_REEL_S): Pro
     await writeFile(entree, image);
     await new Promise<void>((ok, ko) => {
       execFile(ffmpeg.path, argumentsFfmpeg(entree, sortie, duree), { timeout: 120_000 }, (e, _out, err) =>
-        e ? ko(new ErreurVideo(`ffmpeg : ${String(err || e.message).slice(0, 500)}`)) : ok(),
+        e ? ko(new ErreurVideo(motifEchec(e, String(err ?? "")))) : ok(),
       );
     });
     return await readFile(sortie);
