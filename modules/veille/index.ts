@@ -21,6 +21,7 @@ export {
   modifier,
   publier,
   changerStatut,
+  relancerRelais,
   ErreurPublication,
 } from "./articles/depot";
 export { verifierPublication, sourcesPubliees, AVIS_MINIMUM } from "./articles/publication";

@@ -8,7 +8,7 @@ import {
   proposerAvis, proposerLegende, proposerTexteFacebook, publier,
   TAILLE_MAX_OCTETS, type Modifications,
   empreinteTraduction, enregistrerTraduction, lireParId, supprimerTraduction, traduireArticle,
-  renseignerImage,
+  relancerRelais, renseignerImage,
 } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
 import { readFile } from "node:fs/promises";
@@ -136,6 +136,13 @@ export async function depublier(id: number): Promise<void> {
   await exigerAdmin();
   await changerStatut(id, "brouillon");
   revalidatePath("/", "layout");
+  redirect(`/admin/veille/${id}/`);
+}
+
+/** Remet en file les publications en échec d'un article en ligne ; le relais horaire les reprend. */
+export async function relancerReseaux(id: number): Promise<void> {
+  await exigerAdmin();
+  await relancerRelais(id);
   redirect(`/admin/veille/${id}/`);
 }
 

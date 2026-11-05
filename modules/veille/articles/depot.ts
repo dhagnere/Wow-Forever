@@ -270,11 +270,40 @@ export async function sujetsDejaTraites(cles: string[]): Promise<Set<string>> {
   return new Set(rows.map((r) => r.cle));
 }
 
-/** Articles publiés en attente de relais Facebook (7 derniers jours, 3 tentatives au plus). */
+/**
+ * Fenêtre du relais : 7 jours après la mise en ligne, ou après la dernière relance manuelle
+ * (bouton de l'éditeur, `relancerRelais`).
+ */
+const FENETRE_RELAIS = "(publie_le > now() - interval '7 days' OR relais_relance_le > now() - interval '7 days')";
+
+/**
+ * Relance à la main les publications en échec d'un article en ligne (post et Reel Facebook, Instagram, TikTok) :
+ * compteurs d'essais remis à zéro, nouvelle fenêtre de 7 jours. Rien ne part tout de suite : le relais horaire
+ * s'en charge, avec ses règles habituelles (8h-22h, trois publications par heure et par réseau).
+ * Un réseau déjà publié n'est pas touché. Renvoie false si l'article n'est pas en ligne.
+ */
+export async function relancerRelais(id: number): Promise<boolean> {
+  const { rowCount } = await pool().query(
+    `UPDATE articles SET relais_relance_le = now(),
+       facebook_tentatives = CASE WHEN facebook_post_id IS NULL THEN 0 ELSE facebook_tentatives END,
+       facebook_erreur = CASE WHEN facebook_post_id IS NULL THEN NULL ELSE facebook_erreur END,
+       facebook_reel_tentatives = CASE WHEN facebook_reel_id IS NULL THEN 0 ELSE facebook_reel_tentatives END,
+       facebook_reel_erreur = CASE WHEN facebook_reel_id IS NULL THEN NULL ELSE facebook_reel_erreur END,
+       instagram_tentatives = CASE WHEN instagram_media_id IS NULL THEN 0 ELSE instagram_tentatives END,
+       instagram_erreur = CASE WHEN instagram_media_id IS NULL THEN NULL ELSE instagram_erreur END,
+       tiktok_tentatives = CASE WHEN tiktok_publish_id IS NULL THEN 0 ELSE tiktok_tentatives END,
+       tiktok_erreur = CASE WHEN tiktok_publish_id IS NULL THEN NULL ELSE tiktok_erreur END
+     WHERE id = $1 AND statut = 'publie'`,
+    [id],
+  );
+  return (rowCount ?? 0) > 0;
+}
+
+/** Articles publiés en attente de relais Facebook (7 jours, 3 tentatives au plus). */
 export async function enAttenteFacebook(limite: number): Promise<Article[]> {
   const { rows } = await pool().query<Ligne>(
     `SELECT * FROM articles WHERE statut='publie' AND facebook_post_id IS NULL AND facebook_tentatives < 3
-       AND publie_le > now() - interval '7 days' ORDER BY publie_le ASC LIMIT $1`,
+       AND ${FENETRE_RELAIS} ORDER BY publie_le ASC LIMIT $1`,
     [limite],
   );
   return rows.map(versArticle);
@@ -298,7 +327,7 @@ export async function relaisFacebookEchoue(id: number, erreur: string): Promise<
 export async function reelsEnAttente(limite: number): Promise<Article[]> {
   const { rows } = await pool().query<Ligne>(
     `SELECT * FROM articles WHERE statut='publie' AND facebook_post_id IS NOT NULL AND facebook_reel_id IS NULL
-       AND facebook_reel_tentatives < 3 AND publie_le > now() - interval '7 days' ORDER BY publie_le ASC LIMIT $1`,
+       AND facebook_reel_tentatives < 3 AND ${FENETRE_RELAIS} ORDER BY publie_le ASC LIMIT $1`,
     [limite],
   );
   return rows.map(versArticle);
@@ -332,7 +361,7 @@ export async function aRelayer(reseau: ReseauSuivi, limite: number): Promise<Art
   const c = COLONNES_RESEAU[reseau];
   const { rows } = await pool().query<Ligne>(
     `SELECT * FROM articles WHERE statut='publie' AND ${c.id} IS NULL AND ${c.tentatives} < 3
-       AND publie_le > now() - interval '7 days' ORDER BY publie_le ASC LIMIT $1`,
+       AND ${FENETRE_RELAIS} ORDER BY publie_le ASC LIMIT $1`,
     [limite],
   );
   return rows.map(versArticle);

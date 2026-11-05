@@ -8,7 +8,7 @@ import { exigerAdmin } from "@/lib/admin";
 import { SITE, dateLongue } from "@/lib/site";
 import { Editeur } from "./Editeur";
 import type { SourceEditeur } from "./Editeur";
-import { depublier, enregistrer, proposerAvisPour, proposerLegendePour, proposerTexteFacebookPour, restaurer, supprimer } from "../actions";
+import { depublier, enregistrer, relancerReseaux, proposerAvisPour, proposerLegendePour, proposerTexteFacebookPour, restaurer, supprimer } from "../actions";
 import { VersionAnglaise } from "./VersionAnglaise";
 import { proposerImages } from "@/lib/imagesProposees";
 
@@ -21,6 +21,9 @@ export default async function EditerArticle({ params, searchParams }: { params: 
   if (!Number.isInteger(id)) notFound();
   const a = await lireParId(id);
   if (!a) notFound();
+  const enEchec =
+    (!a.facebookPostId && !!a.facebookErreur) || (!a.facebookReelId && !!a.facebookReelErreur) ||
+    (!a.instagramMediaId && !!a.instagramErreur) || (!a.tiktokPublishId && !!a.tiktokErreur);
 
   return (
     <>
@@ -86,6 +89,14 @@ export default async function EditerArticle({ params, searchParams }: { params: 
               </div>
             ) : null}
             {a.facebookErreur ? <p className="alerte" style={{ marginTop: 12, fontSize: 14 }}>Dernier échec : {a.facebookErreur}</p> : null}
+            {a.statut === "publie" && enEchec ? (
+              <form action={relancerReseaux.bind(null, a.id)} style={{ marginTop: 12 }}>
+                <button type="submit" className="btn btn-contour">Relancer les publications en échec</button>
+                <p className="doux" style={{ margin: "6px 0 0", fontSize: 13 }}>
+                  Post et Reel Facebook, Instagram, TikTok : trois nouveaux essais pendant sept jours, au prochain passage du relais (chaque heure, de 8h à 22h).
+                </p>
+              </form>
+            ) : null}
           </div>
           <div className="encadre" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <h2>Reel, Instagram, TikTok</h2>

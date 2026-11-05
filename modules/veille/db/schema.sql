@@ -331,3 +331,6 @@ CREATE TABLE IF NOT EXISTS articles_en (
 -- Légende de l'image d'en-tête (affichée sous l'image, avant le crédit), et sa traduction anglaise.
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS image_legende TEXT NOT NULL DEFAULT '';
 ALTER TABLE articles_en ADD COLUMN IF NOT EXISTS legende TEXT NOT NULL DEFAULT '';
+
+-- Relance manuelle des publications en échec sur les réseaux (bouton de l'éditeur) : rouvre la fenêtre de 7 jours.
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS relais_relance_le TIMESTAMPTZ;
