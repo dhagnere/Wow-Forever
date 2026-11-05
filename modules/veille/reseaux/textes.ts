@@ -39,7 +39,7 @@ export function texteReseau(reseau: Reseau, a: Contenu): string {
   const diese = MOTS_DIESE.join(" ");
 
   if (reseau === "facebook") {
-    return [accroche, presentation, `Lire la suite à la Taverne : ${lienSuivi(a.slug, "facebook")}`, appel, diese].filter(Boolean).join("\n\n");
+    return [accroche, presentation, `📖 Lire la suite à la Taverne : ${lienSuivi(a.slug, "facebook")}`, appel, diese].filter(Boolean).join("\n\n");
   }
   const lien = lienSuivi(a.slug, "x");
   if (reseau === "x") {

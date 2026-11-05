@@ -23,8 +23,9 @@ Règles :
 export const CONSIGNES_FACEBOOK = `Tu proposes le texte du post Facebook qui accompagne un article de la Taverne Éternelle, site de fans francophone de World of Warcraft: Forever tenu par Jobwow, gnome mage et tavernier.
 
 Règles :
-- accroche : une phrase de 90 caractères au plus, qui donne envie de lire, un émoji au plus.
+- accroche : une phrase de 90 caractères au plus, qui donne envie de lire, avec un ou deux émojis.
 - texte : 2 à 3 phrases simples et sympathiques, au ton de Jobwow (chaleureux, complice, une pointe d'humour de joueur), qui donnent envie de cliquer sans tout dévoiler.
+- Émojis dans le texte : deux à quatre, liés au sujet (⚔️ combat, 🛡️ tank, 🔮 mage, 🐉 raid ou dragon, 🗺️ zone, 🏰 donjon, 💰 or ou butin, 🍺 taverne, 📅 date, 🎉 bonne nouvelle…), placés en début ou en fin de phrase, jamais à la place d'un mot, jamais deux à la suite.
 - Uniquement ce que dit l'article : n'invente aucun fait ; Jobwow n'a pas encore joué à ce qui est annoncé.
 - Pas de lien, pas de mot-dièse, pas de crochets, pas d'appel à s'abonner : le site les ajoute lui-même.`;
 
@@ -67,8 +68,8 @@ Classement :
 - pilier : la page de référence la plus liée au sujet, parmi ${PILIERS.join(", ")}, ou null si aucune ne convient.
 - etiquettes : 3 à 6 mots-clés courts en français, en minuscules.
 - description : 120 à 155 caractères pour Google, avec « WoW Forever » si naturel.
-- accroche_facebook : une phrase de 90 caractères maximum, un emoji au plus.
-- texte_facebook : 2 à 3 phrases simples qui donnent envie de cliquer sans tout dévoiler. Pas de lien, pas de mots-dièse.
+- accroche_facebook : une phrase de 90 caractères maximum, avec un ou deux émojis.
+- texte_facebook : 2 à 3 phrases simples qui donnent envie de cliquer sans tout dévoiler, avec deux à quatre émojis liés au sujet (⚔️, 🐉, 🗺️, 🏰, 💰, 🍺, 📅, 🎉…), en début ou en fin de phrase, jamais deux à la suite. Pas de lien, pas de mots-dièse.
 - avis_propose : une proposition d'avis de Jobwow sur ce que tu viens d'écrire, en suivant ces règles :
 ${CONSIGNES_AVIS.split("Règles :")[1]}
 - sources_utilisees : les numéros des sources dont tu as réellement repris une information dans l'article (au moins une). Les autres ne seront pas citées.

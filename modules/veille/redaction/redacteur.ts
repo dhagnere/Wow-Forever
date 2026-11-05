@@ -59,8 +59,10 @@ async function textePage(url: string): Promise<string> {
 
 function couper(texte: string, max: number): string {
   const t = texte.trim().replace(/\s+/g, " ");
-  if (t.length <= max) return t;
-  return `${t.slice(0, max - 1).replace(/\s+\S*$/, "")}…`;
+  // Par caractères (et non unités UTF-16) : la coupe ne casse jamais un émoji en deux.
+  const car = Array.from(t);
+  if (car.length <= max) return t;
+  return `${car.slice(0, max - 1).join("").replace(/\s+\S*$/, "")}…`;
 }
 
 export async function rediger(sujet: Sujet): Promise<ResultatRedaction> {
