@@ -30,8 +30,20 @@ ${recharger ? '<meta http-equiv="refresh" content="4">' : ""}<meta name="robots"
  * Déjà fabriquée : envoyée tout de suite. Sinon : fabrication lancée en arrière-plan et page d'attente qui se
  * recharge toutes les 4 secondes ; le fichier part dès qu'il est prêt.
  */
-export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   await exigerAdmin();
+  try {
+    return await telecharger(ctx);
+  } catch (e) {
+    // Page réservée à l'administration : le motif s'affiche plutôt qu'une page 500 vide, et part dans les journaux.
+    const motif = e instanceof Error ? `${e.name} : ${e.message}` : String(e);
+    console.error(`[reel] ${new URL(req.url).pathname} :`, e);
+    const id = Number((await ctx.params).id);
+    return page("Erreur pendant la préparation de la vidéo", motif, false, Number.isInteger(id) ? id : 0);
+  }
+}
+
+async function telecharger({ params }: { params: Promise<{ id: string }> }): Promise<Response> {
   const id = Number((await params).id);
   if (!Number.isInteger(id)) return new Response("Article introuvable", { status: 404 });
   const a = await lireParId(id);
