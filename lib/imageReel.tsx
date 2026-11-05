@@ -1,0 +1,61 @@
+import "server-only";
+import { ImageResponse } from "next/og";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { lireImage, type Article } from "@/modules/veille";
+import { trouverRubrique } from "@/config/taxonomie";
+import { domaineSite, phraseAppel } from "@/config/reseaux";
+
+/**
+ * Image verticale 1080 × 1920 du Reel : image d'en-tête en fond, logo, rubrique, titre, accroche, phrase d'appel.
+ * Servie par /articles/<slug>/reel/ et fabriquée sur place pour la vidéo (téléchargement de l'éditeur, adresse
+ * publique de la vidéo), sans que le serveur ait à s'appeler lui-même.
+ */
+export async function reponseImageReel(article: Article): Promise<ImageResponse> {
+  // Images fournies en données intégrées : aucune requête réseau (le générateur refuse les adresses locales).
+  const imageUne = article.image ? await lireImage(article.image.id, "une") : null;
+  const fond = imageUne ? `data:image/jpeg;base64,${imageUne.donnees.toString("base64")}` : null;
+  const logo = `data:image/png;base64,${(await readFile(path.join(process.cwd(), "public/images/logo-taverne-192.png"))).toString("base64")}`;
+  const rubrique = trouverRubrique(article.rubrique)?.nom ?? "";
+  const titre = article.titre;
+  const taille = titre.length > 90 ? 64 : titre.length > 60 ? 74 : 86;
+  const accroche = (article.accrocheFacebook || article.chapo).slice(0, 140);
+
+  return new ImageResponse(
+    (
+      <div style={{ width: "100%", height: "100%", display: "flex", position: "relative", background: "#2b1d14", color: "#fbf1da" }}>
+        {fond ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={fond} alt="" width={1080} height={1920} style={{ position: "absolute", inset: 0, width: 1080, height: 1920, objectFit: "cover" }} />
+        ) : (
+          <div style={{ position: "absolute", inset: 0, display: "flex", background: "radial-gradient(ellipse at 30% 25%, rgba(232,192,106,0.35), transparent 55%), linear-gradient(170deg, #3a2e24 0%, #2b1d14 60%, #141312 100%)" }} />
+        )}
+        <div style={{ position: "absolute", inset: 0, display: "flex", background: "linear-gradient(180deg, rgba(20, 19, 18,0.75) 0%, rgba(20, 19, 18,0.25) 30%, rgba(20, 19, 18,0.55) 55%, rgba(20, 19, 18,0.95) 100%)" }} />
+        <div style={{ position: "relative", display: "flex", flexDirection: "column", justifyContent: "space-between", width: "100%", height: "100%", padding: "120px 90px 150px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logo} alt="" width={120} height={120} />
+            <div style={{ display: "flex", fontSize: 50, fontWeight: 700, letterSpacing: 5 }}>
+              LA TAVERNE&nbsp;<span style={{ color: "#e0a23b" }}>ÉTERNELLE</span>
+            </div>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 26, background: "rgba(20, 19, 18,0.82)", border: "2px solid rgba(217,169,74,0.55)", borderRadius: 18, padding: "44px 42px" }}>
+            <div style={{ display: "flex", fontSize: 36, letterSpacing: 6, color: "#e8c06a", textTransform: "uppercase" }}>{rubrique}</div>
+            <div style={{ display: "flex", fontSize: taille, fontWeight: 700, lineHeight: 1.12 }}>{titre}</div>
+            {accroche ? <div style={{ display: "flex", fontSize: 40, lineHeight: 1.3, color: "#ddd5c3" }}>{accroche}</div> : null}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14, border: "4px solid #e0a23b", borderRadius: 18, padding: "34px 38px", background: "rgba(20, 19, 18,0.85)" }}>
+            <div style={{ display: "flex", fontSize: 38, lineHeight: 1.3 }}>{phraseAppel().replace(/^👉\s*/, "")}</div>
+            <div style={{ display: "flex", fontSize: 34, color: "#e8c06a", fontWeight: 700 }}>{domaineSite()}</div>
+          </div>
+        </div>
+      </div>
+    ),
+    { width: 1080, height: 1920, headers: { "Cache-Control": "private, no-store" } },
+  );
+}
+
+/** Même image, en PNG, pour fabriquer la vidéo. */
+export async function imageReel(article: Article): Promise<Buffer> {
+  return Buffer.from(await (await reponseImageReel(article)).arrayBuffer());
+}

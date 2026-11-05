@@ -1,15 +1,21 @@
 import { pool } from "../db/pool";
 import { config } from "../config";
-import { videoReel } from "./video";
+import { videoDepuisImage, videoReel } from "./video";
 
 /**
  * Vidéo du Reel d'un article : fabriquée une seule fois (à partir de l'image /articles/<slug>/reel/), puis gardée en base
  * et réutilisée pour Facebook, Instagram, TikTok et le téléchargement.
  */
-export async function obtenirVideo(article: { id: number; slug: string }, opts: { origine?: string; cookie?: string } = {}): Promise<Buffer> {
+export async function obtenirVideo(
+  article: { id: number; slug: string },
+  opts: { origine?: string; cookie?: string; image?: () => Promise<Buffer> } = {},
+): Promise<Buffer> {
   const { rows } = await pool().query<{ donnees: Buffer }>("SELECT donnees FROM reels_videos WHERE article_id = $1", [article.id]);
   if (rows[0]) return rows[0].donnees;
-  const video = await videoReel(`${opts.origine ?? config.siteUrl()}/articles/${article.slug}/reel/`, opts.cookie);
+  // Image fabriquée sur place quand le site la fournit ; sinon demandée à l'adresse publique (tâches planifiées).
+  const video = opts.image
+    ? await videoDepuisImage(await opts.image())
+    : await videoReel(`${opts.origine ?? config.siteUrl()}/articles/${article.slug}/reel/`, opts.cookie);
   await pool().query(
     "INSERT INTO reels_videos (article_id, donnees) VALUES ($1, $2) ON CONFLICT (article_id) DO UPDATE SET donnees = EXCLUDED.donnees, cree_le = now()",
     [article.id, video],
