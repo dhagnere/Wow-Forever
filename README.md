@@ -52,6 +52,8 @@ Le site est publié à l'adresse **https://www.taverne-eternelle.fr** (applicati
 
 Page Facebook (textes, images de profil et de couverture) et connecteurs du site (Facebook, Instagram, TikTok, Resend, Anthropic, Discord) : [`RESEAUX.md`](RESEAUX.md).
 
+Vidéos de jeu → guide de 1 à 60 (parcours relevés, quêtes de Forever, remarques de relecture), pas à pas : [`VIDEOS.md`](VIDEOS.md).
+
 Lettre (abonnés gardés par le site, écrite dans `/admin/lettre`), confirmations d'inscription et messages « mot de passe oublié » (envoi par Resend), pas à pas : [`LETTRE.md`](LETTRE.md).
 
 ### Tâches planifiées (`cron.json`)
