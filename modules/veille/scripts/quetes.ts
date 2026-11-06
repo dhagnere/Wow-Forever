@@ -3,7 +3,7 @@ import path from "node:path";
 import { derniereVersion, tableCsv } from "../objets/wago";
 import { objetInterne } from "../objets/conversion";
 import { lancer } from "./_lanceur";
-import { VILLES, lignes, lireCsv, lireDump, n, preparerPositions, type Position } from "./_bases-libres";
+import { VILLES, lignes, lireCsv, lireDump, n, preparerPositions, slugLieu, type Position } from "./_bases-libres";
 
 /**
  * Guides de quêtes : quêtes de classe (chaînes, donneurs, objectifs, récompenses) et parcours de montée en niveau
@@ -41,8 +41,14 @@ const TERRITOIRES: Record<"alliance" | "horde", Set<string>> = {
   alliance: new Set(["foret-d-elwynn", "hurlevent", "dun-morogh", "forgefer", "teldrassil", "darnassus", "sombrivage", "loch-modan", "marche-de-l-ouest"]),
   horde: new Set(["durotar", "orgrimmar", "mulgore", "les-pitons-du-tonnerre", "clairieres-de-tirisfal", "fossoyeuse", "foret-des-pins-argentes"]),
 };
+/** Zones de départ des races d'origine : le guide y part du niveau 1, quelle que soit la fourchette calculée de la zone
+ *  (celle de Durotar ressort à 5-14, ce qui écartait les premières quêtes de la Vallée des Épreuves). */
+const DEPARTS = new Set(["foret-d-elwynn", "dun-morogh", "teldrassil", "durotar", "mulgore", "clairieres-de-tirisfal"]);
 const nbClasses = (m: number) => [1, 2, 4, 8, 16, 64, 128, 256, 1024].filter((b) => m & b).length;
 
+/** Champs de bataille (vallée d'Alterac, goulet des Chanteguerres, bassin Arathi) : leurs quêtes de niveau 60, données aux portes,
+ *  ne sont pas des étapes de la route et faussaient la fourchette de niveaux des montagnes d'Alterac. */
+const CHAMPS_DE_BATAILLE = new Set([2597, 3277, 3358]);
 /** Types de quêtes laissés hors du parcours : JcJ, raid, donjon (on les fait en groupe, pas en suivant la route). */
 const TYPES_HORS_PARCOURS = new Set([41, 62, 81]);
 
@@ -266,7 +272,7 @@ lancer("base:quetes", async () => {
   }
 
   // --- Parcours par faction : quêtes de tous, données par un personnage non hostile.
-  const pourTous = [...quetes.values()].filter((q) => (!q.classes || (q.classes & TOUTES_CLASSES) === TOUTES_CLASSES) && q.niveau > 0 && !TYPES_HORS_PARCOURS.has(q.type) && !SAISONNIERES.has(q.zone));
+  const pourTous = [...quetes.values()].filter((q) => (!q.classes || (q.classes & TOUTES_CLASSES) === TOUTES_CLASSES) && q.niveau > 0 && !TYPES_HORS_PARCOURS.has(q.type) && !SAISONNIERES.has(q.zone) && !CHAMPS_DE_BATAILLE.has(q.zone));
   for (const q of pourTous) {
     for (const r of donneurs.get(q.id) ?? []) citer(r);
     // Le guide de 1 à 60 place aussi sur la carte le PNJ à qui l'on rend la quête, et les cibles des objectifs.
@@ -279,7 +285,23 @@ lancer("base:quetes", async () => {
     }
   }
 
-  const posPnj = await positions("creature", "creature_spawn_entry", pnjCites);
+  // Zone de jeu de chaque quête (ZoneOrSort > 0 : AreaTable, remontée jusqu'à la zone) : quand deux cartes se disputent un PNJ,
+  // celle des quêtes qu'il donne ou reçoit l'emporte.
+  const aires = new Map(lireCsv(await tableCsv("AreaTable", version, "frFR")).map((a) => [Number(a.ID), { parent: Number(a.ParentAreaID), nom: a.AreaName_lang ?? "" }]));
+  const zoneDeAire = (id: number) => {
+    let a = aires.get(id);
+    for (let i = 0; a && a.parent && i < 5; i++) a = aires.get(a.parent) ?? a;
+    return a ? slugLieu(a.nom) : "";
+  };
+  const preferences = new Map<number, Set<string>>();
+  for (const q of quetes.values()) {
+    const z = q.zone > 0 ? zoneDeAire(q.zone) : "";
+    if (!z) continue;
+    for (const r of [...(donneurs.get(q.id) ?? []), ...(receveurs.get(q.id) ?? [])]) {
+      if (r.t === "pnj") preferences.set(r.id, (preferences.get(r.id) ?? new Set()).add(z));
+    }
+  }
+  const posPnj = await positions("creature", "creature_spawn_entry", pnjCites, preferences);
   const posDecor = await positions("gameobject", "gameobject_spawn_entry", decorCites);
   console.log(`${tuilesLues()} tuiles d'exploration lues.`);
 
@@ -309,7 +331,7 @@ lancer("base:quetes", async () => {
     }
     const centile = (l: number[], p: number) => l[Math.min(l.length - 1, Math.floor(p * l.length))];
     parcours[camp] = [...parZone.entries()]
-      .filter(([, e]) => e.niveaux.length >= 8)
+      .filter(([, e]) => e.niveaux.length >= 6)
       .map(([lieu, e]) => {
         // Les quêtes de haut niveau d'une capitale ou d'un village (chaînes de raid…) faussent la fourchette : écartées.
         const tri = [...e.niveaux].sort((a, b) => a - b);
@@ -376,7 +398,11 @@ lancer("base:quetes", async () => {
   for (const camp of ["alliance", "horde"] as const) {
     const masque = camp === "alliance" ? ALLIANCE : HORDE;
     for (const z of parcours[camp]) {
-      const [bas, haut] = [z.niveaux[0] - 2, z.niveaux[1] + 2];
+      const depart = DEPARTS.has(z.lieu);
+      const niveaux: [number, number] = depart ? [1, z.niveaux[1]] : z.niveaux;
+      // Marges : 3 niveaux sous la fourchette (quêtes de niveau 10 de la Croisée, juste sous celle des Tarides), 6 au-dessus
+      // (quêtes de Moulin-de-Tarren, de 39 à 41, au-dessus de celle des contreforts de Hautebrande).
+      const [bas, haut] = [niveaux[0] - 3, niveaux[1] + 6];
       const hubs: Hub[] = [];
       // Deux PNJ à moins de 4 % de carte l'un de l'autre (un même village) forment un même point de rassemblement.
       const hubDe = (lieu: { lieu: string; x: number; y: number } | null, nom: string) => {
@@ -414,7 +440,7 @@ lancer("base:quetes", async () => {
         }
         if (!change) break;
       }
-      if (etapes.length >= 5) guide[camp].push({ lieu: z.lieu, niveaux: z.niveaux, hubs, etapes });
+      if (etapes.length >= 5) guide[camp].push({ lieu: z.lieu, niveaux, hubs, etapes });
     }
   }
   await writeFile(path.join(process.cwd(), `content/guide-jeu${suffixe}.json`), JSON.stringify({ version: donnees.version, guide }));

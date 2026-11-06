@@ -127,11 +127,14 @@ export async function preparerPositions(sql: string, version: string, locale: "f
 
   /**
    * Point du monde (x vers le nord, y vers l'ouest) → zone et position en % de sa carte. Les cadres de zones voisines
-   * se chevauchent : la zone retenue est celle dont une zone d'exploration contient le point ; à défaut, la plus petite
-   * carte qui le contient (une capitale est entièrement dans sa zone).
+   * se chevauchent : la zone retenue est celle dont une zone d'exploration contient le point ; si plusieurs zones dévoilées le
+   * contiennent, celle des quêtes du PNJ (`preferees`) quand elle en fait partie, sinon la plus centrale ; à défaut, la plus
+   * petite carte qui le contient (une capitale est entièrement dans sa zone).
    */
-  const surCarte = async (carte: number, x: number, y: number): Promise<[string, number, number] | null> => {
-    const candidats: { slug: string; uiMap: number; u: number; v: number; aire: number; centre: number }[] = [];
+  type Candidat = { slug: string; uiMap: number; u: number; v: number; aire: number; centre: number };
+  /** Cartes de zone dont le cadre contient le point, et celles où il tombe dans une zone dévoilée. */
+  const analyser = async (carte: number, x: number, y: number): Promise<{ candidats: Candidat[]; explores: Candidat[] }> => {
+    const candidats: Candidat[] = [];
     for (const a of assignations) {
       if (a.carte !== carte || x < a.minX || x > a.maxX || y < a.minY || y > a.maxY) continue;
       const fu = (a.maxY - y) / (a.maxY - a.minY);
@@ -141,45 +144,95 @@ export async function preparerPositions(sql: string, version: string, locale: "f
       if (u < 0 || u > 1 || v < 0 || v > 1) continue;
       candidats.push({ slug: a.slug, uiMap: a.uiMap, u, v, aire: (a.maxX - a.minX) * (a.maxY - a.minY), centre: Math.min(fu, 1 - fu, fv, 1 - fv) });
     }
-    if (!candidats.length) return null;
-    let choisi = candidats.length === 1 ? candidats[0] : candidats.find((c) => VILLES.has(c.slug));
-    if (!choisi) {
-      const explores: typeof candidats = [];
+    const explores: Candidat[] = [];
+    if (candidats.length > 1 && !candidats.some((c) => VILLES.has(c.slug))) {
       for (const c of candidats) if (await dansExploration(c.uiMap, c.u * 1002, c.v * 668)) explores.push(c);
-      choisi = explores.length ? explores.sort((p, q) => q.centre - p.centre)[0] : [...candidats].sort((p, q) => p.aire - q.aire)[0];
     }
-    return [choisi.slug, Math.round(choisi.u * 1000) / 10, Math.round(choisi.v * 1000) / 10];
+    return { candidats, explores };
+  };
+  /** Le point est-il dévoilé sur plusieurs cartes (cadres qui se chevauchent) ? */
+  const douteux = (a: { explores: Candidat[] }) => a.explores.length > 1;
+  const choisir = (a: { candidats: Candidat[]; explores: Candidat[] }, preferees?: Set<string>): Candidat | null => {
+    const { candidats, explores } = a;
+    if (!candidats.length) return null;
+    if (candidats.length === 1) return candidats[0];
+    const ville = candidats.find((c) => VILLES.has(c.slug));
+    if (ville) return ville;
+    // Le cadre de la carte des Tarides recouvre la Vallée des Épreuves, dévoilée sur les deux cartes : la zone des quêtes du
+    // PNJ (ou de ses voisins) tranche, avant la position la plus centrale.
+    const voulues = preferees ? explores.filter((c) => preferees.has(c.slug)) : [];
+    return (voulues.length ? voulues : explores).sort((p, q) => q.centre - p.centre)[0] ?? [...candidats].sort((p, q) => p.aire - q.aire)[0];
+  };
+  const enPourcents = (c: Candidat): [string, number, number] => [c.slug, Math.round(c.u * 1000) / 10, Math.round(c.v * 1000) / 10];
+
+  /**
+   * Point du monde (x vers le nord, y vers l'ouest) → zone et position en % de sa carte. Les cadres de zones voisines
+   * se chevauchent : la zone retenue est celle dont une zone d'exploration contient le point ; si plusieurs zones dévoilées le
+   * contiennent, celle des quêtes du PNJ (`preferees`) quand elle en fait partie, sinon la plus centrale ; à défaut, la plus
+   * petite carte qui le contient (une capitale est entièrement dans sa zone).
+   */
+  const surCarte = async (carte: number, x: number, y: number, preferees?: Set<string>): Promise<[string, number, number] | null> => {
+    const c = choisir(await analyser(carte, x, y), preferees);
+    return c ? enPourcents(c) : null;
   };
   const instances = new Map(lireCsv(mapCsv).map((m) => [Number(m.ID), m.MapName_lang]));
   const ecranDeCarte = new Map(ECRANS.map((e) => [e.carte as number, e.slug]));
 
-  const positions = async (table: string, spawnTable: string, garder: Set<number>) => {
+  /** Rayon (unités du monde, environ des mètres) dans lequel un PNJ douteux prend la zone de ses voisins déjà tranchés. */
+  const RAYON_VOISINS = 150;
+  /**
+   * `preferences` : pour chaque créature ou objet, les zones de ses quêtes. Un point dévoilé sur deux cartes prend la zone de
+   * ses quêtes ; à défaut (dresseur, quête de classe sans zone), celle des PNJ voisins tranchés ainsi ; à défaut, la plus centrale.
+   */
+  const positions = async (table: string, spawnTable: string, garder: Set<number>, preferences?: Map<number, Set<string>>) => {
     const parSpawn = new Map<number, number>();
     for (const l of lignes(sql, spawnTable)) parSpawn.set(n(l.guid), n(l.entry));
     const res = new Map<number, { z: Record<string, [number, number][]>; d?: [string, string | null] }>();
+    const ajouter = (id: number, p: [string, number, number]) => {
+      const e = res.get(id) ?? { z: {} };
+      const liste = (e.z[p[0]] ??= []);
+      // Points trop proches fusionnés, 40 au plus par zone : la carte reste lisible et le fichier léger.
+      if (liste.length < 40 && !liste.some(([u, v]) => Math.abs(u - p[1]) < 1.2 && Math.abs(v - p[2]) < 1.2)) liste.push([p[1], p[2]]);
+      res.set(id, e);
+    };
+    const reperes: { carte: number; x: number; y: number; slug: string }[] = [];
+    const enAttente: { id: number; carte: number; x: number; y: number; a: Awaited<ReturnType<typeof analyser>> }[] = [];
     for (const l of lignes(sql, table)) {
       const id = n(l.id) || parSpawn.get(n(l.guid)) || 0;
       if (!id || !garder.has(id)) continue;
-      const e = res.get(id) ?? { z: {} };
+      if (!res.has(id)) res.set(id, { z: {} });
       const carte = n(l.map);
       if (carte === 0 || carte === 1) {
-        const p = await surCarte(carte, n(l.position_x), n(l.position_y));
-        if (p) {
-          const liste = (e.z[p[0]] ??= []);
-          // Points trop proches fusionnés, 40 au plus par zone : la carte reste lisible et le fichier léger.
-          if (liste.length < 40 && !liste.some(([u, v]) => Math.abs(u - p[1]) < 1.2 && Math.abs(v - p[2]) < 1.2)) liste.push([p[1], p[2]]);
+        const x = n(l.position_x), y = n(l.position_y);
+        const a = await analyser(carte, x, y);
+        const pref = preferences?.get(id);
+        if (douteux(a) && !(pref && a.explores.some((c) => pref.has(c.slug)))) {
+          enAttente.push({ id, carte, x, y, a });
+          continue;
         }
-      } else if (instances.has(carte) && !e.d) {
-        e.d = [instances.get(carte)!.replace(/^<[^>]+>/, ""), ecranDeCarte.get(carte) ?? null];
+        const c = choisir(a, pref);
+        if (!c) continue;
+        if (douteux(a)) reperes.push({ carte, x, y, slug: c.slug });
+        ajouter(id, enPourcents(c));
+      } else if (instances.has(carte) && !res.get(id)!.d) {
+        res.get(id)!.d = [instances.get(carte)!.replace(/^<[^>]+>/, ""), ecranDeCarte.get(carte) ?? null];
       }
-      res.set(id, e);
+    }
+    for (const p of enAttente) {
+      const proche = reperes
+        .filter((r) => r.carte === p.carte && p.a.explores.some((c) => c.slug === r.slug))
+        .map((r) => ({ r, d: Math.hypot(r.x - p.x, r.y - p.y) }))
+        .filter((r) => r.d < RAYON_VOISINS)
+        .sort((a, b) => a.d - b.d)[0];
+      const c = choisir(p.a, proche ? new Set([proche.r.slug]) : undefined);
+      if (c) ajouter(p.id, enPourcents(c));
     }
     return res;
   };
   return {
     surCarte,
     instances,
-    positions: positions as (table: string, spawnTable: string, garder: Set<number>) => Promise<Map<number, Position>>,
+    positions: positions as (table: string, spawnTable: string, garder: Set<number>, preferences?: Map<number, Set<string>>) => Promise<Map<number, Position>>,
     tuilesLues: () => tuilesDecodees.size,
   };
 }
