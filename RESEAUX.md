@@ -154,18 +154,16 @@ Modes de publication :
 - **Brouillon**, par défaut : la vidéo arrive dans votre boîte de réception TikTok ; vous ajoutez la légende (copiable dans l'éditeur de l'article) et publiez depuis l'application.
 - **Direct** (`TIKTOK_MODE=direct`) : publication immédiate, mais seulement après l'audit de l'application par TikTok. D'ici là, les vidéos restent privées.
 
-### 2.4 Brevo : la Lettre et les messages des comptes joueurs
+### 2.4 Resend : la Lettre et les messages des comptes joueurs
 
-Variables : `BREVO_API_KEY`, `BREVO_LISTE_ID`, `BREVO_MODELE_DOI`, `BREVO_EXPEDITEUR` ; pour l'édition anglaise, `BREVO_LISTE_ID_EN` et `BREVO_MODELE_DOI_EN`.
+Variables : `RESEND_API_KEY`, `COURRIEL_EXPEDITEUR`, et facultatives `COURRIEL_REPONSE`, `LETTRE_PLAFOND_JOUR`. Les abonnés (français et anglais) sont gardés par le site ; Resend ne fait que remettre les messages.
 
-La procédure complète, étape par étape, est dans [`BREVO.md`](BREVO.md) :
-- domaine authentifié chez Gandi ;
-- expéditeur ;
-- listes française et anglaise ;
-- modèles de confirmation ;
-- clé d'API et adresses IP de Scalingo à autoriser ;
+La procédure complète, étape par étape, est dans [`LETTRE.md`](LETTRE.md) :
+- compte Resend et domaine vérifié chez Gandi ;
+- clé d'API ;
+- reprise des abonnés de Brevo ;
 - essais ;
-- Lettre du dimanche.
+- Lettre du dimanche, écrite et lancée depuis `/admin/lettre`.
 
 ### 2.5 Rédaction par l'IA (Anthropic)
 
@@ -200,7 +198,7 @@ Voir `INSTALLATION.md`, étape 11.
 | Facebook et Reels | `FACEBOOK_PAGE_ID`, `FACEBOOK_PAGE_TOKEN` | `/admin/reseaux/` |
 | Instagram | aucune (jeton de Page) | `/admin/reseaux/` |
 | TikTok | `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` (+ `TIKTOK_MODE`) | `/admin/reseaux/`, bouton « Relier » |
-| Lettre et comptes | `BREVO_API_KEY`, `BREVO_LISTE_ID`, `BREVO_MODELE_DOI`, `BREVO_EXPEDITEUR` (+ `BREVO_LISTE_ID_EN`, `BREVO_MODELE_DOI_EN` pour l'édition anglaise) | inscription test sur `/lettre/` et `/en/newsletter/` |
+| Lettre et comptes | `RESEND_API_KEY`, `COURRIEL_EXPEDITEUR` (+ `COURRIEL_REPONSE`, `LETTRE_PLAFOND_JOUR`, facultatives) | inscription test sur `/lettre/` et `/en/newsletter/` |
 | Rédaction IA | `ANTHROPIC_API_KEY` | `npm run veille:quotidien` |
 | Discord | `NEXT_PUBLIC_DISCORD_URL` | bouton Discord sur `/communaute/` |
 | Google | `GOOGLE_SITE_VERIFICATION` (ou TXT chez Gandi) | Search Console |

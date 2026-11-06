@@ -36,7 +36,7 @@ export default function Lettre() {
         <div className="encadre cadre" style={{ padding: 24 }}>
           <FormulaireLettre />
           <p className="doux" style={{ fontSize: 13, margin: "14px 0 0" }}>
-            Votre adresse sert uniquement à l&apos;envoi de la Lettre, par notre prestataire Brevo. Détails dans la <Link href="/confidentialite/">politique de confidentialité</Link>.
+            Votre adresse sert uniquement à l&apos;envoi de la Lettre, gardée par le site et jamais revendue. Détails dans la <Link href="/confidentialite/">politique de confidentialité</Link>.
           </p>
         </div>
       </div>

@@ -95,3 +95,15 @@ export {
 } from "./joueurs/depot";
 export { validerInscription, erreurMotDePasse, normaliserCourriel, cleGuideValide } from "./joueurs/validation";
 export { MOT_DE_PASSE_MIN } from "./joueurs/motdepasse";
+
+// Lettre : abonnés en double validation, numéros écrits dans /admin/lettre, envoi par Resend (npm run veille:lettre).
+export type { LangueLettre } from "./lettre/messages";
+export type { EnvoiLettre, ChiffresAbonnes } from "./lettre/depot";
+export type { ResultatInscription } from "./lettre/expedition";
+export { inscrireALaLettre, confirmerAbonnement, desabonnerAdresse, desinscrireParLien, envoyerEssai, expedierLettres } from "./lettre/expedition";
+export { listerEnvois, lireEnvoi, enregistrerEnvoi, supprimerEnvoi, lancerEnvoi, chiffresAbonnes, importerAbonnes } from "./lettre/depot";
+export { PAGES_LETTRE, plafondJour } from "./lettre/messages";
+
+// Courriels du site (Resend) : mot de passe oublié, confirmations, Lettre.
+export type { Courriel } from "./courriel/resend";
+export { courrielConfigure, envoyerCourriel } from "./courriel/resend";

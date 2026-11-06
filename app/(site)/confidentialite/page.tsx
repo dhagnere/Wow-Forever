@@ -40,9 +40,11 @@ export default function Confidentialite() {
 
         <h2>La Lettre de la Taverne</h2>
         <p>
-          Votre adresse électronique sert uniquement à l&apos;envoi de la Lettre. Elle est conservée par notre prestataire Brevo, entreprise française,
-          jamais revendue ni prêtée. L&apos;inscription se fait en double validation ; chaque Lettre contient un lien de désinscription en un
-          clic, qui efface votre adresse de la liste. Les abonnés de l&apos;édition anglaise sont gardés dans une liste à part, avec les mêmes règles.
+          Votre adresse électronique sert uniquement à l&apos;envoi de la Lettre, jamais revendue ni prêtée. Elle est gardée dans la base du site,
+          hébergée chez Scalingo, en France. L&apos;inscription se fait en double validation : une demande jamais confirmée est effacée au bout de sept
+          jours. Chaque Lettre contient un lien de désinscription en un clic, qui efface votre adresse. Les messages partent par notre prestataire
+          d&apos;envoi, Resend (Resend, Inc., États-Unis), qui ne reçoit que l&apos;adresse et le message à remettre ; ce transfert hors de l&apos;Union
+          européenne est [encadrement à préciser d&apos;après l&apos;accord de traitement des données de Resend].
         </p>
 
         <h2>Votre compte joueur</h2>
@@ -56,7 +58,7 @@ export default function Confidentialite() {
           Rester connecté demande un cookie, <code>taverne_joueur</code>, déposé seulement quand vous vous connectez et valable trente jours. Il ne sert
           qu&apos;à vous reconnaître et à aucune mesure d&apos;audience ; « Me déconnecter » l&apos;efface. Depuis la page « Mon compte », vous changez de mot de
           passe, arrêtez la Lettre ou supprimez votre compte : tout est alors effacé, progression comprise. Une demande de nouveau mot de passe
-          passe par un message envoyé par Brevo, avec un lien valable une heure.
+          passe par un message envoyé par Resend, avec un lien valable une heure.
         </p>
 
         <h2>Tableau des guildes</h2>

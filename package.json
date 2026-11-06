@@ -29,6 +29,7 @@
     "cartes:jeu": "tsx modules/veille/scripts/cartes-jeu.ts",
     "veille:liens": "tsx modules/veille/scripts/liens.ts",
     "veille:traduire": "tsx modules/veille/scripts/traduire.ts",
+    "veille:lettre": "tsx modules/veille/scripts/lettre.ts",
     "base:butin": "tsx modules/veille/scripts/butin.ts",
     "sorts:jeu": "tsx modules/veille/scripts/sorts-jeu.ts",
     "base:quetes": "tsx modules/veille/scripts/quetes.ts",

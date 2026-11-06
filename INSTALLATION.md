@@ -61,7 +61,7 @@ scalingo --region osc-fr1 --app wowforever env-set NOM=valeur
 | Facebook, Reels | `FACEBOOK_PAGE_ID`, `FACEBOOK_PAGE_TOKEN` (Page `facebook.com/taverneeternelle`, déjà inscrite dans le site ; `NEXT_PUBLIC_FACEBOOK_URL` seulement si elle change d'adresse) |
 | Instagram | `INSTAGRAM_TOKEN` (facultatif si le jeton de Page suffit) |
 | TikTok | `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` |
-| Lettre et comptes joueurs (Brevo) | `BREVO_API_KEY`, `BREVO_LISTE_ID`, `BREVO_MODELE_DOI`, `BREVO_EXPEDITEUR` (étape 9) ; édition anglaise : `BREVO_LISTE_ID_EN`, `BREVO_MODELE_DOI_EN` |
+| Lettre et comptes joueurs (Resend) | `RESEND_API_KEY`, `COURRIEL_EXPEDITEUR` (étape 9) ; facultatives : `COURRIEL_REPONSE`, `LETTRE_PLAFOND_JOUR` |
 | Moteurs de recherche | `GOOGLE_SITE_VERIFICATION` (étape 11) ; Bing : rien à saisir, la balise est déjà dans le site |
 | Communauté | `NEXT_PUBLIC_DISCORD_URL`, `NEXT_PUBLIC_CONTACT_EMAIL` (par défaut `contact@taverne-eternelle.fr`) |
 
@@ -170,17 +170,15 @@ Les liens déjà partagés, les favoris et les résultats de Google continuent a
 
 ---
 
-## Étape 9 — Messagerie et envois Brevo (Gandi et Brevo)
+## Étape 9 — Messagerie et envoi des courriels (Gandi et Resend)
 
-Suivre [`BREVO.md`](BREVO.md), étapes 1 à 9 :
-- l'adresse `contact@taverne-eternelle.fr` ;
-- l'authentification du domaine chez Gandi ;
-- l'expéditeur ;
-- les listes et les modèles de confirmation ;
-- la clé d'API, avec les adresses IP de Scalingo à autoriser ;
-- les variables Scalingo et les essais.
+Créer l'adresse `contact@taverne-eternelle.fr` (boîte ou redirection chez Gandi), puis suivre [`LETTRE.md`](LETTRE.md), étapes 1 à 6 :
+- le compte Resend et le domaine vérifié chez Gandi ;
+- la clé d'API ;
+- les variables Scalingo ;
+- la reprise des abonnés de Brevo et les essais.
 
-Rien à changer dans les modèles quand l'adresse du site change : la page d'arrivée après confirmation est envoyée par le site à partir de `SITE_URL`.
+Rien à changer quand l'adresse du site change : les liens des messages (confirmation, désinscription) sont construits à partir de `SITE_URL`.
 
 ---
 

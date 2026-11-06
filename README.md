@@ -24,7 +24,7 @@ Score d'un sujet : poids des sites qui en parlent (un site compte une fois, mêm
 - **Base d'objets, caractéristiques et sources** : bonus, armure et dégâts calculés depuis les fichiers du jeu à l'import, avec les recettes des métiers (fabriqué par, composants, paliers de difficulté, plans qui l'apprennent, objets fabriqués avec) (`npm run base:importer -- --forcer` pour les ajouter aux objets déjà importés). « Où le trouver » (monstres et taux, coffres et filons, marchands, quêtes, emplacements sur la carte) vient des bases libres CMaNGOS et AzerothCore ; pour le refaire : cloner `cmangos/classic-db` et les fichiers `creature_template_locale`, `gameobject_template_locale`, `quest_template_locale` d'AzerothCore, puis `npm run base:butin -- <dump .sql.gz> <dossier db_world>`.
 - **Cartes du monde** : `/cartes/` (Royaumes de l'Est, Kalimdor, île de Zéphras) et une page par lieu `/cartes/<lieu>/` avec sa carte, ses niveaux, ses donjons et les zones voisines (`npm run cartes:jeu`). Les guides de zones et de donjons y renvoient.
 - **Sorts et talents** : sous chaque classe, un onglet par spécialisation avec ses sorts (rangs, niveaux, coût, incantation) et son arbre de talents, plus les traits raciaux de chaque race (page Races, fiche Skyborne), les familiers du chasseur (19 familles) et les démons du démoniste, et un calculateur de talents par classe (`/classes/<classe>/talents/`, build partageable par lien), lus dans les fichiers de Forever (`npm run sorts:jeu`, à relancer à chaque version du jeu).
-- **Comptes joueurs et guide de 1 à 60** : `/compte/` (inscription, connexion, Lettre, mot de passe oublié via Brevo avec `BREVO_EXPEDITEUR`) ; guide pas à pas par race et classe sur `/guides/parcours/<race>/<classe>/`, cartes numérotées, route tracée et progression sauvegardée jour par jour.
+- **Comptes joueurs et guide de 1 à 60** : `/compte/` (inscription, connexion, Lettre, mot de passe oublié par Resend) ; guide pas à pas par race et classe sur `/guides/parcours/<race>/<classe>/`, cartes numérotées, route tracée et progression sauvegardée jour par jour.
 - **Guides de quêtes** : quêtes de classe chaîne par chaîne et parcours de 1 à 60 pour chaque faction (`npm run base:quetes`, à partir des bases libres CMaNGOS et AzerothCore, recoupées avec les fichiers de Forever).
 - **Illustrations** : icônes de classes et de races et écrans de chargement tirés des fichiers de Forever (`npm run icones:jeu`, `npm run ecrans:jeu`). Chaque page a l'écran de son thème (`lib/ecrans.ts`). Le Mont Hyjal, Shen'dralar et les Rives claires n'ont pas encore d'écran publié par Blizzard (fichiers chiffrés) : relancer `npm run ecrans:jeu` après chaque mise à jour du jeu, puis ajouter leur carte dans `config/ecrans.ts`.
 - **Version anglaise** : `/en/` (accueil, guide de 1 à 60, classes, sorts, talents et calculateur, races, base d'objets, cartes du monde, zones, donjons, Skyborne, guides et quêtes de classe, compte), avec les noms tirés des fichiers anglais du jeu. Bouton FR/EN dans l'en-tête, balises hreflang sur les pages traduites, proposition de la version anglaise aux navigateurs non francophones. Même compte et même progression dans les deux langues.
@@ -44,15 +44,15 @@ Le site est publié à l'adresse **https://www.taverne-eternelle.fr** (applicati
 6. certificat et HTTPS ;
 7. ancien domaine ;
 8. bascule de `SITE_URL` ;
-9. messagerie et Brevo ;
+9. messagerie et envoi des courriels (Resend) ;
 10. services reliés (Meta, TikTok…) ;
 11. Google et Bing ;
 12. premier remplissage ;
 13. contrôle final.
 
-Page Facebook (textes, images de profil et de couverture) et connecteurs du site (Facebook, Instagram, TikTok, Brevo, Anthropic, Discord) : [`RESEAUX.md`](RESEAUX.md).
+Page Facebook (textes, images de profil et de couverture) et connecteurs du site (Facebook, Instagram, TikTok, Resend, Anthropic, Discord) : [`RESEAUX.md`](RESEAUX.md).
 
-Lettre, confirmations d'inscription et messages « mot de passe oublié » (Brevo), pas à pas : [`BREVO.md`](BREVO.md).
+Lettre (abonnés gardés par le site, écrite dans `/admin/lettre`), confirmations d'inscription et messages « mot de passe oublié » (envoi par Resend), pas à pas : [`LETTRE.md`](LETTRE.md).
 
 ### Tâches planifiées (`cron.json`)
 

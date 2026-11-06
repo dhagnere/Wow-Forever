@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Ariane } from "@/components/Ariane";
 import { FormulaireLettre } from "@/app/(site)/lettre/FormulaireLettre";
 import { fondBandeau } from "@/lib/ecrans";
-import { lettreAnglaiseConfiguree, lettreConfiguree } from "@/lib/lettre";
 
 export const dynamic = "force-dynamic";
 
@@ -14,8 +13,6 @@ export const metadata: Metadata = {
 };
 
 export default function NewsletterEn() {
-  // Tant que l'édition anglaise n'a pas sa liste Brevo, l'inscription passe par la Lettre française : on le dit.
-  const enFrancais = lettreConfiguree() && !lettreAnglaiseConfiguree();
   return (
     <>
       <section className="bandeau-page" style={fondBandeau("cite-de-dalaran")}>
@@ -36,12 +33,11 @@ export default function NewsletterEn() {
             <li><strong>The next date</strong> from the <Link href="/en/calendar/">calendar</Link>.</li>
           </ul>
           <p className="doux">Free, no ads. A confirmation is sent by email: your sign-up only counts after your click.</p>
-          {enFrancais ? <p className="info" role="note">The English edition is being set up: until then, the newsletter and its confirmation email are sent in French.</p> : null}
         </div>
         <div className="encadre cadre" style={{ padding: 24 }}>
           <FormulaireLettre langue="en" />
           <p className="doux" style={{ fontSize: 13, margin: "14px 0 0" }}>
-            Your address is only used to send the newsletter, through our provider Brevo. Details in the{" "}
+            Your address is only used to send the newsletter, kept by the site and never sold. Details in the{" "}
             <Link href="/confidentialite/" hrefLang="fr">privacy policy</Link> (in French).
           </p>
         </div>

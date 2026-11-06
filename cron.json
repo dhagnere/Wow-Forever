@@ -4,6 +4,7 @@
     { "command": "5 * * * * npm run veille:facebook" },
     { "command": "*/10 * * * * npm run veille:videos", "size": "L" },
     { "command": "25 * * * * npm run veille:traduire" },
+    { "command": "*/15 * * * * npm run veille:lettre" },
     { "command": "17 4 * * * npm run base:importer" }
   ]
 }

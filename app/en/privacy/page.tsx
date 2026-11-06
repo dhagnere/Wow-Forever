@@ -43,9 +43,11 @@ export default function Privacy() {
 
           <h2>The Tavern&apos;s newsletter</h2>
           <p>
-            Your email address is only used to send the newsletter. It is kept by our provider Brevo, a French company, and is never sold or lent.
-            Sign-up uses double confirmation; each newsletter contains a one-click unsubscribe link, which removes your address from the list.
-            Subscribers to the English edition are kept on a separate list, with the same rules.
+            Your email address is only used to send the newsletter, and is never sold or lent. It is kept in the site&apos;s database, hosted by
+            Scalingo, in France. Sign-up uses double confirmation: a request that is never confirmed is deleted after seven days. Each newsletter
+            contains a one-click unsubscribe link, which deletes your address. Messages are sent through our email provider, Resend (Resend, Inc.,
+            United States), which only receives the address and the message to deliver; this transfer outside the European Union is [framework to be
+            specified from Resend&apos;s data processing agreement].
           </p>
 
           <h2>Your player account</h2>
@@ -58,7 +60,7 @@ export default function Privacy() {
             Staying logged in requires a cookie, <code>taverne_joueur</code>, set only when you log in and valid for thirty days. It is only used to
             recognise you and for no audience measurement; « Log out » removes it. From the account page, you can change your password, stop the
             newsletter or delete your account: everything is then erased, progress included. A new password request goes through a message sent by
-            Brevo, with a link valid for one hour.
+            Resend, with a link valid for one hour.
           </p>
 
           <h2>Guild board</h2>

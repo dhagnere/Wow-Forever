@@ -39,10 +39,10 @@ async function creerCompteJoueur(_e: EtatCompte, d: FormData): Promise<EtatCompt
     if (e instanceof ErreurCompte) return { message: e.message, saisie };
     throw e;
   }
-  // La Lettre demande sa propre confirmation par courriel (double validation Brevo).
+  // La Lettre demande sa propre confirmation par courriel (double validation : lien envoyé par le site).
   let lettre = "";
   if (v.valeur.lettre) {
-    const r = await inscrire(v.valeur.courriel, SITE.url, anglais(d) ? "en" : "fr");
+    const r = await inscrire(v.valeur.courriel, anglais(d) ? "en" : "fr");
     lettre = r.ok ? "lettre" : "lettre-plus-tard";
   }
   const u = new URL(retourSur(d.get("retour"), anglais(d) ? "/en/account/" : "/compte/"), SITE.url);
@@ -113,7 +113,7 @@ export async function basculerLettre(): Promise<void> {
   const j = await joueurConnecte();
   if (!j) redirect("/compte/");
   if (!j.lettre) {
-    const r = await inscrire(j.courriel, SITE.url);
+    const r = await inscrire(j.courriel);
     await modifierCompte(j.id, { lettre: true });
     redirect(`/compte/?bienvenue=${r.ok ? "lettre" : "lettre-plus-tard"}`);
   }

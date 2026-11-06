@@ -341,3 +341,38 @@ CREATE TABLE IF NOT EXISTS reels_demandes (
   demande_le  TIMESTAMPTZ NOT NULL DEFAULT now(),
   erreur      TEXT
 );
+
+-- Lettre : abonnés (double validation gérée par le site, envoi par Resend), numéros et file d'expédition.
+-- Une désinscription efface la ligne de l'abonné ; une demande jamais confirmée est effacée au bout de sept jours.
+CREATE TABLE IF NOT EXISTS lettre_abonnes (
+  id              SERIAL PRIMARY KEY,
+  courriel        TEXT NOT NULL UNIQUE CHECK (courriel = lower(courriel) AND char_length(courriel) <= 254),
+  langue          TEXT NOT NULL DEFAULT 'fr' CHECK (langue IN ('fr', 'en')),
+  confirme_le     TIMESTAMPTZ,
+  jeton_empreinte TEXT UNIQUE,
+  jeton_expire    TIMESTAMPTZ,
+  demande_le      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  cree_le         TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS lettre_abonnes_confirmes_idx ON lettre_abonnes (langue) WHERE confirme_le IS NOT NULL;
+
+CREATE TABLE IF NOT EXISTS lettre_envois (
+  id          SERIAL PRIMARY KEY,
+  langue      TEXT NOT NULL CHECK (langue IN ('fr', 'en')),
+  sujet       TEXT NOT NULL CHECK (char_length(sujet) BETWEEN 1 AND 200),
+  corps       TEXT NOT NULL,
+  statut      TEXT NOT NULL DEFAULT 'brouillon' CHECK (statut IN ('brouillon', 'en_cours', 'termine')),
+  cree_le     TIMESTAMPTZ NOT NULL DEFAULT now(),
+  lance_le    TIMESTAMPTZ,
+  termine_le  TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS lettre_file (
+  envoi_id   INTEGER NOT NULL REFERENCES lettre_envois (id) ON DELETE CASCADE,
+  abonne_id  INTEGER NOT NULL REFERENCES lettre_abonnes (id) ON DELETE CASCADE,
+  envoye_le  TIMESTAMPTZ,
+  echecs     INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (envoi_id, abonne_id)
+);
+CREATE INDEX IF NOT EXISTS lettre_file_attente_idx ON lettre_file (envoi_id) WHERE envoye_le IS NULL;
+CREATE INDEX IF NOT EXISTS lettre_file_envoye_idx ON lettre_file (envoye_le) WHERE envoye_le IS NOT NULL;
