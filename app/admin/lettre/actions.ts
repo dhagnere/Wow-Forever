@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { enregistrerEnvoi, envoyerEssai, importerAbonnes, lancerEnvoi, lireEnvoi, normaliserCourriel, supprimerEnvoi, type LangueLettre } from "@/modules/veille";
+import { enregistrerEnvoi, envoyerEssai, expedierLettres, importerAbonnes, lancerEnvoi, lireEnvoi, normaliserCourriel, supprimerEnvoi, type LangueLettre } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
 import { adresseValide } from "@/lib/lettre";
 
@@ -34,6 +34,8 @@ export async function enregistrerLettre(f: FormData): Promise<void> {
   if (action === "lancer") {
     if (f.get("relu") !== "oui") retour({ id, erreur: "relu" });
     const n = await lancerEnvoi(id);
+    // Premier lot tout de suite (dans la limite du plafond du jour) ; la tâche horaire envoie le reste.
+    if (n) await expedierLettres();
     retour({ ok: "lance", n });
   }
   retour({ id, ok: "enregistre" });

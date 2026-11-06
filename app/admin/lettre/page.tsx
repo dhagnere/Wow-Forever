@@ -13,7 +13,7 @@ type Props = { searchParams: Promise<{ id?: string; ok?: string; erreur?: string
 const MESSAGES: Record<string, string> = {
   enregistre: "Brouillon enregistré.",
   essai: "Essai envoyé : vérifiez la boîte de réception.",
-  lance: "Envoi lancé : la Lettre part par lots, toutes les 15 minutes, dans la limite du plafond quotidien.",
+  lance: "Envoi lancé : les premiers messages sont partis ; s'il en reste au-delà du plafond du jour, ils partent chaque heure (à h 25).",
   supprime: "Brouillon supprimé.",
   import: "Import terminé.",
   vide: "Le sujet et le texte sont obligatoires.",

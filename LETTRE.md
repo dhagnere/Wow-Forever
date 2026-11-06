@@ -3,7 +3,7 @@
 Le site gère lui-même la Lettre ; Resend ne sert qu'à **remettre les messages** :
 
 1. **l'inscription**, en double validation : l'adresse attend dans la base du site, un lien de confirmation part par Resend, et l'abonné n'est inscrit qu'après son clic (`/lettre/confirmation/`, `/en/newsletter/confirm/`) ;
-2. **la Lettre du dimanche**, écrite dans `/admin/lettre` et envoyée par lots toutes les 15 minutes (`npm run veille:lettre`, tâche de `cron.json`) ;
+2. **la Lettre du dimanche**, écrite dans `/admin/lettre` et envoyée dès le clic sur « Lancer l'envoi », puis par lots chaque heure pour ce qui dépasse le plafond du jour (`npm run veille:lettre`, regroupé avec la traduction dans `npm run veille:horaire`, tâche de `cron.json` : Scalingo n'accepte que cinq tâches planifiées) ;
 3. **le message « mot de passe oublié »** des comptes joueurs.
 
 Les adresses restent dans la base du site, chez Scalingo. Une désinscription efface l'adresse ; une inscription jamais confirmée est effacée au bout de sept jours. Chaque Lettre porte un lien de désinscription et l'en-tête de désinscription en un clic que Gmail et Yahoo exigent.
@@ -91,7 +91,7 @@ Avec une adresse à vous, de préférence chez Gmail :
    - la prochaine date du calendrier.
 2. *Enregistrer* : l'aperçu s'affiche sous le formulaire.
 3. *Envoyer un essai* à votre adresse, relire dans la messagerie.
-4. Cocher « J'ai relu l'essai », puis **Lancer l'envoi aux abonnés** le dimanche vers 10 h : les messages partent au passage suivant de la tâche (15 minutes au plus), par lots de 50. La colonne *Envois* suit la progression.
+4. Cocher « J'ai relu l'essai », puis **Lancer l'envoi aux abonnés** le dimanche vers 10 h : le premier lot part aussitôt (jusqu'au plafond du jour), le reste chaque heure à h 25, par lots de 50. La colonne *Envois* suit la progression.
 5. **Édition anglaise** : nouvelle Lettre, édition *Anglaise*, texte traduit, liens vers les articles anglais (`/en/articles/<adresse>/`). Même essai, même lancement.
 
 Un numéro lancé ne se modifie plus. Un message refusé trois fois par Resend n'est plus retenté ; il apparaît « en échec ».
