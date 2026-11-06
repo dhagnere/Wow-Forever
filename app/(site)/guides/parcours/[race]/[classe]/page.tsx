@@ -10,7 +10,7 @@ import { GuideParcours, type ZoneVue } from "@/components/GuideParcours";
 import { ECRAN_CLASSE, fondBandeau } from "@/lib/ecrans";
 import { pageLieu, urlCarte } from "@/lib/cartes";
 import { nomLieu } from "@/lib/quetes";
-import { cleGuide, combinaisons, guidePour, nomRace, planifier, raceGuide, versionGuide, ZEPHRAS } from "@/lib/guide";
+import { cleGuide, combinaisons, guidePour, nomRace, ordreDuGuide, raceGuide, versionGuide, ZEPHRAS } from "@/lib/guide";
 import { LIEUX_ZEPHRAS } from "@/content/zephras-jeu";
 import { SORTIE_ZEPHRAS } from "@/content/zephras";
 
@@ -43,7 +43,7 @@ export default async function GuideRaceClasse({ params }: Props) {
   const zones: ZoneVue[] = guidePour(c.race, c.classe.slug).map((z) => ({
     lieu: z.lieu, nom: nomLieu(z.lieu), carte: urlCarte(z.lieu, 1000), lienCarte: pageLieu(z.lieu), niveaux: z.niveaux, hubs: z.hubs,
     etapes: z.etapes.map(({ id, t, nv, min, cl, grp, obj, g, gn, r, rn, rl, cib }) => ({ id, t, nv, min, cl, grp, obj, g, gn, r, rn, rl: rl ? nomLieu(rl) : null, cib })),
-    arrets: planifier(z),
+    arrets: ordreDuGuide(z, c.race, c.classe.slug),
     ...(z.lieu === ZEPHRAS ? { lieux: LIEUX_ZEPHRAS } : {}),
     ...(z.lieu === ZEPHRAS && !z.etapes.length ? {
       note: `Les quêtes de l'île ne figurent pas encore dans les fichiers du jeu : Jobwow les relève au lancement et les ajoute ici, avec leurs PNJ et leurs cibles sur la carte. En attendant, la carte montre les lieux de l'île. Partez du village de Thendal, faites les quêtes de l'île jusqu'à ce qu'elle soit terminée, puis prenez la route ${SORTIE_ZEPHRAS[c.race.faction] ? `vers ${SORTIE_ZEPHRAS[c.race.faction]}` : "de votre faction [point d'arrivée à confirmer au lancement]"} : la suite du guide reprend au niveau 10.`,
@@ -77,7 +77,7 @@ export default async function GuideRaceClasse({ params }: Props) {
         <div className="encadre-chaud" style={{ marginBottom: 24 }}>
           <p style={{ margin: 0 }}>
             <strong>À vérifier en jeu.</strong> Route établie à partir des quêtes de l&apos;Azeroth d&apos;origine encore présentes dans Forever : des PNJ ou des
-            étapes ont pu changer, et les nouveautés de Forever n&apos;y figurent pas encore. Prenez les quêtes au même endroit avant de partir, faites
+            étapes ont pu changer, et les nouveautés de Forever n&apos;y entrent qu&apos;au fil des parties relevées en jeu. Prenez les quêtes au même endroit avant de partir, faites
             celles marquées « Groupe » à plusieurs, et passez une zone si elle devient trop facile. La case « Monstres et objets sur la carte » montre où
             trouver les cibles d&apos;une quête, avec une flèche du donneur vers les cibles, puis vers le PNJ à qui la rendre.
           </p>

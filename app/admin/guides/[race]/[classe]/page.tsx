@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { lireRelecture } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
 import { trouverClasse } from "@/content/classes";
-import { cleGuide, combinaisons, guidePour, nomRace, planifier, raceGuide, versionGuide, type EtapeGuide, type TypeAction } from "@/lib/guide";
+import { cleGuide, combinaisons, etapesRelevees, guidePour, nomRace, ordreDuGuide, raceGuide, versionGuide, type EtapeGuide, type TypeAction } from "@/lib/guide";
 import { nomLieu } from "@/lib/quetes";
 import { enregistrerZone, importerRemarques } from "../../actions";
 
@@ -35,12 +35,13 @@ export default async function RelectureGuide({ params, searchParams }: Props) {
 
   let numero = 0;
   const zones = guidePour(race, classe.slug).map((z) => {
-    const lignes = planifier(z).flatMap((arret) =>
+    const relevees = etapesRelevees(z, race, classe.slug);
+    const lignes = ordreDuGuide(z, race, classe.slug).flatMap((arret) =>
       arret.actions.map((act) => {
         // act.q : rang de la quête dans la zone ; la clé garde l'identifiant de la quête, stable d'une version à l'autre.
         const e = z.etapes[act.q];
         const cle = `${act.a}:${e.id}`;
-        return { cle, numero: ++numero, a: act.a, e, ailleurs: arret.type === "ailleurs", note: notes.get(cle) };
+        return { cle, numero: ++numero, a: act.a, e, ailleurs: arret.type === "ailleurs", note: notes.get(cle), releve: relevees.has(cle) };
       }),
     );
     return { lieu: z.lieu, nom: nomLieu(z.lieu), niveaux: z.niveaux, lignes, verifiees: lignes.filter((l) => l.note?.verifie).length };
@@ -113,7 +114,7 @@ export default async function RelectureGuide({ params, searchParams }: Props) {
                       <td>
                         <strong>{ACTIONS[l.a]}</strong> « {l.e.t} »{" "}
                         <span className="doux">
-                          niv. {l.e.nv}{l.e.cl ? " · quête de classe" : ""}{l.e.grp ? " · en groupe" : ""}{l.ailleurs ? " · hors de la zone" : ""}
+                          niv. {l.e.nv}{l.e.cl ? " · quête de classe" : ""}{l.e.grp ? " · en groupe" : ""}{l.ailleurs ? " · hors de la zone" : ""}{l.releve ? " · relevé en vidéo" : ""}
                         </span>
                         <br />
                         <span className="doux" style={{ fontSize: 14 }}>{detail(l.a, l.e)}</span>

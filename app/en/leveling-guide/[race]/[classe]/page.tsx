@@ -9,7 +9,7 @@ import { GuideParcours, type ZoneVue } from "@/components/GuideParcours";
 import { ECRAN_CLASSE, fondBandeau } from "@/lib/ecrans";
 import { urlCarte } from "@/lib/cartes";
 import { nomLieu } from "@/lib/quetes";
-import { cleGuide, combinaisons, guidePour, planifier, raceGuide, versionGuide, ZEPHRAS } from "@/lib/guide";
+import { cleGuide, combinaisons, guidePour, ordreDuGuide, raceGuide, versionGuide, ZEPHRAS } from "@/lib/guide";
 import { CLASSES_EN, classeDepuisEn, lienGuideEn, nomClasseEn, nomRaceEn, pageLieuEn, raceDepuisEn, RACES_EN } from "@/lib/anglais";
 import { LIEUX_ZEPHRAS } from "@/content/zephras-jeu";
 import { LIEUX_ZEPHRAS_EN } from "@/content/lieux-en";
@@ -47,7 +47,7 @@ export default async function GuideRaceClasseEn({ params }: Props) {
   const zones: ZoneVue[] = guidePour(c.race, c.classe.slug, "en").map((z) => ({
     lieu: z.lieu, nom: nomLieu(z.lieu, "en"), carte: urlCarte(z.lieu, 1000), lienCarte: pageLieuEn(z.lieu), niveaux: z.niveaux, hubs: z.hubs,
     etapes: z.etapes.map(({ id, t, nv, min, cl, grp, obj, g, gn, r, rn, rl, cib }) => ({ id, t, nv, min, cl, grp, obj, g, gn, r, rn, rl: rl ? nomLieu(rl, "en") : null, cib })),
-    arrets: planifier(z),
+    arrets: ordreDuGuide(z, c.race, c.classe.slug),
     ...(z.lieu === ZEPHRAS ? { lieux: LIEUX_ZEPHRAS.map((l) => ({ ...l, nom: LIEUX_ZEPHRAS_EN[l.nom] ?? l.nom })) } : {}),
     ...(z.lieu === ZEPHRAS && !z.etapes.length ? {
       note: `The island's quests are not in the game files yet: Jobwow will record them at launch and add them here, with their NPCs and targets on the map. Meanwhile, the map shows the island's places. Start from the village of Thendal, do the island's quests until it is complete, then take the road ${SORTIE_ZEPHRAS[c.race.faction] ? `to ${SORTIE_ZEPHRAS[c.race.faction]}` : "of your faction [arrival point to be confirmed at launch]"}: the guide picks up again at level 10.`,
@@ -82,7 +82,7 @@ export default async function GuideRaceClasseEn({ params }: Props) {
         <div className="encadre-chaud" style={{ marginBottom: 24 }}>
           <p style={{ margin: 0 }}>
             <strong>Check in game.</strong> This route is built from original Azeroth quests still present in Forever: some NPCs or steps may have
-            changed, and Forever&apos;s new content is not included yet. Pick up the quests at the same place before leaving, do those marked
+            changed, and Forever&apos;s new quests are only added as they are recorded in game. Pick up the quests at the same place before leaving, do those marked
             “Group” with others, and skip a zone if it becomes too easy. The “Monsters and objects on the map” box shows where to find a quest&apos;s
             targets, with an arrow from the quest giver to the targets, then to the NPC you turn it in to.
           </p>

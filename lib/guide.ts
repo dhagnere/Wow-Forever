@@ -4,6 +4,7 @@ import { CLASSES } from "@/content/classes";
 import { SKYBORNE } from "@/content/monde";
 import { NIVEAUX_ZEPHRAS, QUETES_ZEPHRAS, type QueteZephras } from "@/content/zephras";
 import { QUETES_FOREVER, SECTEUR_A_RELEVER, TITRE_EN_A_CONFIRMER, type QueteForever } from "@/content/ajouts-forever";
+import { PARCOURS_RELEVES, type ParcoursReleve } from "@/content/parcours-releves";
 import { carte } from "./cartes";
 import { suffixe, type Langue } from "./langue";
 
@@ -317,3 +318,51 @@ export function guidesPassantPar(lieu: string): { race: RaceGuide; classes: stri
   }
   return parZone.get(lieu) ?? [];
 }
+
+// --- Parcours relevés en jeu (content/parcours-releves.ts) : l'ordre joué passe avant l'ordre calculé.
+
+/** Parcours relevé pour cette race et cette classe dans la zone (celui de la classe l'emporte sur celui de toute la race). */
+export function parcoursReleve(race: RaceGuide, classe: string, lieu: string, parcours: ParcoursReleve[] = PARCOURS_RELEVES): ParcoursReleve | null {
+  const pour = parcours.filter((p) => p.race === race.slug && p.lieu === lieu);
+  return pour.find((p) => p.classe === classe) ?? pour.find((p) => p.classe === null) ?? null;
+}
+
+/**
+ * Ordre de passage d'une zone : d'abord les étapes du parcours relevé, dans l'ordre joué, puis les autres dans l'ordre
+ * calculé par planifier (qui en garde la logique : on prend, on fait, on rend). Les étapes relevées sont marquées.
+ */
+export function ordreDuGuide(z: ZoneGuide, race: RaceGuide, classe: string, parcours: ParcoursReleve[] = PARCOURS_RELEVES): Arret[] {
+  const calcule = planifier(z);
+  const p = parcoursReleve(race, classe, z.lieu, parcours);
+  if (!p) return calcule;
+  const indice = new Map(z.etapes.map((e, i) => [e.id, i]));
+  const vues = new Set<string>();
+  const releves: Arret[] = [];
+  for (const cle of p.etapes) {
+    const [a, id] = cle.split(":") as [TypeAction, string];
+    const q = indice.get(Number(id));
+    if (q === undefined || !["prendre", "faire", "rendre"].includes(a) || vues.has(`${a}:${q}`)) continue;
+    vues.add(`${a}:${q}`);
+    const e = z.etapes[q];
+    const hub = a === "prendre" ? e.g : a === "rendre" ? e.r : -1;
+    const lieu = hub >= 0 ? { x: z.hubs[hub].x, y: z.hubs[hub].y, type: "pnj" as const, hub }
+      : a === "faire" && e.cib ? { x: e.cib.c[0], y: e.cib.c[1], type: "cible" as const, hub: -1 }
+      : a === "faire" && e.g >= 0 ? { x: z.hubs[e.g].x, y: z.hubs[e.g].y, type: "pnj" as const, hub: e.g }
+      : { x: null, y: null, type: "ailleurs" as const, hub: -1 };
+    const dernier = releves[releves.length - 1];
+    if (dernier && dernier.type === lieu.type && dernier.hub === lieu.hub && dernier.x === lieu.x && dernier.y === lieu.y) dernier.actions.push({ a, q });
+    else releves.push({ ...lieu, actions: [{ a, q }] });
+  }
+  const suite = calcule
+    .map((ar) => ({ ...ar, actions: ar.actions.filter((x) => !vues.has(`${x.a}:${x.q}`)) }))
+    .filter((ar) => ar.actions.length);
+  return [...releves, ...suite];
+}
+
+/** Étapes de la zone reprises d'un parcours relevé en jeu (« prendre:4641 »…), pour les signaler. */
+export function etapesRelevees(z: ZoneGuide, race: RaceGuide, classe: string, parcours: ParcoursReleve[] = PARCOURS_RELEVES): Set<string> {
+  const p = parcoursReleve(race, classe, z.lieu, parcours);
+  const ids = new Set(z.etapes.map((e) => e.id));
+  return new Set((p?.etapes ?? []).filter((c) => ids.has(Number(c.split(":")[1]))));
+}
+
