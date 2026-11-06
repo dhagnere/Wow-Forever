@@ -29,7 +29,7 @@ describe("parcours relevés en jeu", () => {
     const race = raceGuide("orc")!;
     const z = guidePour(race, "chasseur")[0];
     const ordre = cles(z, ordreDuGuide(z, race, "chasseur"));
-    expect(ordre.slice(0, 4)).toEqual(["prendre:4641", "rendre:4641", "prendre:788", "prendre:9100001"]);
+    expect(ordre.slice(0, 6)).toEqual(["prendre:4641", "rendre:4641", "prendre:788", "prendre:9100001", "faire:788", "faire:9100001"]);
     expect([...ordre].sort()).toEqual([...cles(z, planifier(z))].sort());
   });
 

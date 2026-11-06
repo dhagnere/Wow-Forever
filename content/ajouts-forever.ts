@@ -47,11 +47,13 @@ export const QUETES_FOREVER: QueteForever[] = [
     // Gornek et Kzan Tranchecorne sont dans l'Antre : position de Gornek d'après les bases libres.
     donneur: { nom: "Gornek", x: 42.1, y: 68.3 },
     objectifs: ["Rapporter 6 × Arme d'entraînement abandonnée"],
+    // Position du personnage relevée sur la carte du jeu au moment du ramassage (2 armes sur 6), vidéo 2.
+    cibles: [[44.1, 66.6]],
     rendre: { nom: "Kzan Tranchecorne", x: 42.1, y: 68.3 },
     faction: "horde",
     // Proposée par Gornek après le rendu de « Votre place en ce monde » (vidéo) ; à confirmer si elle l'est aussi avant.
     avant: 4641,
-    source: "Vidéo du 6 novembre 2026 (chasseur orc, 2:35 et 2:50) : prise auprès de Gornek après « Votre place en ce monde » ; armes au pied des cactus de la vallée, coordonnées à relever.",
+    source: "Vidéos du 6 novembre 2026, chasseur orc : prise auprès de Gornek après « Votre place en ce monde » (vidéo 1, 2:35), armes ramassées en chassant les sangliers tachetés, carte à 44,1 – 66,6 (vidéo 2, 0:20), rendue dans l'Antre (vidéo 2, vers 12:00).",
   },
 ];
 

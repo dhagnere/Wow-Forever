@@ -22,7 +22,9 @@ describe("quêtes ajoutées par Forever", () => {
     const durotar = guidePour(raceGuide("orc")!, "chasseur")[0];
     const etape = durotar.etapes.find((e) => e.id === 9100001)!;
     expect(etape.t).toBe("Armes égarées");
-    expect(etape.obj[0]).toContain(SECTEUR_A_RELEVER.fr);
+    const saisie = QUETES_FOREVER.find((q) => q.id === 9100001)!;
+    if (saisie.cibles?.length) expect(etape.cib).not.toBeNull();
+    else expect(etape.obj[0]).toContain(SECTEUR_A_RELEVER.fr);
     const ordre = planifier(durotar).flatMap((a) => a.actions.map((x) => `${x.a}:${durotar.etapes[x.q].id}`));
     expect(ordre.indexOf("prendre:9100001")).toBeGreaterThan(ordre.indexOf("rendre:4641"));
     expect(ordre.indexOf("rendre:9100001")).toBeGreaterThan(ordre.indexOf("prendre:9100001"));

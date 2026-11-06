@@ -336,12 +336,14 @@ export function ordreDuGuide(z: ZoneGuide, race: RaceGuide, classe: string, parc
   const p = parcoursReleve(race, classe, z.lieu, parcours);
   if (!p) return calcule;
   const indice = new Map(z.etapes.map((e, i) => [e.id, i]));
+  // Seules les étapes que le calcul connaît sont reprises (pas de « faire » pour une quête sans objectif, par exemple).
+  const connues = new Set(calcule.flatMap((ar) => ar.actions.map((x) => `${x.a}:${x.q}`)));
   const vues = new Set<string>();
   const releves: Arret[] = [];
   for (const cle of p.etapes) {
     const [a, id] = cle.split(":") as [TypeAction, string];
     const q = indice.get(Number(id));
-    if (q === undefined || !["prendre", "faire", "rendre"].includes(a) || vues.has(`${a}:${q}`)) continue;
+    if (q === undefined || !connues.has(`${a}:${q}`) || vues.has(`${a}:${q}`)) continue;
     vues.add(`${a}:${q}`);
     const e = z.etapes[q];
     const hub = a === "prendre" ? e.g : a === "rendre" ? e.r : -1;
