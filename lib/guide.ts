@@ -3,6 +3,7 @@ import path from "node:path";
 import { CLASSES } from "@/content/classes";
 import { SKYBORNE } from "@/content/monde";
 import { NIVEAUX_ZEPHRAS, QUETES_ZEPHRAS, type QueteZephras } from "@/content/zephras";
+import { QUETES_FOREVER, SECTEUR_A_RELEVER, TITRE_EN_A_CONFIRMER, type QueteForever } from "@/content/ajouts-forever";
 import { carte } from "./cartes";
 import { suffixe, type Langue } from "./langue";
 
@@ -131,6 +132,38 @@ export function zoneZephras(race: RaceGuide, classe: string, quetes: QueteZephra
   return { lieu: ZEPHRAS, niveaux: NIVEAUX_ZEPHRAS ?? [1, 10], hubs, etapes };
 }
 
+/**
+ * Ajoute à une zone les quêtes de Forever saisies à la main (content/ajouts-forever.ts) : même faction, même classe s'il
+ * s'agit d'une quête de classe. Les points de rassemblement sont copiés, jamais modifiés en place (données en cache).
+ */
+export function avecAjoutsForever(z: ZoneGuide, faction: RaceGuide["faction"], classe: string, langue: Langue = "fr", ajouts: QueteForever[] = QUETES_FOREVER): ZoneGuide {
+  const quetes = ajouts.filter((q) => q.lieu === z.lieu && (!q.faction || q.faction === faction) && (!q.classes?.length || q.classes.includes(classe)));
+  if (!quetes.length) return z;
+  const hubs: Hub[] = z.hubs.map((h) => ({ ...h, n: [...h.n] }));
+  const hubDe = (p: { nom: string; x: number; y: number }) => {
+    let i = hubs.findIndex((h) => Math.hypot(h.x - p.x, h.y - p.y) < 4);
+    if (i < 0) { hubs.push({ x: p.x, y: p.y, n: [] }); i = hubs.length - 1; }
+    if (!hubs[i].n.includes(p.nom)) hubs[i].n.push(p.nom);
+    return i;
+  };
+  const etapes: EtapeGuide[] = quetes.map((q) => {
+    const rendre = q.rendre ?? q.donneur;
+    const pts = q.cibles ?? [];
+    const c: [number, number] | null = pts.length
+      ? [Math.round((pts.reduce((s, p) => s + p[0], 0) / pts.length) * 10) / 10, Math.round((pts.reduce((s, p) => s + p[1], 0) / pts.length) * 10) / 10]
+      : null;
+    const en = langue === "en";
+    const titre = en ? q.en?.titre ?? `${q.titre} ${TITRE_EN_A_CONFIRMER}` : q.titre;
+    const objectifs = (en && q.en?.objectifs) || q.objectifs;
+    return {
+      id: q.id, t: titre, nv: q.niveau, min: q.min ?? 0, ra: 0, cl: q.classes?.length ? q.classes.reduce((m, s) => m | (BITS_CLASSES[s] ?? 0), 0) : 0,
+      grp: q.groupe ? 1 : 0, obj: c ? objectifs : objectifs.map((o) => `${o} ${SECTEUR_A_RELEVER[langue]}`),
+      g: hubDe(q.donneur), gn: q.donneur.nom, r: hubDe(rendre), rn: rendre.nom, rl: null, av: q.avant ?? 0, cib: c ? { p: pts, c } : null,
+    };
+  });
+  return { ...z, hubs, etapes: [...z.etapes, ...etapes] };
+}
+
 export function guidePour(race: RaceGuide, classe: string, langue: Langue = "fr"): ZoneGuide[] {
   const d = donnees(langue);
   const bitClasse = BITS_CLASSES[classe] ?? 0;
@@ -141,6 +174,7 @@ export function guidePour(race: RaceGuide, classe: string, langue: Langue = "fr"
     const suite = (d?.guide[race.faction] ?? [])
       .filter((z) => !DEPARTS.has(z.lieu) && z.niveaux[0] >= 10)
       .map((z) => ({ ...z, etapes: z.etapes.filter((e) => (!e.ra || e.ra === masque) && (!e.cl || e.cl & bitClasse)) }))
+      .map((z) => avecAjoutsForever(z, race.faction, classe, langue))
       .filter((z) => z.etapes.length >= 4);
     return [zoneZephras(race, classe), ...suite];
   }
@@ -150,6 +184,7 @@ export function guidePour(race: RaceGuide, classe: string, langue: Langue = "fr"
     .filter((z) => z.lieu === race.depart || !DEPARTS.has(z.lieu) || z.niveaux[0] >= 12)
     .filter((z) => z.lieu === race.depart || z.niveaux[1] >= 30 || carte(z.lieu)?.continent === continent)
     .map((z) => ({ ...z, etapes: z.etapes.filter((e) => (!e.ra || e.ra & race.bit) && (!e.cl || e.cl & bitClasse)) }))
+    .map((z) => avecAjoutsForever(z, race.faction, classe, langue))
     .filter((z) => z.etapes.length >= 4)
     // La zone de départ ouvre toujours la route.
     .sort((a, b) => Number(b.lieu === race.depart) - Number(a.lieu === race.depart));

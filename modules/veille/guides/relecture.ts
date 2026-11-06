@@ -17,6 +17,18 @@ const GUIDE = /^(alliance|horde):[a-z-]{2,40}:[a-z-]{2,20}$/;
 export const etapeValide = (e: string) => ETAPE.test(e);
 export const guideValide = (g: string) => GUIDE.test(g);
 
+/**
+ * Bloc de remarques préparé à partir d'une vidéo, une étape par ligne : « prendre:4641 | oui | remarque ».
+ * « oui » (ou x, vrai, yes) coche « vérifié en jeu » ; les lignes dont l'étape n'est pas valable sont ignorées.
+ */
+export function lireBlocRemarques(texte: string): { etape: string; verifie: boolean; remarque: string }[] {
+  return texte.slice(0, 200_000).split(/\r?\n/)
+    .map((l) => l.split("|").map((x) => x.trim()))
+    .filter(([e]) => !!e && etapeValide(e))
+    .slice(0, 2000)
+    .map(([etape, v = "", ...reste]) => ({ etape, verifie: /^(oui|x|vrai|yes)$/i.test(v), remarque: reste.join(" | ").slice(0, 1000) }));
+}
+
 export async function lireRelecture(guide: string): Promise<Map<string, NoteEtape>> {
   const { rows } = await pool().query<{ etape: string; verifie: boolean; remarque: string; maj_le: Date }>(
     "SELECT etape, verifie, remarque, maj_le FROM guides_relecture WHERE guide = $1",

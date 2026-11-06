@@ -6,12 +6,12 @@ import { exigerAdmin } from "@/lib/admin";
 import { trouverClasse } from "@/content/classes";
 import { cleGuide, combinaisons, guidePour, nomRace, planifier, raceGuide, versionGuide, type EtapeGuide, type TypeAction } from "@/lib/guide";
 import { nomLieu } from "@/lib/quetes";
-import { enregistrerZone } from "../../actions";
+import { enregistrerZone, importerRemarques } from "../../actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Relecture d'un guide" };
 
-type Props = { params: Promise<{ race: string; classe: string }>; searchParams: Promise<{ ok?: string }> };
+type Props = { params: Promise<{ race: string; classe: string }>; searchParams: Promise<{ ok?: string; importees?: string }> };
 
 const ACTIONS: Record<TypeAction, string> = { prendre: "Prendre", faire: "Faire", rendre: "Rendre" };
 
@@ -27,7 +27,7 @@ export default async function RelectureGuide({ params, searchParams }: Props) {
   const race = raceGuide(p.race);
   const classe = trouverClasse(p.classe);
   if (!race || !classe || !combinaisons().some((c) => c.race.slug === race.slug && c.classe.slug === classe.slug)) notFound();
-  const { ok } = await searchParams;
+  const { ok, importees } = await searchParams;
   const guide = cleGuide(race, classe.slug);
   const chemin = `/admin/guides/${race.slug}/${classe.slug}/`;
   const publique = `/guides/parcours/${race.slug}/${classe.slug}/`;
@@ -62,6 +62,21 @@ export default async function RelectureGuide({ params, searchParams }: Props) {
         Cochez « vérifié » quand l&apos;étape se passe en jeu comme indiqué. Sinon, décrivez l&apos;écart en quelques mots (PNJ ailleurs, quête absente, niveau trop
         bas, autre ordre plus pratique). Enregistrez zone par zone.
       </p>
+
+      {importees ? <p className="info" role="status">{importees} étape(s) importée(s).</p> : null}
+      <details style={{ margin: "12px 0" }}>
+        <summary style={{ cursor: "pointer", fontWeight: 700 }}>Importer des remarques</summary>
+        <form action={importerRemarques} style={{ marginTop: 8 }}>
+          <input type="hidden" name="guide" value={guide} />
+          <input type="hidden" name="chemin" value={chemin} />
+          <div className="champ">
+            <label htmlFor="i-remarques">Une étape par ligne : <code>prendre:4641 | oui | remarque</code></label>
+            <textarea id="i-remarques" name="remarques" required placeholder={"prendre:4641 | oui |\nprendre:788 | non | Gornek la propose après le rendu"} />
+            <small>« oui » coche « vérifié en jeu ». Une étape absente du bloc garde sa note ; une ligne sans « oui » ni remarque l&apos;efface.</small>
+          </div>
+          <p><button type="submit" className="btn btn-contour">Importer</button></p>
+        </form>
+      </details>
 
       {remarques.length ? (
         <section className="encadre" style={{ margin: "16px 0" }}>

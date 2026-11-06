@@ -106,7 +106,7 @@ export { PAGES_LETTRE, plafondJour } from "./lettre/messages";
 
 // Relecture du guide de 1 à 60 en jeu (/admin/guides).
 export type { NoteEtape, RemarqueGuide } from "./guides/relecture";
-export { lireRelecture, enregistrerRelecture, avancementRelecture, remarquesRelecture, etapeValide, guideValide } from "./guides/relecture";
+export { lireRelecture, enregistrerRelecture, avancementRelecture, remarquesRelecture, etapeValide, guideValide, lireBlocRemarques } from "./guides/relecture";
 
 // Courriels du site (Resend) : mot de passe oublié, confirmations, Lettre.
 export type { Courriel } from "./courriel/resend";
