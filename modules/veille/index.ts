@@ -104,6 +104,10 @@ export { inscrireALaLettre, confirmerAbonnement, desabonnerAdresse, desinscrireP
 export { listerEnvois, lireEnvoi, enregistrerEnvoi, supprimerEnvoi, lancerEnvoi, chiffresAbonnes, importerAbonnes } from "./lettre/depot";
 export { PAGES_LETTRE, plafondJour } from "./lettre/messages";
 
+// Relecture du guide de 1 à 60 en jeu (/admin/guides).
+export type { NoteEtape, RemarqueGuide } from "./guides/relecture";
+export { lireRelecture, enregistrerRelecture, avancementRelecture, remarquesRelecture, etapeValide, guideValide } from "./guides/relecture";
+
 // Courriels du site (Resend) : mot de passe oublié, confirmations, Lettre.
 export type { Courriel } from "./courriel/resend";
 export { courrielConfigure, envoyerCourriel } from "./courriel/resend";

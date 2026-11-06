@@ -376,3 +376,13 @@ CREATE TABLE IF NOT EXISTS lettre_file (
 );
 CREATE INDEX IF NOT EXISTS lettre_file_attente_idx ON lettre_file (envoi_id) WHERE envoye_le IS NULL;
 CREATE INDEX IF NOT EXISTS lettre_file_envoye_idx ON lettre_file (envoye_le) WHERE envoye_le IS NOT NULL;
+
+-- Relecture du guide de 1 à 60 en jeu (/admin/guides) : étape vérifiée et remarque, par guide.
+CREATE TABLE IF NOT EXISTS guides_relecture (
+  guide     TEXT NOT NULL,
+  etape     TEXT NOT NULL,
+  verifie   BOOLEAN NOT NULL DEFAULT false,
+  remarque  TEXT NOT NULL DEFAULT '' CHECK (char_length(remarque) <= 1000),
+  maj_le    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (guide, etape)
+);
