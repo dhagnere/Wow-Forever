@@ -285,4 +285,26 @@ export const VIDEOS_ANALYSEES: VideoAnalysee[] = [
       "Quête « Les ordres de l'amiral » (830) proposée par Gar'Thok : absente du guide (elle est le prérequis de 831). À ajouter ou corriger dans les données.",
     ],
   },
+  {
+    id: "video-11",
+    titre: "Côte des naufrages (objectifs, niveaux 9–11)",
+    source: "https://drive.google.com/file/d/1dlsofMltcSHyuFmg6XqliqV-yzdW7SaF/view",
+    date: "7 novembre 2026",
+    duree: "32 min 07 s",
+    lieu: "durotar",
+    race: "orc",
+    classe: "chasseur",
+    statut: "traitee",
+    etapes: [
+      { a: "faire", q: 784, note: "Marins de Kul Tiras (Vaincre les traîtres)" },
+      { a: "faire", q: 825, note: "Outils gnomes (Des épaves)" },
+      { a: "faire", q: 817, note: "Fourrure de tigre de Durotar (Proie nécessaire)" },
+      { a: "faire", q: 815, note: "Œufs de fouette-queue (Des œufs pour l'omelette)" },
+    ],
+    ajouts: [],
+    remarques: [],
+    observations: [
+      "Session d'objectifs, aucune nouvelle quête : Durotar, Côte des naufrages. Confirme la route et l'emplacement des mobs.",
+    ],
+  },
 ];
