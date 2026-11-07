@@ -67,4 +67,44 @@ export const PARCOURS_RELEVES: ParcoursReleve[] = [
     ],
     source: "Vidéos du 6 novembre 2026, chasseur orc (1 et 2), étapes communes à toutes les classes.",
   },
+  {
+    // Troll chasseur, vidéos 01 à 05 du 7 novembre 2026 (ordre des vidéos conservé) : Vallée des Épreuves, puis Sen'jin
+    // et Îles de l'Écho. La vidéo 07 est une seconde prise de la Vallée (mêmes quêtes déjà relevées) ; la 06, un dialogue.
+    race: "troll",
+    classe: "chasseur",
+    lieu: "durotar",
+    etapes: [
+      "prendre:4641", "rendre:4641", "prendre:788", "prendre:9100001", "faire:788", "faire:9100001",
+      "prendre:790", "faire:790", "rendre:790", "prendre:804", "rendre:788", "rendre:804", "prendre:789", "prendre:3082", "faire:3082",
+      "rendre:9100001", "prendre:4402", "rendre:3082", "prendre:5441",
+      "faire:4402", "faire:789", "faire:5441",
+      "prendre:794", "faire:794", "rendre:794",
+      "prendre:805", "rendre:805",
+      "rendre:5441",
+      "prendre:6394", "faire:6394", "rendre:6394",
+      "prendre:2161", "faire:2161", "rendre:2161",
+      "prendre:786", "prendre:817", "prendre:9100002", "prendre:808", "prendre:823", "prendre:826",
+      "prendre:818",
+    ],
+    source: "Vidéos du 7 novembre 2026, troll chasseur (Jobwow) : Durotar, de la Vallée des Épreuves aux Îles de l'Écho. Ordre des vidéos 01 à 05 conservé.",
+  },
+  {
+    // Même parcours pour les autres classes trolls, sans le parchemin propre au chasseur (3087).
+    race: "troll",
+    classe: null,
+    lieu: "durotar",
+    etapes: [
+      "prendre:4641", "rendre:4641", "prendre:788", "prendre:9100001", "faire:788", "faire:9100001",
+      "prendre:790", "faire:790", "rendre:790", "prendre:804", "rendre:788", "rendre:804", "prendre:789",
+      "rendre:9100001", "prendre:4402", "prendre:5441", "faire:4402", "faire:789", "faire:5441",
+      "prendre:794", "faire:794", "rendre:794",
+      "prendre:805", "rendre:805",
+      "rendre:5441",
+      "prendre:6394", "faire:6394", "rendre:6394",
+      "prendre:2161", "faire:2161", "rendre:2161",
+      "prendre:786", "prendre:817", "prendre:9100002", "prendre:808", "prendre:823", "prendre:826",
+      "prendre:818",
+    ],
+    source: "Vidéos du 7 novembre 2026, troll chasseur (Jobwow), étapes communes à toutes les classes trolls.",
+  },
 ];

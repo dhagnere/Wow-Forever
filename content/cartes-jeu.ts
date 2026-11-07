@@ -1,6 +1,6 @@
 /** Fichier généré par npm run cartes:jeu : ne pas modifier à la main. Cartes © Blizzard Entertainment, lues grâce à wago.tools. */
 
-export const VERSION_CARTES_JEU = "1.60.1.70753";
+export const VERSION_CARTES_JEU = "1.60.1.70862";
 
 export interface CarteJeu { nom: string; continent: string; type: "continent" | "zone" }
 

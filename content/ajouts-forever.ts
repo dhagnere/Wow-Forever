@@ -39,6 +39,7 @@ export interface QueteForever {
 
 export const QUETES_FOREVER: QueteForever[] = [
   {
+    // Id réel Forever : 97279 (« Wayward Weapons »). On garde 9100001 pour ne pas casser la progression déjà enregistrée.
     id: 9100001,
     lieu: "durotar",
     titre: "Armes égarées",
@@ -54,6 +55,33 @@ export const QUETES_FOREVER: QueteForever[] = [
     // Proposée par Gornek après le rendu de « Votre place en ce monde » (vidéo) ; à confirmer si elle l'est aussi avant.
     avant: 4641,
     source: "Vidéos du 6 novembre 2026, chasseur orc : prise auprès de Gornek après « Votre place en ce monde » (vidéo 1, 2:35), armes ramassées en chassant les sangliers tachetés, carte à 44,1 – 66,6 (vidéo 2, 0:20), rendue dans l'Antre (vidéo 2, vers 12:00).",
+  },
+  {
+    // Id réel Forever : 97223 (« Matriarch Bloodclaw »). Id interne 9100002 pour rester dans la plage réservée aux saisies manuelles.
+    id: 9100002,
+    lieu: "durotar",
+    titre: "La matriarche griffesang",
+    niveau: 8,
+    min: 5,
+    donneur: { nom: "Xar'Ti", x: 55.3, y: 75.5 },
+    objectifs: ["Rapporter les œufs de la matriarche griffesang"],
+    cibles: [[68, 72]],
+    faction: "horde",
+    source: "Vidéos du 7 novembre 2026 (vidéo 02) ; Wowhead Forever / WCLBox (quête 97223) : donnée par Xar'Ti (55,3 – 75,5), œufs vers 68/72, remise des œufs à Xaldi de Sen'jin.",
+  },
+  {
+    // Id réel Forever : 792 (« Vile Familiars »). Quête générale de la Vallée des Épreuves, absente des bases libres
+    // (elles n'ont que la version démoniste 1485/1499). Id interne 9100003.
+    id: 9100003,
+    lieu: "durotar",
+    titre: "Les vils quasits",
+    niveau: 4,
+    min: 2,
+    donneur: { nom: "Zureetha Mireloin", x: 42.1, y: 68.3 },
+    objectifs: ["Vaincre 6 × Vil quasit"],
+    cibles: [[44.3, 55.5]],
+    faction: "horde",
+    source: "Vidéos du 7 novembre 2026 (vidéo 03) ; ForeverChanges/WCLBox : quête 792, donnée par Zureetha Mireloin dans la Vallée des Épreuves. Cibles d'après la version démoniste (1485).",
   },
 ];
 

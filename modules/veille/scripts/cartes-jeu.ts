@@ -80,7 +80,7 @@ lancer("cartes:jeu", async () => {
       .png()
       .toBuffer();
     for (const largeur of [1000, 500]) {
-      await sharp(assemblee).resize({ width: largeur }).jpeg({ quality: largeur > 600 ? 80 : 74, progressive: true, mozjpeg: true })
+      await sharp(assemblee).resize({ width: largeur }).modulate({ brightness: 1.24, saturation: 1.18 }).jpeg({ quality: largeur > 600 ? 82 : 76, progressive: true, mozjpeg: true })
         .toFile(path.join(SORTIE, `${slug}-${largeur}.jpg`));
     }
     const continent = CONTINENTS[c.ID] ? CONTINENTS[c.ID] : CONTINENTS[c.ParentUiMapID] ?? "Hors des continents";
