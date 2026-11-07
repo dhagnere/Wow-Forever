@@ -173,6 +173,18 @@ export const QUETES_FOREVER: QueteForever[] = [
     faction: "horde",
     source: "ForeverChanges : quête 96876, commence depuis l'objet « Le sac perdu d'Ukor » (sud de Durotar), rendue à Ukor (52 – 68,4).",
   },
+  {
+    // Id réel Forever : 785 (« A Strategic Alliance »). Id interne 9100011. Quête-pont vers « Déjouer l'agression des Kolkar » (786).
+    id: 9100011,
+    lieu: "durotar",
+    titre: "Alliance stratégique",
+    niveau: 8,
+    min: 5,
+    donneur: { nom: "Lar Fouinebroche", x: 55.9, y: 74 },
+    objectifs: ["Parler à Lar Fouinebroche"],
+    faction: "horde",
+    source: "ForeverChanges : quête 785, mène à Lar Prowltusk (Lar Fouinebroche) à l'ouest de Sen'jin, avant « Déjouer l'agression des Kolkar » (786). Donneur d'origine à confirmer en jeu.",
+  },
 ];
 
 /** Repère affiché quand l'emplacement des cibles n'a pas encore été relevé en jeu. */
