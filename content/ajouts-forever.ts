@@ -210,6 +210,35 @@ export const QUETES_FOREVER: QueteForever[] = [
     faction: "horde",
     source: "Vidéos du 7 novembre 2026 (vidéos 08 et 09) ; ForeverDB : quête 96655, donnée par Brakk, rendue à la Cuisinière Torka.",
   },
+  {
+    // Id réel Forever : 99048 (« A Missing Hand »). Id interne 9100014.
+    id: 9100014,
+    lieu: "durotar",
+    titre: "Une main en moins",
+    niveau: 11,
+    min: 9,
+    donneur: { nom: "Orgnil Marque-l'âme", x: 52.2, y: 43.1 },
+    objectifs: ["Explorer le nord de Tiragarde pour trouver Heglan Shadeeye"],
+    cibles: [[58.6, 45.6]],
+    rendre: { nom: "Heglan Shadeeye", x: 58.6, y: 45.6 },
+    faction: "horde",
+    source: "Vidéos du 7 novembre 2026 (vidéo 12) ; ForeverChanges : quête 99048, donnée par Orgnil Soulscar (52,2 – 43,1), rendue à Heglan Shadeeye (58,6 – 45,6).",
+  },
+  {
+    // Id réel Forever : 99049 (« Threat from Below »). Id interne 9100015. Suite de « Une main en moins » (9100014).
+    id: 9100015,
+    lieu: "durotar",
+    titre: "Une menace venue d'en bas",
+    niveau: 11,
+    min: 9,
+    donneur: { nom: "Heglan Shadeeye", x: 58.6, y: 45.6 },
+    objectifs: ["Rapporter Dague orque ; Rapporter Morceau de bannière ; Rapporter Trident d'os brisé"],
+    cibles: [[58.6, 45.6]],
+    rendre: { nom: "Orgnil Marque-l'âme", x: 52.2, y: 43.1 },
+    avant: 9100014,
+    faction: "horde",
+    source: "Vidéos du 7 novembre 2026 (vidéo 12) ; ForeverChanges : quête 99049, donnée par Heglan Shadeeye, rendue à Orgnil Soulscar (52,2 – 43,1).",
+  },
 ];
 
 /** Repère affiché quand l'emplacement des cibles n'a pas encore été relevé en jeu. */

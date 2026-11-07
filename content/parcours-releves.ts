@@ -47,7 +47,7 @@ export const PARCOURS_RELEVES: ParcoursReleve[] = [
       "prendre:818", "prendre:9100004", "prendre:9100009", "prendre:9100010", "prendre:9100006",
       // Camping + Tranchecolline (niveaux 6-9) — vidéos 08, 09
       "prendre:9100012", "prendre:9100013", "prendre:784", "prendre:9100007", "prendre:815", "prendre:9100008",
-      "prendre:791",
+      "prendre:791", "prendre:9100014",
     ],
     source: "Vidéos du 7 novembre 2026, orc chasseur (Jobwow) : Durotar, de la Vallée des Épreuves à Tranchecolline. Ordre des vidéos 01 à 09 conservé.",
   },
@@ -69,7 +69,7 @@ export const PARCOURS_RELEVES: ParcoursReleve[] = [
       "prendre:9100011", "prendre:786", "prendre:817", "prendre:9100002", "prendre:808", "prendre:823", "prendre:826", "prendre:9100005",
       "prendre:818", "prendre:9100004", "prendre:9100009", "prendre:9100010", "prendre:9100006",
       "prendre:9100012", "prendre:9100013", "prendre:784", "prendre:9100007", "prendre:815", "prendre:9100008",
-      "prendre:791",
+      "prendre:791", "prendre:9100014",
     ],
     source: "Vidéos du 7 novembre 2026, orc chasseur (Jobwow), étapes communes à toutes les classes orques.",
   },
