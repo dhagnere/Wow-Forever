@@ -185,6 +185,31 @@ export const QUETES_FOREVER: QueteForever[] = [
     faction: "horde",
     source: "ForeverChanges : quête 785, mène à Lar Prowltusk (Lar Fouinebroche) à l'ouest de Sen'jin, avant « Déjouer l'agression des Kolkar » (786). Donneur d'origine à confirmer en jeu.",
   },
+  {
+    // Id réel Forever : 96604 (« The Great Outdoors »). Id interne 9100012. Introduction au camping.
+    id: 9100012,
+    lieu: "durotar",
+    titre: "Les grands espaces sauvages",
+    niveau: 6,
+    min: 3,
+    donneur: { nom: "Brakk", x: 52, y: 43.6 },
+    objectifs: ["Utiliser le feu de camp de Brakk jusqu'à recevoir le bonus Repos renforcé"],
+    faction: "horde",
+    source: "Vidéos du 7 novembre 2026 (vidéo 08) ; ForeverDB : quête 96604, donnée par Brakk (Tranchecolline).",
+  },
+  {
+    // Id réel Forever : 96655 (« Camping 101: Cooking »). Id interne 9100013. Camping : cuisine.
+    id: 9100013,
+    lieu: "durotar",
+    titre: "Introduction au camping : la cuisine",
+    niveau: 6,
+    min: 3,
+    donneur: { nom: "Brakk", x: 52, y: 43.6 },
+    objectifs: ["Parler à la Cuisinière Torka à Tranchecolline"],
+    rendre: { nom: "Cuisinier Torka", x: 51.2, y: 42.5 },
+    faction: "horde",
+    source: "Vidéos du 7 novembre 2026 (vidéos 08 et 09) ; ForeverDB : quête 96655, donnée par Brakk, rendue à la Cuisinière Torka.",
+  },
 ];
 
 /** Repère affiché quand l'emplacement des cibles n'a pas encore été relevé en jeu. */
