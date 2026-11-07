@@ -40,6 +40,16 @@ export default async function TestGuide({ searchParams }: Props) {
   const { ok } = await searchParams;
   const videos = VIDEOS_ANALYSEES;
 
+  // Regroupement par race · classe, pour une lecture claire.
+  const groupes = new Map<string, VideoAnalysee[]>();
+  for (const v of videos) {
+    const r = raceGuide(v.race);
+    const c = v.classe ? trouverClasse(v.classe) : null;
+    const libelle = `${r ? nomRace(r) : v.race || "race ?"} · ${c ? c.nom : "toutes classes"}`;
+    if (!groupes.has(libelle)) groupes.set(libelle, []);
+    groupes.get(libelle)!.push(v);
+  }
+
   return (
     <div>
       <h1 style={{ marginTop: 0 }}>TestGuide — analyse des vidéos</h1>
@@ -78,12 +88,17 @@ export default async function TestGuide({ searchParams }: Props) {
         </div>
       </section>
 
-      {videos.map((v) => {
+      {[...groupes.entries()].map(([libelle, groupeVideos]) => (
+        <div key={libelle} style={{ margin: "28px 0" }}>
+          <h2 style={{ margin: "0 0 8px", padding: "8px 14px", background: "var(--surface-chaude, #33231a)", borderLeft: "4px solid var(--or)", borderRadius: 4, fontSize: 20 }}>
+            {libelle} <span className="doux" style={{ fontWeight: 400, fontSize: 15 }}>· {groupeVideos.length} vidéo{groupeVideos.length > 1 ? "s" : ""}</span>
+          </h2>
+          {groupeVideos.map((v) => {
         const r = raceGuide(v.race);
         const c = v.classe ? trouverClasse(v.classe) : null;
         const guideKey = r && c ? cleGuide(r, c.slug) : null;
         return (
-          <section key={v.id} id={v.id} style={{ margin: "24px 0" }} className="encadre">
+          <section key={v.id} id={v.id} style={{ margin: "16px 0" }} className="encadre">
             <h2 style={{ marginTop: 0 }}>
               {v.titre} <span className="doux" style={{ fontWeight: 400, fontSize: 16 }}>· {v.date || "date à déterminer"} · {v.duree || "durée à déterminer"}</span>
             </h2>
@@ -157,7 +172,9 @@ export default async function TestGuide({ searchParams }: Props) {
             ) : null}
           </section>
         );
-      })}
+          })}
+        </div>
+      ))}
     </div>
   );
 }

@@ -9,7 +9,7 @@
  * Ce fichier est le brouillon de travail, relu dans /admin/testguide avant chaque report. Il n'est pas affiché sur le
  * site public : seuls parcours-releves.ts et ajouts-forever.ts le sont, après un commit sur `dev`.
  *
- * Les sept vidéos ci-dessous sont celles fournies le 7 novembre 2026. Le personnage est un troll chasseur qui progresse
+ * Les sept vidéos ci-dessous sont celles fournies le 7 novembre 2026. Le personnage est un orc chasseur qui progresse
  * dans Durotar (Vallée des Épreuves → Sen'jin → Îles de l'Écho). L'analyse est faite par OCR des images extraites : les
  * titres et l'ordre sont fiables, les coordonnées et certains donneurs restent à relever en jeu.
  *
@@ -61,7 +61,7 @@ export const VIDEOS_ANALYSEES: VideoAnalysee[] = [
     date: "7 novembre 2026",
     duree: "10 min 05 s",
     lieu: "durotar",
-    race: "troll",
+    race: "orc",
     classe: "chasseur",
     statut: "traitee",
     etapes: [
@@ -76,14 +76,14 @@ export const VIDEOS_ANALYSEES: VideoAnalysee[] = [
       { a: "rendre", q: 790, note: "à Hana'zua" },
       { a: "prendre", q: 804, note: "Sarkoth (suite)" },
       { a: "prendre", q: 789, note: "L'aiguillon du scorpide" },
-      { a: "prendre", q: 3082, note: "Tablette gravée (quête de classe chasseur troll)" },
+      { a: "prendre", q: 3087, note: "Parchemin gravé (quête de classe chasseur orc)" },
       { a: "rendre", q: 9100001, note: "Armes égarées rendue dans l'Antre" },
       { a: "prendre", q: 4402, note: "Surprise aux pommes de cactus de Galgar" },
     ],
     ajouts: [9100001],
     remarques: [],
     observations: [
-      "Personnage : Jobwow (troll chasseur). Présence d'erreurs d'interface (addon) en début de vidéo, sans incidence sur le parcours.",
+      "Personnage : Jobwow (orc chasseur). Présence d'erreurs d'interface (addon) en début de vidéo, sans incidence sur le parcours.",
       "« Armes égarées » (9100001) déjà saisie dans content/ajouts-forever.ts.",
     ],
   },
@@ -94,7 +94,7 @@ export const VIDEOS_ANALYSEES: VideoAnalysee[] = [
     date: "7 novembre 2026",
     duree: "5 min 22 s",
     lieu: "durotar",
-    race: "troll",
+    race: "orc",
     classe: "chasseur",
     statut: "traitee",
     etapes: [
@@ -113,7 +113,7 @@ export const VIDEOS_ANALYSEES: VideoAnalysee[] = [
     remarques: [],
     observations: [
       "Quêtes Forever confirmées (Wowhead/ForeverChanges/WCLBox) : « La matriarche griffesang » = 97223 (Matriarch Bloodclaw, donnée par Xar'Ti 55,3 / 75,5), « Toutes pattes dehors » = 96821 (Legging It). « Trouver le camp des chasseurs » est un objectif de quête, pas une quête à part entière.",
-      "Confirme la race troll : réputation « Trolls Darkspear », route du Village de Sen'jin (Zalazane, Crâne de Minshina).",
+      "Orc (réputation Orgrimmar) ; la route passe par le Village de Sen'jin, accessible aux orcs dans Forever (Zalazane, Crâne de Minshina).",
     ],
   },
   {
@@ -123,13 +123,13 @@ export const VIDEOS_ANALYSEES: VideoAnalysee[] = [
     date: "7 novembre 2026",
     duree: "15 min 43 s",
     lieu: "durotar",
-    race: "troll",
+    race: "orc",
     classe: "chasseur",
     statut: "traitee",
     etapes: [
       { a: "prendre", q: 4402, note: "Surprise aux pommes de cactus de Galgar" },
       { a: "prendre", q: 9100003, note: "Les vils quasits (id interne 9100003, réel Forever 792)" },
-      { a: "rendre", q: 3082, note: "Tablette gravée terminée" },
+      { a: "rendre", q: 3087, note: "Parchemin gravé terminée" },
       { a: "prendre", q: 5441, note: "Les péons paresseux" },
     ],
     ajouts: [9100001],
@@ -146,7 +146,7 @@ export const VIDEOS_ANALYSEES: VideoAnalysee[] = [
     date: "7 novembre 2026",
     duree: "20 min 31 s",
     lieu: "durotar",
-    race: "troll",
+    race: "orc",
     classe: "chasseur",
     statut: "traitee",
     etapes: [
@@ -167,7 +167,7 @@ export const VIDEOS_ANALYSEES: VideoAnalysee[] = [
     date: "7 novembre 2026",
     duree: "11 min 42 s",
     lieu: "durotar",
-    race: "troll",
+    race: "orc",
     classe: "chasseur",
     statut: "traitee",
     etapes: [],
@@ -185,7 +185,7 @@ export const VIDEOS_ANALYSEES: VideoAnalysee[] = [
     date: "7 novembre 2026",
     duree: "47 s",
     lieu: "durotar",
-    race: "troll",
+    race: "orc",
     classe: "chasseur",
     statut: "traitee",
     etapes: [],
@@ -202,7 +202,7 @@ export const VIDEOS_ANALYSEES: VideoAnalysee[] = [
     date: "7 novembre 2026",
     duree: "16 min 50 s",
     lieu: "durotar",
-    race: "troll",
+    race: "orc",
     classe: "chasseur",
     statut: "traitee",
     etapes: [
