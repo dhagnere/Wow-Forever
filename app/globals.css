@@ -708,6 +708,10 @@ a:hover > .icone-jeu, a:hover .icone-jeu { border-color: var(--or-pale); box-sha
 .pointe-rouge { fill: #ff5a3c; }
 .fleches-quete path { fill: none; stroke: #ff5a3c; stroke-width: 0.55; filter: drop-shadow(0 0 0.3px #000); }
 .fleches-quete path.retour { stroke-dasharray: 1.2 0.8; }
+/* Flèches de l'étape sélectionnée : les pointillés « coulent » vers l'objectif. */
+@keyframes fleche-coule { to { stroke-dashoffset: -2.6; } }
+.fleches-quete.animee path { animation: fleche-coule 1.1s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .fleches-quete.animee path { animation: none; } }
 .cible-carte { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: #ff5a3c; border: 2px solid #2b1d14; box-shadow: 0 0 6px rgba(255, 90, 60, 0.8); pointer-events: none; }
 .secteur-carte { position: absolute; display: grid; place-items: center; min-width: 20px; height: 20px; margin: -10px 0 0 -10px; padding: 0 4px; background: #ff9a3c; border: 2px solid #2b1d14; border-radius: 4px; color: #2b1d14; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; transform: rotate(45deg); }
 .secteur-carte span { transform: rotate(-45deg); }

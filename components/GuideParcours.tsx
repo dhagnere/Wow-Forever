@@ -168,6 +168,8 @@ function CarteZone({ z, faites, voir, actif, onArret, cadrage, t }: {
     pastilles.set(cle, p);
   }
   const quetesVues = z.etapes.map((e, q) => ({ e, q })).filter(({ e }) => voir.has(e.id) && e.cib);
+  // Quêtes de l'étape sélectionnée : leurs flèches (donneur → cibles → receveur) s'animent.
+  const actifQuetes = actif != null ? new Set((z.arrets[actif]?.actions ?? []).map((x) => z.etapes[x.q].id)) : new Set<number>();
   const idSvg = `fl-${z.lieu}`;
   // Au zoom s, épaisseurs, pointes et marges sont divisées par s : à l'écran, elles ne changent pas.
   const ep = (base: number) => base / v.s;
@@ -225,10 +227,11 @@ function CarteZone({ z, faites, voir, actif, onArret, cadrage, t }: {
             const fin = e.r >= 0 ? z.hubs[e.r] : null;
             const aller = depart ? courbe(depart, c, ep(1.3)) : null;
             const retour = fin ? courbe(c, fin, ep(1.3)) : null;
+            const anime = actifQuetes.has(e.id);
             return (
-              <g key={e.id} className="fleches-quete">
-                {aller ? <path d={aller} style={{ strokeWidth: ep(0.55) }} markerEnd={`url(#${idSvg}-rouge)`} /> : null}
-                {retour ? <path d={retour} className="retour" style={{ strokeWidth: ep(0.55), strokeDasharray: `${ep(1.2)} ${ep(0.8)}` }} markerEnd={`url(#${idSvg}-rouge)`} /> : null}
+              <g key={e.id} className={anime ? "fleches-quete animee" : "fleches-quete"}>
+                {aller ? <path d={aller} style={{ strokeWidth: ep(0.55), strokeDasharray: anime ? `${ep(0.6)} ${ep(0.7)}` : undefined }} markerEnd={`url(#${idSvg}-rouge)`} /> : null}
+                {retour ? <path d={retour} className="retour" style={{ strokeWidth: ep(0.55), strokeDasharray: anime ? `${ep(0.6)} ${ep(0.7)}` : `${ep(1.2)} ${ep(0.8)}` }} markerEnd={`url(#${idSvg}-rouge)`} /> : null}
               </g>
             );
           })}
