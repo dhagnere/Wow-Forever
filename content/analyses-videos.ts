@@ -192,7 +192,7 @@ export const VIDEOS_ANALYSEES: VideoAnalysee[] = [
     ajouts: [],
     remarques: [],
     observations: [
-      "Extrait très court : dialogue d'un PNJ (« Pajuh » ?) qui accompagne le personnage vers le village (« le reste du chemin devrait être sans danger »). Aucune quête nouvelle identifiée.",
+      "Escorte de la quête « Perdue dans les ombres » (99123, ajoutée sous 9100006) : Pal'juh accompagne le personnage hors du Kraal des Kolkar.",
     ],
   },
   {

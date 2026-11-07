@@ -83,6 +83,47 @@ export const QUETES_FOREVER: QueteForever[] = [
     faction: "horde",
     source: "Vidéos du 7 novembre 2026 (vidéo 03) ; ForeverChanges/WCLBox : quête 792, donnée par Zureetha Mireloin dans la Vallée des Épreuves. Cibles d'après la version démoniste (1485).",
   },
+  {
+    // Id réel Forever : 97225 (« Forgotten Loa Idols »). Id interne 9100004.
+    id: 9100004,
+    lieu: "durotar",
+    titre: "Idoles de Loa oubliées",
+    niveau: 9,
+    min: 4,
+    donneur: { nom: "Maître Vornal", x: 55.9, y: 74.4 },
+    objectifs: ["Rapporter 8 × Idole de loa oubliée"],
+    cibles: [[67, 85]],
+    rendre: { nom: "Maître Gadrin", x: 56, y: 74.7 },
+    faction: "horde",
+    source: "Vidéos du 7 novembre 2026 (vidéo 04, Îles de l'Écho) ; ForeverChanges/WCLBox : quête 97225, donnée par Maître Vornal (55,9 – 74,4), rendue à Maître Gadrin (56 – 74,7), idoles vers 67/85.",
+  },
+  {
+    // Id réel Forever : 96821 (« Legging It »). Id interne 9100005. Donneur « Vel'rin Fang » en anglais, « Vel'rin Croc » en français.
+    id: 9100005,
+    lieu: "durotar",
+    titre: "Toutes pattes dehors",
+    niveau: 6,
+    min: 1,
+    donneur: { nom: "Vel'rin Croc", x: 55.9, y: 74 },
+    objectifs: ["Vaincre 6 × Rôdeuse des crêtes ; Vaincre 6 × Rôdeur des crêtes"],
+    rendre: { nom: "Gar'Thok", x: 52, y: 43.6 },
+    faction: "horde",
+    source: "Vidéos du 7 novembre 2026 (vidéo 02) ; ForeverChanges : quête 96821, donnée par Vel'rin Fang (55,9 – 74), rendue à Gar'Thok (52 – 43,6). Cibles des araignées à confirmer en jeu.",
+  },
+  {
+    // Id réel Forever : 99123 (« Lost in the Shadows »). Id interne 9100006.
+    id: 9100006,
+    lieu: "durotar",
+    titre: "Perdue dans les ombres",
+    niveau: 8,
+    min: 4,
+    donneur: { nom: "Pal'juh", x: 46.3, y: 78.6 },
+    objectifs: ["Escorter Pal'juh hors du Kraal des Kolkar"],
+    cibles: [[46.3, 78.6]],
+    rendre: { nom: "Maître Vornal", x: 55.9, y: 74.5 },
+    faction: "horde",
+    source: "Vidéos du 7 novembre 2026 (vidéo 05 prise, vidéo 06 escorte) ; ForeverChanges : quête 99123, donnée par Pal'juh (46,3 – 78,6), rendue à Maître Vornal (55,9 – 74,5).",
+  },
 ];
 
 /** Repère affiché quand l'emplacement des cibles n'a pas encore été relevé en jeu. */
