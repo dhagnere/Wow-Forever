@@ -124,6 +124,55 @@ export const QUETES_FOREVER: QueteForever[] = [
     faction: "horde",
     source: "Vidéos du 7 novembre 2026 (vidéo 05 prise, vidéo 06 escorte) ; ForeverChanges : quête 99123, donnée par Pal'juh (46,3 – 78,6), rendue à Maître Vornal (55,9 – 74,5).",
   },
+  {
+    // Id réel Forever : 96822 (« For Honor »). Id interne 9100007.
+    id: 9100007,
+    lieu: "durotar",
+    titre: "Pour l'honneur",
+    niveau: 6,
+    min: 3,
+    donneur: { nom: "Turroc", x: 54, y: 42.7 },
+    objectifs: ["Rapporter Hache de bataille de pillard ; Rapporter Arc de pillard ; Rapporter Bouclier de pillard"],
+    faction: "horde",
+    source: "ForeverChanges : quête 96822, donnée par Turroc (54 – 42,7, Tranchecolline), armes à ramasser près de Tiragarde. Cibles à confirmer en jeu.",
+  },
+  {
+    // Id réel Forever : 96825 (« This Fruit Could Bite Back »). Id interne 9100008.
+    id: 9100008,
+    lieu: "durotar",
+    titre: "Ces fruits pourraient se défendre",
+    niveau: 6,
+    min: 3,
+    donneur: { nom: "Cuisinier Torka", x: 51.2, y: 42.5 },
+    objectifs: ["Rapporter 8 × Poire de cactus"],
+    faction: "horde",
+    source: "ForeverChanges : quête 96825, donnée par Cuisinier Torka (51,2 – 42,5, Tranchecolline), poires à l'ouest. Cibles à confirmer en jeu.",
+  },
+  {
+    // Id réel Forever : 96873 (« A Pain in the Neck »). Id interne 9100009.
+    id: 9100009,
+    lieu: "durotar",
+    titre: "Une douleur dans la nuque",
+    niveau: 8,
+    min: 5,
+    donneur: { nom: "Pa'zula", x: 56.6, y: 73.7 },
+    objectifs: ["Rapporter 3 × Résidu luminescent"],
+    cibles: [[67, 85]],
+    faction: "horde",
+    source: "ForeverChanges : quête 96873, donnée par Pa'zula (56,6 – 73,7, Sen'jin), pendules des trolls des Îles de l'Écho.",
+  },
+  {
+    // Id réel Forever : 96876 (« Ukor's Lost Pack »). Id interne 9100010. Commence depuis un objet ramassé.
+    id: 9100010,
+    lieu: "durotar",
+    titre: "Le sac perdu d'Ukor",
+    niveau: 8,
+    min: 5,
+    donneur: { nom: "Ukor", x: 52, y: 68.4 },
+    objectifs: ["Rapporter Le sac perdu d'Ukor"],
+    faction: "horde",
+    source: "ForeverChanges : quête 96876, commence depuis l'objet « Le sac perdu d'Ukor » (sud de Durotar), rendue à Ukor (52 – 68,4).",
+  },
 ];
 
 /** Repère affiché quand l'emplacement des cibles n'a pas encore été relevé en jeu. */
