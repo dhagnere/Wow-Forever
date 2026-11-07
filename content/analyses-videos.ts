@@ -13,9 +13,9 @@
  * dans Durotar (Vallée des Épreuves → Sen'jin → Îles de l'Écho). L'analyse est faite par OCR des images extraites : les
  * titres et l'ordre sont fiables, les coordonnées et certains donneurs restent à relever en jeu.
  *
- * IMPORTANT — l'ordre des vidéos (video-01 → video-07) est l'ordre de progression réellement joué : il est conservé tel
- * quel, de bout en bout, pour construire le parcours (content/parcours-releves.ts). On ne trie pas par niveau ni par zone,
- * et on ne déduplique pas les allers-retours : chaque étape reste à sa place dans la chronologie des vidéos.
+ * IMPORTANT — l'ordre de progression est celui des vidéos 01 → 05 (Vallée des Épreuves → Sen'jin → Îles de l'Écho), conservé
+ * tel quel pour construire le parcours (content/parcours-releves.ts). La vidéo 06 est l'escorte de « Perdue dans les ombres » ;
+ * la vidéo 07 est une reprise (quêtes déjà rendues dans les vidéos 01–03), pas un retour en arrière.
  */
 
 export type StatutVideo = "a-traiter" | "traitee" | "ecartee";
@@ -197,7 +197,7 @@ export const VIDEOS_ANALYSEES: VideoAnalysee[] = [
   },
   {
     id: "video-07",
-    titre: "Vallée des Épreuves (niveau 5, suite du parcours)",
+    titre: "Vallée des Épreuves (niveau 5, reprise — quêtes déjà rendues)",
     source: lien("1z5jS1OooGOKln5x9GpOTQ2LxpYrPU5Dw"),
     date: "7 novembre 2026",
     duree: "16 min 50 s",
@@ -213,6 +213,6 @@ export const VIDEOS_ANALYSEES: VideoAnalysee[] = [
     ],
     ajouts: [],
     remarques: [],
-    observations: ["Suite du parcours, dans l'ordre des vidéos : la route revient dans la Vallée des Épreuves (rendu de « L'aiguillon du scorpide » 789 et « Les péons paresseux » 5441, reprise de « Le médaillon de la Lame ardente » 794 et « La pioche de Thazz'ril » 6394). Niveau 5 atteint."],
+    observations: ["Reprise / doublon : mêmes quêtes que les vidéos 01–03, déjà rendues. La route ne repasse pas dans la Vallée des Épreuves (pas de retour)."],
   },
 ];
