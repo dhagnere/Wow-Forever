@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { exigerAdmin } from "@/lib/admin";
-import { ficheQuete, nomLieu } from "@/lib/quetes";
+import { nomLieu } from "@/lib/quetes";
 import { QUETES_FOREVER } from "@/content/ajouts-forever";
-import { cleGuide, nomRace, raceGuide } from "@/lib/guide";
+import { cleGuide, ficheGuide, nomRace, raceGuide } from "@/lib/guide";
 import { trouverClasse } from "@/content/classes";
 import { VIDEOS_ANALYSEES, type VideoAnalysee } from "@/content/analyses-videos";
 import { CopierBloc } from "./Copier";
@@ -20,16 +20,16 @@ const STATUTS = { traitee: "Analysée", ecartee: "Écartée", "a-traiter": "À a
 const FOREVER = new Map(QUETES_FOREVER.map((q) => [q.id, q]));
 
 function titreQuete(id: number): string {
-  return FOREVER.get(id)?.titre ?? ficheQuete(id)?.titre ?? `Quête #${id}`;
+  return FOREVER.get(id)?.titre ?? ficheGuide(id)?.t ?? `Quête #${id}`;
 }
 function niveauQuete(id: number): string {
   const f = FOREVER.get(id);
   if (f) return String(f.niveau);
-  const n = ficheQuete(id)?.niveau;
+  const n = ficheGuide(id)?.nv;
   return n ? String(n) : "?";
 }
 function objectifsQuete(id: number): string[] {
-  return FOREVER.get(id)?.objectifs ?? ficheQuete(id)?.objectifs ?? [];
+  return FOREVER.get(id)?.objectifs ?? ficheGuide(id)?.obj ?? [];
 }
 function blocRemarques(v: VideoAnalysee): string {
   return v.remarques.map((r) => `${r.etape} | ${r.verifie ? "oui" : "non"} | ${r.remarque}`).join("\n");

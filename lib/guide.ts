@@ -82,6 +82,19 @@ function donnees(langue: Langue = "fr"): DonneesGuide | null {
 export const versionGuide = (langue: Langue = "fr") => donnees(langue)?.version ?? null;
 export const raceGuide = (slug: string) => RACES_GUIDE.find((r) => r.slug === slug);
 
+/** Quête du guide (titre, niveau, objectifs) par identifiant, lue dans content/guide-jeu.json (toutes les quêtes). */
+export function ficheGuide(id: number, langue: Langue = "fr"): { t: string; nv: number; obj: string[] } | undefined {
+  const d = donnees(langue);
+  if (!d) return undefined;
+  for (const camp of ["alliance", "horde"] as const) {
+    for (const z of d.guide[camp]) {
+      const e = z.etapes.find((x) => x.id === id);
+      if (e) return { t: e.t, nv: e.nv, obj: e.obj };
+    }
+  }
+  return undefined;
+}
+
 /** Combinaisons jouables (races de chaque classe, hors Skyborne qui démarrent sur l'île de Zéphras). */
 export function combinaisons(): { race: RaceGuide; classe: (typeof CLASSES)[number] }[] {
   const res: { race: RaceGuide; classe: (typeof CLASSES)[number] }[] = [];
