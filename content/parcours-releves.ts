@@ -73,4 +73,14 @@ export const PARCOURS_RELEVES: ParcoursReleve[] = [
     ],
     source: "Vidéos du 7 novembre 2026, orc chasseur (Jobwow), étapes communes à toutes les classes orques.",
   },
+  {
+    // Tauren druide, vidéos 01 à 03 du 8 novembre 2026 (ordre conservé) : Camp Narache (Mulgore).
+    race: "tauren",
+    classe: "druide",
+    lieu: "mulgore",
+    etapes: [
+      "prendre:747", "prendre:752", "rendre:752", "prendre:753", "faire:753", "rendre:753", "faire:747", "rendre:747", "prendre:3094",
+    ],
+    source: "Vidéos du 8 novembre 2026 (tauren druide « Thedrood ») : Mulgore, Camp Narache. Ordre des vidéos 01 à 03 conservé.",
+  },
 ];
