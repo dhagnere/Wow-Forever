@@ -80,7 +80,8 @@ export const PARCOURS_RELEVES: ParcoursReleve[] = [
     lieu: "mulgore",
     etapes: [
       "prendre:747", "prendre:752", "rendre:752", "prendre:753", "faire:753", "rendre:753", "faire:747", "rendre:747", "prendre:3094",
+      "prendre:750", "prendre:755", "prendre:9100023", "prendre:3376", "prendre:748", "prendre:1656", "prendre:9100024", "prendre:9100025", "prendre:761", "prendre:745", "prendre:743", "prendre:746", "prendre:766", "prendre:9100026",
     ],
-    source: "Vidéos du 8 novembre 2026 (tauren druide « Thedrood ») : Mulgore, Camp Narache. Ordre des vidéos 01 à 03 conservé.",
+    source: "Vidéos du 8 novembre 2026 (tauren druide « Thedrood ») : Mulgore, Camp Narache puis Village de Sabot-de-sang. Ordre des vidéos 01 à 06 conservé.",
   },
 ];

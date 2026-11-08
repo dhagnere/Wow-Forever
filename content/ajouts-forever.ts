@@ -328,6 +328,54 @@ export const QUETES_FOREVER: QueteForever[] = [
     faction: "horde",
     source: "Vidéos du 7 novembre 2026 (vidéo 17) ; ForeverDB : quête 99051, Durotar, suite de « Une menace venue d'en bas » (99049).",
   },
+  {
+    // Id réel : 781 (« Attack on Camp Narache »), quête Classic absente du guide-jeu.json. Id interne 9100023. Mulgore.
+    id: 9100023,
+    lieu: "mulgore",
+    titre: "L'attaque du Camp Narache",
+    niveau: 4,
+    min: 3,
+    donneur: { nom: "Chef Vent-du-faucon", x: 44.5, y: 77.5 },
+    objectifs: ["Rapporter Plans d'attaque des Dos-hirsutes"],
+    faction: "horde",
+    source: "Vidéos du 8 novembre 2026 (vidéo druide 05) ; ForeverDB : quête 781, Mulgore (démarre sur un objet de Dos-hirsute).",
+  },
+  {
+    // Id réel Forever : 96130 (« Chakuyak »). Id interne 9100024. Mulgore.
+    id: 9100024,
+    lieu: "mulgore",
+    titre: "Ghakuyak",
+    niveau: 5,
+    min: 4,
+    donneur: { nom: "Maur Appelle-pluie", x: 46.7, y: 63.4 },
+    objectifs: ["Vaincre Ghakuyak"],
+    faction: "horde",
+    source: "Vidéos du 8 novembre 2026 (vidéo druide 05) ; ForeverDB : quête 96130, Mulgore. Coordonnées à confirmer.",
+  },
+  {
+    // Id réel Forever : 99108 (« Sparring Match »). Id interne 9100025. Mulgore.
+    id: 9100025,
+    lieu: "mulgore",
+    titre: "Combat d'entraînement",
+    niveau: 6,
+    min: 5,
+    donneur: { nom: "Krang Stonehoof", x: 46.7, y: 63.4 },
+    objectifs: ["Vaincre 3 × Guerrier novice"],
+    faction: "horde",
+    source: "Vidéos du 8 novembre 2026 (vidéos druide 04 et 05) ; ForeverDB : quête 99108, Mulgore (Village de Sabot-de-sang). Coordonnées à confirmer.",
+  },
+  {
+    // Id réel Forever : 99079 (« Longwalker Malah »). Id interne 9100026. Mulgore.
+    id: 9100026,
+    lieu: "mulgore",
+    titre: "Longue-marche Malah",
+    niveau: 9,
+    min: 8,
+    donneur: { nom: "Brave Plume-des-vents", x: 46.7, y: 63.4 },
+    objectifs: ["Parler à Malah Longwind"],
+    faction: "horde",
+    source: "Vidéos du 8 novembre 2026 (vidéo druide 04) ; ForeverDB : quête 99079, Mulgore. Coordonnées à confirmer.",
+  },
 ];
 
 /** Repère affiché quand l'emplacement des cibles n'a pas encore été relevé en jeu. */
