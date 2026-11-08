@@ -1,5 +1,5 @@
 import { writeFileSync, mkdirSync } from "fs";
-import { guidePour, ordreDuGuide, raceGuide } from "./lib/guide";
+import { guidePour, ordreDuGuide, raceGuide, combinaisons } from "./lib/guide";
 import { nomLieu } from "./lib/quetes";
 
 const echap = (s: string) => (s ?? "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
@@ -26,38 +26,58 @@ function etapesRoute(raceSlug: string, classeSlug: string): string {
   return out.join("\n");
 }
 
-const sortie = [
+// Nom de fichier de race tel que le renvoie UnitRace("player") (2e valeur), et classe via UnitClass.
+const RACE_FILE: Record<string, string> = {
+  humain: "Human",
+  nain: "Dwarf",
+  "elfe-de-la-nuit": "NightElf",
+  gnome: "Gnome",
+  orc: "Orc",
+  "mort-vivant": "Scourge",
+  tauren: "Tauren",
+  troll: "Troll",
+  "skyborne-alliance": "SkyborneA", // raceFile à confirmer en jeu (/run print(UnitRace("player")))
+  "skyborne-horde": "SkyborneH",     // raceFile à confirmer en jeu (/run print(UnitRace("player")))
+};
+
+const CLASSE_FILE: Record<string, string> = {
+  guerrier: "WARRIOR",
+  paladin: "PALADIN",
+  chasseur: "HUNTER",
+  voleur: "ROGUE",
+  pretre: "PRIEST",
+  chaman: "SHAMAN",
+  mage: "MAGE",
+  demoniste: "WARLOCK",
+  druide: "DRUID",
+};
+
+const lignes: string[] = [
   '-- Généré automatiquement depuis content/guide-jeu.json (multi-parcours). Ne pas éditer à la main.',
   'print("TavernGuide: data.lua chargé")',
   'TavernGuideRoutes = TavernGuideRoutes or {}',
   '',
-  '-- Orc chasseur — Durotar',
-  'TavernGuideRoutes["Orc"] = TavernGuideRoutes["Orc"] or {}',
-  'TavernGuideRoutes["Orc"]["HUNTER"] = {',
-  '  etapes = {',
-  etapesRoute("orc", "chasseur"),
-  '  },',
-  '}',
-  '',
-  '-- Humain guerrier — parcours complet (toutes les zones)',
-  'TavernGuideRoutes["Human"] = TavernGuideRoutes["Human"] or {}',
-  'TavernGuideRoutes["Human"]["WARRIOR"] = {',
-  '  etapes = {',
-  etapesRoute("humain", "guerrier"),
-  '  },',
-  '}',
-  '',
-  '-- Tauren druide — parcours complet (toutes les zones)',
-  'TavernGuideRoutes["Tauren"] = TavernGuideRoutes["Tauren"] or {}',
-  'TavernGuideRoutes["Tauren"]["DRUID"] = {',
-  '  etapes = {',
-  etapesRoute("tauren", "druide"),
-  '  },',
-  '}',
-].join("\n") + "\n";
+];
+
+for (const { race, classe } of combinaisons()) {
+  const rf = RACE_FILE[race.slug];
+  const cf = CLASSE_FILE[classe.slug];
+  if (!rf || !cf) continue;
+  lignes.push(`-- ${race.nom} ${classe.nom} (${race.slug}/${classe.slug})`);
+  lignes.push(`TavernGuideRoutes["${rf}"] = TavernGuideRoutes["${rf}"] or {}`);
+  lignes.push(`TavernGuideRoutes["${rf}"]["${cf}"] = {`);
+  lignes.push('  etapes = {');
+  lignes.push(etapesRoute(race.slug, classe.slug));
+  lignes.push('  },');
+  lignes.push('}');
+  lignes.push('');
+}
+
+const sortie = lignes.join("\n") + "\n";
 
 const dir = "TavernGuide";
 mkdirSync(dir, { recursive: true });
 writeFileSync(`${dir}/data.lua`, sortie, "utf8");
-const lignes = sortie.split("\n").filter((l) => l.trim().startsWith('{ a =')).length;
-console.log(`OK -> TavernGuide/data.lua (${lignes} étapes au total)`);
+const nEtapes = sortie.split("\n").filter((l) => l.trim().startsWith('{ a =')).length;
+const nRoutes = combinaisons().length;
+console.log(`OK -> TavernGuide/data.lua (${nEtapes} étapes, ${nRoutes} parcours)`);
