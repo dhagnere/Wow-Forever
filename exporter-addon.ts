@@ -46,6 +46,14 @@ const sortie = [
   etapesRoute("humain", "guerrier"),
   '  },',
   '}',
+  '',
+  '-- Tauren druide — parcours complet (toutes les zones)',
+  'TavernGuideRoutes["Tauren"] = TavernGuideRoutes["Tauren"] or {}',
+  'TavernGuideRoutes["Tauren"]["DRUID"] = {',
+  '  etapes = {',
+  etapesRoute("tauren", "druide"),
+  '  },',
+  '}',
 ].join("\n") + "\n";
 
 const dir = "TavernGuide";
