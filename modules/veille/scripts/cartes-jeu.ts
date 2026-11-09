@@ -10,7 +10,7 @@ import { lancer } from "./_lanceur";
  * Cartes du monde de WoW Forever, assemblées à partir des tuiles de la carte du jeu (wago.tools).
  *   npm run cartes:jeu
  * Écrit public/images/jeu/cartes/<lieu>-1000.jpg et <lieu>-500.jpg pour les deux continents, toutes leurs zones
- * et l'île de Zéphras, puis content/cartes-jeu.ts (nom en jeu, continent, lieu parent). Images © Blizzard Entertainment.
+ * et l'île de Zéphras, puis content/cartes-jeu.ts (identifiant UiMap, nom en jeu, continent). Images © Blizzard Entertainment.
  */
 
 type Ligne = Record<string, string>;
@@ -44,7 +44,7 @@ lancer("cartes:jeu", async () => {
   );
 
   await mkdir(SORTIE, { recursive: true });
-  const index: Record<string, { nom: string; continent: string; type: "continent" | "zone" }> = {};
+  const index: Record<string, { id: number; nom: string; continent: string; type: "continent" | "zone" }> = {};
   for (const c of retenues) {
     const art = artParCarte.get(c.ID);
     const lot = art ? tuiles.get(art) ?? [] : [];
@@ -84,7 +84,7 @@ lancer("cartes:jeu", async () => {
         .toFile(path.join(SORTIE, `${slug}-${largeur}.jpg`));
     }
     const continent = CONTINENTS[c.ID] ? CONTINENTS[c.ID] : CONTINENTS[c.ParentUiMapID] ?? "Hors des continents";
-    index[slug] = { nom, continent, type: c.Type === "2" ? "continent" : "zone" };
+    index[slug] = { id: Number(c.ID), nom, continent, type: c.Type === "2" ? "continent" : "zone" };
     console.log(`${slug} ← ${nom} (${continent})`);
   }
 
@@ -92,7 +92,7 @@ lancer("cartes:jeu", async () => {
     path.join(process.cwd(), "content/cartes-jeu.ts"),
     `/** Fichier généré par npm run cartes:jeu : ne pas modifier à la main. Cartes © Blizzard Entertainment, lues grâce à wago.tools. */\n\n` +
       `export const VERSION_CARTES_JEU = ${JSON.stringify(version)};\n\n` +
-      `export interface CarteJeu { nom: string; continent: string; type: "continent" | "zone" }\n\n` +
+      `export interface CarteJeu { id: number; nom: string; continent: string; type: "continent" | "zone" }\n\n` +
       `export const CARTES_JEU: Record<string, CarteJeu> = ${JSON.stringify(index, null, 2)};\n`,
   );
   console.log(`${Object.keys(index).length} cartes, version ${version}.`);

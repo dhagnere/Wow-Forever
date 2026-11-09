@@ -35,7 +35,8 @@
     "sorts:jeu": "tsx modules/veille/scripts/sorts-jeu.ts",
     "base:quetes": "tsx modules/veille/scripts/quetes.ts",
     "zephras:jeu": "tsx modules/veille/scripts/zephras-jeu.ts",
-    "lieux:en": "tsx modules/veille/scripts/lieux-en.ts"
+    "lieux:en": "tsx modules/veille/scripts/lieux-en.ts",
+    "addon:guides": "tsx scripts/addon-guides.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",
