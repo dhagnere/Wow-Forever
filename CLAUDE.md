@@ -108,6 +108,7 @@ npm run zephras:jeu      # lieux de l'île de Zéphras et leur position sur sa c
 npm run lieux:en         # noms anglais des cartes et des lieux de Zéphras (wago.tools) → content/lieux-en.ts
 npm run icones:jeu       # icônes officielles des classes et des races, découpées dans les fichiers du jeu (wago.tools) → public/images/jeu/
 npm run addon:guides -- <dossier EternalRoutes>  # guides de 1 à 60 du site → Guides/site/*.lua, Maps.lua et EternalRoutes.toc de l'addon
+npm run addon:wow        # même chose, directement dans l'addon installé sur le PC de Jobwow (C:\WOW\world of Warcraft\_forever_\Interface\AddOns\EternalRoutes)
 ```
 
 Avant tout envoi : `npm run lint && npm test && npm run build`.
