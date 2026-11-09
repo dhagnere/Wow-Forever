@@ -14,6 +14,16 @@ import { proposerImages } from "@/lib/imagesProposees";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Adresse de la Page Facebook pour « Publier depuis la Page Facebook » : son identifiant (FACEBOOK_PAGE_ID, celui du
+ * relais) donne une adresse qui mène toujours à la bonne Page, même si son nom d'utilisateur change ou n'existe pas ;
+ * à défaut, l'adresse publique du site (NEXT_PUBLIC_FACEBOOK_URL).
+ */
+function adressePageFacebook(): string {
+  const id = (process.env.FACEBOOK_PAGE_ID ?? "").trim();
+  return /^\d{5,25}$/.test(id) ? `https://www.facebook.com/${id}` : SITE.facebook;
+}
+
 export default async function EditerArticle({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ anglais?: string }> }) {
   await exigerAdmin();
   const retourAnglais = (await searchParams).anglais;
@@ -86,7 +96,7 @@ export default async function EditerArticle({ params, searchParams }: { params: 
             <p style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: 15 }}>{messageFacebook(a)}</p>
             {a.statut === "publie" ? (
               <div className="partage" style={{ margin: "12px 0 0" }}>
-                <PartageFacebook url={`${SITE.url}/articles/${a.slug}/`} texte={messageFacebook(a)} libelle="Publier depuis la Page Facebook" page={SITE.facebook} />
+                <PartageFacebook url={`${SITE.url}/articles/${a.slug}/`} texte={messageFacebook(a)} libelle="Publier depuis la Page Facebook" page={adressePageFacebook()} />
                 <PartageFacebook url={`${SITE.url}/articles/${a.slug}/`} texte={messageFacebook(a)} libelle="Fenêtre de partage" className="btn btn-contour" />
               </div>
             ) : null}
