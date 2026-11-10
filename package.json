@@ -37,6 +37,7 @@
     "zephras:jeu": "tsx modules/veille/scripts/zephras-jeu.ts",
     "lieux:en": "tsx modules/veille/scripts/lieux-en.ts",
     "addon:guides": "tsx scripts/addon-guides.ts",
+    "kit:blizzard": "tsx scripts/kit-blizzard.ts",
     "addon:wow": "tsx scripts/addon-guides.ts \"C:\\WOW\\world of Warcraft\\_forever_\\Interface\\AddOns\\EternalRoutes\""
   },
   "dependencies": {

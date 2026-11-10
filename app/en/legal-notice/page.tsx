@@ -54,6 +54,12 @@ export default function LegalNotice() {
             under the tolerance granted to fan sites.
           </p>
           <p>
+            Header images of some articles: official artwork released by Blizzard Entertainment for the press and fan sites (property of Blizzard
+            Entertainment), or photos and illustrations from{" "}
+            <a href="https://commons.wikimedia.org" rel="noopener noreferrer">Wikimedia Commons</a> under a free licence (public domain, CC0, CC BY or CC BY-SA).
+            The author and licence of each image are shown under the image.
+          </p>
+          <p>
             Item database: names, descriptions, levels, prices and icons come from the World of Warcraft: Forever game files, read through the{" "}
             <a href="https://wago.tools" rel="noopener noreferrer">wago.tools</a> service. They remain the property of Blizzard Entertainment and are
             reproduced for information, on a non-commercial fan site.

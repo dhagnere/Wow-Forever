@@ -1,6 +1,7 @@
 import { ECRANS, type SlugEcran } from "@/config/ecrans";
 import { CARTES_JEU } from "@/content/cartes-jeu";
 import { CLASSES } from "@/content/classes";
+import { KIT_BLIZZARD } from "@/config/kit-blizzard";
 import { ECRAN_CLASSE, ecranArticle, nomEcran } from "./ecrans";
 import { carte } from "./cartes";
 
@@ -12,9 +13,9 @@ import { carte } from "./cartes";
  */
 
 export interface ImageProposee {
-  /** « ecran:<slug> » ou « carte:<slug> » : la seule valeur que renvoie le formulaire. */
+  /** « ecran:<slug> », « carte:<slug> » ou « kit:<slug> » : la seule valeur que renvoie le formulaire. */
   cle: string;
-  type: "ecran" | "carte";
+  type: "ecran" | "carte" | "kit";
   slug: string;
   nom: string;
   /** Aperçu (adresse publique) et fichier lu à l'enregistrement (chemin dans public/). */
@@ -40,20 +41,31 @@ const CARTE = (slug: string, raison: string): ImageProposee => ({
   alt: `Carte de WoW Forever : ${carte(slug)?.nom ?? slug}`, credit: "Carte du jeu · © Blizzard Entertainment", raison,
 });
 
+const KIT = (slug: string, raison: string): ImageProposee | null => {
+  const v = KIT_BLIZZARD.find((k) => k.slug === slug);
+  return v ? {
+    cle: `kit:${slug}`, type: "kit", slug, nom: v.nom,
+    apercu: `/images/kit/${slug}-800.jpg`, fichier: `images/kit/${slug}-1600.jpg`,
+    alt: `Visuel officiel de WoW Forever : ${v.nom}`, credit: v.credit, raison,
+  } : null;
+};
+
 /** Retrouve l'image proposée d'après la valeur du formulaire, seulement parmi les illustrations connues (pas de chemin libre). */
 export function imageProposeeDepuisCle(cle: string): ImageProposee | null {
   const [type, slug] = cle.split(":");
   if (type === "ecran" && ECRANS.some((e) => e.slug === slug)) return ECRAN(slug as SlugEcran, "");
   if (type === "carte" && CARTES_JEU[slug]) return CARTE(slug, "");
+  if (type === "kit") return KIT(slug, "");
   return null;
 }
 
-/** Toutes les illustrations du jeu que le site possède (écrans de chargement puis cartes), pour la galerie de l'éditeur. */
+/** Toutes les illustrations que le site possède (kit officiel Blizzard, écrans de chargement, cartes), pour la galerie de l'éditeur. */
 export function toutesLesImages(): ImageProposee[] {
   const ecrans = ECRANS.map((e) => ECRAN(e.slug as SlugEcran, "écran de chargement"));
   const cartes = Object.entries(CARTES_JEU).map(([slug, c]) => CARTE(slug, c.type === "continent" ? "carte du continent" : `carte · ${c.continent}`));
   const parNom = (x: ImageProposee, y: ImageProposee) => x.nom.localeCompare(y.nom, "fr");
-  return [...ecrans.sort(parNom), ...cartes.sort(parNom)];
+  const kit = KIT_BLIZZARD.map((v) => KIT(v.slug, "kit officiel Blizzard")).filter((i): i is ImageProposee => !!i);
+  return [...kit.sort(parNom), ...ecrans.sort(parNom), ...cartes.sort(parNom)];
 }
 
 /** Jusqu'à `nombre` images, les plus proches du sujet d'abord (lieux et donjons cités, classe, page de référence, rubrique). */

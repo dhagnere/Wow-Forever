@@ -53,7 +53,8 @@ describe("galerie de l'éditeur", () => {
     expect(new Set(toutes.map((i) => i.cle)).size).toBe(toutes.length);
     for (const i of toutes) {
       expect(imageProposeeDepuisCle(i.cle)?.fichier, i.cle).toBe(i.fichier);
-      expect(i.fichier.startsWith("images/jeu/")).toBe(true);
+      expect(/^images\/(jeu|kit)\//.test(i.fichier), i.fichier).toBe(true);
+      expect(existsSync(path.join(process.cwd(), "public", i.fichier)), i.fichier).toBe(true);
     }
   });
 });
