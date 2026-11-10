@@ -394,6 +394,8 @@ export function GuideParcours({ cle, titre, zones, retour, langue = "fr" }: { cl
   const duJour = jours.find((j) => j.jour === aujourdhui())?.faites ?? 0;
   // Joueur qui commence : la première zone (même sans quêtes relevées, comme Zéphras) ; sinon la première à terminer.
   const zoneEnCours = nbFaites === 0 ? 0 : zones.findIndex((z) => z.etapes.some((e) => !faites.has(e.id)));
+  // Lien vers le compte, avec la page où revenir : « nofollow » pour que Google n'explore pas une variante de la page
+  // de compte par guide (pages non indexées, signalées en masse dans Search Console).
   const lienCompte = `${langue === "en" ? "/en/account/" : "/compte/"}?retour=${encodeURIComponent(retour)}`;
 
   return (
@@ -419,7 +421,7 @@ export function GuideParcours({ cle, titre, zones, retour, langue = "fr" }: { cl
               </>
             ) : (
               <span>
-                {t.sansCompte[0]} <Link href={lienCompte} data-cta="guide-compte">{t.sansCompte[1]}</Link> {t.sansCompte[2]}
+                {t.sansCompte[0]} <Link href={lienCompte} rel="nofollow" data-cta="guide-compte">{t.sansCompte[1]}</Link> {t.sansCompte[2]}
               </span>
             )}
         </div>
@@ -507,8 +509,8 @@ export function GuideParcours({ cle, titre, zones, retour, langue = "fr" }: { cl
             <p>{t.popup(titre)}</p>
             <p className="doux" style={{ fontSize: 14 }}>{t.popupLettre}</p>
             <div className="actions-bandeau">
-              <Link href={lienCompte} className="btn btn-or" data-cta="popup-compte-creer">{t.creer}</Link>
-              <Link href={`${lienCompte}&mode=connexion`} className="btn btn-contour" data-cta="popup-compte-connexion">{t.connexion}</Link>
+              <Link href={lienCompte} rel="nofollow" className="btn btn-or" data-cta="popup-compte-creer">{t.creer}</Link>
+              <Link href={`${lienCompte}&mode=connexion`} rel="nofollow" className="btn btn-contour" data-cta="popup-compte-connexion">{t.connexion}</Link>
               <button type="button" className="btn btn-contour" onClick={fermerPopup}>{t.plusTard}</button>
             </div>
           </div>
