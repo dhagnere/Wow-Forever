@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { CLASSES } from "@/content/classes";
 import { CARTES_EN } from "@/content/lieux-en";
+import { TRADUCTIONS_FOREVER_EN } from "@/content/traductions-forever-en";
 import { carte } from "./cartes";
 import { combinaisons, guidePour, nomRace, ordreDuGuide, versionGuide, type Arret, type RaceGuide, type TypeAction, type ZoneGuide } from "./guide";
 import { nomLieu, type FicheQuete } from "./quetes";
@@ -318,8 +319,30 @@ export function baseQuetesAddon(): { quetes: Map<number, QueteBase>; classes: Ma
 }
 
 /** QuestDB.lua : une ligne par quête, puis les masques de classe et de race. */
+/** Noms anglais pour la version anglaise de l'addon : cartes (UiMap) et sorts des classes (identifiant → nom, rang). */
+export function nomsAnglaisAddon(): { zones: Map<number, string>; sorts: Map<number, [string, number | null]> } {
+  const zones = new Map<number, string>();
+  for (const [slug, nom] of Object.entries(CARTES_EN)) {
+    const c = carte(slug);
+    if (c && nom) zones.set(c.id, nom);
+  }
+  const sorts = new Map<number, [string, number | null]>();
+  const donnees = JSON.parse(readFileSync(path.join(process.cwd(), "content/sorts-jeu.en.json"), "utf8")) as {
+    classes: Record<string, { sorts: { nom: string; rangs: { id: number; rang: number | null }[] }[] }[]>;
+  };
+  for (const specialisations of Object.values(donnees.classes)) {
+    for (const spe of specialisations) {
+      for (const sort of spe.sorts) {
+        for (const r of sort.rangs) if (!sorts.has(r.id)) sorts.set(r.id, [sort.nom, r.rang ?? null]);
+      }
+    }
+  }
+  return { zones, sorts };
+}
+
 export function fichierBaseQuetes(): string {
   const { quetes, classes, races } = baseQuetesAddon();
+  const { zones, sorts } = nomsAnglaisAddon();
   const ids = [...quetes.keys()].sort((a, b) => a - b);
   const lignes = [
     ENTETE(`Base de quêtes intégrée · ${ids.length} quêtes, en français et en anglais`),
@@ -337,6 +360,18 @@ export function fichierBaseQuetes(): string {
     ...[...classes.entries()].sort(([a], [b]) => a - b).map(([id, m]) => `ns.questClassMask[${id}] = ${m}`),
     `ns.questRaceMask = ns.questRaceMask or {}`,
     ...[...races.entries()].sort(([a], [b]) => a - b).map(([id, m]) => `ns.questRaceMask[${id}] = ${m}`),
+    ``,
+    `-- Version anglaise : nom des cartes (UiMap) et des sorts des classes ({ nom, rang }), lus dans les fichiers du jeu.`,
+    `ns.zoneNamesEn = ns.zoneNamesEn or {}`,
+    ...[...zones.entries()].sort(([a], [b]) => a - b).map(([id, n]) => `ns.zoneNamesEn[${id}] = ${chaineLua(n)}`),
+    `ns.spellNamesEn = ns.spellNamesEn or {}`,
+    ...[...sorts.entries()].sort(([a], [b]) => a - b).map(([id, [n, r]]) => `ns.spellNamesEn[${id}] = ${valeurLua(r === null ? [n] : [n, r])}`),
+    ``,
+    `-- Contenus propres à Forever (content/traductions-forever-en.ts) : nom affiché par le client français → nom anglais.`,
+    `ns.traductionsEn = ns.traductionsEn or {}`,
+    ...Object.entries(TRADUCTIONS_FOREVER_EN)
+      .sort(([a], [b]) => a.localeCompare(b, "fr"))
+      .map(([fr, en]) => `ns.traductionsEn[${chaineLua(fr)}] = ${chaineLua(en)}`),
     ``,
   ];
   return lignes.join("\n");

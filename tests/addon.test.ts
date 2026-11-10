@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CLASSE_JEU, PREMIER_ID_SAISI, baseQuetesAddon, chaineLua, fichierBaseQuetes, fichierCartes, fichierGuide, guidesAddon, tocAvecBase, tocAvecGuides, valeurLua } from "@/lib/addon";
+import { CLASSE_JEU, PREMIER_ID_SAISI, baseQuetesAddon, nomsAnglaisAddon, chaineLua, fichierBaseQuetes, fichierCartes, fichierGuide, guidesAddon, tocAvecBase, tocAvecGuides, valeurLua } from "@/lib/addon";
 import { combinaisons } from "@/lib/guide";
 
 const guides = guidesAddon();
@@ -97,6 +97,17 @@ describe("base de quêtes intégrée (QuestDB.lua)", () => {
   it("garde les restrictions de classe et de race", () => {
     expect(classes.get(3087)).toBe(4);
     expect(races.get(3087)).toBe(2);
+  });
+
+  it("donne les noms anglais des cartes et des sorts pour la version anglaise", () => {
+    const { zones, sorts } = nomsAnglaisAddon();
+    expect(zones.get(1413)).toBe("The Barrens");
+    expect(zones.get(1411)).toBe("Durotar");
+    expect(sorts.get(284)).toEqual(["Heroic Strike", 2]);
+    const lua = fichierBaseQuetes();
+    expect(lua).toContain('ns.zoneNamesEn[1413] = "The Barrens"');
+    expect(lua).toContain('ns.spellNamesEn[284] = { "Heroic Strike", 2 }');
+    expect(lua).toContain("ns.traductionsEn = ns.traductionsEn or {}");
   });
 
   it("produit un fichier Lua et le déclare dans le .toc à la place de QuestRestrictions.lua", () => {
