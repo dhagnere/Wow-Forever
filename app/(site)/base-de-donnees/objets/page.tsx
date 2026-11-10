@@ -23,7 +23,10 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       canonical: urlObjets({ classe: f.classe, sousClasse: f.sousClasse }),
       languages: { fr: urlObjets({ classe: f.classe, sousClasse: f.sousClasse }), en: urlObjetsEn({ classe: f.classe, sousClasse: f.sousClasse }), "x-default": urlObjets({ classe: f.classe, sousClasse: f.sousClasse }) },
     },
-    robots: listeIndexable(f) ? undefined : { index: false, follow: true },
+    // Liste sans filtre : indexable, avec les mêmes consignes que le reste du site (écrire « undefined » retirait la balise).
+    robots: listeIndexable(f)
+      ? { index: true, follow: true, "max-image-preview": "large", googleBot: { index: true, follow: true, "max-image-preview": "large" } }
+      : { index: false, follow: true },
   };
 }
 

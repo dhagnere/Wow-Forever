@@ -22,7 +22,10 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     title: f.q ? `Items: “${f.q}”` : `${nom} — WoW Forever items`,
     description: `${nom} in WoW Forever: full list with level, quality and a detailed page for each item.`,
     alternates: { canonical: en, languages: { fr, en, "x-default": fr } },
-    robots: listeIndexable(f) ? undefined : { index: false, follow: true },
+    // Liste sans filtre : indexable, avec les mêmes consignes que le reste du site (écrire « undefined » retirait la balise).
+    robots: listeIndexable(f)
+      ? { index: true, follow: true, "max-image-preview": "large", googleBot: { index: true, follow: true, "max-image-preview": "large" } }
+      : { index: false, follow: true },
   };
 }
 
