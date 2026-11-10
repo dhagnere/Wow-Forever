@@ -30,5 +30,30 @@ export const KIT_BLIZZARD: VisuelKit[] = [
     "slug": "troll-au-masque-a-plumes-dans-un-temple",
     "nom": "Troll au masque à plumes dans un temple",
     "credit": "Visuel officiel · © Blizzard Entertainment"
+  },
+  {
+    "slug": "arbre-geant-entoure-de-lumiere-bleue",
+    "nom": "Arbre géant entouré de lumière bleue",
+    "credit": "Visuel officiel · © Blizzard Entertainment"
+  },
+  {
+    "slug": "crane-geant-dans-une-foret-traversee-de-lumiere-bleue",
+    "nom": "Crâne géant dans une forêt traversée de lumière bleue",
+    "credit": "Visuel officiel · © Blizzard Entertainment"
+  },
+  {
+    "slug": "nain-et-son-ours-face-a-une-vallee-et-un-volcan",
+    "nom": "Nain et son ours face à une vallée et un volcan",
+    "credit": "Visuel officiel · © Blizzard Entertainment"
+  },
+  {
+    "slug": "nain-et-son-ours-sur-une-crete-enneigee",
+    "nom": "Nain et son ours sur une crête enneigée",
+    "credit": "Visuel officiel · © Blizzard Entertainment"
+  },
+  {
+    "slug": "terres-flottantes-au-milieu-des-nuages",
+    "nom": "Terres flottantes au milieu des nuages",
+    "credit": "Visuel officiel · © Blizzard Entertainment"
   }
 ];
