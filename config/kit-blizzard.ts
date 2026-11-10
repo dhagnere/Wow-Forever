@@ -80,5 +80,30 @@ export const KIT_BLIZZARD: VisuelKit[] = [
     "slug": "statue-et-remparts-sous-un-ciel-vert",
     "nom": "Statue et remparts sous un ciel vert",
     "credit": "Visuel officiel · © Blizzard Entertainment"
+  },
+  {
+    "slug": "collines-en-spirale-et-pierres-levees-dans-la-brume",
+    "nom": "Collines en spirale et pierres levées dans la brume",
+    "credit": "Visuel officiel · © Blizzard Entertainment"
+  },
+  {
+    "slug": "grand-tipi-orne-de-totems-et-de-peaux",
+    "nom": "Grand tipi orné de totems et de peaux",
+    "credit": "Visuel officiel · © Blizzard Entertainment"
+  },
+  {
+    "slug": "maison-elfe-au-toit-bleu-recourbe",
+    "nom": "Maison elfe au toit bleu recourbé",
+    "credit": "Visuel officiel · © Blizzard Entertainment"
+  },
+  {
+    "slug": "tour-de-garde-aux-bannieres-bleues",
+    "nom": "Tour de garde aux bannières bleues",
+    "credit": "Visuel officiel · © Blizzard Entertainment"
+  },
+  {
+    "slug": "village-elfe-au-pied-d-une-tour-dans-la-brume-doree",
+    "nom": "Village elfe au pied d'une tour dans la brume dorée",
+    "credit": "Visuel officiel · © Blizzard Entertainment"
   }
 ];
