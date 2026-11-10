@@ -14,7 +14,6 @@ import { exigerAdmin } from "@/lib/admin";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { imageProposeeDepuisCle } from "@/lib/imagesProposees";
-import { chercherWikimedia, creditWikimedia, telechargerWikimedia, type ImageWikimedia } from "@/lib/wikimedia";
 
 export interface EtatEdition {
   erreurs: string[];
@@ -83,26 +82,8 @@ async function traiterImages(id: number, form: FormData, m: Modifications): Prom
       await definirImage(id, "facebook", await enregistrerImage(await readFile(path.join(process.cwd(), "public", proposeeFacebook.fichier))));
     }
   }
-  // Image de Wikimedia Commons (licence libre), choisie dans l'éditeur : relue d'après son titre, puis même règle qu'un envoi.
-  const choixImage = String(form.get("imageProposee") ?? "");
-  if (!une && choixImage.startsWith("wikimedia:")) {
-    if (form.get("droitsImages") !== "on") {
-      erreurs.push("Image de Wikimedia Commons non ajoutée : cochez la case de déclaration des images pour la garder.");
-      return erreurs;
-    }
-    try {
-      const { image, octets } = await telechargerWikimedia(choixImage.slice("wikimedia:".length), TAILLE_MAX_OCTETS);
-      const mediaId = await enregistrerImage(octets);
-      await definirImage(id, "une", mediaId);
-      // Le crédit (auteur, licence, source) est imposé par les licences CC BY et CC BY-SA : il remplace l'ancien.
-      await renseignerImage(id, m.imageAlt || image.description || image.nom, creditWikimedia(image));
-    } catch (e) {
-      erreurs.push(`Image de Wikimedia Commons non ajoutée : ${e instanceof Error ? e.message : String(e)}`);
-    }
-    return erreurs;
-  }
   // Image proposée (illustration du jeu déjà sur le site) : même règle qu'un envoi, case de déclaration et réencodage compris.
-  const proposee = !une ? imageProposeeDepuisCle(choixImage) : null;
+  const proposee = !une ? imageProposeeDepuisCle(String(form.get("imageProposee") ?? "")) : null;
   if (proposee) {
     if (form.get("droitsImages") !== "on") {
       erreurs.push(`Image proposée « ${proposee.nom} » non ajoutée : cochez la case de déclaration des images pour la garder.`);
@@ -272,15 +253,4 @@ export async function retirerAnglais(id: number): Promise<void> {
   await exigerAdmin();
   await supprimerTraduction(id);
   redirect(`/admin/veille/${id}/?anglais=retire#anglais`);
-}
-
-/** Recherche d'images sous licence libre sur Wikimedia Commons, depuis l'éditeur. */
-export async function chercherImagesWikimedia(terme: string): Promise<{ images?: ImageWikimedia[]; erreur?: string }> {
-  await exigerAdmin();
-  try {
-    const images = await chercherWikimedia(terme);
-    return { images };
-  } catch (e) {
-    return { erreur: e instanceof Error ? e.message : String(e) };
-  }
 }

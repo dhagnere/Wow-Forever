@@ -47,10 +47,8 @@ export default function MentionsLegales() {
           utilisées dans le cadre de la tolérance accordée aux sites de fans.
         </p>
         <p>
-          Images d&apos;en-tête de certains articles : visuels officiels diffusés par Blizzard Entertainment pour la presse et les sites de fans
-          (propriété de Blizzard Entertainment), ou photographies et illustrations de{" "}
-          <a href="https://commons.wikimedia.org" rel="noopener noreferrer">Wikimedia Commons</a> sous licence libre (domaine public, CC0, CC BY ou CC BY-SA).
-          L&apos;auteur et la licence de chaque image sont indiqués sous l&apos;image.
+          Images d&apos;en-tête de certains articles : visuels officiels diffusés par Blizzard Entertainment pour la presse et les sites de fans.
+          Ils restent la propriété de Blizzard Entertainment, et leur crédit est indiqué sous chaque image.
         </p>
         <p>
           Base de données des objets : noms, descriptions, niveaux, prix et icônes proviennent des fichiers du jeu World of Warcraft: Forever,

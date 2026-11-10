@@ -85,13 +85,8 @@ function PropositionAvis({
 export interface ImageProposeeEditeur { cle: string; nom: string; apercu: string; alt: string; credit: string; raison: string }
 
 /** Images proposées : la première est cochée d'office quand l'article n'a pas encore d'image ; elle n'est ajoutée qu'à l'enregistrement. */
-/** Image trouvée sur Wikimedia Commons (licence libre), telle que la renvoie la recherche de l'éditeur. */
-export interface ImageWikimediaEditeur { titre: string; nom: string; apercu: string; page: string; auteur: string; licence: string; largeur: number; hauteur: number }
-type ChercherWikimedia = (terme: string) => Promise<{ images?: ImageWikimediaEditeur[]; erreur?: string }>;
-
-function ImagesProposees({ images, toutes, sansImage, choix, setChoix, chercher }: {
+function ImagesProposees({ images, toutes, sansImage, choix, setChoix }: {
   images: ImageProposeeEditeur[]; toutes: ImageProposeeEditeur[]; sansImage: boolean; choix: string; setChoix: (c: string) => void;
-  chercher?: ChercherWikimedia;
 }) {
   if (!images.length && !toutes.length) return null;
   return (
@@ -116,66 +111,7 @@ function ImagesProposees({ images, toutes, sansImage, choix, setChoix, chercher 
         </label>
       </div>
       <GalerieImages images={toutes.filter((t) => !images.some((i) => i.cle === t.cle))} nom="imageProposee" choix={choix} setChoix={setChoix} />
-      {chercher ? <RechercheWikimedia chercher={chercher} choix={choix} setChoix={setChoix} /> : null}
     </div>
-  );
-}
-
-/**
- * Recherche sur Wikimedia Commons, licences libres seulement (domaine public, CC0, CC BY, CC BY-SA). L'image choisie est
- * téléchargée à l'enregistrement, case de déclaration cochée, et son crédit (auteur, licence, source) est ajouté d'office.
- */
-function RechercheWikimedia({ chercher, choix, setChoix }: { chercher: ChercherWikimedia; choix: string; setChoix: (c: string) => void }) {
-  const [terme, setTerme] = useState("");
-  const [resultats, setResultats] = useState<ImageWikimediaEditeur[] | null>(null);
-  const [erreur, setErreur] = useState("");
-  const [enCours, demarrer] = useTransition();
-  const lancer = () => {
-    if (terme.trim().length < 2) return;
-    setErreur("");
-    demarrer(async () => {
-      const r = await chercher(terme);
-      if (r.images) setResultats(r.images);
-      else setErreur(r.erreur ?? "Recherche impossible.");
-    });
-  };
-  return (
-    <details style={{ marginTop: 12 }} open={choix.startsWith("wikimedia:")}>
-      <summary>Chercher sur Wikimedia Commons (licences libres)</summary>
-      <small>
-        Domaine public, CC0, CC BY et CC BY-SA seulement. L&apos;auteur et la licence partent dans le crédit de l&apos;image, comme ces licences l&apos;exigent.
-        Vérifiez sur la page de l&apos;image qu&apos;elle ne reprend pas une œuvre protégée (illustration du jeu, capture d&apos;écran).
-      </small>
-      <div style={{ display: "flex", gap: 8, margin: "10px 0" }}>
-        <input
-          type="search" value={terme} onChange={(e) => setTerme(e.target.value)} placeholder="Exemple : taverne, montagne enneigée, chope de bière"
-          aria-label="Recherche sur Wikimedia Commons" style={{ flex: 1 }}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); lancer(); } }}
-        />
-        <button type="button" className="btn btn-contour" onClick={lancer} disabled={enCours}>{enCours ? "Recherche…" : "Chercher"}</button>
-      </div>
-      {erreur ? <p className="alerte" role="alert">{erreur}</p> : null}
-      {resultats && !resultats.length ? <p className="doux">Aucune image libre assez grande pour un en-tête (800 pixels de large au moins).</p> : null}
-      {resultats?.length ? (
-        <div className="images-proposees" style={{ maxHeight: 460, overflowY: "auto" }}>
-          {resultats.map((i) => {
-            const cle = `wikimedia:${i.titre}`;
-            return (
-              <label key={cle} className={`image-proposee${choix === cle ? " image-choisie" : ""}`}>
-                <input type="radio" name="imageProposee" value={cle} checked={choix === cle} onChange={() => setChoix(cle)} />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={i.apercu} alt="" loading="lazy" referrerPolicy="no-referrer" />
-                <span>
-                  <strong>{i.nom}</strong>
-                  <small className="doux">{i.auteur || "Auteur inconnu"} · {i.licence} · {i.largeur}×{i.hauteur}</small>
-                  <small><a href={i.page} target="_blank" rel="noreferrer noopener">Voir sur Commons</a></small>
-                </span>
-              </label>
-            );
-          })}
-        </div>
-      ) : null}
-    </details>
   );
 }
 
@@ -334,11 +270,10 @@ function ImageFacebookProposee({ images, toutes, actuelle }: { images: ImageProp
 
 export function Editeur({
   action, proposerAvis, proposerLegende, proposerTexteFacebook, valeurs, rubriques, piliers, publie, avisMinimum, sources, imagesProposees = [],
-  toutesImages = [], chercherWikimedia,
+  toutesImages = [],
 }: {
   imagesProposees?: ImageProposeeEditeur[];
   toutesImages?: ImageProposeeEditeur[];
-  chercherWikimedia?: ChercherWikimedia;
   proposerLegende: (contenu: { titre: string; chapo: string; corps: string }, image: string) => Promise<{ legende?: string; erreur?: string }>;
   proposerTexteFacebook: (contenu: { titre: string; chapo: string; corps: string }) => Promise<{ accroche?: string; texte?: string; erreur?: string }>;
   sources: SourceEditeur[];
@@ -354,8 +289,7 @@ export function Editeur({
   const avisRef = useRef<HTMLTextAreaElement>(null);
   const [choixImage, setChoixImage] = useState(valeurs.imageId ? "" : imagesProposees[0]?.cle ?? "");
   // Image dont parle la légende : l'image proposée cochée, sinon l'image déjà en place (d'après sa description).
-  const nomImage = (choixImage.startsWith("wikimedia:") ? choixImage.replace(/^wikimedia:File:/, "").replace(/\.[a-z0-9]+$/i, "").replace(/_/g, " ") : undefined)
-    ?? [...imagesProposees, ...toutesImages].find((i) => i.cle === choixImage)?.nom ?? (valeurs.imageId ? valeurs.imageAlt || "image d'en-tête" : "");
+  const nomImage = [...imagesProposees, ...toutesImages].find((i) => i.cle === choixImage)?.nom ?? (valeurs.imageId ? valeurs.imageAlt || "image d'en-tête" : "");
   return (
     <form action={envoyer} className="formulaire">
       {etat.erreurs.length ? (
@@ -379,7 +313,7 @@ export function Editeur({
         ) : (
           <small className="doux">Aucune image : le site affiche un visuel généré, et Facebook une image aux couleurs du site.</small>
         )}
-        <ImagesProposees images={imagesProposees} toutes={toutesImages} chercher={chercherWikimedia} sansImage={!valeurs.imageId} choix={choixImage} setChoix={setChoixImage} />
+        <ImagesProposees images={imagesProposees} toutes={toutesImages} sansImage={!valeurs.imageId} choix={choixImage} setChoix={setChoixImage} />
         <div className="champ">
           <label htmlFor="image">{valeurs.imageId ? "Remplacer par une autre image" : "Ou envoyer une image"}</label>
           <small>JPEG, PNG ou WebP, 8 Mo au maximum, 1200 px de large conseillés. L&apos;image est recadrée automatiquement pour Facebook.</small>
