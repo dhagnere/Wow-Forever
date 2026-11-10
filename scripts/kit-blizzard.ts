@@ -20,7 +20,7 @@ if (!dossier || !existsSync(dossier)) {
 const SORTIE = path.join(process.cwd(), "public/images/kit");
 const CREDIT = "Visuel officiel · © Blizzard Entertainment";
 const slugDe = (f: string) =>
-  path.parse(f).name.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+  path.parse(f).name.toLowerCase().replace(/œ/g, "oe").replace(/æ/g, "ae").normalize("NFD").replace(/\p{M}/gu, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
 const nomDe = (f: string) => {
   const n = path.parse(f).name.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
   return n.charAt(0).toUpperCase() + n.slice(1);

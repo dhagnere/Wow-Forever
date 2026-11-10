@@ -55,5 +55,30 @@ export const KIT_BLIZZARD: VisuelKit[] = [
     "slug": "terres-flottantes-au-milieu-des-nuages",
     "nom": "Terres flottantes au milieu des nuages",
     "credit": "Visuel officiel · © Blizzard Entertainment"
+  },
+  {
+    "slug": "fontaine-dans-une-cour-sous-la-brume-verte",
+    "nom": "Fontaine dans une cour sous la brume verte",
+    "credit": "Visuel officiel · © Blizzard Entertainment"
+  },
+  {
+    "slug": "plage-dans-la-brume-au-soleil-couchant",
+    "nom": "Plage dans la brume au soleil couchant",
+    "credit": "Visuel officiel · © Blizzard Entertainment"
+  },
+  {
+    "slug": "pont-et-pavillons-au-coeur-d-une-foret-violette",
+    "nom": "Pont et pavillons au cœur d'une forêt violette",
+    "credit": "Visuel officiel · © Blizzard Entertainment"
+  },
+  {
+    "slug": "sentier-forestier-sous-un-rayon-de-lumiere",
+    "nom": "Sentier forestier sous un rayon de lumière",
+    "credit": "Visuel officiel · © Blizzard Entertainment"
+  },
+  {
+    "slug": "statue-et-remparts-sous-un-ciel-vert",
+    "nom": "Statue et remparts sous un ciel vert",
+    "credit": "Visuel officiel · © Blizzard Entertainment"
   }
 ];
