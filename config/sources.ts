@@ -103,3 +103,10 @@ export const MOTS_CLES = {
 
 /** Fenêtre de collecte : sujets publiés depuis moins de 36 heures. */
 export const FENETRE_HEURES = 36;
+
+/**
+ * Revue : un sujet dont l'élément le plus récent a plus de 3 jours est retiré de la liste (affichage et rédaction),
+ * sauf les sujets de classes, qui restent utiles plus longtemps. Les dossiers de référence (60 jours) ne sont pas concernés.
+ */
+export const AGE_MAX_SUJET_JOURS = 3;
+export const THEMES_SANS_LIMITE_AGE = ["classes"];

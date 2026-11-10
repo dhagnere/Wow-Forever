@@ -2,7 +2,7 @@ import { SOURCES, FENETRE_HEURES, type Source } from "@/config/sources";
 import { DOSSIERS, FENETRE_DOSSIERS_HEURES } from "@/config/dossiers";
 import { pool } from "./db/pool";
 import { lireToutes } from "./collecte/flux";
-import { classer } from "./collecte/tri";
+import { classer, sujetEncoreFrais } from "./collecte/tri";
 import { detecterTheme, selectionVariee } from "./collecte/themes";
 import { ErreurConfiguration, rediger } from "./redaction/redacteur";
 import * as depot from "./articles/depot";
@@ -100,6 +100,8 @@ export interface Revue {
   mode: ModePassage;
   bilan: BilanPassage;
   sujets: SujetRevue[];
+  /** Sujets retirés parce que trop anciens (plus de AGE_MAX_SUJET_JOURS jours, hors classes). */
+  retires: number;
 }
 
 async function lireRevue(id?: number): Promise<Revue | null> {
@@ -111,9 +113,15 @@ async function lireRevue(id?: number): Promise<Revue | null> {
   const l = rows[0];
   if (!l) return null;
   // « Déjà traité » est recalculé : un sujet rédigé depuis la revue n'est plus proposé.
-  const sujets = l.sujets as SujetRevue[];
+  const tous = l.sujets as SujetRevue[];
+  // Les actualités de plus de 3 jours sortent de la liste (sauf les sujets de classes) ; les dossiers gardent leurs 60 jours.
+  const maintenant = new Date();
+  const sujets = l.mode === "dossier" ? tous : tous.filter((x) => sujetEncoreFrais({ ...x, ...themeDe(x) }, maintenant));
   const traites = await depot.sujetsDejaTraites(sujets.map((x) => x.cle));
-  return { id: l.id, jour: l.jour, creeLe: l.cree_le, mode: l.mode, bilan: l.bilan, sujets: sujets.map((x) => ({ ...x, dejaTraite: traites.has(x.cle) })) };
+  return {
+    id: l.id, jour: l.jour, creeLe: l.cree_le, mode: l.mode, bilan: l.bilan, retires: tous.length - sujets.length,
+    sujets: sujets.map((x) => ({ ...x, dejaTraite: traites.has(x.cle) })),
+  };
 }
 
 /** Thème et pilier d'un sujet de revue (recalculés pour les revues antérieures au classement par thème). */

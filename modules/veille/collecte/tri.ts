@@ -1,4 +1,4 @@
-import { MOTS_CLES } from "@/config/sources";
+import { AGE_MAX_SUJET_JOURS, MOTS_CLES, THEMES_SANS_LIMITE_AGE } from "@/config/sources";
 import type { Element, Sujet } from "../types";
 
 import { normaliser } from "./texte";
@@ -23,6 +23,21 @@ export function parleDeForever(e: Pick<Element, "titre" | "resume">): boolean {
 export function dansLaFenetre(e: Pick<Element, "publieLe">, maintenant: Date, heures: number): boolean {
   const age = maintenant.getTime() - e.publieLe.getTime();
   return age >= -60 * 60 * 1000 && age <= heures * 60 * 60 * 1000;
+}
+
+/**
+ * Sujet encore proposé dans la revue : son élément le plus récent a moins de AGE_MAX_SUJET_JOURS jours,
+ * ou son thème est exempté (classes).
+ */
+export function sujetEncoreFrais(
+  s: { theme: string; elements: { publieLe: Date | string }[] },
+  maintenant: Date,
+  jours = AGE_MAX_SUJET_JOURS,
+): boolean {
+  if (THEMES_SANS_LIMITE_AGE.includes(s.theme)) return true;
+  const dates = s.elements.map((e) => new Date(e.publieLe).getTime()).filter((t) => Number.isFinite(t));
+  if (!dates.length) return true;
+  return maintenant.getTime() - Math.max(...dates) <= jours * 24 * 3_600_000;
 }
 
 /** URL canonique : sans paramètres de suivi, sans fragment ni barre finale. */

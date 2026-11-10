@@ -44,3 +44,16 @@ describe("légende de l'image d'en-tête", () => {
     expect(empreinteTraduction({ ...a, image: { id: 1, alt: "a", credit: "c", legende: "Une légende" } })).not.toBe(empreinteTraduction(a));
   });
 });
+
+describe("galerie de l'éditeur", () => {
+  it("propose toutes les illustrations du site, chacune retrouvable par sa clé", async () => {
+    const { toutesLesImages, imageProposeeDepuisCle } = await import("@/lib/imagesProposees");
+    const toutes = toutesLesImages();
+    expect(toutes.length).toBeGreaterThan(50);
+    expect(new Set(toutes.map((i) => i.cle)).size).toBe(toutes.length);
+    for (const i of toutes) {
+      expect(imageProposeeDepuisCle(i.cle)?.fichier, i.cle).toBe(i.fichier);
+      expect(i.fichier.startsWith("images/jeu/")).toBe(true);
+    }
+  });
+});

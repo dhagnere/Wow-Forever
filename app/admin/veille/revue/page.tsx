@@ -92,7 +92,8 @@ export default async function Revue({ searchParams }: { searchParams: Promise<{ 
       {blocDossiers}
       <p className="doux">
         {revue.mode === "dossier" ? `Recherche « ${(b.dossiers ?? []).join(", ")} » sur 60 jours` : `Passage « ${revue.mode} »`} de {HEURE.format(revue.creeLe)} : {b.elementsLus} éléments lus, {b.sujetsRetenus} sujets retenus,{" "}
-        {revue.sujets.filter((s) => s.dejaTraite).length} déjà rédigés. {aCocher.size} sujets cochés
+        {revue.sujets.filter((s) => s.dejaTraite).length} déjà rédigés
+        {revue.retires ? `, ${revue.retires} retiré(s) car publié(s) il y a plus de 3 jours (sujets de classes gardés)` : ""}. {aCocher.size} sujets cochés
         {filtre ? " : les meilleurs de ce thème." : " : les meilleurs, variés entre les thèmes."}
       </p>
       <nav className="onglets" aria-label="Thèmes">

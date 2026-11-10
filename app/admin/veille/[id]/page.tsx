@@ -10,7 +10,7 @@ import { Editeur } from "./Editeur";
 import type { SourceEditeur } from "./Editeur";
 import { depublier, enregistrer, relancerReseaux, proposerAvisPour, proposerLegendePour, proposerTexteFacebookPour, restaurer, supprimer } from "../actions";
 import { VersionAnglaise } from "./VersionAnglaise";
-import { proposerImages } from "@/lib/imagesProposees";
+import { proposerImages, toutesLesImages } from "@/lib/imagesProposees";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +61,7 @@ export default async function EditerArticle({ params, searchParams }: { params: 
             proposerLegende={proposerLegendePour}
             proposerTexteFacebook={proposerTexteFacebookPour}
             imagesProposees={proposerImages(a).map(({ cle, nom, apercu, alt, credit, raison }) => ({ cle, nom, apercu, alt, credit, raison }))}
+            toutesImages={toutesLesImages().map(({ cle, nom, apercu, alt, credit, raison }) => ({ cle, nom, apercu, alt, credit, raison }))}
             sources={a.sources.map((s): SourceEditeur => {
               const fr = lienFrancais(s.url, s.langue);
               const traduite = fr.mode !== "original";

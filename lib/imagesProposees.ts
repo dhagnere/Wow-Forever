@@ -48,10 +48,18 @@ export function imageProposeeDepuisCle(cle: string): ImageProposee | null {
   return null;
 }
 
+/** Toutes les illustrations du jeu que le site possède (écrans de chargement puis cartes), pour la galerie de l'éditeur. */
+export function toutesLesImages(): ImageProposee[] {
+  const ecrans = ECRANS.map((e) => ECRAN(e.slug as SlugEcran, "écran de chargement"));
+  const cartes = Object.entries(CARTES_JEU).map(([slug, c]) => CARTE(slug, c.type === "continent" ? "carte du continent" : `carte · ${c.continent}`));
+  const parNom = (x: ImageProposee, y: ImageProposee) => x.nom.localeCompare(y.nom, "fr");
+  return [...ecrans.sort(parNom), ...cartes.sort(parNom)];
+}
+
 /** Jusqu'à `nombre` images, les plus proches du sujet d'abord (lieux et donjons cités, classe, page de référence, rubrique). */
 export function proposerImages(
   a: { titre: string; chapo: string; corps: string; etiquettes: string[]; pilier: string | null; rubrique: string },
-  nombre = 4,
+  nombre = 8,
 ): ImageProposee[] {
   const texte = normaliser([a.titre, a.titre, a.chapo, a.etiquettes.join(" "), a.corps].join(" "));
   const titre = normaliser(a.titre);

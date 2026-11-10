@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classer, cleUrl, parleDeForever, regrouper, similarite } from "@/modules/veille/collecte/tri";
+import { classer, cleUrl, parleDeForever, regrouper, similarite, sujetEncoreFrais } from "@/modules/veille/collecte/tri";
 import type { Element } from "@/modules/veille/types";
 
 const maintenant = new Date("2026-11-06T06:37:00Z");
@@ -69,5 +69,27 @@ describe("score du jour", () => {
     expect(video.detailScore.video).toBe(1.5);
     expect(video.detailScore.etranger).toBe(1);
     expect(fr.detailScore.etranger).toBe(0);
+  });
+});
+
+describe("sujets de la revue : plus de 3 jours", () => {
+  const maintenant = new Date("2026-11-10T12:00:00Z");
+  const il = (jours: number) => ({ publieLe: new Date(maintenant.getTime() - jours * 24 * 3_600_000).toISOString() });
+
+  it("garde une actualité de moins de 3 jours", () => {
+    expect(sujetEncoreFrais({ theme: "actualites", elements: [il(2.9)] }, maintenant)).toBe(true);
+  });
+
+  it("retire une actualité de plus de 3 jours", () => {
+    expect(sujetEncoreFrais({ theme: "actualites", elements: [il(3.1)] }, maintenant)).toBe(false);
+    expect(sujetEncoreFrais({ theme: "zones", elements: [il(10)] }, maintenant)).toBe(false);
+  });
+
+  it("juge un sujet sur sa source la plus récente", () => {
+    expect(sujetEncoreFrais({ theme: "patchs", elements: [il(8), il(1)] }, maintenant)).toBe(true);
+  });
+
+  it("garde les sujets de classes, quel que soit leur âge", () => {
+    expect(sujetEncoreFrais({ theme: "classes", elements: [il(20)] }, maintenant)).toBe(true);
   });
 });

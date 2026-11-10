@@ -85,8 +85,10 @@ function PropositionAvis({
 export interface ImageProposeeEditeur { cle: string; nom: string; apercu: string; alt: string; credit: string; raison: string }
 
 /** Images proposées : la première est cochée d'office quand l'article n'a pas encore d'image ; elle n'est ajoutée qu'à l'enregistrement. */
-function ImagesProposees({ images, sansImage, choix, setChoix }: { images: ImageProposeeEditeur[]; sansImage: boolean; choix: string; setChoix: (c: string) => void }) {
-  if (!images.length) return null;
+function ImagesProposees({ images, toutes, sansImage, choix, setChoix }: {
+  images: ImageProposeeEditeur[]; toutes: ImageProposeeEditeur[]; sansImage: boolean; choix: string; setChoix: (c: string) => void;
+}) {
+  if (!images.length && !toutes.length) return null;
   return (
     <div className="champ">
       <label>{sansImage ? "Images proposées pour cet article" : "Remplacer par une image proposée"}</label>
@@ -108,7 +110,40 @@ function ImagesProposees({ images, sansImage, choix, setChoix }: { images: Image
           <span><strong>Aucune</strong><small className="doux">{sansImage ? "visuel généré par le site" : "garder l'image actuelle"}</small></span>
         </label>
       </div>
+      <GalerieImages images={toutes.filter((t) => !images.some((i) => i.cle === t.cle))} nom="imageProposee" choix={choix} setChoix={setChoix} />
     </div>
+  );
+}
+
+/**
+ * Toutes les illustrations du jeu que possède le site (écrans de chargement, cartes), avec un filtre par nom.
+ * Aucune image venue d'un autre site : le choix passe, comme les propositions, par la case de déclaration et enregistrerImage.
+ */
+function GalerieImages({ images, nom, choix, setChoix }: { images: ImageProposeeEditeur[]; nom: string; choix: string; setChoix: (c: string) => void }) {
+  const [filtre, setFiltre] = useState("");
+  if (!images.length) return null;
+  const n = (t: string) => t.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
+  const vues = filtre ? images.filter((i) => n(`${i.nom} ${i.raison}`).includes(n(filtre))) : images;
+  const choisie = images.find((i) => i.cle === choix);
+  return (
+    <details style={{ marginTop: 12 }} open={!!choisie}>
+      <summary>Voir toutes les illustrations du site ({images.length}){choisie ? ` · choisie : ${choisie.nom}` : ""}</summary>
+      <input
+        type="search" value={filtre} onChange={(e) => setFiltre(e.target.value)} placeholder="Filtrer : Orgrimmar, Mortemines, carte, Kalimdor…"
+        aria-label="Filtrer les illustrations" style={{ margin: "10px 0", width: "100%" }}
+      />
+      <div className="images-proposees" style={{ maxHeight: 460, overflowY: "auto" }}>
+        {vues.map((i) => (
+          <label key={i.cle} className={`image-proposee${choix === i.cle ? " image-choisie" : ""}`}>
+            <input type="radio" name={nom} value={i.cle} checked={choix === i.cle} onChange={() => setChoix(i.cle)} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={i.apercu} alt="" loading="lazy" />
+            <span><strong>{i.nom}</strong><small className="doux">{i.raison}</small></span>
+          </label>
+        ))}
+        {!vues.length ? <p className="doux">Aucune illustration ne correspond.</p> : null}
+      </div>
+    </details>
   );
 }
 
@@ -205,9 +240,9 @@ function TexteFacebook({ accrocheInitiale, texteInitial, proposer, auto }: {
 }
 
 /** Image du post Facebook : par défaut l'image de l'article (aperçu du lien), ou une image proposée (post photo). */
-function ImageFacebookProposee({ images, actuelle }: { images: ImageProposeeEditeur[]; actuelle: boolean }) {
+function ImageFacebookProposee({ images, toutes, actuelle }: { images: ImageProposeeEditeur[]; toutes: ImageProposeeEditeur[]; actuelle: boolean }) {
   const [choix, setChoix] = useState("");
-  if (!images.length) return null;
+  if (!images.length && !toutes.length) return null;
   return (
     <div className="champ">
       <label>Image du post</label>
@@ -228,14 +263,17 @@ function ImageFacebookProposee({ images, actuelle }: { images: ImageProposeeEdit
           </label>
         ))}
       </div>
+      <GalerieImages images={toutes.filter((t) => !images.some((i) => i.cle === t.cle))} nom="imageFacebookProposee" choix={choix} setChoix={setChoix} />
     </div>
   );
 }
 
 export function Editeur({
   action, proposerAvis, proposerLegende, proposerTexteFacebook, valeurs, rubriques, piliers, publie, avisMinimum, sources, imagesProposees = [],
+  toutesImages = [],
 }: {
   imagesProposees?: ImageProposeeEditeur[];
+  toutesImages?: ImageProposeeEditeur[];
   proposerLegende: (contenu: { titre: string; chapo: string; corps: string }, image: string) => Promise<{ legende?: string; erreur?: string }>;
   proposerTexteFacebook: (contenu: { titre: string; chapo: string; corps: string }) => Promise<{ accroche?: string; texte?: string; erreur?: string }>;
   sources: SourceEditeur[];
@@ -251,7 +289,7 @@ export function Editeur({
   const avisRef = useRef<HTMLTextAreaElement>(null);
   const [choixImage, setChoixImage] = useState(valeurs.imageId ? "" : imagesProposees[0]?.cle ?? "");
   // Image dont parle la légende : l'image proposée cochée, sinon l'image déjà en place (d'après sa description).
-  const nomImage = imagesProposees.find((i) => i.cle === choixImage)?.nom ?? (valeurs.imageId ? valeurs.imageAlt || "image d'en-tête" : "");
+  const nomImage = [...imagesProposees, ...toutesImages].find((i) => i.cle === choixImage)?.nom ?? (valeurs.imageId ? valeurs.imageAlt || "image d'en-tête" : "");
   return (
     <form action={envoyer} className="formulaire">
       {etat.erreurs.length ? (
@@ -275,7 +313,7 @@ export function Editeur({
         ) : (
           <small className="doux">Aucune image : le site affiche un visuel généré, et Facebook une image aux couleurs du site.</small>
         )}
-        <ImagesProposees images={imagesProposees} sansImage={!valeurs.imageId} choix={choixImage} setChoix={setChoixImage} />
+        <ImagesProposees images={imagesProposees} toutes={toutesImages} sansImage={!valeurs.imageId} choix={choixImage} setChoix={setChoixImage} />
         <div className="champ">
           <label htmlFor="image">{valeurs.imageId ? "Remplacer par une autre image" : "Ou envoyer une image"}</label>
           <small>JPEG, PNG ou WebP, 8 Mo au maximum, 1200 px de large conseillés. L&apos;image est recadrée automatiquement pour Facebook.</small>
@@ -375,7 +413,7 @@ export function Editeur({
             </label>
           </div>
         ) : null}
-        <ImageFacebookProposee images={imagesProposees} actuelle={!!valeurs.imageFacebookId} />
+        <ImageFacebookProposee images={imagesProposees} toutes={toutesImages} actuelle={!!valeurs.imageFacebookId} />
         <div className="champ">
           <label htmlFor="imageFacebook">{valeurs.imageFacebookId ? "Remplacer l'image du post" : "Image propre au post (facultatif)"}</label>
           <small>
