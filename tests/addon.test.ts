@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CLASSE_JEU, PREMIER_ID_SAISI, chaineLua, fichierCartes, fichierGuide, guidesAddon, tocAvecGuides, valeurLua } from "@/lib/addon";
+import { CLASSE_JEU, PREMIER_ID_SAISI, baseQuetesAddon, chaineLua, fichierBaseQuetes, fichierCartes, fichierGuide, guidesAddon, tocAvecBase, tocAvecGuides, valeurLua } from "@/lib/addon";
 import { combinaisons } from "@/lib/guide";
 
 const guides = guidesAddon();
@@ -71,5 +71,40 @@ describe("écriture en Lua", () => {
     expect(deux).not.toContain("Guides/site/a.lua");
     expect(deux).toContain("Guides/site/b.lua");
     expect(deux.match(/Maps\.lua/g)).toHaveLength(1);
+  });
+});
+
+describe("base de quêtes intégrée (QuestDB.lua)", () => {
+  const { quetes, classes, races } = baseQuetesAddon();
+
+  it("couvre les quêtes du parcours et des chaînes de classe, en français et en anglais", () => {
+    expect(quetes.size).toBeGreaterThan(2000);
+    const dent = quetes.get(788)!;
+    expect(dent.t).toBe("La dent tranchante");
+    expect(dent.te).toBe("Cutting Teeth");
+    expect(dent.g?.[2]).toBe(1411);
+    expect(dent.oe).toContain("Mottled Boar");
+  });
+
+  it("place les PNJ et les secteurs d'objectifs sur des cartes du jeu", () => {
+    for (const [id, q] of quetes) {
+      expect(id).toBeLessThan(PREMIER_ID_SAISI);
+      for (const p of [q.g, q.r]) if (p) { expect(p[2]).toBeGreaterThan(0); expect(p[3]).toBeGreaterThanOrEqual(0); expect(p[3]).toBeLessThanOrEqual(100); }
+      if (q.c) expect(q.c[0]).toBeGreaterThan(0);
+    }
+  });
+
+  it("garde les restrictions de classe et de race", () => {
+    expect(classes.get(3087)).toBe(4);
+    expect(races.get(3087)).toBe(2);
+  });
+
+  it("produit un fichier Lua et le déclare dans le .toc à la place de QuestRestrictions.lua", () => {
+    const lua = fichierBaseQuetes();
+    expect(lua).toContain("ns.questDB = ns.questDB or {}");
+    expect(lua).toContain("ns.questClassMask[3087] = 4");
+    const toc = tocAvecBase("Core.lua\nQuestNames.lua\nQuestRestrictions.lua\nGuideEngine.lua");
+    expect(toc).toBe("Core.lua\nQuestNames.lua\nQuestDB.lua\nGuideEngine.lua");
+    expect(tocAvecBase(toc)).toBe(toc);
   });
 });

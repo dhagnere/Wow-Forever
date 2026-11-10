@@ -72,7 +72,7 @@ Guide de 1 à 60 par race et classe : `/guides/parcours/<race>/<classe>/` (`comp
 
 ## Addon EternalRoutes
 
-L'addon de jeu (guide pas à pas, dossier `EternalRoutes`, hors du dépôt) reçoit les 56 guides de 1 à 60 du site : `npm run addon:guides -- <dossier de l'addon>` écrit `Guides/site/<race>-<classe>.lua` (même ordre que les pages : `ordreDuGuide`), `Maps.lua` (carte du jeu par nom de zone, identifiant UiMap de `content/cartes-jeu.ts`) et la liste des fichiers dans `EternalRoutes.toc`, entre ses repères. Conversion dans `lib/addon.ts`, vérifiée par `tests/addon.test.ts`. Les identifiants saisis à la main (Zéphras, ajouts Forever) ne partent pas dans l'addon : il suit ces quêtes par leur nom et apprend leur identifiant à l'acceptation. Un parcours enregistré en jeu avec RouteProbe (priorité 10) passe avant le guide du site (priorité 1). Relancer la commande après chaque `npm run base:quetes` ou changement des parcours relevés. L'addon ne prend ni ne rend aucune quête à la place du joueur.
+L'addon de jeu (guide pas à pas, dossier `EternalRoutes`, hors du dépôt) reçoit les 56 guides de 1 à 60 du site : `npm run addon:guides -- <dossier de l'addon>` écrit `Guides/site/<race>-<classe>.lua` (même ordre que les pages : `ordreDuGuide`), `Maps.lua` (carte du jeu par nom de zone, identifiant UiMap de `content/cartes-jeu.ts`) et la liste des fichiers dans `EternalRoutes.toc`, entre ses repères. Conversion dans `lib/addon.ts`, vérifiée par `tests/addon.test.ts`. Les identifiants saisis à la main (Zéphras, ajouts Forever) ne partent pas dans l'addon : il suit ces quêtes par leur nom et apprend leur identifiant à l'acceptation. Un parcours enregistré en jeu avec RouteProbe (priorité 10) passe avant le guide du site (priorité 1). Base de quêtes intégrée : `npm run addon:base -- <dossier de l'addon>` écrit `QuestDB.lua` (`fichierBaseQuetes`, même source : titres, niveaux, quête préalable, donneur et receveur placés, secteur des objectifs, objectifs rédigés par La Taverne, en français et en anglais, masques de classe et de race) ; l'addon s'en sert pour placer les étapes des routes RouteProbe à l'import (la base d'abord, l'enregistrement pour une quête absente de la base), afficher les objectifs et signaler un niveau ou une quête préalable manquants. Relancer les deux commandes après chaque `npm run base:quetes` ou changement des parcours relevés. L'addon ne prend ni ne rend aucune quête à la place du joueur.
 
 ## Version anglaise
 
@@ -113,6 +113,7 @@ npm run lieux:en         # noms anglais des cartes et des lieux de Zéphras (wag
 npm run icones:jeu       # icônes officielles des classes et des races, découpées dans les fichiers du jeu (wago.tools) → public/images/jeu/
 npm run addon:guides -- <dossier EternalRoutes>  # guides de 1 à 60 du site → Guides/site/*.lua, Maps.lua et EternalRoutes.toc de l'addon
 npm run kit:blizzard -- <dossier>  # visuels du kit officiel Blizzard → public/images/kit/ et config/kit-blizzard.ts (galerie de l'éditeur)
+npm run addon:base -- <dossier EternalRoutes>  # base de quêtes intégrée de l'addon (français et anglais) → QuestDB.lua et EternalRoutes.toc
 npm run addon:wow        # même chose, directement dans l'addon installé sur le PC de Jobwow (C:\WOW\world of Warcraft\_forever_\Interface\AddOns\EternalRoutes)
 ```
 

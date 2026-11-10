@@ -1,8 +1,10 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { CLASSES } from "@/content/classes";
 import { CARTES_EN } from "@/content/lieux-en";
 import { carte } from "./cartes";
 import { combinaisons, guidePour, nomRace, ordreDuGuide, versionGuide, type Arret, type RaceGuide, type TypeAction, type ZoneGuide } from "./guide";
-import { nomLieu } from "./quetes";
+import { nomLieu, type FicheQuete } from "./quetes";
 
 /**
  * Guides de 1 à 60 du site au format de l'addon EternalRoutes (npm run addon:guides -- <dossier de l'addon>).
@@ -217,5 +219,136 @@ export function tocAvecGuides(toc: string, fichiers: string[]): string {
     if (moteur < 0) throw new Error("GuideEngine.lua introuvable dans le .toc");
     lignes.splice(moteur, 0, ...bloc);
   }
+  return lignes.join("\n");
+}
+
+// --- Base de quêtes intégrée (QuestDB.lua) : npm run addon:base -- <dossier de l'addon>
+
+/** Nom, nom anglais, carte du jeu (UiMap), x, y (en % de la carte). */
+export type PointBase = [string, string, number, number, number];
+export interface QueteBase {
+  t: string;
+  te?: string;
+  nv: number;
+  min: number;
+  /** Quête préalable. */
+  av?: number;
+  g?: PointBase;
+  r?: PointBase;
+  /** Centre du secteur des objectifs : carte, x, y. */
+  c?: [number, number, number];
+  obj?: string;
+  oe?: string;
+}
+
+const BITS_RACES: Record<string, number> = {
+  Humain: 1, Orc: 2, Nain: 4, "Elfe de la nuit": 8, "Mort-vivant": 16, Tauren: 32, Gnome: 64, Troll: 128,
+  Alliance: 1 | 4 | 8 | 64, Horde: 2 | 16 | 32 | 128,
+};
+
+function lireJson<T>(fichier: string): T {
+  return JSON.parse(readFileSync(path.join(process.cwd(), fichier), "utf8")) as T;
+}
+
+/** Base des quêtes de l'Azeroth d'origine (bases libres CMaNGOS et AzerothCore), en français et en anglais. */
+export function baseQuetesAddon(): { quetes: Map<number, QueteBase>; classes: Map<number, number>; races: Map<number, number> } {
+  type Guide = { guide: Record<"alliance" | "horde", ZoneGuide[]> };
+  type FichesQuetes = { classes: Record<string, { quetes: number[] }[]>; quetes: Record<string, FicheQuete> };
+  const fr = lireJson<Guide>("content/guide-jeu.json");
+  const en = lireJson<Guide>("content/guide-jeu.en.json");
+  const fichesFr = lireJson<FichesQuetes>("content/quetes-jeu.json");
+  const fichesEn = lireJson<FichesQuetes>("content/quetes-jeu.en.json");
+
+  const quetes = new Map<number, QueteBase>();
+  const classes = new Map<number, number>();
+  const races = new Map<number, number>();
+  const anglais = new Map<number, { z: ZoneGuide; e: ZoneGuide["etapes"][number] }>();
+  for (const camp of ["alliance", "horde"] as const) for (const z of en.guide[camp]) for (const e of z.etapes) if (!anglais.has(e.id)) anglais.set(e.id, { z, e });
+
+  const point = (nom: string, nomEn: string | undefined, lieu: string, x: number, y: number): PointBase | undefined => {
+    const id = carte(lieu)?.id;
+    return id ? [nom, nomEn || nom, id, arrondi(x), arrondi(y)] : undefined;
+  };
+
+  for (const camp of ["alliance", "horde"] as const) {
+    for (const z of fr.guide[camp]) {
+      for (const e of z.etapes) {
+        if (e.id >= PREMIER_ID_SAISI || quetes.has(e.id)) continue;
+        const ang = anglais.get(e.id)?.e;
+        const q: QueteBase = { t: e.t, nv: e.nv, min: e.min || e.nv };
+        if (ang?.t && ang.t !== e.t) q.te = ang.t;
+        if (e.av) q.av = e.av;
+        if (e.g >= 0) q.g = point(e.gn, ang?.gn, z.lieu, z.hubs[e.g].x, z.hubs[e.g].y);
+        // rendue au donneur quand aucun receveur n'est placé et qu'elle ne se rend pas ailleurs
+        const hubRendu = e.r >= 0 ? e.r : !e.rl && e.g >= 0 ? e.g : -1;
+        if (hubRendu >= 0) q.r = point(e.rn, ang?.rn, z.lieu, z.hubs[hubRendu].x, z.hubs[hubRendu].y);
+        const idCarte = carte(z.lieu)?.id;
+        if (e.cib && idCarte) q.c = [idCarte, arrondi(e.cib.c[0]), arrondi(e.cib.c[1])];
+        if (e.obj.length) q.obj = e.obj.join(" ; ");
+        if (ang?.obj?.length) q.oe = ang.obj.join(" ; ");
+        quetes.set(e.id, q);
+        if (e.cl) classes.set(e.id, e.cl);
+        if (e.ra) races.set(e.id, e.ra);
+      }
+    }
+  }
+
+  // Quêtes des chaînes de classe absentes du parcours, et receveurs « ailleurs » placés par leur fiche.
+  for (const [cle, f] of Object.entries(fichesFr.quetes)) {
+    const id = Number(cle);
+    if (id >= PREMIER_ID_SAISI) continue;
+    const fe = fichesEn.quetes[cle];
+    const q = quetes.get(id) ?? { t: f.titre, nv: f.niveau, min: f.min || f.niveau };
+    if (!q.te && fe?.titre && fe.titre !== f.titre) q.te = fe.titre;
+    const d = f.donneurs.find((p) => p.l);
+    const r = f.receveurs.find((p) => p.l);
+    if (!q.g && d?.l) q.g = point(d.n, fe?.donneurs.find((p) => p.id === d.id)?.n, d.l.lieu, d.l.x, d.l.y);
+    if (!q.r && r?.l) q.r = point(r.n, fe?.receveurs.find((p) => p.id === r.id)?.n, r.l.lieu, r.l.x, r.l.y);
+    if (!q.obj && f.objectifs.length) q.obj = f.objectifs.join(" ; ");
+    if (!q.oe && fe?.objectifs.length) q.oe = fe.objectifs.join(" ; ");
+    quetes.set(id, q);
+    if (!races.has(id) && f.races?.length) races.set(id, f.races.reduce((m, n) => m | (BITS_RACES[n] ?? 0), 0));
+  }
+  for (const [classe, chaines] of Object.entries(fichesFr.classes)) {
+    const bit = { guerrier: 1, paladin: 2, chasseur: 4, voleur: 8, pretre: 16, chaman: 64, mage: 128, demoniste: 256, druide: 1024 }[classe];
+    if (!bit) continue;
+    for (const ch of chaines) for (const id of ch.quetes) if (!classes.has(id)) classes.set(id, bit);
+  }
+  return { quetes, classes, races };
+}
+
+/** QuestDB.lua : une ligne par quête, puis les masques de classe et de race. */
+export function fichierBaseQuetes(): string {
+  const { quetes, classes, races } = baseQuetesAddon();
+  const ids = [...quetes.keys()].sort((a, b) => a - b);
+  const lignes = [
+    ENTETE(`Base de quêtes intégrée · ${ids.length} quêtes, en français et en anglais`),
+    `-- Champs : t (titre), te (titre anglais), nv (niveau), min (niveau minimal), av (quête préalable),`,
+    `--   g / r (donneur / receveur : nom, nom anglais, carte, x, y), c (secteur des objectifs : carte, x, y),`,
+    `--   obj / oe (objectifs rédigés par La Taverne, en français / en anglais). Ne reprend aucun texte de quête du jeu.`,
+    `ns.questDB = ns.questDB or {}`,
+    `local D = ns.questDB`,
+    ...ids.map((id) => `D[${id}] = ${valeurLua(quetes.get(id))}`),
+    ``,
+    `-- Quêtes réservées à des classes ou à des races (masques du jeu).`,
+    `-- Classes : guerrier 1, paladin 2, chasseur 4, voleur 8, prêtre 16, chaman 64, mage 128, démoniste 256, druide 1024.`,
+    `-- Races : humain 1, orc 2, nain 4, elfe de la nuit 8, mort-vivant 16, tauren 32, gnome 64, troll 128.`,
+    `ns.questClassMask = ns.questClassMask or {}`,
+    ...[...classes.entries()].sort(([a], [b]) => a - b).map(([id, m]) => `ns.questClassMask[${id}] = ${m}`),
+    `ns.questRaceMask = ns.questRaceMask or {}`,
+    ...[...races.entries()].sort(([a], [b]) => a - b).map(([id, m]) => `ns.questRaceMask[${id}] = ${m}`),
+    ``,
+  ];
+  return lignes.join("\n");
+}
+
+/** Liste des fichiers du .toc : QuestDB.lua après QuestNames.lua, à la place de l'ancien QuestRestrictions.lua. */
+export function tocAvecBase(toc: string): string {
+  const lignes = toc.replace(/\r\n/g, "\n").split("\n").filter((l) => !["QuestDB.lua", "QuestRestrictions.lua"].includes(l.trim()));
+  const apres = lignes.findIndex((l) => l.trim() === "QuestNames.lua");
+  const avantMoteur = lignes.findIndex((l) => l.trim() === "GuideEngine.lua");
+  const position = apres >= 0 ? apres + 1 : avantMoteur;
+  if (position < 0) throw new Error("QuestNames.lua ou GuideEngine.lua introuvable dans le .toc");
+  lignes.splice(position, 0, "QuestDB.lua");
   return lignes.join("\n");
 }
