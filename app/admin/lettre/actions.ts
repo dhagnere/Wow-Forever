@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { enregistrerEnvoi, envoyerEssai, expedierLettres, importerAbonnes, lancerEnvoi, lireEnvoi, normaliserCourriel, supprimerEnvoi, type LangueLettre } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
 import { adresseValide } from "@/lib/lettre";
+import { LETTRES_PREPAREES } from "@/content/lettres-preparees";
 
 const langueDe = (f: FormData): LangueLettre => (f.get("langue") === "en" ? "en" : "fr");
 const texte = (f: FormData, nom: string, max: number) => String(f.get(nom) ?? "").slice(0, max);
@@ -46,6 +47,15 @@ export async function supprimerLettre(f: FormData): Promise<void> {
   const id = Number(f.get("id"));
   if (Number.isInteger(id) && id > 0) await supprimerEnvoi(id);
   retour({ ok: "supprime" });
+}
+
+/** Importe comme brouillon une Lettre préparée (content/lettres-preparees.ts) ; l'essai et le lancement restent à faire. */
+export async function importerPreparee(f: FormData): Promise<void> {
+  await exigerAdmin();
+  const l = LETTRES_PREPAREES.find((x) => x.id === String(f.get("preparee") ?? ""));
+  if (!l) retour({ erreur: "preparee-inconnue" });
+  const id = await enregistrerEnvoi({ langue: l.langue, sujet: l.sujet, corps: l.corps });
+  retour({ id, ok: "preparee" });
 }
 
 /** Reprise des abonnés de l'ancien prestataire (adresses déjà confirmées), collées depuis un export CSV. */

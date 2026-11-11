@@ -3,7 +3,8 @@ import Link from "next/link";
 import { chiffresAbonnes, courrielConfigure, lireEnvoi, listerEnvois, markdownVersHtml, plafondJour, type EnvoiLettre } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
 import { dateLongue } from "@/lib/site";
-import { enregistrerLettre, importerLettre, supprimerLettre } from "./actions";
+import { LETTRES_PREPAREES } from "@/content/lettres-preparees";
+import { enregistrerLettre, importerLettre, importerPreparee, supprimerLettre } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Lettre" };
@@ -16,11 +17,13 @@ const MESSAGES: Record<string, string> = {
   lance: "Envoi lancé : les premiers messages sont partis ; s'il en reste au-delà du plafond du jour, ils partent chaque heure (à h 25).",
   supprime: "Brouillon supprimé.",
   import: "Import terminé.",
+  preparee: "Lettre préparée importée en brouillon : relisez-la, envoyez l'essai, puis lancez l'envoi.",
   vide: "Le sujet et le texte sont obligatoires.",
   "essai-adresse": "L'adresse d'essai n'est pas valide.",
   envoi: "L'essai n'est pas parti : vérifiez RESEND_API_KEY, COURRIEL_EXPEDITEUR et le domaine chez Resend (journal de l'application).",
   relu: "Cochez la case « J'ai relu l'essai » avant de lancer l'envoi.",
   consentement: "Cochez la case de consentement avant d'importer des adresses.",
+  "preparee-inconnue": "Lettre préparée introuvable.",
 };
 
 const STATUTS: Record<EnvoiLettre["statut"], string> = { brouillon: "Brouillon", en_cours: "Envoi en cours", termine: "Envoyée" };
@@ -43,6 +46,37 @@ export default async function AdminLettre({ searchParams }: Props) {
         Abonnés confirmés : <strong>{chiffres.fr}</strong> en français, <strong>{chiffres.en}</strong> en anglais · {chiffres.enAttente} inscription(s) en attente de
         confirmation (effacées après 7 jours) · plafond : {plafondJour()} messages de Lettre par jour.
       </p>
+
+      {LETTRES_PREPAREES.length ? (
+        <section style={{ marginBottom: 32 }}>
+          <h2>Brouillons préparés</h2>
+          <p className="doux">Préparés chaque semaine à partir des vidéos du Journal (voir <Link href="/admin/videos/">Vidéos</Link>). L&apos;import crée un brouillon : rien ne part sans essai ni lancement.</p>
+          <div className="tableau-boite">
+            <table>
+              <thead><tr><th scope="col">Semaine</th><th scope="col">Édition</th><th scope="col">Sujet</th><th scope="col"></th></tr></thead>
+              <tbody>
+                {[...LETTRES_PREPAREES].sort((a, b) => b.semaine.localeCompare(a.semaine) || a.langue.localeCompare(b.langue)).map((l) => {
+                  const deja = envois.find((e) => e.langue === l.langue && e.sujet === l.sujet);
+                  return (
+                    <tr key={l.id}>
+                      <td>{l.semaine}</td>
+                      <td>{l.langue === "en" ? "Anglaise" : "Française"}</td>
+                      <td>{l.sujet}</td>
+                      <td>
+                        {deja ? (
+                          deja.statut === "brouillon" ? <Link href={`/admin/lettre/?id=${deja.id}`}>Déjà importée : ouvrir</Link> : <span className="doux">{STATUTS[deja.statut]}</span>
+                        ) : (
+                          <form action={importerPreparee}><input type="hidden" name="preparee" value={l.id} /><button type="submit" className="btn btn-contour btn-petit">Importer en brouillon</button></form>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
 
       <h2>{brouillon ? `Modifier le brouillon n° ${brouillon.id}` : "Nouvelle Lettre"}</h2>
       <form action={enregistrerLettre} className="formulaire" style={{ maxWidth: 820 }}>

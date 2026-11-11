@@ -19,6 +19,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link href="/admin/reseaux/">Réseaux</Link>
             <Link href="/admin/lettre/">Lettre</Link>
             <Link href="/admin/comptes/">Comptes</Link>
+            <Link href="/admin/videos/">Vidéos</Link>
             <Link href="/admin/guides/">Guides 1-60</Link>
             <Link href="/admin/testguide/">TestGuide</Link>
             <Link href="/admin/guildes/">Guildes</Link>
