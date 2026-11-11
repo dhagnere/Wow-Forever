@@ -10,6 +10,7 @@ import { IllustrationEcran } from "@/components/Visuels";
 import { SITE, tempsDeLecture } from "@/lib/site";
 import { ecranArticle } from "@/lib/ecrans";
 import { cheminAnglais, nomRubriqueEn, pageRubriqueEn } from "@/lib/anglais";
+import { JournalVideo } from "@/components/JournalVideo";
 
 export const dynamic = "force-dynamic";
 
@@ -130,6 +131,8 @@ export default async function ArticleEn({ params }: Props) {
           <p className="doux" style={{ fontSize: 14 }}>
             Translated from the <Link href={`/articles/${a.slug}/`} hrefLang="fr">French article</Link>, written and reviewed by Jobwow.
           </p>
+
+          {a.rubrique === "carnet" ? <JournalVideo langue="en" /> : null}
 
           <div className="appel-lettre">
             <p><strong>A week of WoW Forever, every Sunday at 10 am.</strong> Jobwow&apos;s column, the five news to remember and a gameplay tip.</p>

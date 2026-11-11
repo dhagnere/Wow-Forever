@@ -8,6 +8,7 @@ import { Ariane } from "@/components/Ariane";
 import { JsonLd } from "@/components/JsonLd";
 import { LigneSource } from "@/components/Sources";
 import { BandeauLettre } from "@/components/BandeauLettre";
+import { JournalVideo } from "@/components/JournalVideo";
 import { SITE, dateLongue, tempsDeLecture } from "@/lib/site";
 import { ecranArticle, nomEcran } from "@/lib/ecrans";
 import { IllustrationEcran } from "@/components/Visuels";
@@ -114,6 +115,8 @@ export default async function PageArticle({ params }: Props) {
           </section>
 
           <p className="signature-article">{SITE.signatureArticle}</p>
+
+          {article.rubrique === "carnet" ? <JournalVideo /> : null}
 
           <div className="appel-lettre">
             <p><strong>Une semaine de WoW Forever, chaque dimanche à 10 h.</strong> Le billet de Jobwow, les cinq nouvelles à retenir et un tuyau de jeu.</p>

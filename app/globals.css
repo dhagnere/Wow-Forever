@@ -171,6 +171,10 @@ a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(232, 192, 106, 
 .carte-grande .carte-corps { padding: 26px 30px 30px; }
 .encadre { background: var(--surface); border: 1px solid var(--bordure); border-radius: 4px; padding: 20px 22px; }
 .encadre h2 { margin: 0 0 8px; font-size: 16px; }
+/* Renvoi vers le Journal en vidéo, en bas du Carnet et de ses épisodes. */
+.journal-video { margin: 8px 0 24px; }
+.journal-video h2 { font-size: 20px; margin: 0 0 6px; }
+
 /* Vidéos de la chaîne YouTube (/carnet/videos/) : une carte par vidéo, en grille. */
 .videos-chaine { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
 .videos-chaine li { min-width: 0; }

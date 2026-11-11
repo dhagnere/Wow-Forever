@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { listerPubliesEn } from "@/modules/veille";
 import { Ariane } from "@/components/Ariane";
+import { JournalVideo } from "@/components/JournalVideo";
 import { SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -71,6 +72,7 @@ export default async function NotebookEn() {
             </div>
           </aside>
         </div>
+        <div style={{ marginTop: 40 }}><JournalVideo langue="en" /></div>
       </div>
     </>
   );

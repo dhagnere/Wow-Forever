@@ -3,6 +3,7 @@ import Link from "next/link";
 import { listerPublies } from "@/modules/veille";
 import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
+import { JournalVideo } from "@/components/JournalVideo";
 import { SITE, dateLongue } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -70,6 +71,7 @@ export default async function Carnet() {
             </div>
           </aside>
         </div>
+        <div style={{ marginTop: 40 }}><JournalVideo /></div>
       </div>
     </>
   );
