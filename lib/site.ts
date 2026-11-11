@@ -9,10 +9,10 @@ export const SITE = {
   facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || "https://www.facebook.com/taverneeternelle",
   /** Conteneur Google Tag Manager. NEXT_PUBLIC_GTM_ID=off le désactive (développement local, par exemple). */
   gtmId: process.env.NEXT_PUBLIC_GTM_ID === "off" ? "" : (process.env.NEXT_PUBLIC_GTM_ID ?? "GTM-5KX55C25"),
-  /** Chaîne YouTube (adresse publique, « https://www.youtube.com/@… ») : sans valeur, les liens vers la chaîne ne s'affichent pas. */
-  youtube: process.env.NEXT_PUBLIC_YOUTUBE_URL ?? "",
-  /** Identifiant de la chaîne (« UC… », dans YouTube Studio > Paramètres > Chaîne > Paramètres avancés) : liste des vidéos. */
-  youtubeChaine: process.env.YOUTUBE_CHANNEL_ID ?? "",
+  /** Chaîne YouTube de la Taverne ; NEXT_PUBLIC_YOUTUBE_URL la remplace si besoin (« off » masque les liens). */
+  youtube: process.env.NEXT_PUBLIC_YOUTUBE_URL === "off" ? "" : (process.env.NEXT_PUBLIC_YOUTUBE_URL || "https://www.youtube.com/@TheWowtoon"),
+  /** Identifiant « UC… » de la même chaîne, pour la liste des vidéos ; YOUTUBE_CHANNEL_ID le remplace si besoin. */
+  youtubeChaine: process.env.YOUTUBE_CHANNEL_ID || "UCJGfW3y0BO7Dojj-kYh-_9g",
   /** Discord de la Taverne (lien d'invitation) : sans valeur, les boutons Discord ne s'affichent pas. */
   discord: process.env.NEXT_PUBLIC_DISCORD_URL ?? "",
   /** Liens de dons (Tipeee, Ko-fi…). Sans valeur, la page Soutenir annonce une ouverture prochaine. */
