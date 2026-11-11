@@ -32,6 +32,11 @@ function Entete() {
           <a href={SITE.facebook} rel="noopener noreferrer" aria-label="Facebook page of La Taverne Éternelle">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 3h-2a4 4 0 0 0-4 4v3H7v4h2v7h4v-7h3l1-4h-4V7a1 1 0 0 1 1-1h2z" /></svg>
           </a>
+          {SITE.youtube ? (
+            <a href={SITE.youtube} rel="noopener noreferrer" aria-label="YouTube channel of La Taverne Éternelle" data-cta="youtube-entete">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4" /><path d="m10 9 5 3-5 3z" /></svg>
+            </a>
+          ) : null}
         </div>
       </div>
       <div className="entete-menu">
