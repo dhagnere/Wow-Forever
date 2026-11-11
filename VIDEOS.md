@@ -32,6 +32,7 @@ n'entre jamais dans le site.
 
 | Semaine | Date | Personnage | Fichiers | Durée | Remarques |
 |---|---|---|---|---|---|
+| 2026-S46 | 11 novembre 2026 | Jobwow, mort-vivant (Clairières de Tirisfal, Le Glas → Brill) | 8 (12 h 57 → 16 h 09) | 2 h 10 min 35 s | niveaux 1 à 8, 26 chapitres ; addon de guide et Questie à l'écran ; niveau 6 entre deux fichiers (14 h 09 → 14 h 22, non filmé) |
 
 ## Historique : vidéos utilisées pour le guide (jusqu'au 8 novembre 2026)
 
