@@ -10,8 +10,9 @@
  *    YouTube), tirés de ce qui se voit à l'écran (zones, niveaux, quêtes), jamais d'un guide commercial ;
  *  - aucun texte de quête recopié : titres et noms seulement ;
  *  - `fichiers` : noms des fichiers d'origine, dans l'ordre (plusieurs fichiers : à assembler avec npm run carnet:video) ;
- *  - `miniature` : image de la vidéo dans public/images/videos/ (JPEG ou PNG, 1280 × 720, 2 Mo au plus), le personnage
- *    pris dans la vidéo elle-même, sans nom de classe ni nom d'addon.
+ *  - `miniature` (obligatoire) : image de la vidéo dans public/images/videos/ (JPEG ou PNG, 1280 × 720, 2 Mo au plus),
+ *    faite avec npm run video:miniature (gabarit visuels/miniature-video.html), le personnage pris dans la vidéo
+ *    elle-même, sans nom de classe ni nom d'addon.
  * La vidéo passe « publiée » toute seule dans l'admin quand une vidéo publique de la chaîne porte le même titre.
  */
 
@@ -29,7 +30,7 @@ export interface VideoPreparee {
   titre: string;
   description: string;
   /** Miniature à importer dans YouTube Studio : « /images/videos/journal-2026-11-11.jpg ». */
-  miniature?: string;
+  miniature: string;
 }
 
 export const VIDEOS_PREPAREES: VideoPreparee[] = [

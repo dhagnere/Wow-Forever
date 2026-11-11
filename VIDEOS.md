@@ -17,9 +17,18 @@ n'entre jamais dans le site.
    Jobwow avec `npm run carnet:video`. Les chapitres sont calculés sur la vidéo assemblée (durées des fichiers mises bout à bout).
 4. **Fiche YouTube** dans `content/videos-preparees.ts` : titre (100 caractères au plus), description, chapitres (lieux,
    niveaux, quêtes marquantes), fichiers et liens d'origine. Elle s'affiche dans `/admin/videos`, avec des boutons « Copier ».
-   **Miniature** (`miniature`) : 1280 × 720, 2 Mo au plus, dans `public/images/videos/` ; le personnage pris dans la vidéo
-   (nom flottant et icônes d'interface effacés), le sujet de la séance, ses niveaux et sa date, aux couleurs du site ; ni
-   classe ni nom d'addon. Elle s'affiche dans la fiche de l'admin, avec un lien de téléchargement.
+   **Miniature** (`miniature`, obligatoire, une par vidéo) : 1280 × 720, 2 Mo au plus, dans `public/images/videos/`
+   (`journal-<date>.jpg`, suffixe `-2` pour une deuxième séance le même jour). Elle s'affiche dans la fiche de l'admin,
+   avec un lien de téléchargement ; le test refuse une vidéo préparée sans miniature.
+   - **Image** : une image nette du personnage de Jobwow tirée de la vidéo (ffmpeg, une image par seconde autour d'un
+     moment fort : arrivée dans une ville, niveau gagné, gros plan). Effacer le nom flottant et les icônes d'interface
+     collées au personnage (OpenCV, `cv2.inpaint`, masque sur le texte violet et sur les icônes) ; le bas de l'image
+     passe sous le dégradé.
+   - **Textes** : le sujet de la séance en deux lignes (« DU GLAS » / « À BRILL »), les niveaux, la zone et la date ; ni
+     classe, ni nom d'addon, ni « sans guide ».
+   - **Rendu** : `npm run video:miniature -- --image <image> --cadrage x,y,l,h --haut "…" --bas "…" --niveaux "1 → 8"
+     --lieu "…" --date "…" --sortie public/images/videos/journal-<date>.jpg` (gabarit `visuels/miniature-video.html`,
+     rendu par Playwright ; `--anglais` pour une version anglaise). Regarder le résultat avant de pousser.
 5. **Lettre de la semaine**, en français et en anglais, dans `content/lettres-preparees.ts` : le récit des séances, avec un
    lien vers `/carnet/videos/` (ou `/en/notebook/videos/`) et le Carnet. Elle s'importe en brouillon dans `/admin/lettre`.
 6. **Vérifier** (`npm run lint && npm test && npm run build`), puis pousser sur `dev`.

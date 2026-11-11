@@ -16,6 +16,7 @@ const EXEMPLE: VideoPreparee = {
   duree: "1:30:00",
   titre: "Journal de Jobwow · 11 novembre 2026 · Durotar → Les Tarides",
   description: "Une séance.\n\nChapitres :\n0:00 Départ\n14:32 Niveau 5\n1:02:05 Arrivée : Les Tarides",
+  miniature: "/images/videos/journal-2026-11-11.jpg",
 };
 
 describe("vidéos préparées pour YouTube", () => {
@@ -55,14 +56,16 @@ describe("vidéos préparées pour YouTube", () => {
   });
 
   it("chaque miniature existe, au format de YouTube (1280 × 720, 2 Mo au plus)", async () => {
-    for (const v of VIDEOS_PREPAREES.filter((x) => x.miniature)) {
-      const fichier = path.join(process.cwd(), "public", v.miniature!);
+    for (const v of VIDEOS_PREPAREES) {
+      const fichier = path.join(process.cwd(), "public", v.miniature);
       expect(existsSync(fichier), `${v.id} : ${v.miniature} introuvable`).toBe(true);
       expect(statSync(fichier).size, `${v.id} : miniature trop lourde`).toBeLessThanOrEqual(2 * 1024 * 1024);
       const { width, height } = await sharp(fichier).metadata();
       expect(`${width}×${height}`, v.id).toBe("1280×720");
     }
-    expect(problemesVideo({ ...EXEMPLE, miniature: "https://ailleurs.example/image.jpg" })).toEqual(["miniature attendue dans /images/videos/ (jpg ou png)"]);
+    for (const miniature of ["https://ailleurs.example/image.jpg", ""]) {
+      expect(problemesVideo({ ...EXEMPLE, miniature })).toEqual(["miniature manquante ou hors de /images/videos/ (jpg ou png)"]);
+    }
   });
 });
 

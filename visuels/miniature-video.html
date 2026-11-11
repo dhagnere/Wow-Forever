@@ -1,0 +1,58 @@
+<!doctype html>
+<!--
+  Gabarit des miniatures du Journal de Jobwow (1280 × 720), rendu par scripts/miniature-video.mjs.
+  Les textes et l'image de fond arrivent par window.MINIATURE avant le rendu ; rien n'est chargé d'autre que les polices du site.
+-->
+<html lang="fr"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Source+Sans+3:wght@600;700;800&display=swap">
+<style>
+:root { --or: #e0a23b; --or-clair: #ecb85a; --or-pale: #f6d79a; --titre: #fbf1da; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { width: 1280px; height: 720px; overflow: hidden; position: relative; font-family: "Source Sans 3", sans-serif; background: #1c130c; }
+.fond { position: absolute; inset: 0; background-position: center; background-size: cover; filter: saturate(1.15) contrast(1.08) brightness(1.05); }
+/* lueur derrière le personnage, à droite */
+.lueur { position: absolute; left: 700px; top: 120px; width: 560px; height: 560px; border-radius: 50%;
+  background: radial-gradient(circle, var(--lueur, rgba(120, 255, 90, .22)), transparent 70%); mix-blend-mode: screen; }
+.voile { position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, rgba(20,12,6,.96) 0%, rgba(20,12,6,.88) 34%, rgba(20,12,6,.35) 56%, transparent 72%),
+    linear-gradient(0deg, rgba(20,12,6,.95) 0%, rgba(20,12,6,.55) 18%, transparent 36%); }
+.cadre { position: absolute; inset: 14px; border: 3px solid rgba(224,162,59,.75); border-radius: 10px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.5); }
+.haut { position: absolute; left: 56px; top: 52px; display: flex; align-items: center; gap: 16px; }
+.haut img { width: 78px; height: 78px; border-radius: 50%; border: 3px solid var(--or); background: #0d1530; object-fit: contain; padding: 6px; }
+.haut span { font-family: "Cinzel", serif; font-weight: 800; font-size: 30px; letter-spacing: .08em; color: var(--or-pale); text-shadow: 0 3px 0 #000; }
+h1 { position: absolute; left: 52px; top: 178px; width: 720px; margin: 0; font-family: "Cinzel", serif; font-weight: 900; font-size: 112px; line-height: .95; color: var(--titre);
+  text-shadow: 0 5px 0 #000, 0 0 30px rgba(0,0,0,.8); letter-spacing: .01em; }
+h1 em { font-style: normal; color: var(--or); display: block; }
+.niveau { position: absolute; left: 58px; top: 430px; display: flex; align-items: center; gap: 14px;
+  font-family: "Cinzel", serif; font-weight: 900; font-size: 58px; color: #1c130c; background: linear-gradient(180deg, var(--or-pale), var(--or)); padding: 8px 26px 6px; border-radius: 12px;
+  box-shadow: 0 6px 0 #6b4512, 0 10px 24px rgba(0,0,0,.6); }
+.niveau small { font-size: 34px; font-weight: 800; }
+.bas { position: absolute; left: 58px; bottom: 50px; font-size: 32px; font-weight: 700; color: var(--titre); text-shadow: 0 3px 0 #000; }
+.bas b { color: var(--or-clair); }
+</style></head>
+<body>
+  <div class="fond" id="fond"></div>
+  <div class="lueur"></div>
+  <div class="voile"></div>
+  <div class="cadre"></div>
+  <div class="haut"><img id="logo" alt=""><span id="serie">LE JOURNAL DE JOBWOW</span></div>
+  <h1 id="titre"></h1>
+  <div class="niveau" id="niveau"><small id="mot-niveau">NIVEAU</small> <span id="niveaux"></span></div>
+  <div class="bas"><b id="lieu"></b> · <span id="date"></span></div>
+<script>
+  const m = window.MINIATURE || {};
+  const texte = (id, v) => { document.getElementById(id).textContent = v || ""; };
+  document.getElementById("fond").style.backgroundImage = `url("${m.fond}")`;
+  document.getElementById("logo").src = m.logo;
+  if (m.lueur) document.documentElement.style.setProperty("--lueur", m.lueur);
+  const t = document.getElementById("titre");
+  t.textContent = m.haut || "";
+  const em = document.createElement("em"); em.textContent = m.bas || ""; t.appendChild(em);
+  // titre trop large : on réduit la police jusqu'à ce qu'il tienne sur la moitié gauche
+  for (let taille = 112; taille > 60 && (t.scrollWidth > 720 || t.offsetHeight > 240); taille -= 4) t.style.fontSize = taille + "px";
+  texte("serie", m.serie); texte("mot-niveau", m.motNiveau); texte("niveaux", m.niveaux); texte("lieu", m.lieu); texte("date", m.date);
+  if (!m.niveaux) document.getElementById("niveau").style.display = "none";
+</script>
+</body></html>
