@@ -1,6 +1,6 @@
 # La Taverne Éternelle — consignes pour Claude Code
 
-Site de fans francophone non officiel consacré à World of Warcraft: Forever. Next.js 16 (App Router), PostgreSQL, hébergé chez Scalingo. Les articles sont signés Jobwow, troll mage de la Horde et tavernier (avatar : `visuels/jobwow.svg`, dessin d'un mage sans trait de race affirmé dans les textes). La Taverne s'adresse aux deux factions : la fierté de la Horde reste un clin d'œil, jamais un parti pris. Le nom de code interne de l'avis reste `avis_silfax` / `avisSilfax` : ne pas renommer la colonne.
+Site de fans francophone non officiel consacré à World of Warcraft: Forever. Next.js 16 (App Router), PostgreSQL, hébergé chez Scalingo. Les articles sont signés Jobwow, mort-vivant de la Horde et tavernier ; sa classe n'est jamais précisée, ni dans les textes ni dans les consignes de l'IA (avatar : `visuels/jobwow.svg`, dessin d'un personnage au chapeau étoilé). La Taverne s'adresse aux deux factions : la fierté de la Horde reste un clin d'œil, jamais un parti pris. Le nom de code interne de l'avis reste `avis_silfax` / `avisSilfax` : ne pas renommer la colonne.
 
 ## Organisation
 

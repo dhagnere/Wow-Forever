@@ -23,7 +23,7 @@ export default async function NotebookEn() {
           <Ariane langue="en" etapes={[{ nom: "Jobwow's Notebook" }]} />
           <div className="presentation-auteur">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/jobwow-512.png" width={140} height={140} alt="Jobwow's avatar: a mage with a starry hat" className="avatar-jobwow" />
+            <img src="/images/jobwow-512.png" width={140} height={140} alt="Jobwow's avatar: a figure with a starry hat" className="avatar-jobwow" />
             <div>
               <p className="surtitre">Every Sunday at 6 pm, Paris time</p>
               <h1>Jobwow&apos;s Notebook</h1>
@@ -58,7 +58,7 @@ export default async function NotebookEn() {
           <aside className="colonne-laterale">
             <section className="encadre-nuit" aria-labelledby="t-fiche">
               <h2 id="t-fiche" className="titre" style={{ margin: "0 0 4px", fontSize: 22 }}>Jobwow</h2>
-              <p style={{ margin: "0 0 14px", fontSize: 14, color: "#cfc7b4" }}>Undead · Mage · Horde</p>
+              <p style={{ margin: "0 0 14px", fontSize: 14, color: "#cfc7b4" }}>Undead · Horde</p>
               <dl style={{ margin: 0, display: "grid", gridTemplateColumns: "auto 1fr", gap: "6px 16px", fontSize: 15 }}>
                 <dt style={{ color: "#cfc7b4" }}>Realm</dt><dd style={{ margin: 0 }}>Normal</dd>
                 <dt style={{ color: "#cfc7b4" }}>Guild</dt><dd style={{ margin: 0 }}>CODEX</dd>

@@ -17,7 +17,7 @@ Score d'un sujet : poids des sites qui en parlent (un site compte une fois, mêm
 
 ## La Taverne en bref
 
-- **Identité** : enseigne de taverne (chope et sablier), palette bois sombre `#2B1D14`, ambre `#E0A23B`, parchemin `#F3E6C8`, vert de Hyjal `#2F5D50`, rouge braise `#A3402C` ; Cinzel et Source Sans 3. Jobwow, troll mage de la Horde, signe « — Jobwow, au comptoir de la Taverne ». Avatar à télécharger pour les réseaux : `public/images/jobwow-1080.png`.
+- **Identité** : enseigne de taverne (chope et sablier), palette bois sombre `#2B1D14`, ambre `#E0A23B`, parchemin `#F3E6C8`, vert de Hyjal `#2F5D50`, rouge braise `#A3402C` ; Cinzel et Source Sans 3. Jobwow, mort-vivant de la Horde (classe jamais précisée), signe « — Jobwow, au comptoir de la Taverne ». Avatar à télécharger pour les réseaux : `public/images/jobwow-1080.png`.
 - **Rubriques** : Le Comptoir (actualités), L'Armurerie (classes), La Salle des cartes (zones), La Cave (donjons et raids), Le Registre (races), Le Carnet de Jobwow. Les adresses ne changent pas.
 - **Pages ajoutées** : `/calendrier/` (et `/agenda-taverne.ics`), `/lettre/`, `/communaute/`, `/contact/`, `/confidentialite/`, page introuvable, `/rss.xml`, `/sitemap-actualites.xml`.
 - **Appels à l'action** : un bouton principal et un secondaire par page, chacun marqué `data-cta` ; les liens publiés sur Facebook portent `utm_source=facebook`.

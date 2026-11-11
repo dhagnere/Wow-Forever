@@ -22,7 +22,7 @@ export default async function Carnet() {
           <Ariane etapes={[{ nom: "Le Carnet de Jobwow" }]} />
           <div className="presentation-auteur">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/jobwow-512.png" width={140} height={140} alt="Avatar de Jobwow : mage au chapeau étoilé" className="avatar-jobwow" />
+            <img src="/images/jobwow-512.png" width={140} height={140} alt="Avatar de Jobwow : personnage au chapeau étoilé" className="avatar-jobwow" />
             <div>
               <p className="surtitre">Chaque dimanche à 18h</p>
               <h1>Le Carnet de Jobwow</h1>
@@ -57,7 +57,7 @@ export default async function Carnet() {
           <aside className="colonne-laterale">
             <section className="encadre-nuit" aria-labelledby="t-fiche">
               <h2 id="t-fiche" className="titre" style={{ margin: "0 0 4px", fontSize: 22 }}>Jobwow</h2>
-              <p style={{ margin: "0 0 14px", fontSize: 14, color: "#cfc7b4" }}>Mort-vivant · Mage · Horde</p>
+              <p style={{ margin: "0 0 14px", fontSize: 14, color: "#cfc7b4" }}>Mort-vivant · Horde</p>
               <dl style={{ margin: 0, display: "grid", gridTemplateColumns: "auto 1fr", gap: "6px 16px", fontSize: 15 }}>
                 <dt style={{ color: "#cfc7b4" }}>Serveur</dt><dd style={{ margin: 0 }}>Normal</dd>
                 <dt style={{ color: "#cfc7b4" }}>Guilde</dt><dd style={{ margin: 0 }}>CODEX</dd>

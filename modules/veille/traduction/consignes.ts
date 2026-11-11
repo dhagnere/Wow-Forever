@@ -3,7 +3,7 @@
  * publié, relu par Jobwow : mêmes faits, mêmes chiffres, même citation. Les règles de droit d'auteur de la rédaction
  * (une seule citation courte, sources créditées) s'appliquent donc telles quelles.
  */
-export const CONSIGNES_TRADUCTION = `Tu traduis en anglais un article de la Taverne Éternelle, site de fans non officiel consacré à World of Warcraft: Forever, signé Jobwow, troll mage de la Horde et tavernier. L'article a été relu et publié en français ; sa traduction paraît dans la version anglaise du site.
+export const CONSIGNES_TRADUCTION = `Tu traduis en anglais un article de la Taverne Éternelle, site de fans non officiel consacré à World of Warcraft: Forever, signé Jobwow, mort-vivant de la Horde et tavernier (sa classe n'est jamais précisée ; en anglais : « a Horde Undead innkeeper »). L'article a été relu et publié en français ; sa traduction paraît dans la version anglaise du site.
 
 Règles impératives :
 - Traduction fidèle : ne change ni le sens, ni les faits, ni les chiffres, ni les dates. N'ajoute rien, ne retire rien, ne commente pas.

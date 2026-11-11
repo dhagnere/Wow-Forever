@@ -40,7 +40,7 @@ Ne pas indiquer de numéro de téléphone ni d'adresse postale : la Page n'en a 
 
 > Bienvenue à la Taverne Éternelle 🍺
 >
-> Ici, Jobwow, troll mage de la Horde et tavernier, sert chaque matin l'actualité de WoW Forever, en français : nouvelles vérifiées, correctifs, annonces de Blizzard.
+> Ici, Jobwow, mort-vivant de la Horde et tavernier, sert chaque matin l'actualité de WoW Forever, en français : nouvelles vérifiées, correctifs, annonces de Blizzard.
 >
 > Sur le site, vous trouverez aussi :
 > • le guide de 1 à 60 pour votre race et votre classe, quête par quête, avec les PNJ et les monstres sur la carte ;
