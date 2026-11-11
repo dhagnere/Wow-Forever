@@ -9,7 +9,9 @@
  *  - chapitres dans la description : « 0:00 … » en premier, trois au moins, dix secondes au moins entre deux (règles de
  *    YouTube), tirés de ce qui se voit à l'écran (zones, niveaux, quêtes), jamais d'un guide commercial ;
  *  - aucun texte de quête recopié : titres et noms seulement ;
- *  - `fichiers` : noms des fichiers d'origine, dans l'ordre (plusieurs fichiers : à assembler avec npm run carnet:video).
+ *  - `fichiers` : noms des fichiers d'origine, dans l'ordre (plusieurs fichiers : à assembler avec npm run carnet:video) ;
+ *  - `miniature` : image de la vidéo dans public/images/videos/ (JPEG ou PNG, 1280 × 720, 2 Mo au plus), le personnage
+ *    pris dans la vidéo elle-même, sans nom de classe ni nom d'addon.
  * La vidéo passe « publiée » toute seule dans l'admin quand une vidéo publique de la chaîne porte le même titre.
  */
 
@@ -26,6 +28,8 @@ export interface VideoPreparee {
   duree: string;
   titre: string;
   description: string;
+  /** Miniature à importer dans YouTube Studio : « /images/videos/journal-2026-11-11.jpg ». */
+  miniature?: string;
 }
 
 export const VIDEOS_PREPAREES: VideoPreparee[] = [
@@ -54,6 +58,7 @@ export const VIDEOS_PREPAREES: VideoPreparee[] = [
       "https://drive.google.com/file/d/1eexpxYy07EGO3Zwf3qwR7moY_1T6hOdv/view",
     ],
     duree: "2:10:35",
+    miniature: "/images/videos/journal-2026-11-11.jpg",
     titre: "Journal de Jobwow · 11 novembre 2026 · Clairières de Tirisfal · niveaux 1 à 8",
     description: `Une séance de jeu sur WoW Forever : un mort-vivant de la Horde se réveille au Glas, dans les Clairières de Tirisfal, et pousse jusqu'à Brill, du niveau 1 au niveau 8.
 

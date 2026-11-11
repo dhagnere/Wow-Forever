@@ -1,3 +1,6 @@
+import { existsSync, statSync } from "node:fs";
+import path from "node:path";
+import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 import { LETTRES_PREPAREES } from "@/content/lettres-preparees";
 import { VIDEOS_PREPAREES, type VideoPreparee } from "@/content/videos-preparees";
@@ -49,6 +52,17 @@ describe("vidéos préparées pour YouTube", () => {
       expect(ids.has(v.id), `identifiant en double : ${v.id}`).toBe(false);
       ids.add(v.id);
     }
+  });
+
+  it("chaque miniature existe, au format de YouTube (1280 × 720, 2 Mo au plus)", async () => {
+    for (const v of VIDEOS_PREPAREES.filter((x) => x.miniature)) {
+      const fichier = path.join(process.cwd(), "public", v.miniature!);
+      expect(existsSync(fichier), `${v.id} : ${v.miniature} introuvable`).toBe(true);
+      expect(statSync(fichier).size, `${v.id} : miniature trop lourde`).toBeLessThanOrEqual(2 * 1024 * 1024);
+      const { width, height } = await sharp(fichier).metadata();
+      expect(`${width}×${height}`, v.id).toBe("1280×720");
+    }
+    expect(problemesVideo({ ...EXEMPLE, miniature: "https://ailleurs.example/image.jpg" })).toEqual(["miniature attendue dans /images/videos/ (jpg ou png)"]);
   });
 });
 

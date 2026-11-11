@@ -17,6 +17,9 @@ n'entre jamais dans le site.
    Jobwow avec `npm run carnet:video`. Les chapitres sont calculés sur la vidéo assemblée (durées des fichiers mises bout à bout).
 4. **Fiche YouTube** dans `content/videos-preparees.ts` : titre (100 caractères au plus), description, chapitres (lieux,
    niveaux, quêtes marquantes), fichiers et liens d'origine. Elle s'affiche dans `/admin/videos`, avec des boutons « Copier ».
+   **Miniature** (`miniature`) : 1280 × 720, 2 Mo au plus, dans `public/images/videos/` ; le personnage pris dans la vidéo
+   (nom flottant et icônes d'interface effacés), le sujet de la séance, ses niveaux et sa date, aux couleurs du site ; ni
+   classe ni nom d'addon. Elle s'affiche dans la fiche de l'admin, avec un lien de téléchargement.
 5. **Lettre de la semaine**, en français et en anglais, dans `content/lettres-preparees.ts` : le récit des séances, avec un
    lien vers `/carnet/videos/` (ou `/en/notebook/videos/`) et le Carnet. Elle s'importe en brouillon dans `/admin/lettre`.
 6. **Vérifier** (`npm run lint && npm test && npm run build`), puis pousser sur `dev`.

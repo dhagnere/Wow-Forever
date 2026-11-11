@@ -55,6 +55,20 @@ export default async function AdminVideos() {
                         <span key={f}>{i ? ", " : ""}<a href={v.liens[i]} rel="noopener noreferrer">{f}</a></span>
                       ))}
                     </p>
+                    {v.miniature ? (
+                      <figure style={{ margin: 0, display: "grid", gap: 6 }}>
+                        <a href={v.miniature} download>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={v.miniature} alt={`Miniature : ${v.titre}`} width={1280} height={720} loading="lazy"
+                            style={{ width: "100%", maxWidth: 480, height: "auto", borderRadius: 6, border: "1px solid var(--bord, #9a6a22)", display: "block" }} />
+                        </a>
+                        <figcaption className="doux" style={{ fontSize: 14 }}>
+                          Miniature 1280 × 720 : <a href={v.miniature} download>télécharger</a>, puis dans YouTube Studio, section « Miniature », « Importer un fichier ».
+                        </figcaption>
+                      </figure>
+                    ) : (
+                      <p className="doux" style={{ margin: 0, fontSize: 14 }}>Pas encore de miniature.</p>
+                    )}
                     <TexteACopier titre="Titre" texte={v.titre} note={`${v.titre.length} caractères sur 100.`} />
                     <TexteACopier titre="Description et chapitres" texte={v.description} note="YouTube crée les chapitres à partir des horodatages." />
                   </article>

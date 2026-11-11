@@ -21,6 +21,7 @@ export function problemesVideo(v: VideoPreparee): string[] {
   if (/[<>]/.test(v.titre + v.description)) p.push("YouTube refuse les caractères < et >");
   if (!/^\d{4}-S\d{2}$/.test(v.semaine)) p.push("semaine au format AAAA-SNN");
   if (!v.fichiers.length || v.fichiers.length !== v.liens.length) p.push("un lien par fichier");
+  if (v.miniature !== undefined && !/^\/images\/videos\/[a-z0-9-]+\.(jpg|png)$/.test(v.miniature)) p.push("miniature attendue dans /images/videos/ (jpg ou png)");
   const c = chapitresDe(v.description);
   if (c.length) {
     if (c[0].seconde !== 0) p.push("le premier chapitre doit être à 0:00");
