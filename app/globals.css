@@ -171,6 +171,11 @@ a.logo:hover .logo-medaillon { filter: drop-shadow(0 0 10px rgba(232, 192, 106, 
 .carte-grande .carte-corps { padding: 26px 30px 30px; }
 .encadre { background: var(--surface); border: 1px solid var(--bordure); border-radius: 4px; padding: 20px 22px; }
 .encadre h2 { margin: 0 0 8px; font-size: 16px; }
+/* Lettres de Jobwow dans « Mon compte » : une Lettre par bloc dépliable, la plus récente ouverte. */
+.lettres-compte { display: grid; gap: 12px; }
+.lettres-compte summary { cursor: pointer; font-size: 17px; line-height: 1.4; }
+.lettres-compte summary:focus-visible { outline: 2px solid var(--bordure-vive); outline-offset: 3px; }
+.lettres-compte .corps { margin-top: 14px; font-size: 16px; }
 .encadre-chaud { background: var(--surface-chaude); border: 1px solid var(--bordure-vive); border-radius: 4px; padding: 28px; }
 .encadre-nuit { background: #2f2017; border-radius: 12px; padding: 24px; }
 

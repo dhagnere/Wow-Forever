@@ -87,21 +87,24 @@ export { ouTrouver, RANGS, RANGS_EN, sourceDesDonnees } from "./objets/butin";
 export type { Specialisation, Sort, Talent, RangSort, TraitRacial, Familiers, FamilleFamilier, TechniqueFamilier } from "./sorts/conversion";
 
 // Comptes joueurs : connexion, Lettre, progression du guide de 1 à 60.
-export type { Joueur } from "./joueurs/depot";
+export type { Joueur, CompteInscrit } from "./joueurs/depot";
 export type { Inscription } from "./joueurs/validation";
 export {
   COOKIE_JOUEUR, DUREE_SESSION_JOUEUR_S, ErreurCompte, creerCompte, connecter, joueurDeSession, fermerSession, modifierCompte,
   changerMotDePasse, supprimerCompte, demanderReinitialisation, reinitialiser, lireProgression, enregistrerProgression, guidesDuJoueur,
+  listerComptes,
 } from "./joueurs/depot";
 export { validerInscription, erreurMotDePasse, normaliserCourriel, cleGuideValide } from "./joueurs/validation";
 export { MOT_DE_PASSE_MIN } from "./joueurs/motdepasse";
 
 // Lettre : abonnés en double validation, numéros écrits dans /admin/lettre, envoi par Resend (npm run veille:lettre).
 export type { LangueLettre } from "./lettre/messages";
-export type { EnvoiLettre, ChiffresAbonnes } from "./lettre/depot";
+export type { EnvoiLettre, ChiffresAbonnes, LettreParue, AbonneSansCompte } from "./lettre/depot";
 export type { ResultatInscription } from "./lettre/expedition";
 export { inscrireALaLettre, confirmerAbonnement, desabonnerAdresse, desinscrireParLien, envoyerEssai, expedierLettres } from "./lettre/expedition";
-export { listerEnvois, lireEnvoi, enregistrerEnvoi, supprimerEnvoi, lancerEnvoi, chiffresAbonnes, importerAbonnes } from "./lettre/depot";
+export {
+  listerEnvois, lireEnvoi, enregistrerEnvoi, supprimerEnvoi, lancerEnvoi, chiffresAbonnes, importerAbonnes, lettresParues, abonnesSansCompte,
+} from "./lettre/depot";
 export { PAGES_LETTRE, plafondJour } from "./lettre/messages";
 
 // Relecture du guide de 1 à 60 en jeu (/admin/guides).

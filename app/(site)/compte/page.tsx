@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { guidesDuJoueur } from "@/modules/veille";
+import { guidesDuJoueur, lettresParues, markdownVersHtml } from "@/modules/veille";
 import { Ariane } from "@/components/Ariane";
 import { fondBandeau } from "@/lib/ecrans";
 import { joueurConnecte, retourSur } from "@/lib/joueur";
@@ -27,7 +27,7 @@ export default async function Compte({ searchParams }: Props) {
   const p = await searchParams;
   const message = Object.entries(p).map(([k, v]) => MESSAGES[`${k}=${v}`]).find(Boolean);
   const j = await joueurConnecte();
-  const guides = j ? await guidesDuJoueur(j.id) : [];
+  const [guides, lettres] = j ? await Promise.all([guidesDuJoueur(j.id), lettresParues("fr")]) : [[], []];
   return (
     <>
       <section className="bandeau-page" style={fondBandeau("cite-de-dalaran")}>
@@ -84,6 +84,24 @@ export default async function Compte({ searchParams }: Props) {
                   {j.lettre ? "Ne plus recevoir la Lettre" : "Recevoir la Lettre"}
                 </button>
               </form>
+            </section>
+            <section aria-labelledby="t-lettres">
+              <h2 id="t-lettres" className="section-titre" style={{ fontSize: 24 }}>Les Lettres de Jobwow</h2>
+              {lettres.length ? (
+                <div className="lettres-compte">
+                  {lettres.map((l, i) => (
+                    <details key={l.id} className="encadre" open={i === 0}>
+                      <summary>
+                        <strong>{l.sujet}</strong> <span className="doux">· parue le {dateLongue(l.parueLe)}</span>
+                      </summary>
+                      {/* Garde-fou « Filtrage du HTML » : le corps passe par markdownVersHtml. */}
+                      <div className="corps" dangerouslySetInnerHTML={{ __html: markdownVersHtml(l.corps) }} />
+                    </details>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ marginTop: 0 }}>Aucune Lettre n&apos;est encore parue. Elles s&apos;afficheront ici, du plus récent au plus ancien.</p>
+              )}
             </section>
             <section aria-labelledby="t-securite">
               <h2 id="t-securite" className="section-titre" style={{ fontSize: 24 }}>Mot de passe</h2>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { guidesDuJoueur } from "@/modules/veille";
+import { guidesDuJoueur, lettresParues, markdownVersHtml } from "@/modules/veille";
 import { Ariane } from "@/components/Ariane";
 import { fondBandeau } from "@/lib/ecrans";
 import { joueurConnecte, retourSur } from "@/lib/joueur";
@@ -25,7 +25,7 @@ export default async function CompteEn({ searchParams }: Props) {
   const p = await searchParams;
   const message = Object.entries(p).map(([k, v]) => MESSAGES[`${k}=${v}`]).find(Boolean);
   const j = await joueurConnecte();
-  const guides = j ? await guidesDuJoueur(j.id) : [];
+  const [guides, lettres] = j ? await Promise.all([guidesDuJoueur(j.id), lettresParues("en")]) : [[], []];
   return (
     <>
       <section className="bandeau-page" style={fondBandeau("cite-de-dalaran")}>
@@ -71,6 +71,24 @@ export default async function CompteEn({ searchParams }: Props) {
                 </ul>
               ) : (
                 <p>No guide started yet. <Link href="/en/leveling-guide/">Pick my race and class in the 1-60 leveling guide</Link>.</p>
+              )}
+            </section>
+            <section aria-labelledby="t-lettres">
+              <h2 id="t-lettres" className="section-titre" style={{ fontSize: 24 }}>Jobwow&apos;s letters</h2>
+              {lettres.length ? (
+                <div className="lettres-compte">
+                  {lettres.map((l, i) => (
+                    <details key={l.id} className="encadre" open={i === 0}>
+                      <summary>
+                        <strong>{l.sujet}</strong> <span className="doux">· published on {dateEn(l.parueLe)}</span>
+                      </summary>
+                      {/* "HTML filtering" guardrail: the body goes through markdownVersHtml. */}
+                      <div className="corps" dangerouslySetInnerHTML={{ __html: markdownVersHtml(l.corps) }} />
+                    </details>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ marginTop: 0 }}>No letter has been published yet. They will show up here, newest first.</p>
               )}
             </section>
             <section aria-labelledby="t-reglages">

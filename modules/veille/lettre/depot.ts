@@ -141,6 +141,30 @@ export async function lireEnvoi(id: number): Promise<EnvoiLettre | null> {
   return rows[0] ?? null;
 }
 
+/** Numéros déjà lancés d'une édition, du plus récent au plus ancien : ce que les comptes connectés relisent. */
+export interface LettreParue { id: number; sujet: string; corps: string; parueLe: Date }
+
+export async function lettresParues(langue: LangueLettre, limite = 30): Promise<LettreParue[]> {
+  const { rows } = await pool().query<LettreParue>(
+    `SELECT id, sujet, corps, lance_le AS "parueLe" FROM lettre_envois
+     WHERE langue = $1 AND statut <> 'brouillon' AND lance_le IS NOT NULL ORDER BY lance_le DESC LIMIT $2`,
+    [langue, limite],
+  );
+  return rows;
+}
+
+/** Abonnés à la Lettre sans compte joueur (administration seulement). */
+export interface AbonneSansCompte { courriel: string; langue: LangueLettre; confirmeLe: Date | null; demandeLe: Date }
+
+export async function abonnesSansCompte(limite = 500): Promise<AbonneSansCompte[]> {
+  const { rows } = await pool().query<AbonneSansCompte>(
+    `SELECT a.courriel, a.langue, a.confirme_le AS "confirmeLe", a.demande_le AS "demandeLe" FROM lettre_abonnes a
+     WHERE NOT EXISTS (SELECT 1 FROM joueurs j WHERE j.courriel = a.courriel) ORDER BY a.demande_le DESC LIMIT $1`,
+    [limite],
+  );
+  return rows;
+}
+
 export async function enregistrerEnvoi(e: { id?: number; langue: LangueLettre; sujet: string; corps: string }): Promise<number> {
   if (e.id) {
     await pool().query("UPDATE lettre_envois SET langue = $2, sujet = $3, corps = $4 WHERE id = $1 AND statut = 'brouillon'", [e.id, e.langue, e.sujet, e.corps]);

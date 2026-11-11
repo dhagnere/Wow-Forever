@@ -197,6 +197,31 @@ export async function enregistrerProgression(joueurId: number, guide: string, qu
 }
 
 /** Guides commencés par le joueur, pour sa page de compte. */
+/** Comptes inscrits, du plus récent au plus ancien, avec l'état de leur abonnement à la Lettre (administration seulement). */
+export interface CompteInscrit {
+  id: number;
+  pseudo: string;
+  courriel: string;
+  lettre: boolean;
+  abonne: boolean;
+  langueLettre: string | null;
+  creeLe: Date;
+  vuLe: Date;
+  guides: number;
+}
+
+export async function listerComptes(limite = 500): Promise<CompteInscrit[]> {
+  const { rows } = await pool().query<CompteInscrit>(
+    `SELECT j.id, j.pseudo, j.courriel, j.lettre, (a.confirme_le IS NOT NULL) AS abonne, a.langue AS "langueLettre",
+       j.cree_le AS "creeLe", j.vu_le AS "vuLe",
+       (SELECT count(*)::int FROM progression p WHERE p.joueur_id = j.id) AS guides
+     FROM joueurs j LEFT JOIN lettre_abonnes a ON a.courriel = j.courriel
+     ORDER BY j.cree_le DESC LIMIT $1`,
+    [limite],
+  );
+  return rows;
+}
+
 export async function guidesDuJoueur(joueurId: number): Promise<{ guide: string; faites: number; majLe: Date }[]> {
   const { rows } = await pool().query<{ guide: string; faites: number; maj_le: Date }>(
     "SELECT guide, cardinality(quetes) AS faites, maj_le FROM progression WHERE joueur_id = $1 ORDER BY maj_le DESC",
