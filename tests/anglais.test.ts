@@ -36,6 +36,8 @@ describe("version anglaise", () => {
     expect(cheminAnglais("/admin/veille/")).toBeNull();
     expect(cheminAnglais("/lettre/")).toBe("/en/newsletter/");
     expect(cheminAnglais("/carnet/")).toBe("/en/notebook/");
+    expect(cheminAnglais("/carnet/videos/")).toBe("/en/notebook/videos/");
+    expect(cheminFrancais("/en/notebook/videos/")).toBe("/carnet/videos/");
     expect(cheminAnglais("/classes/inconnue/")).toBeNull();
     expect(languesDe("/guildes/modifier/abc/")).toBeUndefined();
     expect(cheminAnglais("/soutenir/")).toBe("/en/support/");

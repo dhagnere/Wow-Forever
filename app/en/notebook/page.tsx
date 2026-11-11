@@ -31,6 +31,7 @@ export default async function NotebookEn() {
               <div className="actions-bandeau">
                 {SITE.discord ? <a href={SITE.discord} className="btn btn-or" rel="noopener noreferrer" data-cta="discord-carnet-en">Reply to Jobwow on Discord</a> : null}
                 <Link href="/en/newsletter/" className={SITE.discord ? "btn btn-contour" : "btn btn-or"} data-cta="lettre-carnet-en">Get the newsletter</Link>
+                <Link href="/en/notebook/videos/" className="btn btn-contour" data-cta="videos-carnet-en">Jobwow&apos;s videos</Link>
               </div>
             </div>
           </div>

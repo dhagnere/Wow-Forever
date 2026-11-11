@@ -114,3 +114,7 @@ export { lireRelecture, enregistrerRelecture, avancementRelecture, remarquesRele
 // Courriels du site (Resend) : mot de passe oublié, confirmations, Lettre.
 export type { Courriel } from "./courriel/resend";
 export { courrielConfigure, envoyerCourriel } from "./courriel/resend";
+
+// Chaîne YouTube : dernières vidéos lues dans le flux public (page « Les vidéos de Jobwow »).
+export type { VideoChaine } from "./youtube/chaine";
+export { videosChaine, videosDepuisFlux, idChaineValide } from "./youtube/chaine";

@@ -34,7 +34,7 @@ export default function SitemapEn() {
         ["/en/guides/zones-by-level/", "Zones by level"], ["/en/guides/class-quests/", "Class quests"], ["/en/guides/dungeon-list/", "Dungeon list"], ...rubriques("guides"),
       ],
     },
-    { titre: "Jobwow's Notebook", liens: [["/en/notebook/", "All episodes"], [pageRubriqueEn("tests"), RUBRIQUES_EN.tests?.nom ?? "Reviews"]] },
+    { titre: "Jobwow's Notebook", liens: [["/en/notebook/", "All episodes"], ["/en/notebook/videos/", "Jobwow's videos"], [pageRubriqueEn("tests"), RUBRIQUES_EN.tests?.nom ?? "Reviews"]] },
     {
       titre: "The site",
       liens: [

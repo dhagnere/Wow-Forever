@@ -121,6 +121,7 @@ const GUIDES: [string, string][] = [
   ["/races/skyborne/", "/en/races/skyborne/"],
   ["/lettre/", "/en/newsletter/"],
   ["/carnet/", "/en/notebook/"],
+  ["/carnet/videos/", "/en/notebook/videos/"],
   ["/guildes/", "/en/guilds/"],
   ["/guildes/inscrire/", "/en/guilds/register/"],
   ["/mentions-legales/", "/en/legal-notice/"],

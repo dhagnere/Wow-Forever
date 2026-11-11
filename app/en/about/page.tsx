@@ -55,6 +55,10 @@ export default function AboutEn() {
             8 am and 10 pm (Paris time). To get everything on Sunday, there is <Link href="/en/newsletter/">the newsletter</Link>; to talk about it,{" "}
             <Link href="/en/community/">the community</Link>.
           </p>
+          <p>
+            Jobwow&apos;s play sessions, recorded without any paid guide, are on <Link href="/en/notebook/videos/">the videos page</Link>
+            {SITE.youtube ? <> and on <a href={SITE.youtube} rel="noopener noreferrer">the Tavern&apos;s YouTube channel</a></> : null}.
+          </p>
         </article>
       </div>
     </>

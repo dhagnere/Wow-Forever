@@ -90,6 +90,7 @@ export function Pied() {
           <nav aria-label="Pied de page" className="pied-liens">
             {LIENS_PIED.map(([href, nom]) => <Link key={href} href={href}>{nom}</Link>)}
             <a href={SITE.facebook} rel="noopener noreferrer">Page Facebook</a>
+            {SITE.youtube ? <a href={SITE.youtube} rel="noopener noreferrer" data-cta="youtube-pied">Chaîne YouTube</a> : null}
             {SITE.discord ? <a href={SITE.discord} rel="noopener noreferrer">Discord</a> : null}
             {SITE.gtmId ? <GererCookies /> : null}
           </nav>

@@ -54,6 +54,10 @@ export default function APropos() {
           Chaque article publié part sur la <a href={SITE.facebook} rel="noopener noreferrer">Page Facebook de la Taverne Éternelle</a>, entre 8h et 22h.
           Pour tout recevoir le dimanche, il y a <Link href="/lettre/">la Lettre</Link> ; pour en discuter, <Link href="/communaute/">la communauté</Link>.
         </p>
+        <p>
+          Les séances de jeu de Jobwow, filmées sans guide payant, sont sur <Link href="/carnet/videos/">la page des vidéos</Link>
+          {SITE.youtube ? <> et sur <a href={SITE.youtube} rel="noopener noreferrer">la chaîne YouTube de la Taverne</a></> : null}.
+        </p>
       </article>
     </div>
     </>

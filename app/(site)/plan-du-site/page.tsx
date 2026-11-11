@@ -16,7 +16,7 @@ export default function PlanDuSite() {
     { titre: "Races", liens: [["/races/", "Toutes les races"], ["/races/skyborne/", "Skyborne, la nouvelle race"]] },
     { titre: "Monde", liens: [["/zones/", "Zones"], ...ZONES.map((z) => [`/zones/${z.slug}/`, z.nom] as [string, string]), ["/donjons/", "Donjons et raids"], ...DONJONS.map((d) => [`/donjons/${d.slug}/`, d.nom] as [string, string]), ["/base-de-donnees/", "Base de données des objets"], ["/cartes/", "Cartes du monde"]] },
     { titre: "Guides", liens: [["/guides/bien-demarrer/", "Bien démarrer"], ["/guides/zones-de-depart/", "Zones de départ"], ["/guides/zones-par-niveau/", "Zones par niveau"], ["/guides/parcours/", "Parcours de 1 à 60"], ["/guides/quetes-de-classe/", "Quêtes de classe"], ["/guides/liste-des-donjons/", "Liste des donjons"], ...RUBRIQUES.filter((r) => r.famille === "guides").map((r) => [`/rubriques/${r.slug}/`, r.nom] as [string, string])] },
-    { titre: "Carnet de Jobwow", liens: [["/carnet/", "Tous les épisodes"], ["/rubriques/tests/", "Tests et avis"]] },
+    { titre: "Carnet de Jobwow", liens: [["/carnet/", "Tous les épisodes"], ["/carnet/videos/", "Les vidéos de Jobwow"], ["/rubriques/tests/", "Tests et avis"]] },
     { titre: "Le site", liens: [["/a-propos/", "Qui est Jobwow ?"], ["/mentions-legales/", "Mentions légales"]] },
   ];
   return (

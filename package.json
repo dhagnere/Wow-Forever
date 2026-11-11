@@ -39,6 +39,7 @@
     "addon:guides": "tsx scripts/addon-guides.ts",
     "addon:base": "tsx scripts/addon-base.ts",
     "kit:blizzard": "tsx scripts/kit-blizzard.ts",
+    "carnet:video": "tsx scripts/carnet-video.ts",
     "addon:wow": "tsx scripts/addon-guides.ts \"C:\\WOW\\world of Warcraft\\_forever_\\Interface\\AddOns\\EternalRoutes\""
   },
   "dependencies": {

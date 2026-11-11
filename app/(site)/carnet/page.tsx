@@ -30,6 +30,7 @@ export default async function Carnet() {
               <div className="actions-bandeau">
                 {SITE.discord ? <a href={SITE.discord} className="btn btn-or" rel="noopener noreferrer" data-cta="discord-carnet">Répondre à Jobwow sur Discord</a> : null}
                 <Link href="/lettre/" className={SITE.discord ? "btn btn-contour" : "btn btn-or"} data-cta="lettre-carnet">Recevoir la Lettre</Link>
+                <Link href="/carnet/videos/" className="btn btn-contour" data-cta="videos-carnet">Les vidéos de Jobwow</Link>
               </div>
             </div>
           </div>

@@ -69,6 +69,7 @@ function Pied() {
             <Link href="/en/contact/">Contact</Link>
             <Link href="/en/about/">Who is Jobwow?</Link>
             <Link href="/en/support/">Support the Tavern</Link>
+            {SITE.youtube ? <a href={SITE.youtube} rel="noopener noreferrer" data-cta="youtube-pied-en">YouTube channel</a> : null}
             {SITE.gtmId ? <GererCookies langue="en" /> : null}
             <Link href="/en/sitemap/">Site map</Link>
           </nav>

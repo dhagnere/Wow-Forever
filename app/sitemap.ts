@@ -26,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const fixes = [
     "/", "/actualites/", "/classes/", "/races/", "/races/skyborne/", "/zones/", "/donjons/", "/guides/bien-demarrer/",
     "/guides/zones-de-depart/", "/guides/zones-par-niveau/", "/guides/liste-des-donjons/", "/guides/parcours/", "/guides/quetes-de-classe/",
-    "/base-de-donnees/", "/base-de-donnees/objets/", "/cartes/", ...tousLesLieux().map((l) => `/cartes/${l}/`), "/calendrier/", "/lettre/", "/communaute/", "/guildes/", "/guildes/inscrire/", "/soutenir/", "/contact/", "/confidentialite/", "/carnet/", "/a-propos/", "/plan-du-site/", "/mentions-legales/",
+    "/base-de-donnees/", "/base-de-donnees/objets/", "/cartes/", ...tousLesLieux().map((l) => `/cartes/${l}/`), "/calendrier/", "/lettre/", "/communaute/", "/guildes/", "/guildes/inscrire/", "/soutenir/", "/contact/", "/confidentialite/", "/carnet/", "/carnet/videos/", "/a-propos/", "/plan-du-site/", "/mentions-legales/",
     ...RUBRIQUES.map((r) => `/rubriques/${r.slug}/`),
     ...CLASSES.map((c) => `/classes/${c.slug}/`),
     ...CLASSES.map((c) => `/classes/${c.slug}/talents/`),
