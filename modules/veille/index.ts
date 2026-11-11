@@ -106,6 +106,11 @@ export {
   listerEnvois, lireEnvoi, enregistrerEnvoi, supprimerEnvoi, lancerEnvoi, chiffresAbonnes, importerAbonnes, lettresParues, lettresCarnet, abonnesSansCompte,
 } from "./lettre/depot";
 export { PAGES_LETTRE, plafondJour } from "./lettre/messages";
+// Traduction automatique des Lettres françaises (édition anglaise en brouillon, à relire avant lancement).
+export type { OptionsTraductionLettre, ResultatTraductionLettre } from "./lettre/traduction";
+export { traduireLettre, traduireLettresEnAttente, empreinteLettre, CONSIGNES_TRADUCTION_LETTRE } from "./lettre/traduction";
+/** Ferme la connexion à la base (scripts en ligne de commande hors du module). */
+export { fermer as fermerBase } from "./db/pool";
 
 // Relecture du guide de 1 à 60 en jeu (/admin/guides).
 export type { NoteEtape, RemarqueGuide } from "./guides/relecture";

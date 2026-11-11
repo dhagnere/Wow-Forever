@@ -6,6 +6,8 @@ Le site gère lui-même la Lettre ; Resend ne sert qu'à **remettre les messages
 2. **la Lettre du dimanche**, écrite dans `/admin/lettre` et envoyée dès le clic sur « Lancer l'envoi », puis par lots chaque heure pour ce qui dépasse le plafond du jour (`npm run veille:lettre`, regroupé avec la traduction dans `npm run veille:horaire`, tâche de `cron.json` : Scalingo n'accepte que cinq tâches planifiées) ;
 3. **le message « mot de passe oublié »** des comptes joueurs.
 
+**Édition anglaise.** Une Lettre française enregistrée est traduite en anglais dans l'heure (`npm run veille:lettres-en`, dans `npm run veille:horaire` ; clé `ANTHROPIC_API_KEY`), ou tout de suite par « Traduire maintenant » dans `/admin/lettre`. La traduction arrive en brouillon dans l'édition anglaise : la relire, envoyer l'essai, puis lancer l'envoi comme pour la française. Tant qu'elle n'est pas modifiée, elle suit les changements du français ; modifiée à la main, elle n'est plus écrasée. Les Lettres préparées chaque semaine arrivent déjà dans les deux langues.
+
 Les adresses restent dans la base du site, chez Scalingo. Une désinscription efface l'adresse ; une inscription jamais confirmée est effacée au bout de sept jours. Chaque Lettre porte un lien de désinscription et l'en-tête de désinscription en un clic que Gmail et Yahoo exigent.
 
 **Variables à saisir chez Scalingo :**

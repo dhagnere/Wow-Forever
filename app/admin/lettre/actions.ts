@@ -2,11 +2,11 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { enregistrerEnvoi, envoyerEssai, expedierLettres, importerAbonnes, lancerEnvoi, lireEnvoi, listerEnvois, normaliserCourriel, supprimerEnvoi, type LangueLettre } from "@/modules/veille";
+import { enregistrerEnvoi, envoyerEssai, expedierLettres, importerAbonnes, lancerEnvoi, lireEnvoi, listerEnvois, normaliserCourriel, supprimerEnvoi, traduireLettre, type LangueLettre } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
 import { adresseValide } from "@/lib/lettre";
 import { LETTRES_PREPAREES } from "@/content/lettres-preparees";
-import { pairePreparee } from "@/lib/lettresCarnet";
+import { optionsTraductionLettre, pairePreparee } from "@/lib/lettresCarnet";
 
 const langueDe = (f: FormData): LangueLettre => (f.get("langue") === "en" ? "en" : "fr");
 const texte = (f: FormData, nom: string, max: number) => String(f.get(nom) ?? "").slice(0, max);
@@ -43,6 +43,17 @@ export async function enregistrerLettre(f: FormData): Promise<void> {
   retour({ id, ok: "enregistre" });
 }
 
+/** Traduit tout de suite une Lettre française en anglais (sinon, la tâche horaire s'en charge). */
+export async function traduireLettreMaintenant(f: FormData): Promise<void> {
+  await exigerAdmin();
+  const id = Number(f.get("id"));
+  if (!Number.isInteger(id) || id <= 0) retour({ erreur: "traduction", n: "Lettre inconnue" });
+  const r = await traduireLettre(id, optionsTraductionLettre(LETTRES_PREPAREES));
+  revalidatePath("/en/notebook/");
+  if (!r.ok) retour({ id, erreur: "traduction", n: r.raison });
+  retour({ id: r.id, ok: "traduite" });
+}
+
 export async function supprimerLettre(f: FormData): Promise<void> {
   await exigerAdmin();
   const id = Number(f.get("id"));
@@ -56,11 +67,15 @@ export async function importerPreparee(f: FormData): Promise<void> {
   const l = LETTRES_PREPAREES.find((x) => x.id === String(f.get("preparee") ?? ""));
   if (!l) retour({ erreur: "preparee-inconnue" });
   const deja = await listerEnvois();
-  const absente = (x: { langue: LangueLettre; sujet: string }) => !deja.some((e) => e.langue === x.langue && e.sujet === x.sujet);
-  const id = absente(l) ? await enregistrerEnvoi({ langue: l.langue, sujet: l.sujet, corps: l.corps }) : deja.find((e) => e.langue === l.langue && e.sujet === l.sujet)!.id;
-  // l'édition de l'autre langue arrive avec elle : le Carnet anglais suit le français
+  const existante = (x: { langue: LangueLettre; sujet: string }) => deja.find((e) => e.langue === x.langue && e.sujet === x.sujet)?.id;
+  // l'édition de l'autre langue arrive avec elle, l'anglaise reliée à la française : le Carnet anglais suit le français,
+  // et la traduction automatique ne la double pas
   const paire = pairePreparee(l, LETTRES_PREPAREES);
-  if (paire && absente(paire)) await enregistrerEnvoi({ langue: paire.langue, sujet: paire.sujet, corps: paire.corps });
+  const fr = l.langue === "fr" ? l : paire;
+  const en = l.langue === "en" ? l : paire;
+  const frId = fr ? existante(fr) ?? await enregistrerEnvoi({ langue: "fr", sujet: fr.sujet, corps: fr.corps }) : undefined;
+  const enId = en ? existante(en) ?? await enregistrerEnvoi({ langue: "en", sujet: en.sujet, corps: en.corps, traductionDe: frId }) : undefined;
+  const id = (l.langue === "fr" ? frId : enId)!;
   revalidatePath("/carnet/");
   revalidatePath("/en/notebook/");
   retour({ id, ok: "preparee" });

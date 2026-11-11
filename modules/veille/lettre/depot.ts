@@ -123,9 +123,18 @@ export interface EnvoiLettre {
   destinataires: number;
   envoyes: number;
   echecs: number;
+  /** Édition anglaise : identifiant de la Lettre française dont elle est la traduction (automatique ou importée). */
+  traductionDe: number | null;
+  /** Traduction automatique pas encore retouchée par Jobwow. */
+  traductionAuto: boolean;
+  /** Empreinte du français au moment de la traduction. */
+  empreinteSource: string | null;
+  /** Lettre française : dernière erreur de traduction automatique. */
+  traductionErreur: string | null;
 }
 
 const SELECT_ENVOI = `SELECT e.id, e.langue, e.sujet, e.corps, e.statut, e.cree_le AS "creeLe", e.lance_le AS "lanceLe", e.termine_le AS "termineLe",
+  e.traduction_de AS "traductionDe", e.traduction_auto AS "traductionAuto", e.empreinte_source AS "empreinteSource", e.traduction_erreur AS "traductionErreur",
   count(f.abonne_id)::int AS destinataires,
   count(f.envoye_le)::int AS envoyes,
   count(*) FILTER (WHERE f.envoye_le IS NULL AND f.echecs >= ${ECHECS_MAX})::int AS echecs
@@ -142,7 +151,7 @@ export async function lireEnvoi(id: number): Promise<EnvoiLettre | null> {
 }
 
 /** Numéros déjà lancés d'une édition, du plus récent au plus ancien : ce que les comptes connectés relisent. */
-export interface LettreParue { id: number; sujet: string; corps: string; parueLe: Date }
+export interface LettreParue { id: number; sujet: string; corps: string; parueLe: Date; traductionDe?: number | null }
 
 export async function lettresParues(langue: LangueLettre, limite = 30): Promise<LettreParue[]> {
   const { rows } = await pool().query<LettreParue>(
@@ -159,7 +168,7 @@ export async function lettresParues(langue: LangueLettre, limite = 30): Promise<
  */
 export async function lettresCarnet(langue: LangueLettre, limite = 12): Promise<LettreParue[]> {
   const { rows } = await pool().query<LettreParue>(
-    `SELECT id, sujet, corps, COALESCE(lance_le, cree_le) AS "parueLe" FROM lettre_envois
+    `SELECT id, sujet, corps, COALESCE(lance_le, cree_le) AS "parueLe", traduction_de AS "traductionDe" FROM lettre_envois
      WHERE langue = $1 AND btrim(corps) <> '' ORDER BY COALESCE(lance_le, cree_le) DESC LIMIT $2`,
     [langue, limite],
   );
@@ -178,16 +187,26 @@ export async function abonnesSansCompte(limite = 500): Promise<AbonneSansCompte[
   return rows;
 }
 
-export async function enregistrerEnvoi(e: { id?: number; langue: LangueLettre; sujet: string; corps: string }): Promise<number> {
+export async function enregistrerEnvoi(e: { id?: number; langue: LangueLettre; sujet: string; corps: string; traductionDe?: number }): Promise<number> {
   if (e.id) {
-    await pool().query("UPDATE lettre_envois SET langue = $2, sujet = $3, corps = $4 WHERE id = $1 AND statut = 'brouillon'", [e.id, e.langue, e.sujet, e.corps]);
+    // Une traduction automatique retouchée (sujet ou texte changé) n'est plus retraduite : traduction_auto passe à false.
+    await pool().query(
+      `UPDATE lettre_envois SET langue = $2, sujet = $3, corps = $4, traduction_auto = traduction_auto AND sujet = $3 AND corps = $4
+       WHERE id = $1 AND statut = 'brouillon'`,
+      [e.id, e.langue, e.sujet, e.corps],
+    );
     return e.id;
   }
-  const { rows } = await pool().query<{ id: number }>("INSERT INTO lettre_envois (langue, sujet, corps) VALUES ($1, $2, $3) RETURNING id", [e.langue, e.sujet, e.corps]);
+  const { rows } = await pool().query<{ id: number }>(
+    "INSERT INTO lettre_envois (langue, sujet, corps, traduction_de) VALUES ($1, $2, $3, $4) RETURNING id",
+    [e.langue, e.sujet, e.corps, e.traductionDe ?? null],
+  );
   return rows[0].id;
 }
 
+/** Supprime un brouillon, et sa traduction automatique encore en brouillon et jamais retouchée. */
 export async function supprimerEnvoi(id: number): Promise<void> {
+  await pool().query("DELETE FROM lettre_envois WHERE traduction_de = $1 AND traduction_auto AND statut = 'brouillon' AND EXISTS (SELECT 1 FROM lettre_envois s WHERE s.id = $1 AND s.statut = 'brouillon')", [id]);
   await pool().query("DELETE FROM lettre_envois WHERE id = $1 AND statut = 'brouillon'", [id]);
 }
 

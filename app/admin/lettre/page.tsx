@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { chiffresAbonnes, courrielConfigure, lireEnvoi, listerEnvois, markdownVersHtml, plafondJour, type EnvoiLettre } from "@/modules/veille";
+import { chiffresAbonnes, courrielConfigure, empreinteLettre, lireEnvoi, listerEnvois, markdownVersHtml, plafondJour, type EnvoiLettre } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
 import { dateLongue } from "@/lib/site";
 import { LETTRES_PREPAREES } from "@/content/lettres-preparees";
-import { enregistrerLettre, importerLettre, importerPreparee, supprimerLettre } from "./actions";
+import { enregistrerLettre, importerLettre, importerPreparee, supprimerLettre, traduireLettreMaintenant } from "./actions";
+import { sujetsAvecAnglaisPrepare } from "@/lib/lettresCarnet";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Lettre" };
@@ -24,6 +25,8 @@ const MESSAGES: Record<string, string> = {
   relu: "Cochez la case « J'ai relu l'essai » avant de lancer l'envoi.",
   consentement: "Cochez la case de consentement avant d'importer des adresses.",
   "preparee-inconnue": "Lettre préparée introuvable.",
+  traduite: "Édition anglaise traduite automatiquement et enregistrée en brouillon : relisez-la avant l'essai et le lancement. Elle paraît déjà dans le Carnet anglais.",
+  traduction: "La traduction n'a pas abouti",
 };
 
 const STATUTS: Record<EnvoiLettre["statut"], string> = { brouillon: "Brouillon", en_cours: "Envoi en cours", termine: "Envoyée" };
@@ -33,6 +36,10 @@ export default async function AdminLettre({ searchParams }: Props) {
   const p = await searchParams;
   const [chiffres, envois, courant] = await Promise.all([chiffresAbonnes(), listerEnvois(), p.id ? lireEnvoi(Number(p.id)) : null]);
   const brouillon = courant?.statut === "brouillon" ? courant : null;
+  const avecAnglaisPrepare = sujetsAvecAnglaisPrepare(LETTRES_PREPAREES);
+  /** État de l'édition anglaise d'une Lettre française, pour la colonne « Anglais ». */
+  const anglaise = (e: EnvoiLettre) => envois.find((x) => x.traductionDe === e.id);
+  const source = brouillon?.traductionDe ? envois.find((x) => x.id === brouillon.traductionDe) : undefined;
   const message = p.erreur ? MESSAGES[p.erreur] : p.ok ? MESSAGES[p.ok] : null;
   return (
     <div>
@@ -79,6 +86,15 @@ export default async function AdminLettre({ searchParams }: Props) {
       ) : null}
 
       <h2>{brouillon ? `Modifier le brouillon n° ${brouillon.id}` : "Nouvelle Lettre"}</h2>
+      {brouillon?.traductionDe ? (
+        <p className="info" role="note">
+          {brouillon.traductionAuto
+            ? <>Traduction automatique de la Lettre n° {brouillon.traductionDe}{source ? ` (« ${source.sujet} »)` : ""} : relisez-la avant l&apos;essai. Tant que vous ne la modifiez pas, elle suit les changements du français ; modifiée, elle reste telle quelle.</>
+            : <>Édition anglaise de la Lettre n° {brouillon.traductionDe}{source ? ` (« ${source.sujet} »)` : ""}.</>}
+          {source && brouillon.empreinteSource && !brouillon.traductionAuto && brouillon.empreinteSource !== empreinteLettre(source.sujet, source.corps)
+            ? " Attention : la française a changé depuis la traduction." : ""}
+        </p>
+      ) : null}
       <form action={enregistrerLettre} className="formulaire" style={{ maxWidth: 820 }}>
         {brouillon ? <input type="hidden" name="id" value={brouillon.id} /> : null}
         <div className="champ">
@@ -120,7 +136,7 @@ export default async function AdminLettre({ searchParams }: Props) {
       {envois.length ? (
         <div className="tableau-boite">
           <table>
-            <thead><tr><th scope="col">Sujet</th><th scope="col">Édition</th><th scope="col">Statut</th><th scope="col">Envois</th><th scope="col">Date</th><th scope="col"></th></tr></thead>
+            <thead><tr><th scope="col">Sujet</th><th scope="col">Édition</th><th scope="col">Statut</th><th scope="col">Envois</th><th scope="col">Date</th><th scope="col">Anglais</th><th scope="col"></th></tr></thead>
             <tbody>
               {envois.map((e) => (
                 <tr key={e.id}>
@@ -129,6 +145,29 @@ export default async function AdminLettre({ searchParams }: Props) {
                   <td>{STATUTS[e.statut]}</td>
                   <td>{e.statut === "brouillon" ? "—" : `${e.envoyes} / ${e.destinataires}${e.echecs ? ` · ${e.echecs} en échec` : ""}`}</td>
                   <td className="doux">{dateLongue(e.lanceLe ?? e.creeLe)}</td>
+                  <td style={{ fontSize: 14 }}>
+                    {e.langue === "en" ? (
+                      e.traductionDe ? <span className="doux">{e.traductionAuto ? "Traduction automatique" : "Édition anglaise"} de n° {e.traductionDe}</span> : null
+                    ) : (() => {
+                      const a = anglaise(e);
+                      if (a) {
+                        const retard = a.traductionAuto && a.statut === "brouillon" && a.empreinteSource !== empreinteLettre(e.sujet, e.corps);
+                        return (
+                          <>
+                            {a.statut === "brouillon" ? <Link href={`/admin/lettre/?id=${a.id}`}>Brouillon n° {a.id}</Link> : <span>n° {a.id} ({STATUTS[a.statut].toLowerCase()})</span>}
+                            {retard ? <span className="doux"> · à retraduire (prochaine heure)</span> : null}
+                          </>
+                        );
+                      }
+                      if (avecAnglaisPrepare.has(e.sujet.trim().toLowerCase())) return <span className="doux">Édition préparée</span>;
+                      return (
+                        <>
+                          {e.traductionErreur ? <span className="erreur" style={{ display: "block" }}>Échec : {e.traductionErreur}</span> : <span className="doux">Traduite dans l&apos;heure</span>}
+                          <form action={traduireLettreMaintenant}><input type="hidden" name="id" value={e.id} /><button type="submit" className="btn btn-contour btn-petit">Traduire maintenant</button></form>
+                        </>
+                      );
+                    })()}
+                  </td>
                   <td>
                     {e.statut === "brouillon" ? (
                       <form action={supprimerLettre}><input type="hidden" name="id" value={e.id} /><button type="submit" className="btn btn-danger btn-petit">Supprimer</button></form>

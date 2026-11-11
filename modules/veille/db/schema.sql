@@ -377,6 +377,14 @@ CREATE TABLE IF NOT EXISTS lettre_file (
 CREATE INDEX IF NOT EXISTS lettre_file_attente_idx ON lettre_file (envoi_id) WHERE envoye_le IS NULL;
 CREATE INDEX IF NOT EXISTS lettre_file_envoye_idx ON lettre_file (envoye_le) WHERE envoye_le IS NOT NULL;
 
+-- Traduction automatique d'une Lettre française : édition anglaise en brouillon, reliée à sa source, à relire avant
+-- lancement. traduction_auto passe à false dès que Jobwow retouche l'anglaise (elle n'est alors plus retraduite).
+ALTER TABLE lettre_envois ADD COLUMN IF NOT EXISTS traduction_de INTEGER REFERENCES lettre_envois (id) ON DELETE SET NULL;
+ALTER TABLE lettre_envois ADD COLUMN IF NOT EXISTS traduction_auto BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE lettre_envois ADD COLUMN IF NOT EXISTS empreinte_source TEXT;
+ALTER TABLE lettre_envois ADD COLUMN IF NOT EXISTS traduction_erreur TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS lettre_envois_traduction_idx ON lettre_envois (traduction_de) WHERE traduction_de IS NOT NULL;
+
 -- Relecture du guide de 1 à 60 en jeu (/admin/guides) : étape vérifiée et remarque, par guide.
 CREATE TABLE IF NOT EXISTS guides_relecture (
   guide     TEXT NOT NULL,
