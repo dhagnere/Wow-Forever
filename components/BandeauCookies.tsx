@@ -37,8 +37,8 @@ function appliquer(choix: Choix) {
   }
 }
 
-/** Bannière de consentement : Accepter et Refuser au même niveau, comme l'exige la CNIL. */
-export function BandeauCookies() {
+/** Bannière de consentement : Accepter et Refuser au même niveau, comme l'exige la CNIL. Même choix dans les deux langues. */
+export function BandeauCookies({ langue = "fr" }: { langue?: "fr" | "en" }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -57,14 +57,22 @@ export function BandeauCookies() {
   return (
     <div className="bandeau-cookies" role="dialog" aria-modal="false" aria-labelledby="t-cookies">
       <div className="wrap">
-        <p id="t-cookies" style={{ margin: 0 }}>
-          <strong>Mesure d&apos;audience.</strong> Avec votre accord, la Taverne Éternelle utilise des cookies Google pour compter les
-          visites et améliorer le site. Vous pouvez changer d&apos;avis à tout moment en bas de page.{" "}
-          <Link href="/mentions-legales/#cookies">En savoir plus</Link>
-        </p>
+        {langue === "en" ? (
+          <p id="t-cookies" style={{ margin: 0 }}>
+            <strong>Audience measurement.</strong> With your consent, La Taverne Éternelle uses Google cookies to count visits and improve
+            the site. You can change your mind at any time at the bottom of the page.{" "}
+            <Link href="/en/legal-notice/#cookies">Learn more</Link>
+          </p>
+        ) : (
+          <p id="t-cookies" style={{ margin: 0 }}>
+            <strong>Mesure d&apos;audience.</strong> Avec votre accord, la Taverne Éternelle utilise des cookies Google pour compter les
+            visites et améliorer le site. Vous pouvez changer d&apos;avis à tout moment en bas de page.{" "}
+            <Link href="/mentions-legales/#cookies">En savoir plus</Link>
+          </p>
+        )}
         <div className="boutons" style={{ justifyContent: "flex-start", flex: "none" }}>
-          <button type="button" className="btn btn-contour" onClick={() => choisir("refuse")}>Refuser</button>
-          <button type="button" className="btn btn-contour" onClick={() => choisir("accepte")}>Accepter</button>
+          <button type="button" className="btn btn-contour" onClick={() => choisir("refuse")}>{langue === "en" ? "Refuse" : "Refuser"}</button>
+          <button type="button" className="btn btn-contour" onClick={() => choisir("accepte")}>{langue === "en" ? "Accept" : "Accepter"}</button>
         </div>
       </div>
     </div>
@@ -72,10 +80,10 @@ export function BandeauCookies() {
 }
 
 /** Lien de pied de page pour revoir son choix. */
-export function GererCookies() {
+export function GererCookies({ langue = "fr" }: { langue?: "fr" | "en" }) {
   return (
     <button type="button" className="lien-bouton" onClick={() => window.dispatchEvent(new Event(EVENEMENT_ROUVRIR))}>
-      Gérer les cookies
+      {langue === "en" ? "Manage cookies" : "Gérer les cookies"}
     </button>
   );
 }

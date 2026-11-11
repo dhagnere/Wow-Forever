@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { CadreEn } from "@/components/CadreEn";
 import { Mesure } from "@/components/Mesure";
+import { MesureAudience } from "@/components/MesureAudience";
+import { BandeauCookies } from "@/components/BandeauCookies";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -14,6 +16,12 @@ export default function LayoutAnglais({ children }: { children: React.ReactNode 
     <>
       <CadreEn>{children}</CadreEn>
       <Mesure />
+      {SITE.gtmId ? (
+        <>
+          <MesureAudience gtmId={SITE.gtmId} />
+          <BandeauCookies langue="en" />
+        </>
+      ) : null}
     </>
   );
 }

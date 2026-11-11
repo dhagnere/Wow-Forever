@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { SiteCadre } from "@/components/Cadre";
 import { Mesure } from "@/components/Mesure";
+import { MesureAudience } from "@/components/MesureAudience";
+import { BandeauCookies } from "@/components/BandeauCookies";
+import { SITE } from "@/lib/site";
 
 export default function Introuvable() {
   return (
@@ -16,6 +19,12 @@ export default function Introuvable() {
         </div>
       </div>
       <Mesure />
+      {SITE.gtmId ? (
+        <>
+          <MesureAudience gtmId={SITE.gtmId} />
+          <BandeauCookies />
+        </>
+      ) : null}
     </SiteCadre>
   );
 }

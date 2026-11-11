@@ -8,7 +8,7 @@ export const SITE = {
   /** Page Facebook de la Taverne ; NEXT_PUBLIC_FACEBOOK_URL la remplace si besoin. */
   facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || "https://www.facebook.com/taverneeternelle",
   /** Conteneur Google Tag Manager. NEXT_PUBLIC_GTM_ID=off le désactive (développement local, par exemple). */
-  gtmId: process.env.NEXT_PUBLIC_GTM_ID === "off" ? "" : (process.env.NEXT_PUBLIC_GTM_ID ?? "GTM-KMGBD5FD"),
+  gtmId: process.env.NEXT_PUBLIC_GTM_ID === "off" ? "" : (process.env.NEXT_PUBLIC_GTM_ID ?? "GTM-5KX55C25"),
   /** Discord de la Taverne (lien d'invitation) : sans valeur, les boutons Discord ne s'affichent pas. */
   discord: process.env.NEXT_PUBLIC_DISCORD_URL ?? "",
   /** Liens de dons (Tipeee, Ko-fi…). Sans valeur, la page Soutenir annonce une ouverture prochaine. */

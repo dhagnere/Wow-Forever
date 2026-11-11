@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SITE } from "@/lib/site";
+import { GererCookies } from "./BandeauCookies";
 import { Medaillon, NomSite } from "./Cadre";
 import { ChoixLangue } from "./ChoixLangue";
 import { Decompte } from "./Decompte";
@@ -68,6 +69,7 @@ function Pied() {
             <Link href="/en/contact/">Contact</Link>
             <Link href="/en/about/">Who is Jobwow?</Link>
             <Link href="/en/support/">Support the Tavern</Link>
+            {SITE.gtmId ? <GererCookies langue="en" /> : null}
             <Link href="/en/sitemap/">Site map</Link>
           </nav>
         </div>

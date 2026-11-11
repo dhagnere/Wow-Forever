@@ -41,7 +41,7 @@ export default function LegalNotice() {
           <p>
             The site uses Google Tag Manager for audience measurement. No measurement or advertising cookie is set without your consent: on your
             first visit, a banner lets you accept or refuse. Your choice is kept for six months in your browser, then you are asked again. You can
-            change it at any time with the « Gérer les cookies » (manage cookies) link at the bottom of French pages.
+            change it at any time with the “Manage cookies” link at the bottom of every page.
           </p>
           <p>
             The site also measures its audience with its own tool, without cookies and without keeping any IP address. Each processing, the

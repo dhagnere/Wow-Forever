@@ -37,8 +37,8 @@ export default function Privacy() {
 
           <h2>Google Tag Manager and Google Analytics</h2>
           <p>
-            These tools only load with your consent, given in the banner on arrival. You can withdraw it at any time with the « Gérer les cookies »
-            (manage cookies) link at the bottom of French pages. The data is then processed by Google, including outside the European Union.
+            These tools only load with your consent, given in the banner on arrival. You can withdraw it at any time with the “Manage cookies” link
+            at the bottom of every page. The data is then processed by Google, including outside the European Union.
           </p>
 
           <h2>The Tavern&apos;s newsletter</h2>
