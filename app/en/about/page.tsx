@@ -18,7 +18,7 @@ export default function AboutEn() {
           <Ariane langue="en" etapes={[{ nom: "Who is Jobwow?" }]} />
           <div className="presentation-auteur">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/jobwow-512.png" width={200} height={200} alt="Jobwow's avatar: a figure with a starry hat, round glasses and a glowing orb staff" className="avatar-jobwow" />
+            <img src="/images/jobwow-512.png" width={200} height={200} alt="Jobwow's avatar: a Horde Undead, in-game screenshot" className="avatar-jobwow" />
             <div>
               <p className="surtitre">The innkeeper</p>
               <h1>Who is Jobwow?</h1>

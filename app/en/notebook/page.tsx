@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listerPubliesEn, videosChaine } from "@/modules/veille";
+import { lettresParues, listerPubliesEn, videosChaine } from "@/modules/veille";
 import { Ariane } from "@/components/Ariane";
 import { JournalVideo } from "@/components/JournalVideo";
+import { LettresCarnet } from "@/components/LettresCarnet";
 import { SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +17,11 @@ export const metadata: Metadata = {
 const dateEn = (d: Date) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" }).format(d);
 
 export default async function NotebookEn() {
-  const [episodes, videos] = await Promise.all([listerPubliesEn({ rubrique: "carnet", limite: 100 }), videosChaine(SITE.youtubeChaine)]);
+  const [episodes, videos, lettres] = await Promise.all([
+    listerPubliesEn({ rubrique: "carnet", limite: 100 }),
+    videosChaine(SITE.youtubeChaine),
+    lettresParues("en", 12),
+  ]);
   return (
     <>
       <section className="bandeau-page">
@@ -24,7 +29,7 @@ export default async function NotebookEn() {
           <Ariane langue="en" etapes={[{ nom: "Jobwow's Notebook" }]} />
           <div className="presentation-auteur">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/jobwow-512.png" width={140} height={140} alt="Jobwow's avatar: a figure with a starry hat" className="avatar-jobwow" />
+            <img src="/images/jobwow-512.png" width={140} height={140} alt="Jobwow's avatar: a Horde Undead, in-game screenshot" className="avatar-jobwow" />
             <div>
               <p className="surtitre">Every Sunday at 6 pm, Paris time</p>
               <h1>Jobwow&apos;s Notebook</h1>
@@ -56,6 +61,7 @@ export default async function NotebookEn() {
             ) : (
               <p className="doux">First episode on Sunday 8 November at 6 pm, Paris time. Each episode is translated within an hour of its French publication.</p>
             )}
+            <LettresCarnet lettres={lettres} langue="en" />
           </section>
           <aside className="colonne-laterale">
             <section className="encadre-nuit" aria-labelledby="t-fiche">

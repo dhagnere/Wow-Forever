@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listerPublies, videosChaine } from "@/modules/veille";
+import { lettresParues, listerPublies, videosChaine } from "@/modules/veille";
 import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { JournalVideo } from "@/components/JournalVideo";
+import { LettresCarnet } from "@/components/LettresCarnet";
 import { SITE, dateLongue } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,11 @@ export const metadata: Metadata = {
 };
 
 export default async function Carnet() {
-  const [episodes, videos] = await Promise.all([listerPublies({ rubrique: "carnet", limite: 100 }), videosChaine(SITE.youtubeChaine)]);
+  const [episodes, videos, lettres] = await Promise.all([
+    listerPublies({ rubrique: "carnet", limite: 100 }),
+    videosChaine(SITE.youtubeChaine),
+    lettresParues("fr", 12),
+  ]);
   return (
     <>
       <section className="bandeau-page">
@@ -23,7 +28,7 @@ export default async function Carnet() {
           <Ariane etapes={[{ nom: "Le Carnet de Jobwow" }]} />
           <div className="presentation-auteur">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/jobwow-512.png" width={140} height={140} alt="Avatar de Jobwow : personnage au chapeau étoilé" className="avatar-jobwow" />
+            <img src="/images/jobwow-512.png" width={140} height={140} alt="Avatar de Jobwow : mort-vivant de la Horde, capture du jeu" className="avatar-jobwow" />
             <div>
               <p className="surtitre">Chaque dimanche à 18h</p>
               <h1>Le Carnet de Jobwow</h1>
@@ -55,6 +60,7 @@ export default async function Carnet() {
             ) : (
               <p className="doux">Premier épisode le dimanche 8 novembre à 18h.</p>
             )}
+            <LettresCarnet lettres={lettres} />
           </section>
           <aside className="colonne-laterale">
             <section className="encadre-nuit" aria-labelledby="t-fiche">

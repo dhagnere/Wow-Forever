@@ -19,7 +19,7 @@ export default function APropos() {
           <Ariane etapes={[{ nom: "Qui est Jobwow ?" }]} />
           <div className="presentation-auteur">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/jobwow-512.png" width={200} height={200} alt="Avatar de Jobwow : personnage au chapeau étoilé, lunettes rondes et bâton à orbe lumineux" className="avatar-jobwow" />
+            <img src="/images/jobwow-512.png" width={200} height={200} alt="Avatar de Jobwow : mort-vivant de la Horde, capture du jeu" className="avatar-jobwow" />
             <div>
               <p className="surtitre">Le tavernier</p>
               <h1>Qui est Jobwow ?</h1>
