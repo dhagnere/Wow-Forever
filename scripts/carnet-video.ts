@@ -72,8 +72,18 @@ function nomSeance(debut: number, n: number): string {
 
 async function main() {
   const dossier = process.argv[2];
-  if (!dossier || dossier.startsWith("--") || !existsSync(dossier)) {
-    console.error('Usage : npm run carnet:video -- "<dossier des vidéos de Warcraft Recorder>" [--sortie <dossier>] [--ecart 30]');
+  const usage = 'Usage : npm run carnet:video -- "<dossier des vidéos>" [--sortie <dossier>] [--ecart 30]\n' +
+    'Sous PowerShell, si npm perd le chemin : npx tsx scripts/carnet-video.ts "<dossier des vidéos>"';
+  if (!dossier || dossier.startsWith("--")) {
+    console.error(`Aucun dossier reçu (arguments : ${JSON.stringify(process.argv.slice(2))}).\n${usage}`);
+    process.exit(1);
+  }
+  if (!existsSync(dossier) || !statSync(dossier).isDirectory()) {
+    console.error(`Dossier introuvable : « ${dossier} ».`);
+    if (/[^\x00-\x7f]/.test(dossier) || dossier.includes("\uFFFD")) {
+      console.error("Le chemin contient un accent ou un caractère spécial : renommez le dossier sans accent (par exemple D:\\Taverne\\journal-2026-11-11) et relancez.");
+    }
+    console.error(usage);
     process.exit(1);
   }
   const sortie = option("sortie") ?? path.join(dossier, "Journal de Jobwow");
