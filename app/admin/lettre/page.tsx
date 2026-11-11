@@ -17,7 +17,7 @@ const MESSAGES: Record<string, string> = {
   lance: "Envoi lancé : les premiers messages sont partis ; s'il en reste au-delà du plafond du jour, ils partent chaque heure (à h 25).",
   supprime: "Brouillon supprimé.",
   import: "Import terminé.",
-  preparee: "Lettre préparée importée en brouillon : relisez-la, envoyez l'essai, puis lancez l'envoi.",
+  preparee: "Lettre préparée importée en brouillon, avec son édition dans l'autre langue ; elle paraît déjà dans le Carnet. Relisez-la, envoyez l'essai, puis lancez l'envoi.",
   vide: "Le sujet et le texte sont obligatoires.",
   "essai-adresse": "L'adresse d'essai n'est pas valide.",
   envoi: "L'essai n'est pas parti : vérifiez RESEND_API_KEY, COURRIEL_EXPEDITEUR et le domaine chez Resend (journal de l'application).",
@@ -50,7 +50,7 @@ export default async function AdminLettre({ searchParams }: Props) {
       {LETTRES_PREPAREES.length ? (
         <section style={{ marginBottom: 32 }}>
           <h2>Brouillons préparés</h2>
-          <p className="doux">Préparés chaque semaine à partir des vidéos du Journal (voir <Link href="/admin/videos/">Vidéos</Link>). L&apos;import crée un brouillon : rien ne part sans essai ni lancement.</p>
+          <p className="doux">Préparés chaque semaine à partir des vidéos du Journal (voir <Link href="/admin/videos/">Vidéos</Link>). L&apos;import crée le brouillon français et l&apos;anglais de la même semaine ; ils paraissent aussitôt sous les épisodes du Carnet (version anglaise sur <Link href="/en/notebook/">/en/notebook/</Link>), mais rien ne part aux abonnés sans essai ni lancement.</p>
           <div className="tableau-boite">
             <table>
               <thead><tr><th scope="col">Semaine</th><th scope="col">Édition</th><th scope="col">Sujet</th><th scope="col"></th></tr></thead>

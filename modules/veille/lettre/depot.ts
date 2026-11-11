@@ -153,6 +153,19 @@ export async function lettresParues(langue: LangueLettre, limite = 30): Promise<
   return rows;
 }
 
+/**
+ * Lettres affichées sous les épisodes du Carnet : brouillons compris (Jobwow le veut ainsi), datées du lancement ou,
+ * pour un brouillon, de sa création. Les brouillons vides ne sont pas montrés.
+ */
+export async function lettresCarnet(langue: LangueLettre, limite = 12): Promise<LettreParue[]> {
+  const { rows } = await pool().query<LettreParue>(
+    `SELECT id, sujet, corps, COALESCE(lance_le, cree_le) AS "parueLe" FROM lettre_envois
+     WHERE langue = $1 AND btrim(corps) <> '' ORDER BY COALESCE(lance_le, cree_le) DESC LIMIT $2`,
+    [langue, limite],
+  );
+  return rows;
+}
+
 /** Abonnés à la Lettre sans compte joueur (administration seulement). */
 export interface AbonneSansCompte { courriel: string; langue: LangueLettre; confirmeLe: Date | null; demandeLe: Date }
 

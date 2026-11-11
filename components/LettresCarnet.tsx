@@ -5,24 +5,23 @@ import { dateLongue } from "@/lib/site";
 const TEXTES = {
   fr: {
     titre: "Les Lettres de Jobwow",
-    parue: "parue le",
     abonner: "Recevoir la Lettre",
     lienLettre: "/lettre/",
-    texte: "La Lettre du dimanche, telle qu'elle est partie aux abonnés.",
+    texte: "La Lettre de la semaine, à lire ici ou à recevoir par courriel.",
   },
   en: {
     titre: "Jobwow's Letters",
-    parue: "published on",
     abonner: "Get the Letter",
     lienLettre: "/en/newsletter/",
-    texte: "The Sunday Letter, as it went out to subscribers.",
+    texte: "The weekly Letter, to read here or get by email.",
   },
 };
 
 const DATE_EN = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" });
 
 /**
- * Lettres déjà lancées (jamais un brouillon : lettresParues ne lit que les envois partis), sous les épisodes du Carnet.
+ * Lettres sous les épisodes du Carnet, brouillons compris (lettresCarnet ; en anglais, lettresCarnetEn complète par
+ * l'édition anglaise préparée).
  * La plus récente est ouverte ; le corps passe par markdownVersHtml (garde-fou « Filtrage du HTML »).
  */
 export function LettresCarnet({ lettres, langue = "fr" }: { lettres: LettreParue[]; langue?: "fr" | "en" }) {
@@ -37,7 +36,7 @@ export function LettresCarnet({ lettres, langue = "fr" }: { lettres: LettreParue
           <details key={l.id} className="encadre" open={i === 0}>
             <summary>
               <strong>{l.sujet}</strong>{" "}
-              <span className="doux">· {t.parue} {langue === "en" ? DATE_EN.format(new Date(l.parueLe)) : dateLongue(l.parueLe)}</span>
+              <span className="doux">· {langue === "en" ? DATE_EN.format(new Date(l.parueLe)) : dateLongue(l.parueLe)}</span>
             </summary>
             <div className="corps" dangerouslySetInnerHTML={{ __html: markdownVersHtml(l.corps) }} />
           </details>

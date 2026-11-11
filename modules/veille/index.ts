@@ -103,7 +103,7 @@ export type { EnvoiLettre, ChiffresAbonnes, LettreParue, AbonneSansCompte } from
 export type { ResultatInscription } from "./lettre/expedition";
 export { inscrireALaLettre, confirmerAbonnement, desabonnerAdresse, desinscrireParLien, envoyerEssai, expedierLettres } from "./lettre/expedition";
 export {
-  listerEnvois, lireEnvoi, enregistrerEnvoi, supprimerEnvoi, lancerEnvoi, chiffresAbonnes, importerAbonnes, lettresParues, abonnesSansCompte,
+  listerEnvois, lireEnvoi, enregistrerEnvoi, supprimerEnvoi, lancerEnvoi, chiffresAbonnes, importerAbonnes, lettresParues, lettresCarnet, abonnesSansCompte,
 } from "./lettre/depot";
 export { PAGES_LETTRE, plafondJour } from "./lettre/messages";
 

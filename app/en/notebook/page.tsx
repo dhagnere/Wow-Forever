@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { lettresParues, listerPubliesEn, videosChaine } from "@/modules/veille";
+import { lettresCarnet, listerPubliesEn, videosChaine } from "@/modules/veille";
+import { LETTRES_PREPAREES } from "@/content/lettres-preparees";
+import { lettresCarnetEn } from "@/lib/lettresCarnet";
 import { Ariane } from "@/components/Ariane";
 import { JournalVideo } from "@/components/JournalVideo";
 import { LettresCarnet } from "@/components/LettresCarnet";
@@ -17,11 +19,13 @@ export const metadata: Metadata = {
 const dateEn = (d: Date) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" }).format(d);
 
 export default async function NotebookEn() {
-  const [episodes, videos, lettres] = await Promise.all([
+  const [episodes, videos, en, fr] = await Promise.all([
     listerPubliesEn({ rubrique: "carnet", limite: 100 }),
     videosChaine(SITE.youtubeChaine),
-    lettresParues("en", 12),
+    lettresCarnet("en", 12),
+    lettresCarnet("fr", 12),
   ]);
+  const lettres = lettresCarnetEn(en, fr, LETTRES_PREPAREES);
   return (
     <>
       <section className="bandeau-page">

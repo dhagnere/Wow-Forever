@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { LETTRES_PREPAREES } from "@/content/lettres-preparees";
 import { VIDEOS_PREPAREES, type VideoPreparee } from "@/content/videos-preparees";
 import { markdownVersHtml } from "@/modules/veille";
+import { lettresCarnetEn, pairePreparee } from "@/lib/lettresCarnet";
 import { chapitresDe, prepareeDe, problemesLettres, problemesVideo, publication } from "@/lib/videosPreparees";
 
 const EXEMPLE: VideoPreparee = {
@@ -88,5 +89,29 @@ describe("Lettres préparées", () => {
   it("signale une semaine à laquelle manque une langue", () => {
     expect(problemesLettres([{ id: "2026-S46-fr", semaine: "2026-S46", langue: "fr", sujet: "Semaine 46", corps: "Bonjour" }]))
       .toEqual(["semaine 2026-S46 : il faut une Lettre française et une anglaise"]);
+  });
+});
+
+describe("Lettres sous les épisodes du Carnet", () => {
+  const fr = LETTRES_PREPAREES.find((l) => l.id === "2026-S46-fr")!;
+  const en = LETTRES_PREPAREES.find((l) => l.id === "2026-S46-en")!;
+  const date = new Date("2026-11-11T20:00:00Z");
+
+  it("le Carnet anglais montre l'édition anglaise préparée d'une Lettre française déjà enregistrée", () => {
+    const liste = lettresCarnetEn([], [{ id: 7, sujet: fr.sujet, corps: fr.corps, parueLe: date }], LETTRES_PREPAREES);
+    expect(liste).toEqual([{ id: -7, sujet: en.sujet, corps: en.corps, parueLe: date }]);
+  });
+
+  it("garde l'anglaise enregistrée (éventuellement retouchée) plutôt que la préparée, sans doublon", () => {
+    const anglaise = { id: 8, sujet: en.sujet, corps: "Corrigée à la main.", parueLe: date };
+    expect(lettresCarnetEn([anglaise], [{ id: 7, sujet: fr.sujet, corps: fr.corps, parueLe: date }], LETTRES_PREPAREES)).toEqual([anglaise]);
+  });
+
+  it("une Lettre française écrite à la main, sans édition préparée, n'invente pas d'anglais", () => {
+    expect(lettresCarnetEn([], [{ id: 9, sujet: "Une Lettre libre", corps: "Texte.", parueLe: date }], LETTRES_PREPAREES)).toEqual([]);
+  });
+
+  it("chaque Lettre préparée a son édition dans l'autre langue, importée avec elle", () => {
+    for (const l of LETTRES_PREPAREES) expect(pairePreparee(l, LETTRES_PREPAREES)?.langue, l.id).toBe(l.langue === "fr" ? "en" : "fr");
   });
 });

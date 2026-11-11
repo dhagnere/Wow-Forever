@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { lettresParues, listerPublies, videosChaine } from "@/modules/veille";
+import { lettresCarnet, listerPublies, videosChaine } from "@/modules/veille";
 import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { JournalVideo } from "@/components/JournalVideo";
@@ -19,7 +19,7 @@ export default async function Carnet() {
   const [episodes, videos, lettres] = await Promise.all([
     listerPublies({ rubrique: "carnet", limite: 100 }),
     videosChaine(SITE.youtubeChaine),
-    lettresParues("fr", 12),
+    lettresCarnet("fr", 12),
   ]);
   return (
     <>
