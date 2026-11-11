@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { lirePublie, lirePublieEn, listerPubliesEn, markdownVersHtml, sourcesPubliees } from "@/modules/veille";
+import { lirePublie, lirePublieEn, listerPubliesEn, markdownVersHtml, sourcesPubliees, videosChaine } from "@/modules/veille";
 import { CarteArticle } from "@/components/Articles";
 import { Ariane } from "@/components/Ariane";
 import { JsonLd } from "@/components/JsonLd";
@@ -132,7 +132,7 @@ export default async function ArticleEn({ params }: Props) {
             Translated from the <Link href={`/articles/${a.slug}/`} hrefLang="fr">French article</Link>, written and reviewed by Jobwow.
           </p>
 
-          {a.rubrique === "carnet" ? <JournalVideo langue="en" /> : null}
+          {a.rubrique === "carnet" ? <JournalVideo langue="en" videos={await videosChaine(SITE.youtubeChaine)} /> : null}
 
           <div className="appel-lettre">
             <p><strong>A week of WoW Forever, every Sunday at 10 am.</strong> Jobwow&apos;s column, the five news to remember and a gameplay tip.</p>

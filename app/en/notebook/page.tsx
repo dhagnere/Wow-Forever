@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listerPubliesEn } from "@/modules/veille";
+import { listerPubliesEn, videosChaine } from "@/modules/veille";
 import { Ariane } from "@/components/Ariane";
 import { JournalVideo } from "@/components/JournalVideo";
 import { SITE } from "@/lib/site";
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 const dateEn = (d: Date) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" }).format(d);
 
 export default async function NotebookEn() {
-  const episodes = await listerPubliesEn({ rubrique: "carnet", limite: 100 });
+  const [episodes, videos] = await Promise.all([listerPubliesEn({ rubrique: "carnet", limite: 100 }), videosChaine(SITE.youtubeChaine)]);
   return (
     <>
       <section className="bandeau-page">
@@ -41,6 +41,7 @@ export default async function NotebookEn() {
       <div className="wrap contenu">
         <div className="colonnes">
           <section className="colonne-principale" aria-labelledby="t-episodes">
+            {videos.length ? <JournalVideo langue="en" videos={videos} /> : null}
             <h2 id="t-episodes" className="section-titre" style={{ fontSize: 26 }}>The episodes</h2>
             {episodes.length ? (
               <ol style={{ listStyle: "none", margin: 0, padding: "0 0 0 28px", borderLeft: "2px solid var(--bordure)", display: "flex", flexDirection: "column", gap: 28 }}>
@@ -72,7 +73,7 @@ export default async function NotebookEn() {
             </div>
           </aside>
         </div>
-        <div style={{ marginTop: 40 }}><JournalVideo langue="en" /></div>
+        {videos.length ? null : <div style={{ marginTop: 40 }}><JournalVideo langue="en" /></div>}
       </div>
     </>
   );

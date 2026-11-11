@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { LETTRES_PREPAREES } from "@/content/lettres-preparees";
 import { VIDEOS_PREPAREES, type VideoPreparee } from "@/content/videos-preparees";
 import { markdownVersHtml } from "@/modules/veille";
-import { chapitresDe, problemesLettres, problemesVideo, publication } from "@/lib/videosPreparees";
+import { chapitresDe, prepareeDe, problemesLettres, problemesVideo, publication } from "@/lib/videosPreparees";
 
 const EXEMPLE: VideoPreparee = {
   id: "2026-11-11-21h00",
@@ -44,6 +44,16 @@ describe("vidéos préparées pour YouTube", () => {
     const chaine = [{ titre: "journal de jobwow · 11 novembre 2026 · durotar → les tarides", lien: "https://www.youtube.com/watch?v=abc" }];
     expect(publication(EXEMPLE, chaine)?.lien).toBe("https://www.youtube.com/watch?v=abc");
     expect(publication({ ...EXEMPLE, titre: "Autre" }, chaine)).toBeUndefined();
+  });
+
+  it("reconnaît une vidéo dont Jobwow a retouché la fin du titre (même date), et lui rend sa miniature", () => {
+    const chaine = [{ titre: "Journal de Jobwow · 11 novembre 2026 · niveaux 1 à 7", lien: "https://www.youtube.com/watch?v=def" }];
+    expect(publication(EXEMPLE, chaine)?.lien).toBe("https://www.youtube.com/watch?v=def");
+    expect(prepareeDe(chaine[0], [EXEMPLE])?.miniature).toBe("/images/videos/journal-2026-11-11.jpg");
+    // deux séances préparées le même jour : seul le titre exact fait foi
+    const seconde = { ...EXEMPLE, id: "2026-11-11-22h30", titre: "Journal de Jobwow · 11 novembre 2026 · Brill" };
+    expect(publication(EXEMPLE, chaine, [EXEMPLE, seconde])).toBeUndefined();
+    expect(publication(EXEMPLE, [{ titre: "Journal de Jobwow · 12 novembre 2026 · Brill" }])).toBeUndefined();
   });
 
   it("chaque vidéo préparée respecte les règles", () => {

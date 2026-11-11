@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listerPublies } from "@/modules/veille";
+import { listerPublies, videosChaine } from "@/modules/veille";
 import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { JournalVideo } from "@/components/JournalVideo";
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Carnet() {
-  const episodes = await listerPublies({ rubrique: "carnet", limite: 100 });
+  const [episodes, videos] = await Promise.all([listerPublies({ rubrique: "carnet", limite: 100 }), videosChaine(SITE.youtubeChaine)]);
   return (
     <>
       <section className="bandeau-page">
@@ -40,6 +40,7 @@ export default async function Carnet() {
       <div className="wrap contenu">
         <div className="colonnes">
           <section className="colonne-principale" aria-labelledby="t-episodes">
+            {videos.length ? <JournalVideo videos={videos} /> : null}
             <h2 id="t-episodes" className="section-titre" style={{ fontSize: 26 }}>Les épisodes</h2>
             {episodes.length ? (
               <ol style={{ listStyle: "none", margin: 0, padding: "0 0 0 28px", borderLeft: "2px solid var(--bordure)", display: "flex", flexDirection: "column", gap: 28 }}>
@@ -71,7 +72,7 @@ export default async function Carnet() {
             </div>
           </aside>
         </div>
-        <div style={{ marginTop: 40 }}><JournalVideo /></div>
+        {videos.length ? null : <div style={{ marginTop: 40 }}><JournalVideo /></div>}
       </div>
     </>
   );

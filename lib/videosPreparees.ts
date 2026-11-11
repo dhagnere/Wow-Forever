@@ -53,8 +53,27 @@ export function problemesLettres(lettres: LettrePreparee[]): string[] {
 export const titreNormalise = (t: string): string =>
   t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 
-/** Vidéo publique de la chaîne correspondant à une vidéo préparée (même titre), s'il y en a une. */
-export function publication<T extends { titre: string }>(v: VideoPreparee, chaine: T[]): T | undefined {
+/** Début d'un titre du Journal : « journal de jobwow · 11 novembre 2026 » (série et date), ou null. */
+const debutTitre = (t: string): string | null => {
+  const parties = titreNormalise(t).split(" · ");
+  return parties.length >= 2 && /\d{4}$/.test(parties[1]) ? parties.slice(0, 2).join(" · ") : null;
+};
+
+/**
+ * Vidéo publique de la chaîne correspondant à une vidéo préparée : même titre, ou, si Jobwow a retouché la fin du titre
+ * dans YouTube Studio, même série et même date, quand une seule vidéo préparée porte cette date.
+ */
+export function publication<T extends { titre: string }>(v: VideoPreparee, chaine: T[], toutes: VideoPreparee[] = [v]): T | undefined {
   const t = titreNormalise(v.titre);
-  return chaine.find((c) => titreNormalise(c.titre) === t);
+  const exacte = chaine.find((c) => titreNormalise(c.titre) === t);
+  if (exacte) return exacte;
+  const debut = debutTitre(v.titre);
+  if (!debut || toutes.filter((x) => debutTitre(x.titre) === debut).length > 1) return undefined;
+  const memeDate = chaine.filter((c) => debutTitre(c.titre) === debut);
+  return memeDate.length === 1 ? memeDate[0] : undefined;
+}
+
+/** Vidéo préparée (et donc sa miniature) d'une vidéo de la chaîne, s'il y en a une. */
+export function prepareeDe<T extends { titre: string }>(video: T, toutes: VideoPreparee[]): VideoPreparee | undefined {
+  return toutes.find((v) => publication(v, [video], toutes) === video);
 }

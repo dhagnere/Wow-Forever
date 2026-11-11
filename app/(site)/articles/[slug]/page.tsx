@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { lirePublie, lirePublieEn, listerPublies, markdownVersHtml, sourcesPubliees, texteReseau } from "@/modules/veille";
+import { lirePublie, lirePublieEn, listerPublies, markdownVersHtml, sourcesPubliees, texteReseau, videosChaine } from "@/modules/veille";
 import { PartageFacebook } from "@/components/PartageFacebook";
 import { CarteArticle, nomRubrique } from "@/components/Articles";
 import { Ariane } from "@/components/Ariane";
@@ -50,7 +50,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PageArticle({ params }: Props) {
   const article = await lirePublie((await params).slug);
   if (!article) notFound();
-  const memeTheme = await listerPublies({ rubrique: article.rubrique, limite: 3, sauf: article.id });
+  const [memeTheme, videos] = await Promise.all([
+    listerPublies({ rubrique: article.rubrique, limite: 3, sauf: article.id }),
+    article.rubrique === "carnet" ? videosChaine(SITE.youtubeChaine) : Promise.resolve([]),
+  ]);
   const url = `${SITE.url}/articles/${article.slug}/`;
 
   return (
@@ -116,7 +119,7 @@ export default async function PageArticle({ params }: Props) {
 
           <p className="signature-article">{SITE.signatureArticle}</p>
 
-          {article.rubrique === "carnet" ? <JournalVideo /> : null}
+          {article.rubrique === "carnet" ? <JournalVideo videos={videos} /> : null}
 
           <div className="appel-lettre">
             <p><strong>Une semaine de WoW Forever, chaque dimanche à 10 h.</strong> Le billet de Jobwow, les cinq nouvelles à retenir et un tuyau de jeu.</p>

@@ -19,7 +19,7 @@ export default async function AdminVideos() {
   await exigerAdmin();
   const chaine = await videosChaine(SITE.youtubeChaine);
   const semaines = [...new Set(VIDEOS_PREPAREES.map((v) => v.semaine))].sort().reverse();
-  const aPublier = VIDEOS_PREPAREES.filter((v) => !publication(v, chaine)).length;
+  const aPublier = VIDEOS_PREPAREES.filter((v) => !publication(v, chaine, VIDEOS_PREPAREES)).length;
   return (
     <div>
       <h1 style={{ marginTop: 0 }}>Vidéos du Journal</h1>
@@ -39,7 +39,7 @@ export default async function AdminVideos() {
             ) : null}
             <div style={{ display: "grid", gap: 18 }}>
               {VIDEOS_PREPAREES.filter((v) => v.semaine === s).sort((a, b) => a.id.localeCompare(b.id)).map((v) => {
-                const pub = publication(v, chaine);
+                const pub = publication(v, chaine, VIDEOS_PREPAREES);
                 const problemes = problemesVideo(v);
                 return (
                   <article key={v.id} className="encadre" style={{ display: "grid", gap: 10 }}>
