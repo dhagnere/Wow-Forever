@@ -247,7 +247,7 @@ export function titreVideo(s: Seance, info: { zones: string[]; niveaux: [number,
 
 export function descriptionVideo(s: Seance, info: { liste: Chapitre[]; valides: boolean; zones: string[] }, site: string): string {
   const lignes = [
-    `Une séance de jeu sur WoW Forever, filmée sans guide payant${info.zones.length ? ` : ${info.zones.join(", ")}` : ""}.`,
+    `Une séance de jeu sur WoW Forever${info.zones.length ? ` : ${info.zones.join(", ")}` : ""}.`,
     "",
     "Chapitres :",
     ...info.liste.map((c) => `${horodatage(c.seconde)} ${c.titre}`),

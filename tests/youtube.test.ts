@@ -13,7 +13,7 @@ const FLUX = `<?xml version="1.0" encoding="UTF-8"?>
   <published>2026-11-11T20:00:00+00:00</published>
   <media:group>
    <media:title>Journal de Jobwow</media:title>
-   <media:description>Une séance de jeu sur WoW Forever, filmée sans guide payant : Durotar, Les Tarides.
+   <media:description>Une séance de jeu sur WoW Forever : Durotar, Les Tarides.
 
 Chapitres :
 0:00 Début de la séance
@@ -38,7 +38,7 @@ describe("chaîne YouTube", () => {
       titre: "Journal de Jobwow · 11 novembre 2026 · Durotar → Les Tarides",
       publieLe: "2026-11-11T20:00:00.000Z",
       lien: "https://www.youtube.com/watch?v=AbCdEfGhIjK",
-      resume: "Une séance de jeu sur WoW Forever, filmée sans guide payant : Durotar, Les Tarides.",
+      resume: "Une séance de jeu sur WoW Forever : Durotar, Les Tarides.",
     });
     // le titre reste du texte, le résumé perd toute balise
     expect(v[1].titre).toBe("Bande-annonce <de la Taverne>");

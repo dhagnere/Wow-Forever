@@ -1,53 +1,42 @@
-# Vidéos de jeu → guide de 1 à 60
+# Vidéos de jeu → YouTube et Lettre
 
-Une partie filmée sert à corriger le guide de 1 à 60 avec ce qui se passe vraiment en jeu. Chaque vidéo donne trois résultats.
+Les parties filmées par Jobwow (Warcraft Recorder) servent **seulement** à la chaîne YouTube et à la Lettre de la semaine.
+Elles ne servent plus à corriger les guides du site : les routes réellement jouées passent par RouteProbe et l'addon
+EternalRoutes. Rien n'est donc repris d'une vidéo dans `content/parcours-releves.ts`, `content/ajouts-forever.ts` ni dans
+la relecture des guides, et les addons affichés à l'écran (Zygor, Questie…) ne posent plus de problème : ce qu'ils montrent
+n'entre jamais dans le site.
 
-## Condition : aucun guide commercial
+## Circuit
 
-La vidéo est jouée **sans Zygor** (ni aucun autre guide payant) : l'addon est **désactivé** dans la liste des AddOns, pas seulement masqué. Sinon l'ordre des étapes serait celui de ce guide, et rien n'en est repris. La vidéo est vérifiée sur toute sa durée (bande du haut de l'écran, où s'affiche le pointeur, et discussion) avant toute exploitation ; une vidéo avec Zygor est supprimée sans être analysée.
+1. **Jobwow envoie les liens de partage** (Google Drive, « Tous les utilisateurs disposant du lien » le temps du travail) des
+   fichiers d'une semaine.
+2. **Téléchargement et lecture de l'écran**, un fichier à la fois (`gdown`, puis une image toutes les 5 s avec ffmpeg et
+   `rapidocr-onnxruntime`) : discussion (« Quête acceptée », « … terminée », niveaux), texte du centre (lieux traversés,
+   pointeur de l'addon de guide), suivi des quêtes. Les fichiers téléchargés sont effacés aussitôt lus.
+3. **Séances** : les fichiers d'une même séance (moins de 30 minutes d'écart) forment une vidéo YouTube, à assembler par
+   Jobwow avec `npm run carnet:video`. Les chapitres sont calculés sur la vidéo assemblée (durées des fichiers mises bout à bout).
+4. **Fiche YouTube** dans `content/videos-preparees.ts` : titre (100 caractères au plus), description, chapitres (lieux,
+   niveaux, quêtes marquantes), fichiers et liens d'origine. Elle s'affiche dans `/admin/videos`, avec des boutons « Copier ».
+5. **Lettre de la semaine**, en français et en anglais, dans `content/lettres-preparees.ts` : le récit des séances, avec un
+   lien vers `/carnet/videos/` (ou `/en/notebook/videos/`) et le Carnet. Elle s'importe en brouillon dans `/admin/lettre`.
+6. **Vérifier** (`npm run lint && npm test && npm run build`), puis pousser sur `dev`.
 
-## Ce qu'il faut voir à l'écran
+## Règles des textes
 
-- la discussion, avec les messages « Quête acceptée : … » et « … terminé » ;
-- la fiche de quête ouverte quelques secondes à la prise (titre, objectifs, donneur) ;
-- les coordonnées : carte ouverte (« Personnage : x, y » en bas à gauche) ou petit addon sur la mini-carte, en particulier là où se trouvent les monstres et objets d'une quête ;
-- si possible, un commentaire à voix haute quand quelque chose ne colle pas avec le guide du site.
+- Titres, noms de lieux et de quêtes seulement : aucun texte de quête recopié.
+- Rien d'inventé : ce qui ne se voit pas dans la vidéo reste entre crochets.
+- Ne pas annoncer une partie « sans guide » quand un addon de guide est affiché.
+- Le nom d'un guide commercial n'apparaît ni dans les titres ni dans la Lettre.
 
-Format : 1080p à 30 images par seconde, une zone par dossier, des morceaux de 10 à 20 minutes numérotés (`orc-chasseur_durotar_01.mp4`…). Partage par lien le temps du travail, puis retour en accès limité.
+## Séances préparées pour YouTube
 
-## Les trois résultats
+| Semaine | Date | Personnage | Fichiers | Durée | Remarques |
+|---|---|---|---|---|---|
 
-1. **Le parcours relevé** — `content/parcours-releves.ts` : l'ordre joué dans la zone, étape par étape (« prendre:<id> », « faire:<id> », « rendre:<id> »), pour la race, et pour la classe si des quêtes de classe en font partie. Le guide suit cet ordre en tête de zone, puis l'ordre calculé (`ordreDuGuide`).
-2. **Les quêtes de Forever manquantes** — `content/ajouts-forever.ts` : toute quête vue en jeu et absente du guide (ids 9100001 et suivants), avec donneur, receveur, coordonnées, objectifs rédigés avec nos mots et la source (vidéo, moment). Aucun texte de quête recopié.
-3. **Le bloc de remarques** — à coller dans `/admin/guides/<race>/<classe>/`, champ « Importer des remarques », une étape par ligne :
+## Historique : vidéos utilisées pour le guide (jusqu'au 8 novembre 2026)
 
-   ```
-   prendre:4641 | oui |
-   prendre:788 | non | ce qui ne colle pas, en quelques mots
-   ```
-
-   « oui » coche « vérifié en jeu » ; les remarques restent dans l'admin.
-
-Les deux premiers passent par un commit sur `dev` (tests compris : `tests/parcours-releves.test.ts`, `tests/ajouts-forever.test.ts`) et n'apparaissent sur le site qu'au déploiement. Un guide d'essai (page locale, non publiée) peut être préparé avant, pour relecture.
-
-## Procédure d'analyse (la même pour chaque classe et chaque guide)
-
-Du lien de la vidéo au guide mis à jour, dans cet ordre :
-
-1. **Télécharger** la vidéo (`gdown`, id du lien Drive).
-2. **Extraire les images** (`ffmpeg` via `imageio-ffmpeg` : 1 image/6 s pour les longues, 1 image/s pour les courtes de moins d'une minute).
-3. **OCR** (`rapidocr-onnxruntime`, script `ocr_all.py`).
-4. **Chronologie** (`extract_timeline.py` → `timeline.txt`) : repérer « Quête acceptée : … » et « … terminé », ainsi que les « niveau N ».
-5. **Relever l'ordre des quêtes** : la suite des `prendre` / `faire` / `rendre`, dans l'ordre des vidéos, sans trier.
-6. **Vérifier les coordonnées** à chaque fois (`quest_lookup.py` ou `guidePour` : donneur, receveur, cibles), et ne reporter que celles du guide.
-7. **Écrire les trois résultats** : `parcours-relevés.ts` (ordre), `ajouts-forever.ts` (quête Forever vue et absente du guide), `analyses-videos.ts` (une entrée par vidéo).
-8. **Vérifier** : `npm run lint && npm test` (les tests comprennent l'ordre jouable et les ajouts Forever).
-9. **Pousser** sur `dev` (le site se déploie automatiquement).
-10. **Régénérer l'addon** `TavernGuide` : `npx tsx exporter-addon.ts` (→ `data.lua`), puis re-zipper, pour que la route serve aussi en jeu.
-
-Avant tout : confirmer que la vidéo est jouée **sans addon de guide** (pas de Zygor ni Questie à l'écran). Sinon l'ordre ne vaut rien et la vidéo est écartée, jamais analysée.
-
-## Vidéos traitées
+Avant ce changement, les vidéos jouées sans addon de guide servaient à relever l'ordre réel des quêtes. Les résultats restent
+dans `content/parcours-releves.ts` et `content/ajouts-forever.ts`, mais ne sont plus complétés par des vidéos.
 
 | Date | Personnage | Zone | Durée | Parcours relevé | Ajouts Forever | Remarques |
 |---|---|---|---|---|---|---|

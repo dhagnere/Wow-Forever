@@ -56,7 +56,7 @@ export default function AboutEn() {
             <Link href="/en/community/">the community</Link>.
           </p>
           <p>
-            Jobwow&apos;s play sessions, recorded without any paid guide, are on <Link href="/en/notebook/videos/">the videos page</Link>
+            Jobwow&apos;s play sessions are on <Link href="/en/notebook/videos/">the videos page</Link>
             {SITE.youtube ? <> and on <a href={SITE.youtube} rel="noopener noreferrer">the Tavern&apos;s YouTube channel</a></> : null}.
           </p>
         </article>
