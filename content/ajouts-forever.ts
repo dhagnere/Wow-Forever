@@ -274,9 +274,13 @@ export const QUETES_FOREVER: QueteForever[] = [
     niveau: 15,
     min: 10,
     donneur: { nom: "Kor'geld", x: 52, y: 30 },
-    objectifs: ["Rapporter 2 × Bouture de cattail", "Rapporter 4 × Bouture de speargrass"],
+    objectifs: ["Rapporter 2 × Bouture de cattail (Orgrimmar, 68 – 30)", "Rapporter 4 × Bouture de speargrass (Orgrimmar, 68 – 30)"],
+    // Boutures ramassées à Orgrimmar, 68 – 30 sur la carte de la ville (relevé de Jobwow en jeu, 12 novembre 2026). La carte
+    // d'Orgrimmar n'existe pas dans le guide : comme le donneur, la collecte est rattachée au point de rassemblement de
+    // Durotar (52, 30), ce qui suffit à l'ordre « prendre, ramasser, rendre » ; l'objectif dit où aller vraiment.
+    cibles: [[52, 30]],
     faction: "horde",
-    source: "Vidéos du 7 novembre 2026 (vidéos 13 et 16) ; ForeverDB : quête 97242, à Orgrimmar (entrée en Durotar ~52, 30).",
+    source: "Vidéos du 7 novembre 2026 (vidéos 13 et 16) ; ForeverDB : quête 97242, à Orgrimmar (entrée en Durotar ~52, 30). Collecte relevée en jeu par Jobwow le 12 novembre 2026 : Orgrimmar, 68 – 30.",
   },
   {
     // Id réel Forever : 97275 (« Whuut's the Rush »). Id interne 9100019. Orgrimmar.
