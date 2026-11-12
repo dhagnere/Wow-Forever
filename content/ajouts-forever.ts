@@ -8,7 +8,8 @@
  *  - id : 9100001, 9100002… (unique, jamais réutilisé : il sert à sauvegarder la progression des joueurs) ;
  *  - lieu : slug de la carte de la zone (« durotar », « clairieres-de-tirisfal »…) ;
  *  - positions x et y : coordonnées en jeu sur la carte de la zone (0 à 100) ;
- *  - objectifs : rédigés avec nos mots (« Rapporter 6 × … », « Vaincre 10 × … »), jamais le texte du jeu ;
+ *  - objectifs : rédigés avec nos mots (« Rapporter 6 × … », « Vaincre 10 × … »), jamais le texte du jeu ; une ligne par
+ *    objet ou par monstre (le jeu compte chacun à part, l'addon les affiche ligne à ligne) ;
  *  - cibles : quelques points où se trouvent les monstres ou objets ; sans cibles, l'objectif est marqué « à relever » et le
  *    guide le compte comme fait dès la prise (comme une lettre à remettre) ;
  *  - faction : "alliance", "horde" ou null ; classes : slugs, seulement pour une quête de classe ;
@@ -105,7 +106,7 @@ export const QUETES_FOREVER: QueteForever[] = [
     niveau: 6,
     min: 1,
     donneur: { nom: "Vel'rin Croc", x: 55.9, y: 74 },
-    objectifs: ["Vaincre 6 × Rôdeuse des crêtes ; Vaincre 6 × Rôdeur des crêtes"],
+    objectifs: ["Vaincre 6 × Rôdeuse des crêtes", "Vaincre 6 × Rôdeur des crêtes"],
     rendre: { nom: "Gar'Thok", x: 52, y: 43.6 },
     faction: "horde",
     source: "Vidéos du 7 novembre 2026 (vidéo 02) ; ForeverChanges : quête 96821, donnée par Vel'rin Fang (55,9 – 74), rendue à Gar'Thok (52 – 43,6). Cibles des araignées à confirmer en jeu.",
@@ -132,7 +133,7 @@ export const QUETES_FOREVER: QueteForever[] = [
     niveau: 6,
     min: 3,
     donneur: { nom: "Turroc", x: 54, y: 42.7 },
-    objectifs: ["Rapporter Hache de bataille de pillard ; Rapporter Arc de pillard ; Rapporter Bouclier de pillard"],
+    objectifs: ["Rapporter Hache de bataille de pillard", "Rapporter Arc de pillard", "Rapporter Bouclier de pillard"],
     faction: "horde",
     source: "ForeverChanges : quête 96822, donnée par Turroc (54 – 42,7, Tranchecolline), armes à ramasser près de Tiragarde. Cibles à confirmer en jeu.",
   },
@@ -232,7 +233,7 @@ export const QUETES_FOREVER: QueteForever[] = [
     niveau: 11,
     min: 9,
     donneur: { nom: "Heglan Shadeeye", x: 58.6, y: 45.6 },
-    objectifs: ["Rapporter Dague orque ; Rapporter Morceau de bannière ; Rapporter Trident d'os brisé"],
+    objectifs: ["Rapporter Dague orque", "Rapporter Morceau de bannière", "Rapporter Trident d'os brisé"],
     cibles: [[58.6, 45.6]],
     rendre: { nom: "Orgnil Marque-l'âme", x: 52.2, y: 43.1 },
     avant: 9100014,
@@ -273,7 +274,7 @@ export const QUETES_FOREVER: QueteForever[] = [
     niveau: 15,
     min: 10,
     donneur: { nom: "Kor'geld", x: 52, y: 30 },
-    objectifs: ["Rapporter 2 × Bouture de cattail ; Rapporter 4 × Bouture de speargrass"],
+    objectifs: ["Rapporter 2 × Bouture de cattail", "Rapporter 4 × Bouture de speargrass"],
     faction: "horde",
     source: "Vidéos du 7 novembre 2026 (vidéos 13 et 16) ; ForeverDB : quête 97242, à Orgrimmar (entrée en Durotar ~52, 30).",
   },
