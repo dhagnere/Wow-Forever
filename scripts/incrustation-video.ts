@@ -2,9 +2,11 @@
  * Jobwow incrusté dans les vidéos du Journal, sur le PC de Jobwow (jamais sur le serveur du site) :
  *
  *   npm run carnet:incrustation -- "<vidéo, dossier de vidéos ou fichier .narration.json>" \
- *     [--miniature <image>] [--sonde <EternalProbe.lua>] [--preparer] [--sans-clips]
+ *     [--miniature <image>] [--sonde <EternalProbe.lua>] [--preparer] [--sans-clips] [--sortie <dossier>] [--ecart 30] [--par-fichier]
  *
- * Une vidéo fournie = une vidéo rendue (la séance suit la durée du fichier). Pour chaque vidéo :
+ * Un dossier (celui de Warcraft Recorder) : les vidéos sont rangées par séance comme pour carnet:video (plus de 30 minutes
+ * d'écart, nouvelle séance) et assemblées sans réencodage dans « Journal de Jobwow » (ou --sortie) ; --par-fichier garde
+ * une vidéo par fichier. Un fichier seul donne une vidéo. Pour chaque vidéo (ou séance assemblée) :
  * 1. la narration (`<vidéo>.narration.json`) est préparée si elle n'existe pas encore : intro, moments forts tirés des
  *    repères de la sonde (niveau, élite, mort, zone, grimoire, entraîneur, trajet, quête rendue), répliques de Jobwow,
  *    sous-titres, trois clips verticaux. Elle se relit et se corrige dans l'atelier vidéo (artefact), puis on relance ;
@@ -23,7 +25,7 @@ import {
   evenementsSonde, grapheRendu, preparerNarration, typographie, verifierNarration,
   type Calque, type Evenement, type Moment, type Narration,
 } from "@/lib/incrustation";
-import { chapitres, heureLocale, lireSauvegardeSonde, reperesRouteProbe, SONDES, titreVideo, type Repere } from "@/lib/videoCarnet";
+import { chapitres, heureLocale, horodatage, lireSauvegardeSonde, positionDans, reperesRouteProbe, seances, SONDES, titreVideo, type Clip, type Repere, type Seance } from "@/lib/videoCarnet";
 
 const COMPTES_WOW = "C:\\WOW\\world of Warcraft\\_forever_\\WTF\\Account";
 const EXTENSIONS = new Set([".mp4", ".mkv", ".mov"]);
@@ -217,21 +219,40 @@ async function main() {
   const usage = 'Usage : npm run carnet:incrustation -- "<vidéo, dossier ou .narration.json>" [--miniature <image>] [--sonde <fichier>] [--preparer] [--sans-clips]';
   if (!cible || cible.startsWith("--") || !existsSync(cible)) { console.error(`${cible ? `Introuvable : « ${cible} ».\n` : ""}${usage}`); process.exit(1); }
 
-  // vidéos à traiter : un fichier, un dossier (sans les rendus déjà faits), ou une narration
-  const videos: string[] = [];
+  // vidéos à traiter : une narration, un fichier, ou un dossier rangé par séances
+  const travaux: { video: string; seance: Seance | null }[] = [];
   if (cible.endsWith(".narration.json")) {
     const n = JSON.parse(readFileSync(cible, "utf8")) as Narration;
-    videos.push(path.resolve(path.dirname(cible), n.video));
+    travaux.push({ video: path.resolve(path.dirname(cible), n.video), seance: null });
   } else if (statSync(cible).isDirectory()) {
-    for (const nom of readdirSync(cible).sort()) {
-      if (EXTENSIONS.has(path.extname(nom).toLowerCase()) && !/\.(jobwow|clip-\d+)\.mp4$/i.test(nom)) videos.push(path.join(cible, nom));
+    const sortieDossier = option("sortie") ?? path.join(cible, "Journal de Jobwow");
+    const fichiers = readdirSync(cible).sort()
+      .filter((nom) => EXTENSIONS.has(path.extname(nom).toLowerCase()) && !/\.(jobwow|clip-\d+)\.mp4$/i.test(nom))
+      .map((nom) => path.join(cible, nom));
+    const clips: Clip[] = [];
+    for (const f of fichiers) { const { duree } = await infos(f); clips.push({ fichier: f, debut: debutDe(f, duree), duree }); }
+    const groupes = drapeau("par-fichier") ? clips.map((c) => ({ clips: [c], debut: c.debut, fin: c.debut + c.duree * 1000, duree: c.duree }))
+      : seances(clips, Number(option("ecart") ?? 30));
+    for (const s of groupes) {
+      if (s.clips.length === 1) { travaux.push({ video: s.clips[0].fichier, seance: s }); continue; }
+      mkdirSync(sortieDossier, { recursive: true });
+      const d = new Date(s.debut).toISOString();
+      const nom = `journal-jobwow_${d.slice(0, 10)}_${d.slice(11, 16).replace(":", "h")}`;
+      const video = path.join(sortieDossier, `${nom}${path.extname(s.clips[0].fichier).toLowerCase()}`);
+      if (!existsSync(video)) {
+        const liste = path.join(sortieDossier, `${nom}.liste.txt`);
+        writeFileSync(liste, s.clips.map((c) => `file '${c.fichier.replace(/\\/g, "/").replace(/'/g, "'\\''")}'`).join("\n"), "utf8");
+        console.log(`Assemblage de ${s.clips.length} fichiers (${horodatage(s.duree)}) : ${video}`);
+        await encoder(["-hide_banner", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", liste, "-c", "copy", "-movflags", "+faststart", video]);
+      } else console.log(`Déjà assemblée : ${video}`);
+      travaux.push({ video, seance: s });
     }
-  } else videos.push(cible);
-  if (!videos.length) { console.error("Aucune vidéo trouvée."); process.exit(1); }
+  } else travaux.push({ video: cible, seance: null });
+  if (!travaux.length) { console.error("Aucune vidéo trouvée."); process.exit(1); }
 
   let evenements: Evenement[] | null = null;
   let reperes: Repere[] = [];
-  for (const video of videos) {
+  for (const { video, seance: seanceConnue } of travaux) {
     const fichierN = `${sansExt(video)}.narration.json`;
     const travail = path.join(path.dirname(video), ".incrustation", path.basename(sansExt(video)));
     const { duree, audio } = await infos(video);
@@ -254,11 +275,13 @@ async function main() {
         reperes = reperes.sort((a, b) => a.heure - b.heure);
         if (!evenements.length) console.log("Aucun repère de sonde : seule l'intro sera commentée (/reload en jeu pour sauvegarder, ou --sonde <fichier>).");
       }
-      const debut = debutDe(video, duree);
-      const seance = { clips: [{ fichier: video, debut, duree }], debut, fin: debut + duree * 1000, duree };
+      const debut = seanceConnue?.debut ?? debutDe(video, duree);
+      const seance: Seance = seanceConnue ?? { clips: [{ fichier: video, debut, duree }], debut, fin: debut + duree * 1000, duree };
       n = preparerNarration({
-        video: path.basename(video), debut, dureeVideo: duree, evenements,
-        miniature: option("miniature") ?? miniatureVoisine(video), titre: titreVideo(seance, chapitres(seance, reperes)),
+        video: path.basename(video), debut, dureeVideo: duree, evenements, fin: seance.fin,
+        position: (h) => positionDans(seance, h),
+        miniature: option("miniature") ?? miniatureVoisine(video) ?? (seance.clips.length > 1 ? miniatureVoisine(seance.clips[0].fichier) : null),
+        titre: titreVideo(seance, chapitres(seance, reperes)),
       });
       if (n.miniature) n.miniature = path.resolve(n.miniature);
       writeFileSync(fichierN, JSON.stringify(n, null, 2), "utf8");

@@ -142,8 +142,11 @@ function personnageJoue(evts: Evenement[], debut: number, fin: number): string |
  */
 export function preparerNarration(o: {
   video: string; debut: number; dureeVideo: number; evenements: Evenement[]; miniature: string | null; titre: string; introSecondes?: number;
+  /** Séance de plusieurs fichiers assemblés : position d'une heure du PC dans la vidéo (null entre deux fichiers). */
+  fin?: number; position?: (heure: number) => number | null;
 }): Narration {
-  const fin = o.debut + o.dureeVideo * 1000;
+  const fin = o.fin ?? o.debut + o.dureeVideo * 1000;
+  const position = o.position ?? ((h: number) => (h - o.debut) / 1000);
   const personnage = personnageJoue(o.evenements, o.debut, fin);
   const evts = personnage ? o.evenements.filter((e) => e.personnage === personnage) : [];
   // état au départ : dernière zone et dernier niveau connus avant la vidéo
@@ -160,8 +163,10 @@ export function preparerNarration(o: {
   const candidats: Moment[] = [];
   for (const e of evts) {
     if (e.heure <= o.debut || e.heure >= fin - 3000) continue;
+    const pos = position(e.heure);
+    if (pos === null || pos >= o.dureeVideo - 3) continue;
     candidats.push({
-      seconde: Math.round((e.heure - o.debut) / 100) / 10,
+      seconde: Math.round(pos * 10) / 10,
       duree: DUREE_MOMENT,
       genre: e.genre,
       bulle: "",

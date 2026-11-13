@@ -43,6 +43,10 @@ Décidé le 13 novembre 2026 : pas de voix ; Jobwow (sa capture, dans un médail
 humoristique et un sous-titre à chaque moment fort, la miniature YouTube en image de départ, une vidéo 16:9 et des clips
 verticaux de 30 s. Gratuit, tout sur le PC de Jobwow. Une vidéo fournie donne une vidéo rendue (pas de regroupement).
 
+Un dossier (celui de Warcraft Recorder) est rangé par séances comme pour `carnet:video` (plus de 30 minutes d'écart : nouvelle
+séance), chaque séance assemblée sans réencodage dans « Journal de Jobwow » (`--sortie` pour un autre dossier) ; `--par-fichier`
+garde une vidéo par fichier.
+
 1. `npm run carnet:incrustation -- "<vidéo ou dossier>" --preparer` écrit `<vidéo>.narration.json` : intro, puis les moments
    tirés des repères d'EternalProbe (niveau, élite, mort, zone, grimoire, entraîneur, trajet, vol, repère `/ep mark`, une
    quête rendue toutes les deux minutes au plus), sans chevauchement, et trois clips verticaux au plus. Miniature :

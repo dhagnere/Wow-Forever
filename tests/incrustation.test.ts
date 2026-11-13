@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { REPLIQUES, GENRES_MOMENT, replique } from "@/content/repliques-jobwow";
 import { choisirClips, evenementsSonde, grapheRendu, preparerNarration, typographie, verifierNarration, type Moment } from "@/lib/incrustation";
-import { heureLocale, lireSauvegardeSonde } from "@/lib/videoCarnet";
+import { heureLocale, lireSauvegardeSonde, positionDans, type Seance } from "@/lib/videoCarnet";
 
 // Jobwow incrusté dans les vidéos (npm run carnet:incrustation) : narration tirée des repères de la sonde, graphe ffmpeg.
 
@@ -61,6 +61,20 @@ describe("Narration d'une vidéo", () => {
     const c = choisirClips(longs, 610);
     expect(c).toHaveLength(3);
     expect(c.every((x) => x.debut >= 0 && x.debut + x.duree <= 610)).toBe(true);
+  });
+
+  it("place les moments d'une séance de plusieurs fichiers, et laisse ceux qui tombent entre deux fichiers", () => {
+    const debut = heureLocale("2026-11-13 21-00-00")!;
+    const seance: Seance = {
+      clips: [{ fichier: "a.mp4", debut, duree: 20 }, { fichier: "b.mp4", debut: debut + 300_000, duree: 20 }],
+      debut, fin: debut + 320_000, duree: 40,
+    };
+    const e = (s: number, genre: "niveau" | "exploit" | "mort") => ({ heure: debut + s * 1000, genre, valeurs: { zone: "Durotar", niveau: "5", nom: "Gros dur" }, personnage: "J" });
+    const m = preparerNarration({
+      video: "s.mp4", debut, dureeVideo: 40, fin: seance.fin, position: (h) => positionDans(seance, h),
+      evenements: [e(10, "niveau"), e(100, "exploit"), e(308, "mort")], miniature: null, titre: "S",
+    }).moments;
+    expect(m.map((x) => [x.seconde, x.genre])).toEqual([[0, "intro"], [10, "niveau"], [28, "mort"]]);
   });
 
   it("accepte la narration préparée et signale un fichier abîmé", () => {
