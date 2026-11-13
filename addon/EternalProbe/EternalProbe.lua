@@ -780,6 +780,15 @@ end)
 
 -- ---- API publique -----------------------------------------------------------
 
+-- Outils partagés avec Captures.lua (nouvelles captures d'EternalProbe), qui ajoute ses propres événements.
+P.AddEvent = AddEvent
+P.Position = CurrentPos
+P.PositionUnite = UnitMapPos
+P.NoterHeure = NoterHeure
+P.DB = DB
+P.Print = Print
+function P.EnCours() return recording end
+
 function P.Start()
     AnnoncerEchange(SonEnregistrement())
     recording = true
@@ -961,7 +970,8 @@ SlashCmdList.ETERNALPROBE = function(msg)
         return
     end
 
-    Print("Commandes : /ep start | stop | dump | context | clear | suite | archives | mark <texte>")
+    if P.CommandeEnPlus and P.CommandeEnPlus(lower, raw) then return end
+    Print("Commandes : /ep start | stop | dump | context | clear | suite | archives | mark <texte> | photos on|off")
 end
 
 -- Bouton minimap (déplaçable) : démarrer / arrêter l'enregistrement

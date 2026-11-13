@@ -3,10 +3,23 @@
 | Dossier | Rôle | État |
 |---|---|---|
 | `EternalRoutes/` | Guide pas à pas en jeu (fenêtre, flèche, auto-avance) | 0.11.0 : lit EternalProbe, puis RouteProbe |
-| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.7.0 : reprise de RouteProbe 0.6, table propre |
+| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.8.0 : niveaux de quête, récompenses, points de vol, vols, morts, élites, captures d'écran |
 | `RouteProbe/` | Ancienne sonde d'enregistrement, gardée pour référence | 0.6.0, version jouée au 13/11 |
 
 Branche de travail : `dev-addon`. Chaque changement est relu puis fusionné dans `dev`.
+
+## Ce qu'EternalProbe enregistre en plus de RouteProbe (0.8.0)
+
+Nouveaux événements, au même format « heure|type|… » (EternalRoutes ignore ceux qu'il ne connaît pas) :
+`qniveau` (niveau de la quête et du joueur, groupe conseillé), `recompense` (xp, argent, objets donnés et au choix),
+`choix` (objet choisi), `gain` (xp et argent reçus), `taxi` (point de vol, destinations connues), `fpnouveau`,
+`vol` (départ, arrivée), `mort`, `exploit` (élite ou rare vaincu), `photo` (capture d'écran prise au niveau gagné,
+à la première visite d'une zone, après un élite ; `/ep photos off` les coupe). Détail en tête de `Captures.lua`.
+
+## Banc d'essai
+
+`tests/eternalprobe.test.ts` fait tourner EternalProbe dans un WoW simulé (`tests/banc/wow-simule.lua`, Lua par fengari),
+puis l'import d'EternalRoutes sur son enregistrement. Il attrape les erreurs avant le jeu, sans remplacer le test en jeu.
 
 ## Installer en jeu
 
