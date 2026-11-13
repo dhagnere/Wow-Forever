@@ -51,6 +51,7 @@ end
 
 -- ---- temps et minuteurs -------------------------------------------------------------------------
 function GetTime() return BANC.t end
+function time() return math.floor(BANC.t) end -- horloge du PC, pour les reprises après /reload
 C_Timer = { After = function(d, fn) BANC.minuteurs[#BANC.minuteurs + 1] = { quand = BANC.t + d, fn = fn } end }
 
 function BANC.Avancer(s)

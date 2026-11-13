@@ -13,7 +13,13 @@
       vol         depart ou arrivee|carte|x|y
       mort        zone|carte|x|y
       exploit     nom|classement (elite, rareelite, rare, worldboss)|carte|x|y
-      photo       raison (niveau, zone, exploit, depart)
+      photo       raison (niveau, zone, exploit, trajet)
+      trajet      debut ou arrivee ou annule|nom du trajet|zone|carte|x|y (|durée en s à l'arrivée)
+
+    Trajets (zeppelin, bateau) : /ep trajet <nom> au moment d'embarquer. L'arrivée est notée seule dès qu'on
+    reste immobile 5 s dans une autre carte que celle du départ ; /ep trajet fin la note à la main,
+    /ep trajet annule l'abandonne. Un trajet marche même sans enregistrement en cours, survit à un /reload,
+    et ne crée aucune étape dans EternalRoutes : le site le place d'après ses lieux de départ et d'arrivée.
 
     Interdits du client : aucun événement ni fonction réservés à l'interface de Blizzard (le journal de
     combat, COMBAT_LOG_EVENT_UNFILTERED, fait bloquer l'addon par WoW Forever dès le chargement). Un élite
@@ -69,7 +75,70 @@ local function Photo(raison)
 end
 P.Photo = Photo
 
-function P.CommandeEnPlus(lower)
+-- ---- trajets (zeppelin, bateau) ------------------------------------------------
+
+local trajet -- { nom, carte, zone, t, dernier, immobile }
+
+local function TrajetFin(issue)
+    if not trajet then P.Print("Aucun trajet en cours (/ep trajet <nom> au moment d'embarquer).") return end
+    local zone, map, x, y = Ici()
+    local duree = math.floor(GetTime() - trajet.t + 0.5)
+    if issue == "annule" then
+        Ev("trajet", "annule", trajet.nom, zone, map, x, y)
+        P.Print(("Trajet « %s » abandonné."):format(trajet.nom))
+    else
+        Ev("trajet", "arrivee", trajet.nom, zone, map, x, y, duree)
+        P.Print(("Trajet « %s » : arrivée à %s, après %d min %02d s."):format(trajet.nom, zone, math.floor(duree / 60), duree % 60))
+        Photo("trajet")
+    end
+    trajet = nil
+    P.DB().trajet = nil
+end
+
+local function TrajetDebut(nom)
+    if trajet then TrajetFin("annule") end
+    local zone, map, x, y = Ici()
+    if map == "nil" then P.Print("Position inconnue : impossible de noter le départ du trajet ici.") return end
+    nom = (nom and nom ~= "") and nom or ("Trajet depuis " .. zone)
+    trajet = { nom = nom, carte = map, zone = zone, t = GetTime(), immobile = 0 }
+    P.DB().trajet = { nom = nom, carte = map, zone = zone, heure = time and time() or 0 }
+    Ev("trajet", "debut", nom, zone, map, x, y)
+    P.Print(("Trajet « %s » : départ de %s. L'arrivée sera notée seule (immobile dans une autre zone) ; /ep trajet fin pour la noter vous-même."):format(nom, zone))
+end
+
+--- Arrivée : immobile 5 s de suite dans une autre carte que celle du départ (en vol ou en mer, on bouge sans cesse).
+local function SuivreTrajet()
+    if not trajet then return end
+    if GetTime() - trajet.t > 900 then TrajetFin("annule") return end
+    local map, x, y = P.Position()
+    if not (map and x and y and x > 0 and y > 0) or map == trajet.carte then trajet.immobile, trajet.dernier = 0, nil return end
+    local d = trajet.dernier
+    if d and d.map == map and math.abs(x - d.x) < 0.001 and math.abs(y - d.y) < 0.001 then
+        trajet.immobile = trajet.immobile + 1
+    else
+        trajet.immobile = 0
+    end
+    trajet.dernier = { map = map, x = x, y = y }
+    if trajet.immobile >= 5 then TrajetFin("arrivee") end
+end
+
+--- Après un /reload : reprendre le trajet noté dans la sauvegarde, s'il a moins de 15 minutes.
+local function ReprendreTrajet()
+    local t = P.DB().trajet
+    if not t or not time then return end
+    local age = time() - (t.heure or 0)
+    if age > 900 then P.DB().trajet = nil return end
+    trajet = { nom = t.nom, carte = t.carte, zone = t.zone, t = GetTime() - age, immobile = 0 }
+    P.Print(("Trajet « %s » repris après le rechargement."):format(t.nom))
+end
+
+function P.CommandeEnPlus(lower, raw)
+    if lower == "trajet fin" then TrajetFin("arrivee") return true end
+    if lower == "trajet annule" then TrajetFin("annule") return true end
+    if lower == "trajet" or lower:match("^trajet%s") then
+        TrajetDebut(tostring(raw or ""):match("^%S+%s+(.-)%s*$"))
+        return true
+    end
     if lower == "photos off" then
         P.DB().photos = false
         P.Print("Captures d'écran automatiques : coupées.")
@@ -105,7 +174,7 @@ for _, ev in ipairs({
     "QUEST_ACCEPTED", "QUEST_COMPLETE", "QUEST_TURNED_IN",
     "TAXIMAP_OPENED", "UI_INFO_MESSAGE", "PLAYER_DEAD",
     "PLAYER_TARGET_CHANGED", "UPDATE_MOUSEOVER_UNIT", "UNIT_HEALTH",
-    "PLAYER_LEVEL_UP", "ZONE_CHANGED_NEW_AREA",
+    "PLAYER_LEVEL_UP", "ZONE_CHANGED_NEW_AREA", "PLAYER_LOGIN",
 }) do
     pcall(f.RegisterEvent, f, ev)
 end
@@ -174,6 +243,7 @@ f:SetScript("OnEvent", function(_, event, ...)
         if (...) == "target" then VerifierCible() end
         return
     end
+    if event == "PLAYER_LOGIN" then ReprendreTrajet() return end
     if not P.EnCours() then return end
 
     if event == "QUEST_ACCEPTED" then
@@ -220,6 +290,7 @@ f:SetScript("OnUpdate", function(_, dt)
     attente = attente + dt
     if attente < 1 then return end
     attente = 0
+    SuivreTrajet()
     if not P.EnCours() or not UnitOnTaxi then return end
     local maintenant = UnitOnTaxi("player") and true or false
     if maintenant ~= enVol then

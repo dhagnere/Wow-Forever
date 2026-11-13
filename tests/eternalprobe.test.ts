@@ -122,6 +122,43 @@ describe("EternalProbe dans un WoW simulé", () => {
   });
 });
 
+describe("Trajets en zeppelin ou en bateau (/ep trajet)", () => {
+  // Départ en haut de la tour de Tirisfal, vol au-dessus de la mer puis de Durotar, arrêt à la tour d'Orgrimmar.
+  const TRAJET = `
+BANC.Evenement("PLAYER_LOGIN")
+BANC.Avancer(20)
+BANC.carte, BANC.zone, BANC.x, BANC.y = 1420, "Clairières de Tirisfal", 0.61, 0.59
+SlashCmdList.ETERNALPROBE("trajet Zeppelin Tirisfal - Orgrimmar")
+for i = 1, 10 do BANC.x = BANC.x + 0.005; BANC.Avancer(1) end   -- on bouge encore dans Tirisfal
+BANC.carte, BANC.zone = 1411, "Durotar"
+for i = 1, 30 do BANC.x, BANC.y = 0.30 + i * 0.005, 0.20 + i * 0.003; BANC.Avancer(1) end -- en vol : jamais immobile
+BANC.x, BANC.y = 0.50, 0.12
+BANC.Avancer(10) -- à quai, immobile
+`;
+  const LIGNES = `
+local t = {}
+for _, e in ipairs(EternalProbeDB.events) do if e:find("|trajet|", 1, true) then t[#t + 1] = e end end
+return table.concat(t, "\\n") .. "\\n#encours=" .. tostring(EternalProbeDB.trajet ~= nil)
+`;
+
+  it("note le départ, puis l'arrivée seule quand on s'arrête dans une autre zone", () => {
+    const r = executer(SIMULE, ...SONDE, TRAJET, LIGNES).split("\n");
+    expect(r[0]).toMatch(/\|trajet\|debut\|Zeppelin Tirisfal - Orgrimmar\|Clairières de Tirisfal\|1420\|/);
+    expect(r[1]).toMatch(/\|trajet\|arrivee\|Zeppelin Tirisfal - Orgrimmar\|Durotar\|1411\|0\.500\|0\.120\|\d+$/);
+    expect(r).toHaveLength(3);
+    expect(r[2]).toBe("#encours=false");
+  });
+
+  it("ne conclut rien tant qu'on bouge, et se termine à la main avec /ep trajet fin", () => {
+    const enMouvement = TRAJET.split("BANC.x, BANC.y = 0.50, 0.12")[0];
+    const r1 = executer(SIMULE, ...SONDE, enMouvement, LIGNES).split("\n");
+    expect(r1.filter((l) => l.includes("|arrivee|"))).toHaveLength(0);
+    expect(r1.at(-1)).toBe("#encours=true");
+    const r2 = executer(SIMULE, ...SONDE, enMouvement, 'SlashCmdList.ETERNALPROBE("trajet fin")', LIGNES).split("\n");
+    expect(r2.filter((l) => l.includes("|arrivee|"))).toHaveLength(1);
+  });
+});
+
 describe("Import d'un enregistrement EternalProbe par EternalRoutes", () => {
   // l'espace de noms d'EternalRoutes, réduit à ce dont l'import a besoin
   const ESPACE = `
@@ -143,6 +180,14 @@ return route.source .. "|" .. tostring(route.type) .. "|" .. #route.steps .. "|"
     expect(source).toBe("RouteProbe");
     expect(Number(etapes)).toBeGreaterThan(0);
     expect(Number(actions)).toBeGreaterThanOrEqual(2); // prendre et rendre au moins
+  });
+
+  it("ignore un trajet noté dans l'enregistrement : même route qu'avant", () => {
+    const sans = executer(SIMULE, ...SONDE, SEANCE, ESPACE, lire("EternalRoutes/Importer.lua"), CONVERTIR);
+    const avec = executer(SIMULE, ...SONDE, SEANCE,
+      'BANC.carte, BANC.zone = 1420, "Clairières de Tirisfal"; SlashCmdList.ETERNALPROBE("trajet Zeppelin"); BANC.carte = 1411; BANC.Avancer(10)',
+      ESPACE, lire("EternalRoutes/Importer.lua"), CONVERTIR);
+    expect(avec).toBe(sans);
   });
 
   it("préfère EternalProbeDB à l'ancienne RouteProbeDB", () => {

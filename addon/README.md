@@ -3,7 +3,7 @@
 | Dossier | Rôle | État |
 |---|---|---|
 | `EternalRoutes/` | Guide pas à pas en jeu (fenêtre, flèche, auto-avance) | 0.11.0 : lit EternalProbe, puis RouteProbe |
-| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.8.1 : niveaux de quête, récompenses, points de vol, vols, morts, élites, captures d'écran |
+| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.8.2 : niveaux de quête, récompenses, points de vol, vols, morts, élites, captures d'écran, trajets (`/ep trajet`) |
 | `RouteProbe/` | Ancienne sonde d'enregistrement, gardée pour référence | 0.6.0, version jouée au 13/11 |
 
 Branche de travail : `dev-addon`. Chaque changement est relu puis fusionné dans `dev`.
@@ -14,7 +14,12 @@ Nouveaux événements, au même format « heure|type|… » (EternalRoutes ignor
 `qniveau` (niveau de la quête et du joueur, groupe conseillé), `recompense` (xp, argent, objets donnés et au choix),
 `choix` (objet choisi), `gain` (xp et argent reçus), `taxi` (point de vol, destinations connues), `fpnouveau`,
 `vol` (départ, arrivée), `mort`, `exploit` (élite ou rare vaincu), `photo` (capture d'écran prise au niveau gagné,
-à la première visite d'une zone, après un élite ; `/ep photos off` les coupe). Détail en tête de `Captures.lua`.
+à la première visite d'une zone, après un élite ; `/ep photos off` les coupe), `trajet` (zeppelin, bateau). Détail en tête de `Captures.lua`.
+
+**Trajets** : `/ep trajet Zeppelin Tirisfal - Orgrimmar` au moment d'embarquer. L'arrivée se note seule dès qu'on reste
+immobile 5 s dans une autre zone ; `/ep trajet fin` la note à la main, `/ep trajet annule` abandonne. Marche sans
+enregistrement en cours et survit à un `/reload`. Le site place un trajet d'après ses lieux de départ et d'arrivée,
+jamais d'après l'heure : on peut le rejouer après coup (aucune quête n'est en jeu).
 
 ## Banc d'essai
 
