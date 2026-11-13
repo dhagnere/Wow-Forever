@@ -1,0 +1,2 @@
+Routes EternalRoutes : un fichier .lua par route convertie d'un enregistrement RouteProbe.
+Chaque fichier ajouté ici doit aussi figurer dans EternalRoutes.toc (ligne Guides/<nom>.lua).

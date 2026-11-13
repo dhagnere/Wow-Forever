@@ -1,0 +1,22 @@
+## Interface: 16001, 11500, 11501, 11502, 11503, 11504, 11505, 11506, 11507, 11508, 11509, 11510
+## Title: EternalRoutes
+## Notes: Guides de leveling — La Taverne Éternelle
+## Author: La Taverne Éternelle
+## Version: 0.10.0
+## Category: Quests
+## Category-frFR: Quêtes
+## X-Website: https://www.taverne-eternelle.fr/
+## OptionalDeps: TomTom, RouteProbe
+## SavedVariables: EternalRoutesRoutesDB
+## SavedVariablesPerCharacter: EternalRoutesDB
+
+Core.lua
+Locale.lua
+Data.lua
+QuestIds.lua
+QuestNames.lua
+QuestDB.lua
+GuideEngine.lua
+TomTomIntegration.lua
+GuideWindow.lua
+Importer.lua
