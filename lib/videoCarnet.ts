@@ -9,6 +9,21 @@
 
 export type ValeurLua = string | number | boolean | null | ValeurLua[] | { [cle: string]: ValeurLua };
 
+/** Sondes d'enregistrement : EternalProbe (deuxième génération) puis l'ancienne RouteProbe, même format d'événements. */
+export const SONDES = [
+  { fichier: "EternalProbe.lua", table: "EternalProbeDB" },
+  { fichier: "RouteProbe.lua", table: "RouteProbeDB" },
+] as const;
+
+/** Table d'une sauvegarde de sonde, quelle que soit la sonde qui l'a écrite (null si aucune). */
+export function lireSauvegardeSonde(texte: string): ValeurLua {
+  for (const s of SONDES) {
+    const db = lireTableLua(texte, s.table);
+    if (db !== null) return db;
+  }
+  return null;
+}
+
 /** Lit `RouteProbeDB = { … }` (ou n'importe quelle table Lua écrite par le jeu). */
 export function lireTableLua(texte: string, nom = "RouteProbeDB"): ValeurLua {
   const debut = texte.indexOf(nom);

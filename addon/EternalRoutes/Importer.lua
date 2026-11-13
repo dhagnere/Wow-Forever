@@ -683,18 +683,27 @@ function Importer.Contenu(db)
     return n
 end
 
+--- Enregistrement à importer : celui d'EternalProbe s'il en contient un, sinon celui de l'ancienne sonde RouteProbe.
+function Importer.Enregistrement()
+    local ep, rp = _G.EternalProbeDB, _G.RouteProbeDB
+    if type(ep) == "table" and type(ep.events) == "table" and #ep.events > 0 then return ep end
+    if type(rp) == "table" and type(rp.events) == "table" and #rp.events > 0 then return rp end
+    return ep or rp
+end
+
 function Importer.Importer()
-    local ok, g, raison = pcall(Importer.Convertir, _G.RouteProbeDB)
+    local db = Importer.Enregistrement()
+    local ok, g, raison = pcall(Importer.Convertir, db)
     if not ok then
         ns.Print(ns.L.IMP_ERROR:format(tostring(g)))
         return nil
     end
     if not g then
-        if not _G.RouteProbeDB then
+        if not db then
             ns.Print(ns.L.IMP_NO_PROBE)
         else
             ns.Print(ns.L.IMP_FAILED:format(tostring(raison)))
-            local n = Importer.Contenu(_G.RouteProbeDB)
+            local n = Importer.Contenu(db)
             ns.Print(ns.L.IMP_CONTENT:format(n.events, n.pos, n.accept, n.turnin))
             ns.Print(ns.L.IMP_HINT)
         end

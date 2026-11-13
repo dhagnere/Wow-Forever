@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chapitres, descriptionVideo, heureLocale, horodatage, lireTableLua, positionDans, reperesRouteProbe, seances, titreVideo, type Clip } from "@/lib/videoCarnet";
+import { chapitres, descriptionVideo, heureLocale, horodatage, lireSauvegardeSonde, lireTableLua, positionDans, reperesRouteProbe, seances, titreVideo, type Clip } from "@/lib/videoCarnet";
 
 // Sauvegarde de RouteProbe telle que le jeu l'écrit : un orc en cours, un démoniste mis de côté.
 const SAUVEGARDE = `
@@ -50,6 +50,20 @@ describe("sauvegarde de RouteProbe", () => {
     const marque = r.find((x) => x.type === "marqueur")!;
     expect(marque.heure).toBe(heureLocale("2026-11-11 21:05:05"));
     expect(marque.texte).toBe('Sortie de la "Vallée"');
+  });
+});
+
+describe("sauvegarde d'EternalProbe", () => {
+  it("lit EternalProbeDB comme RouteProbeDB : mêmes repères, même personnage", () => {
+    const eternal = SAUVEGARDE.replace("RouteProbeDB =", "EternalProbeDB =").replace('["enCours"] = true,', '["enCours"] = true,\n\t["format"] = 2,');
+    const db = lireSauvegardeSonde(eternal);
+    expect((db as Record<string, unknown>).format).toBe(2);
+    expect(reperesRouteProbe(db)).toEqual(reperesRouteProbe(lireTableLua(SAUVEGARDE)));
+  });
+
+  it("garde les anciennes sauvegardes de RouteProbe", () => {
+    expect(reperesRouteProbe(lireSauvegardeSonde(SAUVEGARDE)).length).toBeGreaterThan(0);
+    expect(lireSauvegardeSonde("-- vide")).toBeNull();
   });
 });
 
