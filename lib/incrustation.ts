@@ -90,6 +90,10 @@ export interface Moment {
   genre: GenreMoment;
   bulle: string;            // réplique de Jobwow ("" : pas de bulle)
   sousTitre: string;        // ce qui se passe à l'écran ("" : pas de sous-titre)
+  /** Voix de la bulle (npm run carnet:voix) : fichier relatif à la narration, texte dit, durée en secondes. */
+  voix?: string;
+  voixTexte?: string;
+  dureeVoix?: number;
 }
 export interface ClipVertical { debut: number; duree: number; titre: string }
 export interface Narration {
@@ -270,6 +274,17 @@ export interface PlanRendu {
   medaillons: { normal: string; mort: string; niveau: string; x: number; y: number; hauteur: number };
   etats: { mort: [number, number][]; niveau: [number, number][]; parle: [number, number][] };
   calques: Calque[];                  // bulles et sous-titres, aux heures de la partie de jeu
+  /** Voix des bulles, aux heures de la partie de jeu ; le son du jeu baisse pendant qu'elles parlent. */
+  voix?: { fichier: string; debut: number; fin: number }[];
+}
+
+/** Volume du jeu pendant que Jobwow parle, et de sa voix. */
+export const VOLUME_JEU_SOUS_VOIX = 0.35;
+export const VOLUME_VOIX = 1.6;
+
+/** La voix d'un moment, si elle a été faite pour le texte actuel de la bulle (sinon elle est périmée). */
+export function voixAJour(m: Moment): boolean {
+  return Boolean(m.voix && m.bulle.trim() && m.voixTexte === m.bulle);
 }
 
 const n2 = (v: number) => (Math.round(v * 100) / 100).toString();
@@ -297,7 +312,23 @@ export function grapheRendu(p: PlanRendu): { entrees: string[][]; graphe: string
     entrees.push(["-f", "lavfi", "-t", n2(p.dureeJeu), "-i", "anullsrc=r=48000:cl=stereo"]);
     audioJeu = `[${k++}:a]`;
   }
-  lignes.push(`${audioJeu}aresample=48000,aformat=channel_layouts=stereo[aj]`);
+  const voix = p.voix ?? [];
+  if (!voix.length) {
+    lignes.push(`${audioJeu}aresample=48000,aformat=channel_layouts=stereo[aj]`);
+  } else {
+    // le jeu baisse pendant que Jobwow parle ; chaque voix est décalée à son heure et prolongée de silence,
+    // pour que le mélange (ffmpeg 4.1 : amix divise par le nombre d'entrées) garde un volume constant
+    const sous = voix.map((x) => `between(t,${n2(x.debut)},${n2(x.fin)})`).join("+");
+    lignes.push(`${audioJeu}aresample=48000,aformat=channel_layouts=stereo,volume=${VOLUME_JEU_SOUS_VOIX}:enable='${sous}'[ajeu]`);
+    const noms: string[] = [];
+    voix.forEach((x, i) => {
+      entrees.push(["-i", x.fichier]);
+      const ms = Math.max(0, Math.round(x.debut * 1000));
+      lignes.push(`[${k++}:a]aresample=48000,aformat=channel_layouts=stereo,adelay=${ms}|${ms},apad,volume=${VOLUME_VOIX}[vx${i}]`);
+      noms.push(`[vx${i}]`);
+    });
+    lignes.push(`[ajeu]${noms.join("")}amix=inputs=${voix.length + 1}:duration=first:dropout_transition=0,volume=${voix.length + 1}[aj]`);
+  }
   let v = "[jeu]", a = "[aj]";
   if (p.intro) {
     entrees.push(["-loop", "1", "-framerate", "30", "-t", n2(p.intro.secondes), "-i", p.intro.fichier]);

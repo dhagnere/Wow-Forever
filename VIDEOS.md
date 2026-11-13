@@ -57,6 +57,14 @@ garde une vidéo par fichier.
 3. `npm run carnet:incrustation -- "<vidéo>.narration.json"` rend `<vidéo>.jobwow.mp4` et `<vidéo>.clip-N.mp4`
    (`--sans-clips` pour s'en passer). Le médaillon (portrait retouché « Taverne » : parties claires assombries, touche chaude, bords assombris) rebondit quand Jobwow « parle », passe en gris à la mort, en doré au niveau.
 
+**Voix de Jobwow** (choisie le 14/11) : `npm run carnet:voix -- "<vidéo>.narration.json"` fait dire chaque bulle par
+Chatterbox Multilingual (Resemble AI, licence MIT, français), qui imite `visuels/voix/jobwow-reference.mp3` (voix « Gilles »
+de Piper, enregistrements CC0, traitée « mort-vivant léger ») avec exaggeration 0,7 et cfg 0,3 (`scripts/voix_chatterbox.py`).
+Les fichiers vont dans `voix-<vidéo>/` ; la narration reçoit `voix`, `voixTexte`, `dureeVoix`, et la bulle dure le temps de
+la phrase. Le rendu mêle les voix au jeu, baissé à 35 % pendant qu'elles parlent ; une bulle modifiée après coup garde
+l'ancienne voix muette jusqu'au prochain `carnet:voix`. Installation sur le PC : Python, puis PyTorch (CUDA si carte NVIDIA)
+et `pip install chatterbox-tts`. Description YouTube : mentionner la voix de synthèse.
+
 Répliques dans `content/repliques-jobwow.ts` (aucune classe citée : celle de Jobwow n'est jamais précisée), narration et
 graphe ffmpeg dans `lib/incrustation.ts`, images (sharp) et encodage dans `scripts/incrustation-video.ts`, contrôles dans
 `tests/incrustation.test.ts`. L'atelier embarque une copie des répliques : la republier quand la liste change.

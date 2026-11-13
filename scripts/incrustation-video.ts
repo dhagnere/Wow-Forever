@@ -22,7 +22,7 @@ import ffmpeg from "@ffmpeg-installer/ffmpeg";
 import sharp from "sharp";
 import { COULEUR_GENRE } from "@/content/repliques-jobwow";
 import {
-  evenementsSonde, grapheRendu, preparerNarration, typographie, verifierNarration,
+  evenementsSonde, grapheRendu, preparerNarration, typographie, verifierNarration, voixAJour,
   type Calque, type Evenement, type Moment, type Narration,
 } from "@/lib/incrustation";
 import { chapitres, heureLocale, horodatage, lireSauvegardeSonde, positionDans, reperesRouteProbe, seances, SONDES, titreVideo, type Clip, type Repere, type Seance } from "@/lib/videoCarnet";
@@ -151,7 +151,7 @@ const PAYSAGE: Gabarit = { W: 1920, H: 1080, diametre: 270, medX: 50, medBas: 90
 const VERTICAL: Gabarit = { W: 1080, H: 1920, diametre: 330, medX: 50, medBas: 520, bulleL: 960, bulleT: 54, stL: 960, stT: 52, stBas: 200, stDecalX: 0, bulleAuDessus: true };
 
 async function rendre(n: Narration, video: string, audio: boolean, g: Gabarit, sortie: string, travail: string,
-  morceau: { debut: number; duree: number } | null, miniature: string | null) {
+  morceau: { debut: number; duree: number } | null, miniature: string | null, dossierNarration: string) {
   mkdirSync(travail, { recursive: true });
   const suf = morceau ? `v${Math.round(morceau.debut)}` : "p";
   const med = {
@@ -182,6 +182,13 @@ async function rendre(n: Narration, video: string, audio: boolean, g: Gabarit, s
     }
   }
   const avecBulle = moments.filter((m) => m.bulle.trim()).map((m) => [m.seconde, Math.min(dureeJeu, m.seconde + m.duree)] as [number, number]);
+  // voix des bulles (npm run carnet:voix) : seulement celles faites pour le texte actuel, et entières dans le morceau
+  const voix = n.moments
+    .filter((m) => voixAJour(m) && m.seconde >= debut && m.seconde + (m.dureeVoix ?? 0) <= debut + dureeJeu)
+    .map((m) => ({ fichier: path.resolve(dossierNarration, m.voix!), debut: m.seconde - debut, fin: m.seconde - debut + (m.dureeVoix ?? m.duree) }))
+    .filter((x) => existsSync(x.fichier));
+  const perimees = n.moments.filter((m) => m.voix && !voixAJour(m)).length;
+  if (!morceau && perimees) console.log(`${perimees} voix ne correspondent plus au texte de leur bulle : relancez npm run carnet:voix pour les refaire.`);
   const { entrees, graphe } = grapheRendu({
     largeur: g.W, hauteur: g.H, audio, dureeJeu,
     intro: miniature && n.introSecondes > 0 ? { fichier: miniature, secondes: n.introSecondes } : null,
@@ -192,6 +199,7 @@ async function rendre(n: Narration, video: string, audio: boolean, g: Gabarit, s
       niveau: moments.filter((m) => m.genre === "niveau").map((m) => [m.seconde, Math.min(dureeJeu, m.seconde + m.duree)]),
     },
     calques,
+    voix,
   });
   const fichierGraphe = path.join(travail, `graphe-${suf}.txt`);
   writeFileSync(fichierGraphe, graphe, "utf8");
@@ -302,12 +310,12 @@ async function main() {
     const mini = await miniaturePrete(option("miniature") ?? n.miniature, travail);
     const sortie = `${sansExt(video)}.jobwow.mp4`;
     console.log(`Rendu 16:9 : ${sortie}`);
-    await rendre(n, video, audio, PAYSAGE, sortie, travail, null, mini);
+    await rendre(n, video, audio, PAYSAGE, sortie, travail, null, mini, path.dirname(fichierN));
     if (!drapeau("sans-clips")) {
       for (const [i, c] of n.clips.entries()) {
         const s = `${sansExt(video)}.clip-${i + 1}.mp4`;
         console.log(`Clip vertical ${i + 1} (${c.titre}) : ${s}`);
-        await rendre(n, video, audio, VERTICAL, s, travail, { debut: c.debut, duree: Math.min(c.duree, duree - c.debut) }, null);
+        await rendre(n, video, audio, VERTICAL, s, travail, { debut: c.debut, duree: Math.min(c.duree, duree - c.debut) }, null, path.dirname(fichierN));
       }
     }
   }

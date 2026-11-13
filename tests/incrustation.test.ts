@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { REPLIQUES, GENRES_MOMENT, replique } from "@/content/repliques-jobwow";
-import { choisirClips, evenementsSonde, grapheRendu, preparerNarration, typographie, verifierNarration, type Moment } from "@/lib/incrustation";
+import { choisirClips, evenementsSonde, grapheRendu, preparerNarration, typographie, verifierNarration, voixAJour, type Moment } from "@/lib/incrustation";
 import { heureLocale, lireSauvegardeSonde, positionDans, type Seance } from "@/lib/videoCarnet";
 
 // Jobwow incrusté dans les vidéos (npm run carnet:incrustation) : narration tirée des repères de la sonde, graphe ffmpeg.
@@ -126,5 +126,22 @@ describe("Graphe ffmpeg", () => {
     expect(entrees[0]).toEqual(["-f", "lavfi", "-t", "75", "-i", "anullsrc=r=48000:cl=stereo"]);
     expect(graphe).toContain("[0:v]scale=-2:1920,crop=1080:1920");
     expect(graphe).toContain("[1:a]aresample");
+  });
+
+  it("mêle les voix des bulles au son du jeu, qu'il baisse pendant qu'elles parlent", () => {
+    const { entrees, graphe } = grapheRendu({ ...plan, intro: null, voix: [{ fichier: "01.wav", debut: 30, fin: 34.5 }, { fichier: "02.wav", debut: 50, fin: 52 }] });
+    expect(entrees).toContainEqual(["-i", "01.wav"]);
+    expect(graphe).toContain("volume=0.35:enable='between(t,30,34.5)+between(t,50,52)'");
+    expect(graphe).toContain("adelay=30000|30000,apad");
+    expect(graphe).toContain("amix=inputs=3:duration=first:dropout_transition=0,volume=3[aj]");
+  });
+});
+
+describe("Voix des bulles", () => {
+  const m: Moment = { seconde: 10, duree: 6, genre: "niveau", bulle: "Niveau 4 !", sousTitre: "", voix: "voix/01.wav", voixTexte: "Niveau 4 !", dureeVoix: 2.1 };
+  it("ne garde une voix que si elle dit le texte actuel de la bulle", () => {
+    expect(voixAJour(m)).toBe(true);
+    expect(voixAJour({ ...m, bulle: "Niveau 4 ! Ça s'arrose." })).toBe(false);
+    expect(voixAJour({ ...m, voix: undefined })).toBe(false);
   });
 });
