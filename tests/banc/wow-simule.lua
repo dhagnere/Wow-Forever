@@ -33,9 +33,13 @@ local function NouveauCadre()
     end })
 end
 
-function CreateFrame()
+function CreateFrame(genre, nom)
     local c = NouveauCadre()
     BANC.frames[#BANC.frames + 1] = c
+    -- bulle d'aide : sa 2e ligne donne le titre du PNJ (« <Entraîneur de démons> »)
+    if genre == "GameTooltip" and nom then
+        _G[nom .. "TextLeft2"] = { GetText = function() return BANC.titrePnj end }
+    end
     return c
 end
 UIParent, Minimap, GameTooltip = NouveauCadre(), NouveauCadre(), NouveauCadre()
@@ -91,7 +95,7 @@ function UnitGUID(u)
     if u == "player" then return "Player-1" end
     if BANC.cible and (u == "target" or u == "mouseover") then return BANC.cible.guid end
 end
-function UnitExists(u) return u == "player" or (BANC.cible ~= nil and (u == "target" or u == "mouseover")) end
+function UnitExists(u) return u == "player" or (BANC.cible ~= nil and (u == "target" or u == "mouseover" or u == "npc")) end
 function UnitIsPlayer(u) return u == "player" end
 function UnitClassification() return BANC.cible and BANC.cible.classement or "normal" end
 function UnitIsDead(u) return u == "target" and BANC.cible ~= nil and BANC.cible.mort == true end
@@ -100,7 +104,7 @@ function UnitOnTaxi() return BANC.enVol end
 function GetZoneText() return BANC.zone end
 function GetRealmName() return "Forever" end
 function IsInInstance() return false end
-function IsTradeskillTrainer() return false end
+function IsTradeskillTrainer() return BANC.metier == true end
 function Screenshot() BANC.photos = BANC.photos + 1 end
 ERR_NEWTAXIPATH = "Nouveau trajet aérien découvert !"
 
@@ -153,3 +157,27 @@ function CombatLogGetCurrentEventInfo() return unpack(BANC.combat or {}) end
 function GetNumLootItems() return 0 end
 function GetSpellInfo() return nil end
 function GetSpellSubtext() return nil end
+
+-- ---- vendeurs, sacs et objets -------------------------------------------------------------------
+-- BANC.vente : { { id, nom, classe, sousClasse } } en vente chez le PNJ ouvert ; BANC.sacs : { { id, nom } }
+BANC.vente, BANC.sacs, BANC.objets = {}, {}, {}
+local function Lien(id, nom) return ("|cffffffff|Hitem:%d::::|h[%s]|h|r"):format(id, nom) end
+function GetMerchantItemLink(i) local o = BANC.vente[i]; return o and Lien(o.id, o.nom) end
+function GetMerchantItemInfo(i) local o = BANC.vente[i]; if o then return o.nom, "", 100, 1 end end
+function BuyMerchantItem(i)
+    local o = BANC.vente[i]
+    if o then BANC.sacs[#BANC.sacs + 1] = { id = o.id, nom = o.nom } end
+end
+function GetItemInfoInstant(id)
+    local o = BANC.objets[id]
+    if o then return id, "", "", "", 0, o.classe, o.sousClasse end
+end
+function GetItemInfo(id) local o = BANC.objets[id]; return o and o.nom end
+function IsUsableItem() return true end
+C_Container = {
+    GetContainerNumSlots = function(sac) return sac == 0 and 16 or 0 end,
+    GetContainerItemLink = function(sac, place)
+        local o = sac == 0 and BANC.sacs[place]
+        return o and Lien(o.id, o.nom) or nil
+    end,
+}

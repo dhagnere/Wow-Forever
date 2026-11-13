@@ -197,3 +197,103 @@ return route.source .. "|" .. tostring(route.type) .. "|" .. #route.steps .. "|"
     expect(r).toBe("eternal");
   });
 });
+
+describe("Consignes sous l'étape : entraîneurs, grimoires, objets à ramasser (EternalRoutes 0.12)", () => {
+  // Un démoniste fait la séance courte, achète un grimoire chez l'entraîneur de démons, puis ouvre sa fenêtre
+  const ACHAT = `
+BANC.cible = { nom = "Kazrogal", guid = "Creature-0-1-1-1-5815-1", x = 0.40, y = 0.60 }
+BANC.titrePnj = "<Entraîneur de démons>"
+BANC.objets[16321] = { nom = "Grimoire d'Éclair de feu (Rang 2)", classe = 9, sousClasse = 0 }
+BANC.objets[2512] = { nom = "Flèche brute", classe = 6, sousClasse = 2 }
+BANC.vente = { { id = 16321, nom = "Grimoire d'Éclair de feu (Rang 2)" }, { id = 2512, nom = "Flèche brute" } }
+BANC.Evenement("MERCHANT_SHOW")
+BuyMerchantItem(1)
+BuyMerchantItem(2)
+BANC.Evenement("MERCHANT_CLOSED")
+BANC.Avancer(5)
+BANC.Evenement("TRAINER_SHOW")
+BANC.Evenement("TRAINER_CLOSED")
+BANC.titrePnj = nil
+`;
+  const DEMONISTE =
+    'BANC.joueur.classe, BANC.joueur.classeFichier = "Démoniste", "WARLOCK"\n' +
+    SEANCE.replace('SlashCmdList.ETERNALPROBE("stop")', ACHAT + 'SlashCmdList.ETERNALPROBE("stop")');
+  const ESPACE = `
+GetLocale = function() return "frFR" end
+EternalRoutes = { ADDON_NAME = "EternalRoutes", guides = {}, db = {}, questDB = {}, Print = function() end }
+`;
+  const MOTEUR = [lire("EternalRoutes/Locale.lua"), lire("EternalRoutes/Importer.lua"), lire("EternalRoutes/GuideEngine.lua")];
+
+  it("note le titre de l'entraîneur et le seul grimoire acheté", () => {
+    const r = executer(SIMULE, ...SONDE, DEMONISTE, `
+local t = {}
+for _, e in ipairs(EternalProbeDB.events) do
+  local k = e:match("^[^|]*|([^|]*)")
+  if k == "livre" or k == "trainer" then t[#t + 1] = e:gsub("^[^|]*|", "") end
+end
+return table.concat(t, "\\n")`).split("\n");
+    expect(r).toHaveLength(2);
+    expect(r[0]).toMatch(/^livre\|16321\|Grimoire d'Éclair de feu \(Rang 2\)\|Kazrogal\|Entraîneur de démons\|/);
+    expect(r[1]).toMatch(/^trainer\|Kazrogal\|0\|.*\|Entraîneur de démons$/);
+  });
+
+  it("fait de l'achat une étape « choisir une capacité pour votre démon », faite dès le grimoire en sac", () => {
+    const r = executer(SIMULE, ...SONDE, DEMONISTE, ESPACE, ...MOTEUR, `
+local route = assert(EternalRoutes.Importer.Convertir(EternalRoutes.Importer.Enregistrement()))
+local E, out = EternalRoutes.Engine, {}
+for _, s in ipairs(route.steps) do
+  local q = s.quests[1]
+  if q.kind == "entrainer" then
+    local etat = E.EtatEntraineur(q)
+    out[#out + 1] = table.concat(E.ActionsEtape(q, E.GetObjectives(q)), " / ") .. " [" .. etat .. "]"
+    if q.achat then
+      BANC.sacs = {}
+      E.OublierSacs()
+      out[#out + 1] = "sans grimoire [" .. E.EtatEntraineur(q) .. "] " .. E.GetObjectives(q)[1].text
+    end
+  end
+end
+return table.concat(out, "\\n")`).split("\n");
+    expect(r).toEqual([
+      "Choisissez une capacité pour votre démon et achetez son grimoire. [done]",
+      "sans grimoire [available] Grimoire d'Éclair de feu (Rang 2)",
+      "Choisissez une capacité pour votre démon. [available]",
+    ]);
+  });
+
+  it("rappelle d'ouvrir le grimoire resté dans les sacs, et pas les autres objets", () => {
+    const r = executer(SIMULE, ...SONDE, DEMONISTE, ESPACE, ...MOTEUR,
+      'return table.concat(EternalRoutes.Engine.ActionsSacs(), "\\n")');
+    expect(r).toBe("Ouvrez vos sacs et faites un clic droit sur « Grimoire d'Éclair de feu (Rang 2) » : votre démon apprend la capacité.");
+  });
+
+  it("dit où ramasser un objet et quoi faire chez un entraîneur de classe ou de métier", () => {
+    const r = executer(SIMULE, ESPACE, ...MOTEUR, `
+local E = EternalRoutes.Engine
+local q = { kind = "faire", collecte = {
+  { item = "Viande de sanglier", sources = { "Sanglier tacheté" }, monstres = true },
+  { item = "Caisse de vivres", sources = { "Caisse abandonnée" }, decor = true } } }
+local objs = {
+  { text = "Viande de sanglier : 2/6", type = "item", finished = false },
+  { text = "Caisse de vivres : 0/3", type = "item", finished = false },
+  { text = "Brasier allumé : 0/1", type = "object", finished = false },
+  { text = "Loup : 3/3", type = "monster", finished = true } }
+local t = E.ActionsEtape(q, objs)
+t[#t + 1] = E.ActionsEtape({ kind = "faire" }, { { text = "Rapporter 5 × Pierre", finished = false } })[1]
+t[#t + 1] = E.ActionsEtape({ kind = "entrainer" }, {})[1]
+t[#t + 1] = E.ActionsEtape({ kind = "entrainer", metier = true }, {})[1]
+t[#t + 1] = E.ActionsEtape({ kind = "entrainer", familier = "bete" }, {})[1]
+t[#t + 1] = tostring(#E.ActionsEtape({ kind = "prendre" }, {}))
+return table.concat(t, "\\n")`).split("\n");
+    expect(r).toEqual([
+      "Fouillez les corps : Sanglier tacheté.",
+      "Cliquez sur : Caisse abandonnée pour ramasser les objets.",
+      "Cliquez sur l'objet indiqué dans le décor.",
+      "Ramassez les objets demandés.",
+      "Apprenez vos nouveaux sorts auprès de l'entraîneur.",
+      "Apprenez le rang suivant de votre métier.",
+      "Choisissez les techniques à enseigner à votre familier.",
+      "0",
+    ]);
+  });
+});

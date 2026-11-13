@@ -72,6 +72,8 @@ local C = {
 }
 
 local COULEUR_ACTION = { prendre = C.or_, rendre = C.vert, faire = C.bleu, entrainer = { 0.780, 0.639, 0.902 } }
+-- consigne sous l'étape (« » Apprenez vos nouveaux sorts ») : jaune clair, distincte des objectifs
+local C_CONSIGNE = { 1.000, 0.851, 0.502 }
 
 -- États d'une quête dans la fenêtre : à prendre (neutre), acceptée en cours (orangé), objectifs remplis (vert),
 -- rendue (repliée, barrée). La couleur n'est jamais seule : pictogramme et badge écrit l'accompagnent.
@@ -508,6 +510,7 @@ local function RemplirQuete(r, q, largeur, location, source)
         r.badge:Hide()
         r.pnj:Hide()
         if r.alerte then r.alerte:Hide() end
+        for _, l in ipairs(r.consignes or {}) do l:Hide() end
         for _, o in ipairs(r.objs) do o.texte:Hide(); o.compte:Hide() end
         r.icone:SetTexture(TEX .. "check_full")
         r.icone:SetAlpha(0.6)
@@ -577,10 +580,8 @@ local function RemplirQuete(r, q, largeur, location, source)
     local objs = ns.Engine.GetObjectives(q)
     local k = 0
     for _, o in ipairs(objs) do
+        -- où ramasser l'objet : dans l'action affichée sous les objectifs (ActionsEtape)
         local texte = NettoyerObjectif(o.text)
-        -- où l'objet a été ramassé lors de l'enregistrement (RouteProbe) : « · sur : Coffre de ravitaillement »
-        local sources = texte ~= "" and ns.Engine.SourcesObjectif and ns.Engine.SourcesObjectif(q, texte)
-        if sources then texte = texte .. " · " .. sources end
         if texte ~= "" then
             k = k + 1
             local l = Objectif(r, k)
@@ -610,6 +611,26 @@ local function RemplirQuete(r, q, largeur, location, source)
         r.objs[j].texte:Hide()
         r.objs[j].compte:Hide()
     end
+
+    -- ce qu'il faut faire, en clair : « Apprenez vos nouveaux sorts », « Fouillez les corps : Sanglier »…
+    local actions = (ev ~= "pret" and ns.Engine.ActionsEtape) and ns.Engine.ActionsEtape(q, objs) or {}
+    r.consignes = r.consignes or {}
+    for j, phrase in ipairs(actions) do
+        local l = r.consignes[j]
+        if not l then
+            l = Texte(r, 11, C_CONSIGNE)
+            l:SetWordWrap(true)
+            r.consignes[j] = l
+        end
+        l:ClearAllPoints()
+        l:SetPoint("TOPLEFT", 26 + P, y)
+        l:SetWidth(largeur - 26 - 2 * P)
+        l:SetText("\194\187 " .. phrase)
+        Teinte(l, C_CONSIGNE)
+        l:Show()
+        y = y - math.max(l:GetStringHeight() or 12, 12) - 3
+    end
+    for j = #actions + 1, #r.consignes do r.consignes[j]:Hide() end
 
     local pnj
     if location and location ~= "" then
@@ -1289,6 +1310,32 @@ local function RafraichirFenetre()
                 r.sep:Hide()
                 y = y - h - 4
             end
+            -- grimoire ou livre dans les sacs : à ouvrir tout de suite, quelle que soit l'étape
+            local sacs = ns.Engine.ActionsSacs and ns.Engine.ActionsSacs() or {}
+            if #sacs > 0 then
+                if not f.sacs then
+                    f.sacs = CreateFrame("Frame", nil, f.carte, "BackdropTemplate")
+                    f.sacs.icone = f.sacs:CreateTexture(nil, "ARTWORK")
+                    f.sacs.icone:SetSize(16, 16)
+                    f.sacs.icone:SetPoint("TOPLEFT", 6, -5)
+                    f.sacs.icone:SetTexture("Interface\\Icons\\INV_Misc_Book_06")
+                    f.sacs.texte = Texte(f.sacs, 11, C_CONSIGNE)
+                    f.sacs.texte:SetPoint("TOPLEFT", 28, -6)
+                    f.sacs.texte:SetWordWrap(true)
+                end
+                Fond(f.sacs, ETATS.prendre.fond, ETATS.prendre.bord)
+                f.sacs.texte:SetWidth(largeurCarte - 16 - 36)
+                f.sacs.texte:SetText(table.concat(sacs, "\n"))
+                Teinte(f.sacs.texte, C_CONSIGNE)
+                local hs = math.max((f.sacs.texte:GetStringHeight() or 12) + 12, 26)
+                f.sacs:ClearAllPoints()
+                f.sacs:SetPoint("TOPLEFT", f.carte, "TOPLEFT", 8, y)
+                f.sacs:SetSize(largeurCarte - 16, hs)
+                f.sacs:Show()
+                y = y - hs - 4
+            elseif f.sacs then
+                f.sacs:Hide()
+            end
             -- annonce : quête acceptée, objectifs remplis, quête rendue (8 secondes)
             local a = Window.annonce
             if a and GetTime() - a.t < 8 then
@@ -1595,7 +1642,9 @@ local function RafraichirMini()
                 break
             end
         end
-        m.sousBase = base or LieuEtape(step)
+        local sacs = ns.Engine.ActionsSacs and ns.Engine.ActionsSacs() or {}
+        local actions = ns.Engine.ActionsEtape and ns.Engine.ActionsEtape(q, ns.Engine.GetObjectives(q)) or {}
+        m.sousBase = sacs[1] or base or actions[1] or LieuEtape(step)
     else
         m.titre:SetText(LieuEtape(step))
     end

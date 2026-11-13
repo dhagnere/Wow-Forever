@@ -51,6 +51,15 @@ local function Rogner(s)
     return (t:gsub("^%s+", ""):gsub("%s+$", ""))
 end
 
+--- Titre d'un PNJ → familier qu'il sert : « demon » (entraîneur de démons), « bete » (dresseur de familiers), ou nil.
+local function Familier(titre)
+    local t = tostring(titre or ""):lower()
+    if t == "" or t == "nil" then return nil end
+    if t:find("d\195\169mon") or t:find("demon") then return "demon" end
+    if t:find("famili") or t:find("pet trainer", 1, true) then return "bete" end
+    return nil
+end
+
 local function NettoyerObjectif(t)
     local s = tostring(t or ""):gsub("\194\160", " "):gsub("|4[^;]*;", "")
     s = s:gsub("%s*:%s*%d+%s*/%s*%d+.*$", "")
@@ -280,6 +289,8 @@ function Importer.Convertir(db)
                 if r.source ~= "" then
                     if not c.comptes[r.source] then c.sources[#c.sources + 1] = r.source end
                     c.comptes[r.source] = (c.comptes[r.source] or 0) + 1
+                    -- décor (coffre, plante…) ou monstre : décide du verbe affiché sous l'étape
+                    if r.genre == "objet" then c.decor = true elseif r.genre == "monstre" then c.monstres = true end
                 end
                 if r.carte and r.x and r.y then points[#points + 1] = { t = r.t, carte = r.carte, x = r.x, y = r.y } end
             end
@@ -400,7 +411,7 @@ function Importer.Convertir(db)
                     sorts[#sorts + 1] = { id = id, name = f.d[2] }
                 end
             end
-            if #sorts > 0 then
+            if #sorts > 0 or Familier(e.d[7]) then
                 local prec = visites[#visites]
                 if prec and prec.npc == npc and e.t - prec.tFin < 120 then
                     for _, sp in ipairs(sorts) do
@@ -411,11 +422,31 @@ function Importer.Convertir(db)
                     local carte, x, y = tonumber(e.d[3]), tonumber(e.d[4]), tonumber(e.d[5])
                     if carte and x and y then x, y = x * 100, y * 100 else carte, x, y = Position(e.t) end
                     visites[#visites + 1] = { t = e.t, tFin = e.t, npc = npc, metier = (e.d[2] == "1"), carte = carte,
-                        x = x, y = y, niveau = tonumber(e.d[6]), sorts = sorts, vus = vus }
+                        x = x, y = y, niveau = tonumber(e.d[6]), sorts = sorts, vus = vus, familier = Familier(e.d[7]) }
                 end
             end
         end
     end
+
+    -- « livre » (EternalProbe 0.10) : grimoires achetés chez un même vendeur, en une visite
+    for _, e in ipairs(ev) do
+        if e.k == "livre" then
+            local npc = Rogner(e.d[3])
+            local livre = { id = tonumber(e.d[1]), name = Rogner(e.d[2]) }
+            local prec = visites[#visites]
+            if prec and prec.achat and prec.npc == npc and e.t - prec.tFin < 300 then
+                if not prec.vus[livre.name] then prec.vus[livre.name] = true; prec.livres[#prec.livres + 1] = livre end
+                prec.tFin = e.t
+            else
+                local carte, x, y = tonumber(e.d[5]), tonumber(e.d[6]), tonumber(e.d[7])
+                if carte and x and y then x, y = x * 100, y * 100 else carte, x, y = Position(e.t) end
+                visites[#visites + 1] = { t = e.t, tFin = e.t, npc = npc, achat = true, carte = carte, x = x, y = y,
+                    niveau = tonumber(e.d[8]), sorts = {}, livres = { livre }, vus = { [livre.name] = true },
+                    familier = Familier(e.d[4]) or (ctx.classFile == "WARLOCK" and "demon" or nil) }
+            end
+        end
+    end
+    table.sort(visites, function(a, b) return a.t < b.t end)
     for _, v in ipairs(visites) do
         brutes[#brutes + 1] = { t = v.t, genre = "entrainer", qid = 0, visite = v }
     end
@@ -435,6 +466,7 @@ function Importer.Convertir(db)
         etapes[#etapes + 1] = { genre = "entrainer", carte = v.carte, x = v.x, y = v.y, location = v.npc,
             class = ctx.classFile, niveau = v.niveau,
             quests = { { kind = "entrainer", name = v.npc, spells = v.sorts, metier = v.metier or nil,
+                familier = v.familier, achat = v.achat or nil, livres = v.livres,
                 cle = ("%s-%s-%d"):format(tostring(ctx.classFile), Slug(v.npc), math.floor(v.t)) } } }
       else
         local carte, x, y, lieu

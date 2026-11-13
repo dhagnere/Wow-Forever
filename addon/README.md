@@ -2,8 +2,8 @@
 
 | Dossier | Rôle | État |
 |---|---|---|
-| `EternalRoutes/` | Guide pas à pas en jeu (fenêtre, flèche, auto-avance) | 0.11.0 : lit EternalProbe, puis RouteProbe |
-| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.9.1 : captures de la 0.8, trajets (`/ep trajet`), code à coller sur le site (`/ep export`, `/ep export depart`) |
+| `EternalRoutes/` | Guide pas à pas en jeu (fenêtre, flèche, auto-avance) | 0.12.0 : lit EternalProbe, puis RouteProbe ; consigne sous chaque étape (entraîneur, grimoire, objets à ramasser) |
+| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.10.0 : captures de la 0.8, trajets (`/ep trajet`), code à coller sur le site (`/ep export`, `/ep export depart`), titre des entraîneurs, grimoires achetés |
 | `RouteProbe/` | Ancienne sonde d'enregistrement, gardée pour référence | 0.6.0, version jouée au 13/11 |
 
 Branche de travail : `dev-addon`. Chaque changement est relu puis fusionné dans `dev`.
@@ -20,6 +20,31 @@ Nouveaux événements, au même format « heure|type|… » (EternalRoutes ignor
 immobile 5 s dans une autre zone ; `/ep trajet fin` la note à la main, `/ep trajet annule` abandonne. Marche sans
 enregistrement en cours et survit à un `/reload`. Le site place un trajet d'après ses lieux de départ et d'arrivée,
 jamais d'après l'heure : on peut le rejouer après coup (aucune quête n'est en jeu).
+
+**Entraîneurs et grimoires (0.10.0)** : l'événement `trainer` porte en 7e champ le titre du PNJ (« Entraîneur de démons »,
+« Dresseur de familiers »), lu sur sa bulle ; `livre` note un grimoire ou un livre acheté chez un vendeur (objet, nom,
+vendeur, titre, position, niveau). Les autres achats ne sont pas notés.
+
+## Consignes sous l'étape (EternalRoutes 0.12.0)
+
+Sous les objectifs, une ligne jaune « » … » dit quoi faire :
+
+| Étape | Consigne |
+|---|---|
+| Entraîneur de classe | Apprenez vos nouveaux sorts auprès de l'entraîneur. |
+| Entraîneur de métier | Apprenez le rang suivant de votre métier. |
+| Entraîneur de démons (fenêtre d'entraîneur) | Choisissez une capacité pour votre démon. |
+| Achat d'un grimoire (`livre`) | Choisissez une capacité pour votre démon et achetez son grimoire. Faite dès que le grimoire est dans les sacs. |
+| Dresseur de familiers | Choisissez les techniques à enseigner à votre familier. |
+| Objet à ramasser sur des monstres | Fouillez les corps : Sanglier tacheté. |
+| Objet à ramasser dans le décor | Cliquez sur : Caisse abandonnée pour ramasser les objets. |
+| Objet sans source relevée | Ramassez les objets demandés. |
+| Objet du décor à utiliser, lieu à atteindre | Cliquez sur l'objet indiqué dans le décor. / Rendez-vous sur place… |
+
+Un grimoire ou un livre utilisable dans les sacs fait apparaître, quelle que soit l'étape, un encadré : « Ouvrez vos sacs
+et faites un clic droit sur « Grimoire d'Éclair de feu (Rang 2) » : votre démon apprend la capacité. » (mode réduit compris).
+Les sources (« sur : … ») ne sont plus collées au texte de l'objectif : elles sont dans la consigne. Textes dans `Locale.lua`
+(`HINT_…`, français et anglais), règles dans `Engine.ActionsEtape` et `Engine.ActionsSacs` (`GuideEngine.lua`).
 
 ## Publier un parcours sur le site
 

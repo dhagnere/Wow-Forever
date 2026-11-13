@@ -15,6 +15,10 @@
       exploit     nom|classement (elite, rareelite, rare, worldboss)|carte|x|y
       photo       raison (niveau, zone, exploit, trajet)
       trajet      debut ou arrivee ou annule|nom du trajet|zone|carte|x|y (|durée en s à l'arrivée)
+      livre       objet|nom|vendeur|titre du vendeur|carte|x|y|niveau du joueur (grimoire ou livre acheté)
+
+    « trainer » (EternalProbe.lua) porte en 7e champ le titre du PNJ : EternalRoutes en tire l'action
+    affichée sous l'étape (choisir une capacité pour son démon ou son familier).
 
     Trajets (zeppelin, bateau) : /ep trajet <nom> au moment d'embarquer. L'arrivée est notée seule dès qu'on
     reste immobile 5 s dans une autre carte que celle du départ ; /ep trajet fin la note à la main,
@@ -166,6 +170,32 @@ local function RetenirClassement(unite)
         end
     end
 end
+
+-- ---- grimoires et livres achetés -----------------------------------------------
+-- Un démon apprend ses capacités par un grimoire acheté à l'entraîneur de démons : l'achat devient
+-- une étape d'EternalRoutes (« choisissez une capacité pour votre démon »).
+
+local function EstLivre(id, nom)
+    if id and GetItemInfoInstant then
+        local ok, _, _, _, _, _, classe, sousClasse = pcall(GetItemInfoInstant, id)
+        if ok and classe then return classe == 9 and sousClasse == 0 end
+    end
+    nom = tostring(nom or "")
+    return nom:find("^Grimoire") ~= nil or nom:find("^Livre") ~= nil or nom:find("^Book") ~= nil
+end
+P.EstLivre = EstLivre
+
+local function NoterAchat(index)
+    if not P.EnCours() then return end
+    local lien = GetMerchantItemLink and GetMerchantItemLink(index)
+    local id = ItemID(lien)
+    local nom = GetMerchantItemInfo and GetMerchantItemInfo(index)
+    if not EstLivre(id, nom) then return end
+    local _, map, x, y = Ici()
+    Ev("livre", id or 0, tostring(nom or ""):gsub("|", "/"), (UnitName("npc") or "?"), P.SousTitre and P.SousTitre("npc") or "",
+        map, x, y, UnitLevel("player") or 0)
+end
+if BuyMerchantItem then hooksecurefunc("BuyMerchantItem", NoterAchat) end
 
 -- ---- événements ---------------------------------------------------------------
 

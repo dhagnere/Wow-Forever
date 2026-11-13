@@ -636,6 +636,27 @@ end
 
 P.ObjetDeQuete, P.NoterButin, P.NoterRecu = ObjetDeQuete, NoterButin, NoterRecu
 
+--- Titre d'un PNJ, lu sur la 2e ligne de sa bulle (« <Entraîneur de démons> »), ou "" si aucun.
+local bulle
+function P.SousTitre(unite)
+    local ok, texte = pcall(function()
+        if not (UnitExists and UnitExists(unite)) then return "" end
+        bulle = bulle or CreateFrame("GameTooltip", "EternalProbeBulle", nil, "GameTooltipTemplate")
+        bulle:SetOwner(WorldFrame or UIParent, "ANCHOR_NONE")
+        bulle:SetUnit(unite)
+        local ligne = _G["EternalProbeBulleTextLeft2"]
+        local t = ligne and ligne:GetText() or ""
+        bulle:Hide()
+        return t
+    end)
+    texte = ok and tostring(texte or "") or ""
+    -- la 2e ligne d'un PNJ sans titre donne son niveau : rien à garder
+    if texte:find("%d") and (texte:find(LEVEL or "Niveau", 1, true) or texte:find("Niveau", 1, true) or texte:find("Level", 1, true)) then
+        return ""
+    end
+    return (texte:gsub("[<>]", ""):gsub("|", "/"))
+end
+
 frame:SetScript("OnEvent", function(_, event, ...)
     if event == "PLAYER_LOGIN" then
         local ancien = SonEnregistrement()
@@ -729,8 +750,10 @@ frame:SetScript("OnEvent", function(_, event, ...)
         local npc = UnitName("npc") or UnitName("target") or "?"
         local metier = IsTradeskillTrainer and IsTradeskillTrainer() and 1 or 0
         local map, x, y = CurrentPos()
-        AddEvent("trainer", ("%s|%d|%s|%s|%s|%s"):format(npc, metier, tostring(map),
-            x and ("%.3f"):format(x) or "nil", y and ("%.3f"):format(y) or "nil", tostring(UnitLevel("player"))))
+        -- 7e champ : titre du PNJ (« Entraîneur de démons », « Dresseur de familiers »…), pour l'action affichée
+        AddEvent("trainer", ("%s|%d|%s|%s|%s|%s|%s"):format(npc, metier, tostring(map),
+            x and ("%.3f"):format(x) or "nil", y and ("%.3f"):format(y) or "nil", tostring(UnitLevel("player")),
+            P.SousTitre("npc")))
         dejaAppris = {}
 
     elseif event == "TRAINER_CLOSED" then

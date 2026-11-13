@@ -339,9 +339,126 @@ local function NomSort(sp)
     return sp.name or ("#" .. tostring(sp.id))
 end
 
+-- ---------------------------------------------------------------------------
+-- Grimoires et livres dans les sacs (capacités de démon, sorts appris en cliquant sur un livre)
+-- ---------------------------------------------------------------------------
+
+local livresCache
+
+local function EstLivre(id)
+    if not (id and GetItemInfoInstant) then return false end
+    local ok, _, _, _, _, _, classe, sousClasse = pcall(GetItemInfoInstant, id)
+    return ok and classe == 9 and sousClasse == 0
+end
+
+--- Livres utilisables dans les sacs : { { id, nom, grimoire = true si c'est un grimoire de démon } }.
+function Engine.LivresDansSacs()
+    if livresCache then return livresCache end
+    local out = {}
+    local nb = (C_Container and C_Container.GetContainerNumSlots) or GetContainerNumSlots
+    local lien = (C_Container and C_Container.GetContainerItemLink) or GetContainerItemLink
+    if nb and lien then
+        for sac = 0, 4 do
+            for place = 1, (nb(sac) or 0) do
+                local l = lien(sac, place)
+                local id = l and tonumber(tostring(l):match("|Hitem:(%d+)"))
+                if id and EstLivre(id) and (not IsUsableItem or IsUsableItem(id)) then
+                    local nom = tostring(l):match("|h%[(.-)%]|h") or (GetItemInfo and GetItemInfo(id)) or ("#" .. id)
+                    out[#out + 1] = { id = id, nom = nom, grimoire = nom:find("^Grimoire") ~= nil }
+                end
+            end
+        end
+    end
+    livresCache = out
+    return out
+end
+
+function Engine.OublierSacs() livresCache = nil end
+
+local function LivreEnSac(q)
+    for _, l in ipairs(Engine.LivresDansSacs()) do
+        for _, v in ipairs(q.livres or {}) do
+            if (v.id and v.id == l.id) or (v.name and v.name == l.nom) then return true end
+        end
+    end
+    return false
+end
+
+local function NomLivre(v)
+    local nom = v.id and GetItemInfo and GetItemInfo(v.id)
+    return (nom and nom ~= "") and nom or TraduireEn(v.name) or ("#" .. tostring(v.id))
+end
+
+local function Classe()
+    local _, c = UnitClass("player")
+    return c
+end
+
+--- Ce qu'il faut faire à cette étape, en clair, sous son titre : liste de phrases (souvent une seule).
+function Engine.ActionsEtape(q, objectifs)
+    local L, out, vus = ns.L, {}, {}
+    local function Ajouter(t) if t and t ~= "" and not vus[t] then vus[t] = true; out[#out + 1] = t end end
+    if not q then return out end
+    if q.kind == "entrainer" then
+        if q.achat then
+            Ajouter(q.familier == "demon" and L.HINT_DEMON_BUY or L.HINT_BOOK_BUY)
+        elseif q.familier == "demon" then
+            Ajouter(L.HINT_DEMON_TRAIN)
+        elseif q.familier == "bete" then
+            Ajouter(L.HINT_PET_TRAIN)
+        elseif q.metier then
+            Ajouter(L.HINT_PROF_TRAIN)
+        else
+            Ajouter(L.HINT_CLASS_TRAIN)
+        end
+        return out
+    end
+    if q.kind ~= "faire" then return out end
+    for _, o in ipairs(objectifs or {}) do
+        if not o.finished then
+            local texte = tostring(o.text or "")
+            local collecte
+            for _, c in ipairs(q.collecte or {}) do
+                if c.item and c.item ~= "" and texte:find(c.item, 1, true) then collecte = c break end
+            end
+            local objet = o.type == "item" or collecte ~= nil or texte:find("^Rapporter") or texte:find("^Bring")
+            if objet then
+                local sources = collecte and #(collecte.sources or {}) > 0 and table.concat(collecte.sources, ", ")
+                if not sources then
+                    Ajouter(L.HINT_LOOT_ANY)
+                elseif collecte.decor and not collecte.monstres then
+                    Ajouter(L.HINT_LOOT_OBJECT:format(sources))
+                elseif collecte.monstres and not collecte.decor then
+                    Ajouter(L.HINT_LOOT_MOB:format(sources))
+                else
+                    Ajouter(L.HINT_LOOT:format(sources))
+                end
+            elseif o.type == "object" then
+                Ajouter(L.HINT_USE_OBJECT)
+            elseif o.type == "event" then
+                Ajouter(L.HINT_EVENT)
+            end
+        end
+    end
+    return out
+end
+
+--- Livres à ouvrir maintenant : une phrase par livre utilisable dans les sacs.
+function Engine.ActionsSacs()
+    local L, out = ns.L, {}
+    local demoniste = Classe() == "WARLOCK"
+    for i, l in ipairs(Engine.LivresDansSacs()) do
+        if i > 2 then break end
+        out[#out + 1] = ((l.grimoire and demoniste) and L.HINT_DEMON_BAG or L.HINT_BOOK_BAG):format(l.nom)
+    end
+    return out
+end
+
 --- Faite quand l'entraîneur a été vu à cette étape, ou quand tous ses sorts sont connus.
+--- Un achat de grimoire est fait dès que le grimoire est dans les sacs.
 function Engine.EtatEntraineur(q)
     if ns.db and ns.db.entraineurs and q.cle and ns.db.entraineurs[q.cle] then return "done" end
+    if q.achat and LivreEnSac(q) then return "done" end
     local sorts = q.spells or {}
     if #sorts > 0 then
         local tous = true
@@ -366,7 +483,25 @@ function Engine.EntraineurVu(npc, metier)
     end
 end
 
+--- Vendeur quitté : valide l'achat de grimoire en cours chez ce vendeur.
+function Engine.MarchandVu(npc)
+    local step = Engine.GetCurrentStep()
+    if not Engine.EstEntraineur(step) then return end
+    local q = step.quests[1]
+    if q.achat and npc and q.name == npc then
+        ns.db.entraineurs = ns.db.entraineurs or {}
+        ns.db.entraineurs[q.cle or q.name] = true
+    end
+end
+
 function Engine.GetObjectives(q)
+    if q and q.kind == "entrainer" and q.achat then
+        local out, fait = {}, Engine.EtatEntraineur(q) == "done"
+        for _, v in ipairs(q.livres or {}) do
+            out[#out + 1] = { text = NomLivre(v), numFulfilled = 0, numRequired = 0, finished = fait }
+        end
+        return out
+    end
     if q and q.kind == "entrainer" then
         local out = {}
         for _, sp in ipairs(q.spells or {}) do
@@ -840,10 +975,11 @@ engineFrame:RegisterEvent("QUEST_PROGRESS")
 engineFrame:RegisterEvent("QUEST_COMPLETE")
 engineFrame:RegisterEvent("QUEST_FINISHED")
 engineFrame:RegisterEvent("PLAYER_LEVEL_UP")
-for _, e in ipairs({ "TRAINER_SHOW", "TRAINER_CLOSED", "LEARNED_SPELL_IN_TAB", "SPELLS_CHANGED" }) do
+for _, e in ipairs({ "TRAINER_SHOW", "TRAINER_CLOSED", "LEARNED_SPELL_IN_TAB", "SPELLS_CHANGED",
+    "MERCHANT_SHOW", "MERCHANT_CLOSED", "BAG_UPDATE_DELAYED" }) do
     pcall(engineFrame.RegisterEvent, engineFrame, e)
 end
-local entraineurOuvert
+local entraineurOuvert, marchandOuvert
 
 local function LogEvent(text)
     Engine.lastEvent = text
@@ -902,6 +1038,16 @@ engineFrame:SetScript("OnEvent", function(self, event, ...)
         if entraineurOuvert then Engine.EntraineurVu(entraineurOuvert.npc, entraineurOuvert.metier) end
         entraineurOuvert = nil
         LogEvent(event)
+    elseif event == "MERCHANT_SHOW" then
+        marchandOuvert = UnitName("npc") or UnitName("target")
+        LogEvent(event)
+    elseif event == "MERCHANT_CLOSED" then
+        Engine.OublierSacs()
+        if marchandOuvert then Engine.MarchandVu(marchandOuvert) end
+        marchandOuvert = nil
+        LogEvent(event)
+    elseif event == "BAG_UPDATE_DELAYED" then
+        Engine.OublierSacs()
     else
         LogEvent(event)
     end
