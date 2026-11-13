@@ -6,7 +6,8 @@
  *
  * Comment remplir (une quête par entrée) :
  *  - id : 9100001, 9100002… (unique, jamais réutilisé : il sert à sauvegarder la progression des joueurs) ;
- *  - lieu : slug de la carte de la zone (« durotar », « clairieres-de-tirisfal »…) ;
+ *  - lieu : slug de la carte de la zone (« durotar », « clairieres-de-tirisfal »…) ; une capitale (« orgrimmar »…) reçoit sa
+ *    propre zone dans le guide dès qu'une quête y est saisie (zonesAjouts, lib/guide.ts) ;
  *  - positions x et y : coordonnées en jeu sur la carte de la zone (0 à 100) ;
  *  - objectifs : rédigés avec nos mots (« Rapporter 6 × … », « Vaincre 10 × … »), jamais le texte du jeu ; une ligne par
  *    objet ou par monstre (le jeu compte chacun à part, l'addon les affiche ligne à ligne) ;
@@ -243,7 +244,8 @@ export const QUETES_FOREVER: QueteForever[] = [
   {
     // Id réel Forever : 97246 (« Meal Appeal »). Id interne 9100016. Orgrimmar.
     id: 9100016,
-    lieu: "durotar",
+    lieu: "orgrimmar",
+    // PNJ à 52 – 30 en attendant leur position relevée sur la carte d'Orgrimmar (ancien point de rassemblement en Durotar).
     titre: "En souffrance de pitance",
     niveau: 15,
     min: 10,
@@ -256,7 +258,8 @@ export const QUETES_FOREVER: QueteForever[] = [
   {
     // Id réel Forever : 97249 (« Favorite Food »). Id interne 9100017. Orgrimmar.
     id: 9100017,
-    lieu: "durotar",
+    lieu: "orgrimmar",
+    // PNJ à 52 – 30 en attendant leur position relevée sur la carte d'Orgrimmar (ancien point de rassemblement en Durotar).
     titre: "Son plat préféré",
     niveau: 15,
     min: 10,
@@ -269,23 +272,23 @@ export const QUETES_FOREVER: QueteForever[] = [
   {
     // Id réel Forever : 97242 (« Yelmak's Medley »). Id interne 9100018. Orgrimmar.
     id: 9100018,
-    lieu: "durotar",
+    lieu: "orgrimmar",
+    // PNJ à 52 – 30 en attendant leur position relevée sur la carte d'Orgrimmar (ancien point de rassemblement en Durotar).
     titre: "Le mélange de Yelmak",
     niveau: 15,
     min: 10,
     donneur: { nom: "Kor'geld", x: 52, y: 30 },
-    objectifs: ["Rapporter 2 × Bouture de cattail (Orgrimmar, 68 – 30)", "Rapporter 4 × Bouture de speargrass (Orgrimmar, 68 – 30)"],
-    // Boutures ramassées à Orgrimmar, 68 – 30 sur la carte de la ville (relevé de Jobwow en jeu, 12 novembre 2026). La carte
-    // d'Orgrimmar n'existe pas dans le guide : comme le donneur, la collecte est rattachée au point de rassemblement de
-    // Durotar (52, 30), ce qui suffit à l'ordre « prendre, ramasser, rendre » ; l'objectif dit où aller vraiment.
-    cibles: [[52, 30]],
+    objectifs: ["Rapporter 2 × Bouture de cattail", "Rapporter 4 × Bouture de speargrass"],
+    // Boutures ramassées à Orgrimmar, 68 – 30 (relevé de Jobwow en jeu, 12 novembre 2026).
+    cibles: [[68, 30]],
     faction: "horde",
     source: "Vidéos du 7 novembre 2026 (vidéos 13 et 16) ; ForeverDB : quête 97242, à Orgrimmar (entrée en Durotar ~52, 30). Collecte relevée en jeu par Jobwow le 12 novembre 2026 : Orgrimmar, 68 – 30.",
   },
   {
     // Id réel Forever : 97275 (« Whuut's the Rush »). Id interne 9100019. Orgrimmar.
     id: 9100019,
-    lieu: "durotar",
+    lieu: "orgrimmar",
+    // PNJ à 52 – 30 en attendant leur position relevée sur la carte d'Orgrimmar (ancien point de rassemblement en Durotar).
     titre: "Droit au Whuut",
     niveau: 15,
     min: 10,
@@ -298,7 +301,8 @@ export const QUETES_FOREVER: QueteForever[] = [
   {
     // Id réel Forever : 97326 (« Rocks to Rests »). Id interne 9100020. Orgrimmar.
     id: 9100020,
-    lieu: "durotar",
+    lieu: "orgrimmar",
+    // PNJ à 52 – 30 en attendant leur position relevée sur la carte d'Orgrimmar (ancien point de rassemblement en Durotar).
     titre: "Ameublement rocheux",
     niveau: 15,
     min: 10,

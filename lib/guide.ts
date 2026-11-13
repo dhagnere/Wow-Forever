@@ -178,6 +178,36 @@ export function avecAjoutsForever(z: ZoneGuide, faction: RaceGuide["faction"], c
   return { ...z, hubs, etapes: [...z.etapes, ...etapes] };
 }
 
+/**
+ * Lieux que les bases libres ne connaissent pas comme zone du guide (Orgrimmar…) mais où Forever a ajouté des quêtes :
+ * une zone vide est créée pour chacun (s'il a une carte du jeu), puis remplie par avecAjoutsForever. Ses niveaux sont
+ * ceux de ses quêtes. Un lieu déjà présent dans les données de la faction n'est jamais recréé, même s'il a été écarté
+ * de la route (zone de départ d'une autre race).
+ */
+export function zonesAjouts(donneesFaction: ZoneGuide[], faction: RaceGuide["faction"], classe: string, ajouts: QueteForever[] = QUETES_FOREVER): ZoneGuide[] {
+  const connues = new Set(donneesFaction.map((z) => z.lieu));
+  const pour = ajouts.filter((q) => (!q.faction || q.faction === faction) && (!q.classes?.length || q.classes.includes(classe)) && !connues.has(q.lieu) && carte(q.lieu));
+  return [...new Set(pour.map((q) => q.lieu))].map((lieu) => {
+    const qs = pour.filter((q) => q.lieu === lieu);
+    return {
+      lieu,
+      niveaux: [Math.min(...qs.map((q) => q.min || Math.max(1, q.niveau - 2))), Math.max(...qs.map((q) => q.niveau))] as [number, number],
+      hubs: [],
+      etapes: [],
+    };
+  });
+}
+
+/** Insère chaque zone créée avant la première zone (hors zone de départ) qui commence à un niveau plus élevé. */
+function avecZonesAjouts(route: ZoneGuide[], nouvelles: ZoneGuide[], depart: string): ZoneGuide[] {
+  const liste = [...route];
+  for (const n of nouvelles) {
+    const i = liste.findIndex((z) => z.lieu !== depart && z.niveaux[0] > n.niveaux[0]);
+    liste.splice(i < 0 ? liste.length : i, 0, n);
+  }
+  return liste;
+}
+
 export function guidePour(race: RaceGuide, classe: string, langue: Langue = "fr"): ZoneGuide[] {
   const d = donnees(langue);
   const bitClasse = BITS_CLASSES[classe] ?? 0;
@@ -185,19 +215,23 @@ export function guidePour(race: RaceGuide, classe: string, langue: Langue = "fr"
     // Après l'île : la route de la faction à partir du niveau 10, hors zones de départ des autres races ; seules les
     // quêtes ouvertes à toute la faction (ou à tous) sont gardées, faute de masque de race propre aux Skyborne.
     const masque = MASQUE_FACTION[race.faction];
-    const suite = (d?.guide[race.faction] ?? [])
+    const donneesFaction = d?.guide[race.faction] ?? [];
+    const suite = avecZonesAjouts(donneesFaction
       .filter((z) => !DEPARTS.has(z.lieu) && z.niveaux[0] >= 10)
-      .map((z) => ({ ...z, etapes: z.etapes.filter((e) => (!e.ra || e.ra === masque) && (!e.cl || e.cl & bitClasse)) }))
+      .map((z) => ({ ...z, etapes: z.etapes.filter((e) => (!e.ra || e.ra === masque) && (!e.cl || e.cl & bitClasse)) })),
+    zonesAjouts(donneesFaction, race.faction, classe).filter((z) => z.niveaux[0] >= 10), ZEPHRAS)
       .map((z) => avecAjoutsForever(z, race.faction, classe, langue))
       .filter((z) => z.etapes.length >= 4);
     return [zoneZephras(race, classe), ...suite];
   }
   const continent = carte(race.depart)?.continent;
   if (!d) return [];
-  return d.guide[race.faction]
+  const route = d.guide[race.faction]
     .filter((z) => z.lieu === race.depart || !DEPARTS.has(z.lieu) || z.niveaux[0] >= 12)
     .filter((z) => z.lieu === race.depart || z.niveaux[1] >= 30 || carte(z.lieu)?.continent === continent)
-    .map((z) => ({ ...z, etapes: z.etapes.filter((e) => (!e.ra || e.ra & race.bit) && (!e.cl || e.cl & bitClasse)) }))
+    .map((z) => ({ ...z, etapes: z.etapes.filter((e) => (!e.ra || e.ra & race.bit) && (!e.cl || e.cl & bitClasse)) }));
+  // Les capitales n'ont pas de zone dans les bases libres : celles où Forever a ajouté des quêtes en reçoivent une.
+  return avecZonesAjouts(route, zonesAjouts(d.guide[race.faction], race.faction, classe), race.depart)
     .map((z) => avecAjoutsForever(z, race.faction, classe, langue))
     .filter((z) => z.etapes.length >= 4)
     // La zone de départ ouvre toujours la route.
