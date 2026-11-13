@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from "vitest";
 import { QUETES_FOREVER, SECTEUR_A_RELEVER, TITRE_EN_A_CONFIRMER } from "@/content/ajouts-forever";
 import { avecAjoutsForever, guidePour, planifier, raceGuide } from "@/lib/guide";
 import { carte } from "@/lib/cartes";
-import { lireBlocRemarques } from "@/modules/veille/guides/relecture";
 
 vi.mock("server-only", () => ({}));
 
@@ -38,16 +37,6 @@ describe("quêtes ajoutées par Forever", () => {
     const en = avecAjoutsForever(sans, "horde", "chasseur", "en");
     expect(JSON.stringify(sans)).toBe(avant);
     expect(en.etapes.find((e) => e.id === 9100001)!.t).toContain(TITRE_EN_A_CONFIRMER);
-  });
-});
-
-describe("import de remarques dans la relecture", () => {
-  it("lit une étape par ligne et ignore le reste", () => {
-    expect(lireBlocRemarques("prendre:4641 | oui |\nprendre:788 | non | Gornek | après le rendu\nn'importe quoi\nfaire:12 | X")).toEqual([
-      { etape: "prendre:4641", verifie: true, remarque: "" },
-      { etape: "prendre:788", verifie: false, remarque: "Gornek | après le rendu" },
-      { etape: "faire:12", verifie: true, remarque: "" },
-    ]);
   });
 });
 

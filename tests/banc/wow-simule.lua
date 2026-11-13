@@ -44,6 +44,7 @@ SlashCmdList, UISpecialFrames, SOUNDKIT = {}, {}, setmetatable({}, { __index = f
 RaidNotice_AddMessage, PlaySound, ReloadUI = function() end, function() end, function() end
 RaidWarningFrame, ChatTypeInfo = NouveauCadre(), setmetatable({}, { __index = function() return { r = 1, g = 1, b = 1 } end })
 
+tinsert = table.insert
 function hooksecurefunc(nom, fn)
     local avant = _G[nom]
     _G[nom] = function(...) local r = { avant(...) }; fn(...); return unpack(r) end

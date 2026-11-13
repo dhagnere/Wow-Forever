@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { parcoursProbePublies } from "@/modules/veille";
+import { PARCOURS_RELEVES } from "@/content/parcours-releves";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { trouverClasse } from "@/content/classes";
@@ -16,6 +18,9 @@ import { LIEUX_ZEPHRAS_EN } from "@/content/lieux-en";
 import { SORTIE_ZEPHRAS } from "@/content/zephras";
 
 type Props = { params: Promise<{ race: string; classe: string }> };
+
+// Les guides publiés depuis /admin/probe sont relus sans déploiement : à la publication, et au plus tard chaque heure.
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return combinaisons().map(({ race, classe }) => ({ race: RACES_EN[race.slug].slug, classe: CLASSES_EN[classe.slug].slug }));
@@ -44,10 +49,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function GuideRaceClasseEn({ params }: Props) {
   const c = lire(await params);
   if (!c) notFound();
+  const parcours = [...(await parcoursProbePublies()), ...PARCOURS_RELEVES];
   const zones: ZoneVue[] = guidePour(c.race, c.classe.slug, "en").map((z) => ({
     lieu: z.lieu, nom: nomLieu(z.lieu, "en"), carte: urlCarte(z.lieu, 1000), lienCarte: pageLieuEn(z.lieu), niveaux: z.niveaux, hubs: z.hubs,
     etapes: z.etapes.map(({ id, t, nv, min, cl, grp, obj, g, gn, r, rn, rl, cib }) => ({ id, t, nv, min, cl, grp, obj, g, gn, r, rn, rl: rl ? nomLieu(rl, "en") : null, cib })),
-    arrets: ordreDuGuide(z, c.race, c.classe.slug),
+    arrets: ordreDuGuide(z, c.race, c.classe.slug, parcours),
     ...(z.lieu === ZEPHRAS ? { lieux: LIEUX_ZEPHRAS.map((l) => ({ ...l, nom: LIEUX_ZEPHRAS_EN[l.nom] ?? l.nom })) } : {}),
     ...(z.lieu === ZEPHRAS && !z.etapes.length ? {
       note: `The island's quests are not in the game files yet: Jobwow will record them at launch and add them here, with their NPCs and targets on the map. Meanwhile, the map shows the island's places. Start from the village of Thendal, do the island's quests until it is complete, then take the road ${SORTIE_ZEPHRAS[c.race.faction] ? `to ${SORTIE_ZEPHRAS[c.race.faction]}` : "of your faction [arrival point to be confirmed at launch]"}: the guide picks up again at level 10.`,

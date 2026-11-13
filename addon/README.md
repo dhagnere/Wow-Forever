@@ -3,7 +3,7 @@
 | Dossier | Rôle | État |
 |---|---|---|
 | `EternalRoutes/` | Guide pas à pas en jeu (fenêtre, flèche, auto-avance) | 0.11.0 : lit EternalProbe, puis RouteProbe |
-| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.8.2 : niveaux de quête, récompenses, points de vol, vols, morts, élites, captures d'écran, trajets (`/ep trajet`) |
+| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.9.0 : captures de la 0.8, trajets (`/ep trajet`), code à coller sur le site (`/ep export`) |
 | `RouteProbe/` | Ancienne sonde d'enregistrement, gardée pour référence | 0.6.0, version jouée au 13/11 |
 
 Branche de travail : `dev-addon`. Chaque changement est relu puis fusionné dans `dev`.
@@ -20,6 +20,13 @@ Nouveaux événements, au même format « heure|type|… » (EternalRoutes ignor
 immobile 5 s dans une autre zone ; `/ep trajet fin` la note à la main, `/ep trajet annule` abandonne. Marche sans
 enregistrement en cours et survit à un `/reload`. Le site place un trajet d'après ses lieux de départ et d'arrivée,
 jamais d'après l'heure : on peut le rejouer après coup (aucune quête n'est en jeu).
+
+## Publier un parcours sur le site
+
+1. En jeu : `/ep export`. La fenêtre montre un code déjà sélectionné : Ctrl+C.
+2. Site : Administration › **Guides à valider (Probe)**, coller, « Analyser le code ».
+3. Relire (zones, quêtes, trajets, vérification), choisir la portée, « Publier ». Les pages du guide se mettent à jour
+   dans la minute ; « Retirer du site » rend l'ordre d'avant.
 
 ## Banc d'essai
 

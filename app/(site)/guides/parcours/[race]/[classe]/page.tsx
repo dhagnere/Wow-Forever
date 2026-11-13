@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { parcoursProbePublies } from "@/modules/veille";
+import { PARCOURS_RELEVES } from "@/content/parcours-releves";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { trouverClasse } from "@/content/classes";
@@ -15,6 +17,9 @@ import { LIEUX_ZEPHRAS } from "@/content/zephras-jeu";
 import { SORTIE_ZEPHRAS } from "@/content/zephras";
 
 type Props = { params: Promise<{ race: string; classe: string }> };
+
+// Les guides publiés depuis /admin/probe sont relus sans déploiement : à la publication, et au plus tard chaque heure.
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return combinaisons().map(({ race, classe }) => ({ race: race.slug, classe: classe.slug }));
@@ -40,10 +45,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function GuideRaceClasse({ params }: Props) {
   const c = lire(await params);
   if (!c) notFound();
+  const parcours = [...(await parcoursProbePublies()), ...PARCOURS_RELEVES];
   const zones: ZoneVue[] = guidePour(c.race, c.classe.slug).map((z) => ({
     lieu: z.lieu, nom: nomLieu(z.lieu), carte: urlCarte(z.lieu, 1000), lienCarte: pageLieu(z.lieu), niveaux: z.niveaux, hubs: z.hubs,
     etapes: z.etapes.map(({ id, t, nv, min, cl, grp, obj, g, gn, r, rn, rl, cib }) => ({ id, t, nv, min, cl, grp, obj, g, gn, r, rn, rl: rl ? nomLieu(rl) : null, cib })),
-    arrets: ordreDuGuide(z, c.race, c.classe.slug),
+    arrets: ordreDuGuide(z, c.race, c.classe.slug, parcours),
     ...(z.lieu === ZEPHRAS ? { lieux: LIEUX_ZEPHRAS } : {}),
     ...(z.lieu === ZEPHRAS && !z.etapes.length ? {
       note: `Les quêtes de l'île ne figurent pas encore dans les fichiers du jeu : Jobwow les relève au lancement et les ajoute ici, avec leurs PNJ et leurs cibles sur la carte. En attendant, la carte montre les lieux de l'île. Partez du village de Thendal, faites les quêtes de l'île jusqu'à ce qu'elle soit terminée, puis prenez la route ${SORTIE_ZEPHRAS[c.race.faction] ? `vers ${SORTIE_ZEPHRAS[c.race.faction]}` : "de votre faction [point d'arrivée à confirmer au lancement]"} : la suite du guide reprend au niveau 10.`,

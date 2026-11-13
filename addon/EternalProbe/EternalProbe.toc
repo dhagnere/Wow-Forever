@@ -3,7 +3,7 @@
 ## Notes: Sonde d'enregistrement de parcours, deuxième génération (remplace RouteProbe)
 ## Notes-frFR: Sonde d'enregistrement de parcours, deuxième génération (remplace RouteProbe)
 ## Author: La Taverne Éternelle
-## Version: 0.8.2
+## Version: 0.9.0
 ## Category: Quests
 ## Category-frFR: Quêtes
 ## X-Website: https://www.taverne-eternelle.fr/
@@ -11,3 +11,4 @@
 
 EternalProbe.lua
 Captures.lua
+Export.lua

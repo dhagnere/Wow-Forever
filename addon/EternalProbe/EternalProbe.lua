@@ -971,7 +971,7 @@ SlashCmdList.ETERNALPROBE = function(msg)
     end
 
     if P.CommandeEnPlus and P.CommandeEnPlus(lower, raw) then return end
-    Print("Commandes : /ep start | stop | dump | context | clear | suite | archives | mark <texte> | trajet <nom> | trajet fin | photos on|off")
+    Print("Commandes : /ep start | stop | dump | context | clear | suite | archives | mark <texte> | trajet <nom> | trajet fin | export | photos on|off")
 end
 
 -- Bouton minimap (déplaçable) : démarrer / arrêter l'enregistrement
