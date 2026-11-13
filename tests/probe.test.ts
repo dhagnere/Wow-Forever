@@ -124,4 +124,38 @@ describe("de bout en bout : le code produit par EternalProbe se lit sur le site"
     expect(g.race).toBe("orc");
     expect(g.zones[0]).toEqual({ lieu: "durotar", etapes: ["prendre:4641", "rendre:4641"] });
   });
+
+  it("/ep suite garde la zone de départ, exportable à part avec /ep export depart", () => {
+    const L = lauxlib.luaL_newstate();
+    lualib.luaL_openlibs(L);
+    const lire = (f: string) => readFileSync(path.join(process.cwd(), f), "utf8");
+    const morceaux = [
+      lire("tests/banc/wow-simule.lua"),
+      lire("addon/EternalProbe/EternalProbe.lua"), lire("addon/EternalProbe/Captures.lua"), lire("addon/EternalProbe/Export.lua"),
+      `EternalRoutes = { Importer = { Importer = function() return { id = "rp-depart" } end } }
+       BANC.Evenement("PLAYER_LOGIN")
+       SlashCmdList.ETERNALPROBE("start")
+       BANC.journal[4641] = { titre = "Votre place en ce monde", niveau = 1, objectifs = {} }
+       BANC.Avancer(2)
+       BANC.Evenement("QUEST_ACCEPTED", 4641)
+       BANC.Evenement("QUEST_TURNED_IN", 4641, 40, 0)
+       SlashCmdList.ETERNALPROBE("suite")
+       BANC.Avancer(2)
+       BANC.journal[788] = { titre = "Nettoyer la vallée", niveau = 2, objectifs = {} }
+       BANC.Evenement("QUEST_ACCEPTED", 788)
+       local depart = EternalProbe.CodeExport(true)
+       local commune = EternalProbe.CodeExport()
+       return depart .. "\\n" .. commune`,
+    ];
+    for (const m of morceaux) {
+      if (lauxlib.luaL_dostring(L, to_luastring(m)) !== lua.LUA_OK) throw new Error(lua.lua_tojsstring(L, -1));
+    }
+    const [depart, commune] = (lua.lua_tojsstring(L, -1) as string).split("\n");
+    const gd = guideDepuisExport(lireExport(depart));
+    const gc = guideDepuisExport(lireExport(commune));
+    expect(gd.partie).toBe("depart");
+    expect(gd.zones[0].etapes).toEqual(["prendre:4641", "rendre:4641"]);
+    expect(gc.partie).toBe("commune");
+    expect(gc.zones[0].etapes).toEqual(["prendre:788"]);
+  });
 });

@@ -435,7 +435,7 @@ local function Personnage()
     return (royaume ~= "") and (nom .. "-" .. royaume) or nom
 end
 
-local CHAMPS = { "events", "quests", "targets", "context", "horloges", "partie", "carteDepart", "enCours" }
+local CHAMPS = { "events", "quests", "targets", "context", "horloges", "partie", "carteDepart", "enCours", "departGarde" }
 
 --- La sauvegarde est commune au compte : l'enregistrement d'un autre personnage est mis de côté,
 --- et celui du personnage connecté lui est rendu. Renvoie le nom du personnage mis de côté, s'il y en a un.
@@ -834,9 +834,15 @@ function P.Suite()
         Print("Import non confirmé : l'enregistrement est gardé. Vérifiez /er routes, puis /ep clear et /ep start.")
         return
     end
+    -- la zone de départ reste exportable (/ep export depart) : la partie commune repart d'un enregistrement vide
+    local db = DB()
+    local garde = { events = db.events, quests = db.quests, context = db.context, partie = db.partie,
+        carteDepart = db.carteDepart, personnage = db.personnage }
     P.Clear()
+    DB().departGarde = garde
     DB().partie = "commune"
     P.Start()
+    Print("Zone de départ gardée : /ep export depart donne son code pour le site, à tout moment.")
 end
 
 function P.Stop()
@@ -971,7 +977,7 @@ SlashCmdList.ETERNALPROBE = function(msg)
     end
 
     if P.CommandeEnPlus and P.CommandeEnPlus(lower, raw) then return end
-    Print("Commandes : /ep start | stop | dump | context | clear | suite | archives | mark <texte> | trajet <nom> | trajet fin | export | photos on|off")
+    Print("Commandes : /ep start | stop | dump | context | clear | suite | archives | mark <texte> | trajet <nom> | trajet fin | export | export depart | photos on|off")
 end
 
 -- Bouton minimap (déplaçable) : démarrer / arrêter l'enregistrement

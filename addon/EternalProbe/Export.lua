@@ -1,6 +1,8 @@
 --[[----------------------------------------------------------------------------
     EternalProbe — Export.lua : /ep export, le code à coller sur le site.
 
+    /ep export depart : la zone de départ, gardée à part quand /ep suite lance la partie commune.
+
     La fenêtre montre un code déjà sélectionné : Ctrl+C, puis coller sur La Taverne Éternelle,
     Administration › Guides à valider (Probe). Rien à chercher dans le dossier WTF.
 
@@ -50,8 +52,10 @@ P.Base64 = Base64
 -- ---- le code ------------------------------------------------------------------------------------
 local function Champ(v) return (tostring(v == nil and "" or v):gsub("[|\n]", "/")) end
 
-function P.CodeExport()
-    local db = P.DB()
+--- Code d'un enregistrement : celui en cours, ou (depart = true) la zone de départ gardée par /ep suite.
+function P.CodeExport(depart)
+    local db = depart and P.DB().departGarde or P.DB()
+    if not db then return "", 0, 0 end
     local c = db.context or {}
     local lignes = {
         "EP|1",
@@ -144,10 +148,11 @@ local function Fenetre()
     return fenetre
 end
 
-function P.Exporter()
-    local code, nbEvenements, nbQuetes = P.CodeExport()
+function P.Exporter(depart)
+    local code, nbEvenements, nbQuetes = P.CodeExport(depart)
     if nbEvenements == 0 then
-        P.Print("Rien à exporter : aucun enregistrement pour ce personnage (/ep start, jouez, puis /ep export).")
+        P.Print(depart and "Aucune zone de départ gardée pour ce personnage (elle l'est par /ep suite)."
+            or "Rien à exporter : aucun enregistrement pour ce personnage (/ep start, jouez, puis /ep export).")
         return
     end
     Fenetre()
@@ -164,5 +169,6 @@ end
 local avant = P.CommandeEnPlus
 function P.CommandeEnPlus(lower, raw)
     if lower == "export" then P.Exporter() return true end
+    if lower == "export depart" or lower == "export départ" then P.Exporter(true) return true end
     return avant and avant(lower, raw) or false
 end
