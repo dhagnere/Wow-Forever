@@ -55,7 +55,7 @@ garde une vidéo par fichier.
    fichier, corriger heures, répliques (« Autre réplique »), sous-titres et clips, aperçu 16:9 et 9:16, puis copier le texte
    dans le fichier.
 3. `npm run carnet:incrustation -- "<vidéo>.narration.json"` rend `<vidéo>.jobwow.mp4` et `<vidéo>.clip-N.mp4`
-   (`--sans-clips` pour s'en passer). Le médaillon rebondit quand Jobwow « parle », passe en gris à la mort, en doré au niveau.
+   (`--sans-clips` pour s'en passer). Le médaillon (portrait retouché « Taverne » : parties claires assombries, touche chaude, bords assombris) rebondit quand Jobwow « parle », passe en gris à la mort, en doré au niveau.
 
 Répliques dans `content/repliques-jobwow.ts` (aucune classe citée : celle de Jobwow n'est jamais précisée), narration et
 graphe ffmpeg dans `lib/incrustation.ts`, images (sharp) et encodage dans `scripts/incrustation-video.ts`, contrôles dans

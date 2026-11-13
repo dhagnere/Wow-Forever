@@ -89,8 +89,15 @@ async function medaillon(diametre: number, etat: "normal" | "mort" | "niveau", s
   const bord = Math.round(diametre * 0.085);
   const tot = diametre + 2 * bord;
   const cart = Math.round(diametre * 0.16);
-  let portrait = sharp(AVATAR).extract({ left: 96, top: 20, width: 320, height: 320 }).resize(diametre, diametre);
-  if (etat === "mort") portrait = portrait.grayscale().modulate({ brightness: 0.75 });
+  // retouche « Taverne » (choisie le 14/11) : parties claires assombries (la capture est presque blanche), couleur
+  // et netteté rendues, touche chaude, bords du cercle assombris pour que Jobwow ressorte sur le jeu
+  const chaud = Buffer.from(`<svg width="${diametre}" height="${diametre}"><rect width="${diametre}" height="${diametre}" fill="#c98a3a" fill-opacity="0.16"/></svg>`);
+  const vignette = Buffer.from(`<svg width="${diametre}" height="${diametre}"><defs><radialGradient id="g" cx="50%" cy="42%" r="62%"><stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity="0.75"/></radialGradient></defs><rect width="${diametre}" height="${diametre}" fill="url(#g)"/></svg>`);
+  const retouche = await sharp(AVATAR).extract({ left: 96, top: 20, width: 320, height: 320 }).resize(diametre, diametre)
+    .modulate({ brightness: 0.7, saturation: 1.2 }).linear(1.15, 4).sharpen({ sigma: 1 })
+    .composite([{ input: chaud, blend: "soft-light" }, { input: vignette }]).png().toBuffer();
+  let portrait = sharp(retouche);
+  if (etat === "mort") portrait = portrait.grayscale().modulate({ brightness: 0.8 });
   const rond = Buffer.from(`<svg width="${diametre}" height="${diametre}"><circle cx="${diametre / 2}" cy="${diametre / 2}" r="${diametre / 2}" fill="#fff"/></svg>`);
   const visage = await portrait.composite([{ input: rond, blend: "dest-in" }]).png().toBuffer();
   const liseré = etat === "niveau" ? "#f2c94c" : etat === "mort" ? "#9aa4ad" : "#d6a840";
