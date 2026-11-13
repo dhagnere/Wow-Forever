@@ -5,6 +5,8 @@
  * Fonctions pures : la lecture des fichiers et ffmpeg restent dans scripts/carnet-video.ts.
  */
 
+import { CARTES_JEU } from "@/content/cartes-jeu";
+
 // ——— Lecture de la sauvegarde de RouteProbe (SavedVariables, syntaxe de table Lua) ———
 
 export type ValeurLua = string | number | boolean | null | ValeurLua[] | { [cle: string]: ValeurLua };
@@ -90,7 +92,16 @@ export function lireTableLua(texte: string, nom = "RouteProbeDB"): ValeurLua {
 
 // ——— Chronologie des repères, en heure du PC ———
 
-export type TypeRepere = "zone" | "niveau" | "marqueur";
+/**
+ * Niveau atteint d'un événement « level » : la sonde 0.10.1 et suivantes notent le nouveau niveau (« level|5|nouveau ») ;
+ * avant, elle notait celui que le jeu donnait encore à l'instant de la montée, l'ancien : on ajoute un.
+ */
+export function niveauAtteint(champs: string[]): number {
+  const n = Number(champs[2]);
+  return champs[3] === "nouveau" ? n : n + 1;
+}
+
+export type TypeRepere = "zone" | "niveau" | "marqueur" | "etat";   // « etat » : zone|niveau au début d'un enregistrement
 export interface Repere { heure: number; type: TypeRepere; texte: string; personnage: string }
 
 /** Heure du PC « 2026-11-11 21:04:13 » (heure locale, sans fuseau) → millisecondes, comparables aux noms de fichiers. */
@@ -99,6 +110,8 @@ export function heureLocale(texte: string): number | null {
   if (!m) return null;
   return Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
 }
+
+const NOMS_CARTES = new Map(Object.values(CARTES_JEU).map((c) => [c.id, c.nom]));
 
 const listeDe = (v: ValeurLua | undefined): ValeurLua[] =>
   Array.isArray(v) ? v : v && typeof v === "object" ? Object.keys(v).filter((k) => /^\d+$/.test(k)).sort((a, b) => +a - +b).map((k) => (v as Record<string, ValeurLua>)[k]) : [];
@@ -110,6 +123,13 @@ const listeDe = (v: ValeurLua | undefined): ValeurLua[] =>
 export function reperesEnregistrement(enr: Record<string, ValeurLua>, personnage: string): Repere[] {
   const out: Repere[] = [];
   let ref: { t: number; heure: number } | null = null;
+  // niveau à chaque repère d'horloge (EternalProbe : table « horloges ») : l'état au début d'un enregistrement
+  const niveaux = new Map<number, number>();
+  for (const h of listeDe(enr.horloges)) {
+    const x = h as Record<string, ValeurLua>;
+    if (x && typeof x === "object" && typeof x.t === "number" && typeof x.niveau === "number") niveaux.set(Math.round(x.t * 10), x.niveau);
+  }
+  let debut: { heure: number; niveau: number | null } | null = null;
   for (const brut of listeDe(enr.events)) {
     const p = String(brut).split("|");
     const t = Number(p[0]);
@@ -117,12 +137,19 @@ export function reperesEnregistrement(enr: Record<string, ValeurLua>, personnage
     if (p[1] === "clock") {
       const h = heureLocale(p[3] ?? "");
       if (h !== null) ref = { t, heure: h };
+      // nouvel enregistrement : l'état (zone, niveau) est donné à la première position qui suit
+      if (p[2] === "debut" && h !== null) debut = { heure: h, niveau: niveaux.get(Math.round(t * 10)) ?? null };
       continue;
     }
     if (!ref) continue;
     const heure = ref.heure + Math.round((t - ref.t) * 1000);
+    if (debut && p[1] === "pos") {
+      const zone = NOMS_CARTES.get(Number(p[2])) ?? "";
+      out.push({ heure: debut.heure, type: "etat", texte: `${zone}|${debut.niveau ?? ""}`, personnage });
+      debut = null;
+    }
     if (p[1] === "zone" && p[2] && p[2] !== "nil") out.push({ heure, type: "zone", texte: p[2], personnage });
-    else if (p[1] === "level" && p[2]) out.push({ heure, type: "niveau", texte: p[2], personnage });
+    else if (p[1] === "level" && p[2]) out.push({ heure, type: "niveau", texte: String(niveauAtteint(p)), personnage });
     else if (p[1] === "mark" && p[2]) out.push({ heure, type: "marqueur", texte: p.slice(2).join("|"), personnage });
   }
   return out;
@@ -213,12 +240,14 @@ export function chapitres(s: Seance, tous: Repere[]): { liste: Chapitre[]; valid
     if (r.heure < s.debut - ETAT_MAX_MS) continue;
     if (r.type === "zone") zone = r.texte;
     if (r.type === "niveau") niveau = Number(r.texte);
+    // début d'un enregistrement : peut-être un autre personnage ou un autre lieu, on repart de son état
+    if (r.type === "etat") { const [z, n] = r.texte.split("|"); zone = z || null; niveau = n ? Number(n) : null; }
   }
   const zones = zone ? [zone] : [];
   let nMin = niveau, nMax = niveau;
   const liste: Chapitre[] = [{ seconde: 0, titre: ["Début de la séance", zone, niveau ? `niveau ${niveau}` : null].filter(Boolean).join(" · ") }];
   for (const r of reperes) {
-    if (r.heure <= s.debut || r.heure > s.fin) continue;
+    if (r.type === "etat" || r.heure <= s.debut || r.heure > s.fin) continue;
     // zone et niveau de la première minute : déjà dans le chapitre de départ (un marqueur garde son chapitre)
     if (r.type !== "marqueur" && r.heure <= s.debut + DEPART_MS) continue;
     const pos = positionDans(s, r.heure);

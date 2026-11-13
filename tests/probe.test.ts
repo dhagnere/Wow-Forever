@@ -22,7 +22,7 @@ const SEANCE = [
   "21.0|accept|788|Nettoyer la vallée",
   "30.0|pos|1411|0.450|0.640",
   "31.0|obj|788|1|1|10|monster|1411|0.450|0.640|Sanglier",
-  "60.0|level|2",
+  "60.0|level|2|nouveau",
   "70.0|turnin|788|Nettoyer la vallée",
   "80.0|trajet|debut|Zeppelin Tirisfal - Orgrimmar|Clairières de Tirisfal|1420|0.61|0.59",
   "300.0|trajet|arrivee|Zeppelin Tirisfal - Orgrimmar|Durotar|1411|0.5|0.12|220",

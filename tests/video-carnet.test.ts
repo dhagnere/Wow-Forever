@@ -8,10 +8,10 @@ RouteProbeDB = {
 	["events"] = {
 		"1000.0|clock|debut|2026-11-11 21:00:00", -- [1]
 		"1001.0|zone|Durotar|1411|0.42|0.68", -- [2]
-		"1300.0|level|3", -- [3]
+		"1300.0|level|3|nouveau", -- [3]
 		"1305.0|mark|Sortie de la \\"Vallée\\"", -- [4]
 		"1900.0|zone|Les Tarides|1413|0.5|0.5", -- [5]
-		"2500.0|level|4", -- [6]
+		"2500.0|level|4|nouveau", -- [6]
 		"3000.0|zone|Les Tarides|1413|0.5|0.5", -- [7]
 	},
 	["horloges"] = {
@@ -138,5 +138,13 @@ describe("séances et chapitres", () => {
     expect(horodatage(0)).toBe("0:00");
     expect(horodatage(872)).toBe("14:32");
     expect(horodatage(3725)).toBe("1:02:05");
+  });
+});
+
+describe("niveau atteint", () => {
+  it("lit le nouveau niveau des sondes récentes, et ajoute un aux anciennes, qui notaient l'ancien", async () => {
+    const { niveauAtteint } = await import("@/lib/videoCarnet");
+    expect(niveauAtteint("230029.6|level|2".split("|"))).toBe(3);
+    expect(niveauAtteint("230029.6|level|3|nouveau".split("|"))).toBe(3);
   });
 });

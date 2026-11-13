@@ -8,16 +8,19 @@
  * relue au rendu. Fonctions pures : sharp et ffmpeg restent dans scripts/incrustation-video.ts.
  */
 import { COULEUR_GENRE, GENRES_MOMENT, replique, type GenreMoment } from "@/content/repliques-jobwow";
-import { heureLocale, type ValeurLua } from "@/lib/videoCarnet";
+import { CARTES_JEU } from "@/content/cartes-jeu";
+import { heureLocale, niveauAtteint, type ValeurLua } from "@/lib/videoCarnet";
 
 // ——— Événements de la sonde utiles à la narration ———
 
 export interface Evenement {
   heure: number;            // heure du PC (ms, heure locale sans fuseau, comme heureLocale)
-  genre: Exclude<GenreMoment, "intro">;
+  genre: Exclude<GenreMoment, "intro"> | "reprise";   // « reprise » : début d'un enregistrement (état remis à zéro)
   valeurs: { zone?: string; niveau?: string; nom?: string; titre?: string; demons?: boolean };
   personnage: string;
 }
+
+const NOMS_CARTES = new Map(Object.values(CARTES_JEU).map((c) => [c.id, c.nom]));
 
 const listeDe = (v: ValeurLua | undefined): ValeurLua[] =>
   Array.isArray(v) ? v : v && typeof v === "object" ? Object.keys(v).filter((k) => /^\d+$/.test(k)).sort((a, b) => +a - +b).map((k) => (v as Record<string, ValeurLua>)[k]) : [];
@@ -27,6 +30,7 @@ export function evenementsEnregistrement(enr: Record<string, ValeurLua>, personn
   const out: Evenement[] = [];
   let ref: { t: number; heure: number } | null = null;
   let zone: string | undefined;
+  let aPlacer = false;
   for (const brut of listeDe(enr.events)) {
     const p = String(brut).split("|");
     const t = Number(p[0]);
@@ -34,17 +38,21 @@ export function evenementsEnregistrement(enr: Record<string, ValeurLua>, personn
     if (p[1] === "clock") {
       const h = heureLocale(p[3] ?? "");
       if (h !== null) ref = { t, heure: h };
+      // un nouvel enregistrement peut être un autre personnage ou un autre lieu : on repart de zéro
+      if (p[2] === "debut" && h !== null) { zone = undefined; aPlacer = true; out.push({ heure: h, genre: "reprise", valeurs: {}, personnage }); }
       continue;
     }
     const zoneAvant = zone;
     if (p[1] === "zone" && p[2] && p[2] !== "nil") zone = p[2];
+    // première position d'un enregistrement : la zone d'après la carte du jeu
+    if (p[1] === "pos" && aPlacer) { aPlacer = false; zone = zone ?? NOMS_CARTES.get(Number(p[2])); }
     if (!ref) continue;
     const heure = ref.heure + Math.round((t - ref.t) * 1000);
     const e = (genre: Evenement["genre"], valeurs: Evenement["valeurs"] = {}) =>
       out.push({ heure, genre, valeurs: { zone, ...valeurs }, personnage });
     switch (p[1]) {
       case "zone": if (zone && zone !== zoneAvant) e("zone"); break;
-      case "level": if (p[2]) e("niveau", { niveau: p[2] }); break;
+      case "level": if (p[2]) e("niveau", { niveau: String(niveauAtteint(p)) }); break;
       case "mark": if (p[2]) e("marqueur", { titre: p.slice(2).join("|").trim() }); break;
       case "mort": e("mort", { zone: p[2] && p[2] !== "?" ? p[2] : zone }); break;
       case "exploit": if (p[2]) e("exploit", { nom: p[2] }); break;
@@ -153,16 +161,23 @@ export function preparerNarration(o: {
   let zone: string | undefined, niveau: string | undefined;
   for (const e of evts) {
     if (e.heure > o.debut) break;
+    if (e.genre === "reprise") { zone = undefined; niveau = undefined; continue; }
     zone = e.valeurs.zone ?? zone;
     if (e.genre === "niveau") niveau = e.valeurs.niveau;
   }
+  // niveau de départ inconnu : celui d'avant la première montée de niveau de la vidéo
+  if (!niveau) {
+    const premier = evts.find((e) => e.heure > o.debut && e.genre === "niveau");
+    if (premier) niveau = String(Number(premier.valeurs.niveau) - 1);
+  }
+  if (!zone) zone = evts.find((e) => e.heure > o.debut && e.valeurs.zone)?.valeurs.zone;
   const g = graine(o.video);
   const rangs = new Map<GenreMoment, number>();
   const prochaine = (genre: GenreMoment) => { const r = (rangs.get(genre) ?? g % 97); rangs.set(genre, r + 1); return r; };
 
   const candidats: Moment[] = [];
   for (const e of evts) {
-    if (e.heure <= o.debut || e.heure >= fin - 3000) continue;
+    if (e.genre === "reprise" || e.heure <= o.debut || e.heure >= fin - 3000) continue;
     const pos = position(e.heure);
     if (pos === null || pos >= o.dureeVideo - 3) continue;
     candidats.push({

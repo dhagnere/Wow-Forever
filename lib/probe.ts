@@ -138,7 +138,9 @@ export function guideDepuisExport(e: ExportProbe): GuideProbe {
       case "pos": changerCarte(nombre(c[0])); break;
       case "zone": changerCarte(nombre(c[1])); break;
       case "level": {
-        const n = nombre(c[0]);
+        // nouveau niveau (sonde 0.10.1, « level|5|nouveau ») ; avant, l'ancien était noté : un de plus
+        const brut = nombre(c[0]);
+        const n = brut === null ? null : c[1] === "nouveau" ? brut : brut + 1;
         if (n !== null) { niveauMax = Math.max(niveauMax, n); if (!niveauMin) niveauMin = n - 1; }
         break;
       }

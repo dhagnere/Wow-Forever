@@ -51,6 +51,13 @@ local function Rogner(s)
     return (t:gsub("^%s+", ""):gsub("%s+$", ""))
 end
 
+--- Niveau atteint d'un événement « level » : nouveau niveau depuis EternalProbe 0.10.1 (« level|5|nouveau »),
+--- l'ancien avant (le jeu ne l'avait pas encore changé) : un de plus.
+local function NiveauAtteint(e)
+    local n = tonumber(e.d[1]) or 1
+    return e.d[2] == "nouveau" and n or n + 1
+end
+
 --- Titre d'un PNJ → familier qu'il sert : « demon » (entraîneur de démons), « bete » (dresseur de familiers), ou nil.
 local function Familier(titre)
     local t = tostring(titre or ""):lower()
@@ -543,7 +550,7 @@ function Importer.Convertir(db)
     -- niveaux et identité de la route
     local niveauMax = tonumber(ctx.level) or 1
     for _, e in ipairs(ev) do
-        if e.k == "level" then niveauMax = math.max(niveauMax, tonumber(e.d[1]) or 0) end
+        if e.k == "level" then niveauMax = math.max(niveauMax, NiveauAtteint(e)) end
     end
     local zoneDepart = NomZone(etapes[1].carte, ctx.zone)
     local steps, zones, zoneIndex, derniereZone = {}, 0, 0, nil
@@ -570,7 +577,7 @@ function Importer.Convertir(db)
     -- niveau au début de l'enregistrement : la première montée de niveau moins un, sinon le niveau capté
     local niveauDebut
     for _, e in ipairs(ev) do
-        if e.k == "level" then niveauDebut = math.max(1, (tonumber(e.d[1]) or 2) - 1) break end
+        if e.k == "level" then niveauDebut = math.max(1, NiveauAtteint(e) - 1) break end
     end
     niveauDebut = niveauDebut or tonumber(ctx.level) or 1
 

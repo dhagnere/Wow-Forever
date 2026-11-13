@@ -779,7 +779,10 @@ frame:SetScript("OnEvent", function(_, event, ...)
         NoterRecu((...))
 
     elseif event == "PLAYER_LEVEL_UP" then
-        AddEvent("level", tostring(UnitLevel("player")))
+        -- le nouveau niveau vient de l'événement : UnitLevel donne encore l'ancien à cet instant.
+        -- « |nouveau » distingue ce format des enregistrements d'avant la 0.10.1, qui notaient l'ancien niveau.
+        local nouveau = tonumber((...)) or ((UnitLevel("player") or 0) + 1)
+        AddEvent("level", ("%d|nouveau"):format(nouveau))
         VerifierPlusTard("niveau")
     end
 end)

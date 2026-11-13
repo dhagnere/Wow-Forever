@@ -2,8 +2,8 @@
 
 | Dossier | Rôle | État |
 |---|---|---|
-| `EternalRoutes/` | Guide pas à pas en jeu (fenêtre, flèche, auto-avance) | 0.12.0 : lit EternalProbe, puis RouteProbe ; consigne sous chaque étape (entraîneur, grimoire, objets à ramasser) |
-| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.10.0 : captures de la 0.8, trajets (`/ep trajet`), code à coller sur le site (`/ep export`, `/ep export depart`), titre des entraîneurs, grimoires achetés |
+| `EternalRoutes/` | Guide pas à pas en jeu (fenêtre, flèche, auto-avance) | 0.12.1 : lit EternalProbe, puis RouteProbe ; consigne sous chaque étape (entraîneur, grimoire, objets à ramasser) ; niveaux lus au bon format |
+| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.10.1 : captures de la 0.8, trajets (`/ep trajet`), code à coller sur le site (`/ep export`, `/ep export depart`), titre des entraîneurs, grimoires achetés, nouveau niveau noté à la montée (`level|5|nouveau`) |
 | `RouteProbe/` | Ancienne sonde d'enregistrement, gardée pour référence | 0.6.0, version jouée au 13/11 |
 
 Branche de travail : `dev-addon`. Chaque changement est relu puis fusionné dans `dev`.
@@ -24,6 +24,10 @@ jamais d'après l'heure : on peut le rejouer après coup (aucune quête n'est en
 **Entraîneurs et grimoires (0.10.0)** : l'événement `trainer` porte en 7e champ le titre du PNJ (« Entraîneur de démons »,
 « Dresseur de familiers »), lu sur sa bulle ; `livre` note un grimoire ou un livre acheté chez un vendeur (objet, nom,
 vendeur, titre, position, niveau). Les autres achats ne sont pas notés.
+
+**Niveaux (0.10.1)** : à la montée de niveau, le jeu donne encore l'ancien niveau ; la sonde note désormais le nouveau, lu dans
+l'événement, sous la forme `level|5|nouveau`. Les enregistrements plus anciens (sans `nouveau`) sont lus avec un niveau de plus
+par le site, `carnet:video`, `carnet:incrustation` et EternalRoutes.
 
 ## Consignes sous l'étape (EternalRoutes 0.12.0)
 

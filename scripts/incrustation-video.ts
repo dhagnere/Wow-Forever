@@ -262,6 +262,8 @@ async function main() {
       const erreurs = verifierNarration(n);
       if (erreurs.length) { console.error(`${fichierN} :\n- ${erreurs.join("\n- ")}`); process.exit(1); }
       console.log(`Narration relue : ${fichierN} (${n.moments.length} moments, ${n.clips.length} clips)`);
+      // miniature donnée par son nom : à côté de la narration
+      if (n.miniature && !path.isAbsolute(n.miniature) && !/^[A-Za-z]:[\\/]/.test(n.miniature)) n.miniature = path.join(path.dirname(fichierN), n.miniature);
     } else {
       if (!evenements) {
         evenements = [];

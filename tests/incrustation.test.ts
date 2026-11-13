@@ -10,12 +10,12 @@ const SAUVEGARDE = `EternalProbeDB = {
 ["events"] = {
 "100.0|clock|debut|2026-11-13 20:59:50",
 "101.0|zone|Clairières de Tirisfal|1420|0.3|0.6",
-"101.5|level|3",
+"101.5|level|3|nouveau",
 "115.0|zone|Clairières de Tirisfal|1420|0.3|0.6",
 "118.0|turnin|364|Le réveil des morts",
 "125.0|exploit|Capitaine Perrine|elite|1420|0.4|0.5",
 "135.0|turnin|376|La faim maudite",
-"140.0|level|4",
+"140.0|level|4|nouveau",
 "150.0|trainer|Dannal Stern|0|1420|0.6|0.5|4|Entraîneur de démons",
 "160.0|mort|Clairières de Tirisfal|1420|0.4|0.4",
 "170.0|livre|16321|Grimoire d'Éclair de feu|Kazrogal|Entraîneur de démons|1420|0.6|0.5|4",
@@ -28,7 +28,7 @@ describe("Narration d'une vidéo", () => {
   const n = preparerNarration({ video: "essai.mp4", debut: DEBUT, dureeVideo: 75, evenements: evts, miniature: "mini.jpg", titre: "Essai" });
 
   it("lit les événements de la sonde, sans répéter une zone déjà annoncée", () => {
-    expect(evts.map((e) => e.genre)).toEqual(["zone", "niveau", "quete", "exploit", "quete", "niveau", "entraineur", "mort", "grimoire"]);
+    expect(evts.map((e) => e.genre)).toEqual(["reprise", "zone", "niveau", "quete", "exploit", "quete", "niveau", "entraineur", "mort", "grimoire"]);
     expect(evts.find((e) => e.genre === "entraineur")?.valeurs.demons).toBe(true);
   });
 

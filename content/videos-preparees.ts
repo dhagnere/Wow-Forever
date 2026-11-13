@@ -97,4 +97,44 @@ Le guide de 1 à 60 : https://www.taverne-eternelle.fr/guides/parcours/
 
 La Taverne Éternelle, site de fans indépendant, non affilié à Blizzard Entertainment.`,
   },
+  {
+    id: "2026-11-13-21h23",
+    semaine: "2026-S46",
+    date: "2026-11-13",
+    fichiers: [
+      "2026-11-13 21-23-42 - Manual.mp4",
+      "2026-11-13 21-25-41 - Manual.mp4",
+      "2026-11-13 21-27-04 - Manual.mp4",
+      "2026-11-13 22-07-15 - Manual.mp4",
+    ],
+    liens: [
+      "https://drive.google.com/file/d/1bsbgT6_QNNUR9gZDOrrEk7o_deStl6F7/view",
+      "https://drive.google.com/file/d/1WfSQtG-09Axsj7aYhmajrces2Wp1JhST/view",
+      "https://drive.google.com/file/d/1tICg4-VknTDVwJLcPQf57izLTrZGdpBh/view",
+      "https://drive.google.com/file/d/1k_WFGy6lc-J2H4b6vcuv1cMgi0rEFuAt/view",
+    ],
+    duree: "46:20",
+    titre: "Journal de Jobwow · 13 novembre 2026 · Clairières de Tirisfal · niveaux 1 à 5",
+    miniature: "/images/videos/journal-2026-11-13.jpg",
+    description: `Une nouvelle partie commence au Glas, dans les Clairières de Tirisfal : Jobwow se relève et reprend la route du niveau 1 au niveau 5. Bulles et sous-titres incrustés pour suivre chaque étape.
+
+Chapitres :
+0:00 Début de la séance au Glas · niveau 1
+3:50 Réveil brutal rendu, premiers sorts chez Maximillion
+5:17 Niveau 2
+7:10 Lever le voile
+10:26 Niveau 3 et Les Déchus
+19:18 Niveau 4
+20:50 Les Maudits, nouveaux sorts chez l'entraîneur
+33:34 La chasse aux trésors
+34:17 Niveau 5
+41:52 Samuel enterré : La dernière volonté de Marla
+44:57 Le messager rouge, cap sur Brill
+
+Le Carnet de Jobwow : https://www.taverne-eternelle.fr/carnet/
+Toutes les vidéos sur le site : https://www.taverne-eternelle.fr/carnet/videos/
+Le guide de 1 à 60 : https://www.taverne-eternelle.fr/guides/parcours/
+
+La Taverne Éternelle, site de fans indépendant, non affilié à Blizzard Entertainment.`,
+  },
 ];
