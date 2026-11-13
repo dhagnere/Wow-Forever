@@ -20,7 +20,11 @@ n'entre jamais dans le site.
    **Miniature** (`miniature`, obligatoire, une par vidéo) : 1280 × 720, 2 Mo au plus, dans `public/images/videos/`
    (`journal-<date>.jpg`, suffixe `-2` pour une deuxième séance le même jour). Elle s'affiche dans la fiche de l'admin,
    avec un lien de téléchargement ; le test refuse une vidéo préparée sans miniature.
-   - **Image** : une image nette du personnage de Jobwow tirée de la vidéo (ffmpeg, une image par seconde autour d'un
+   - **Image** (à partir du 13/11/2026) : une illustration fournie par Jobwow, différente pour chaque vidéo, qui montre
+     la progression du personnage ; gardée dans `visuels/videos/illustration-<numéro>.webp` (la première vidéo :
+     `illustration-01.webp`). Elle porte le logo de World of Warcraft Forever : créditer « © Blizzard Entertainment »
+     dans la description. Ne jamais aller chercher une illustration ailleurs.
+   - **Image** (avant le 13/11/2026, et à défaut d'illustration fournie) : une image nette du personnage de Jobwow tirée de la vidéo (ffmpeg, une image par seconde autour d'un
      moment fort : arrivée dans une ville, niveau gagné, gros plan). Effacer le nom flottant et les icônes d'interface
      collées au personnage (OpenCV, `cv2.inpaint`, masque sur le texte violet et sur les icônes) ; le bas de l'image
      passe sous le dégradé.
