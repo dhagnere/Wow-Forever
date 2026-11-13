@@ -29,7 +29,7 @@ const SONDE = [lire("EternalProbe/EternalProbe.lua"), lire("EternalProbe/Capture
 const SEANCE = `
 BANC.Evenement("PLAYER_LOGIN")
 SlashCmdList.ETERNALPROBE("start")
-BANC.Avancer(2)
+BANC.Avancer(20) -- pas de photo dans les 15 s qui suivent un chargement
 BANC.journal[783] = { titre = "Votre place en ce monde", niveau = 2, objectifs = {
   { text = "Sanglier tacheté : 0/4", type = "monster", numFulfilled = 0, numRequired = 4, finished = false } } }
 BANC.cible = { nom = "Gornek", guid = "Creature-0-1-1-1-3143-1", x = 0.42, y = 0.68 }
@@ -41,8 +41,12 @@ BANC.x, BANC.y = 0.45, 0.62
 BANC.Avancer(2)
 BANC.cible = { nom = "Chef kolkar", guid = "Creature-0-1-1-1-3197-9", classement = "elite", x = 0.46, y = 0.61 }
 BANC.Evenement("PLAYER_TARGET_CHANGED")
-BANC.combat = { 0, "PARTY_KILL", false, "Player-1", "Testeur", 0, 0, "Creature-0-1-1-1-3197-9", "Chef kolkar" }
-BANC.Evenement("COMBAT_LOG_EVENT_UNFILTERED")
+BANC.cible.mort = true
+BANC.Evenement("UNIT_HEALTH", "target")
+BANC.cible = { nom = "Chef kolkar", guid = "Creature-0-1-1-1-3197-7", classement = "elite", x = 0.47, y = 0.61 }
+BANC.Evenement("PLAYER_TARGET_CHANGED")
+BANC.cible.mort, BANC.cible.autre = true, true -- vaincu par un autre joueur : pas un exploit
+BANC.Evenement("UNIT_HEALTH", "target")
 BANC.Avancer(2)
 BANC.journal[783].objectifs[1] = { text = "Sanglier tacheté : 4/4", type = "monster", numFulfilled = 4, numRequired = 4, finished = true }
 BANC.Evenement("QUEST_LOG_UPDATE")
@@ -76,12 +80,17 @@ const EVENEMENTS = `
 local t = {}
 for _, e in ipairs(EternalProbeDB.events) do t[#t + 1] = e end
 return table.concat(t, "\\n") .. "\\n#photos=" .. BANC.photos .. "\\n#format=" .. tostring(EternalProbeDB.format)
+  .. "\\n#bloque=" .. table.concat(BANC.bloque, ",")
 `;
 
 describe("EternalProbe dans un WoW simulé", () => {
   const sortie = executer(SIMULE, ...SONDE, SEANCE, EVENEMENTS);
   const lignes = sortie.split("\n");
   const de = (type: string) => lignes.filter((l) => l.split("|")[1] === type);
+
+  it("ne touche à rien de réservé à l'interface de Blizzard (sinon le jeu bloque l'addon au chargement)", () => {
+    expect(sortie).toMatch(/#bloque=$/);
+  });
 
   it("écrit sa propre table, au format 2", () => {
     expect(sortie).toContain("#format=2");
@@ -102,6 +111,7 @@ describe("EternalProbe dans un WoW simulé", () => {
   });
 
   it("relève élite vaincu, point de vol, vol, mort, et prend les photos", () => {
+    expect(de("exploit")).toHaveLength(1);
     expect(de("exploit")[0]).toMatch(/\|exploit\|Chef kolkar\|elite\|1411\|/);
     expect(de("fpnouveau")).toHaveLength(1);
     expect(de("taxi")[0]).toMatch(/\|taxi\|Orgrimmar, Durotar\|1411\|.*\|1$/);

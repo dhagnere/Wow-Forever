@@ -9,6 +9,8 @@ BANC = {
     joueur = { nom = "Testeur", niveau = 3, race = "Orc", raceFichier = "Orc", classe = "Guerrier", classeFichier = "WARRIOR", faction = "Horde" },
     carte = 1411, x = 0.42, y = 0.68, zone = "Durotar",
     cible = nil, journal = {}, quete = nil, taxi = nil, enVol = false, combat = nil,
+    -- événements réservés à l'interface de Blizzard : un addon qui s'y inscrit est bloqué par le jeu
+    interdits = { COMBAT_LOG_EVENT_UNFILTERED = true }, bloque = {},
 }
 
 -- ---- cadres (frames) : toute méthode inconnue ne fait rien --------------------------------------
@@ -17,7 +19,10 @@ local function NouveauCadre()
     return setmetatable(c, { __index = function(_, k)
         if k == "SetScript" then return function(self, nom, fn) self.scripts[nom] = fn end end
         if k == "GetScript" then return function(self, nom) return self.scripts[nom] end end
-        if k == "RegisterEvent" then return function(self, ev) self.evenements[ev] = true end end
+        if k == "RegisterEvent" then return function(self, ev)
+            if BANC.interdits[ev] then BANC.bloque[#BANC.bloque + 1] = ev end
+            self.evenements[ev] = true
+        end end
         if k == "CreateTexture" or k == "CreateFontString" then return function() return NouveauCadre() end end
         if k == "GetWidth" or k == "GetHeight" then return function() return 140 end end
         if k == "GetCenter" then return function() return 0, 0 end end
@@ -87,6 +92,8 @@ end
 function UnitExists(u) return u == "player" or (BANC.cible ~= nil and (u == "target" or u == "mouseover")) end
 function UnitIsPlayer(u) return u == "player" end
 function UnitClassification() return BANC.cible and BANC.cible.classement or "normal" end
+function UnitIsDead(u) return u == "target" and BANC.cible ~= nil and BANC.cible.mort == true end
+function UnitIsTapDenied(u) return u == "target" and BANC.cible ~= nil and BANC.cible.autre == true end
 function UnitOnTaxi() return BANC.enVol end
 function GetZoneText() return BANC.zone end
 function GetRealmName() return "Forever" end

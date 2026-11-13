@@ -15,6 +15,10 @@
       exploit     nom|classement (elite, rareelite, rare, worldboss)|carte|x|y
       photo       raison (niveau, zone, exploit, depart)
 
+    Interdits du client : aucun événement ni fonction réservés à l'interface de Blizzard (le journal de
+    combat, COMBAT_LOG_EVENT_UNFILTERED, fait bloquer l'addon par WoW Forever dès le chargement). Un élite
+    vaincu se voit donc sur la cible : morte, classée élite ou rare, et pas prise par un autre joueur.
+
     Captures d'écran : le jeu les range dans Screenshots\ avec l'heure du PC dans le nom ; l'événement
     « photo », daté par les repères d'horloge, permet au site de retrouver la bonne image.
     /ep photos off les coupe, /ep photos on les remet.
@@ -50,8 +54,10 @@ local function PhotosActives()
 end
 
 local dernierePhoto = 0
+local chargement = GetTime() -- pas de photo dans les 15 s qui suivent un chargement ou un /reload
 local function Photo(raison)
     if not P.EnCours() or not PhotosActives() or not Screenshot then return end
+    if GetTime() - chargement < 15 then return end
     if GetTime() - dernierePhoto < 5 then return end -- pas de rafale
     dernierePhoto = GetTime()
     local function prendre()
@@ -98,7 +104,7 @@ local f = CreateFrame("Frame")
 for _, ev in ipairs({
     "QUEST_ACCEPTED", "QUEST_COMPLETE", "QUEST_TURNED_IN",
     "TAXIMAP_OPENED", "UI_INFO_MESSAGE", "PLAYER_DEAD",
-    "PLAYER_TARGET_CHANGED", "UPDATE_MOUSEOVER_UNIT", "COMBAT_LOG_EVENT_UNFILTERED",
+    "PLAYER_TARGET_CHANGED", "UPDATE_MOUSEOVER_UNIT", "UNIT_HEALTH",
     "PLAYER_LEVEL_UP", "ZONE_CHANGED_NEW_AREA",
 }) do
     pcall(f.RegisterEvent, f, ev)
@@ -148,9 +154,26 @@ local function PointDeVol()
     Ev("taxi", courant, map, x, y, connus)
 end
 
+--- Élite ou rare vaincu : la cible est morte, on connaissait son classement, et elle n'était pas à un autre joueur.
+local function VerifierCible()
+    if not P.EnCours() or not UnitExists("target") or not UnitIsDead or not UnitIsDead("target") then return end
+    local guid = UnitGUID("target")
+    local c = guid and classements[guid]
+    if not c then return end
+    classements[guid] = nil
+    if UnitIsTapDenied and UnitIsTapDenied("target") then return end
+    local _, map, x, y = Ici()
+    Ev("exploit", UnitName("target") or "?", c, map, x, y)
+    Photo("exploit")
+end
+
 f:SetScript("OnEvent", function(_, event, ...)
     if event == "UPDATE_MOUSEOVER_UNIT" then RetenirClassement("mouseover") return end
-    if event == "PLAYER_TARGET_CHANGED" then RetenirClassement("target") return end
+    if event == "PLAYER_TARGET_CHANGED" then RetenirClassement("target"); VerifierCible() return end
+    if event == "UNIT_HEALTH" then
+        if (...) == "target" then VerifierCible() end
+        return
+    end
     if not P.EnCours() then return end
 
     if event == "QUEST_ACCEPTED" then
@@ -176,16 +199,6 @@ f:SetScript("OnEvent", function(_, event, ...)
 
     elseif event == "PLAYER_DEAD" then
         Ev("mort", Ici())
-
-    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
-        if not CombatLogGetCurrentEventInfo then return end
-        local _, sous, _, source, _, _, _, cible, nom = CombatLogGetCurrentEventInfo()
-        if sous == "PARTY_KILL" and source == UnitGUID("player") and classements[cible] then
-            local _, map, x, y = Ici()
-            Ev("exploit", nom or "?", classements[cible], map, x, y)
-            classements[cible] = nil
-            Photo("exploit")
-        end
 
     elseif event == "PLAYER_LEVEL_UP" then
         Photo("niveau")

@@ -3,7 +3,7 @@
 | Dossier | Rôle | État |
 |---|---|---|
 | `EternalRoutes/` | Guide pas à pas en jeu (fenêtre, flèche, auto-avance) | 0.11.0 : lit EternalProbe, puis RouteProbe |
-| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.8.0 : niveaux de quête, récompenses, points de vol, vols, morts, élites, captures d'écran |
+| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.8.1 : niveaux de quête, récompenses, points de vol, vols, morts, élites, captures d'écran |
 | `RouteProbe/` | Ancienne sonde d'enregistrement, gardée pour référence | 0.6.0, version jouée au 13/11 |
 
 Branche de travail : `dev-addon`. Chaque changement est relu puis fusionné dans `dev`.
