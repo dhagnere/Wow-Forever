@@ -37,6 +37,26 @@ n'entre jamais dans le site.
    lien vers `/carnet/videos/` (ou `/en/notebook/videos/`) et le Carnet. Elle s'importe en brouillon dans `/admin/lettre`.
 6. **Vérifier** (`npm run lint && npm test && npm run build`), puis pousser sur `dev`.
 
+## Jobwow incrusté (bulles et sous-titres)
+
+Décidé le 13 novembre 2026 : pas de voix ; Jobwow (sa capture, dans un médaillon) en bas à gauche, une bulle de réplique
+humoristique et un sous-titre à chaque moment fort, la miniature YouTube en image de départ, une vidéo 16:9 et des clips
+verticaux de 30 s. Gratuit, tout sur le PC de Jobwow. Une vidéo fournie donne une vidéo rendue (pas de regroupement).
+
+1. `npm run carnet:incrustation -- "<vidéo ou dossier>" --preparer` écrit `<vidéo>.narration.json` : intro, puis les moments
+   tirés des repères d'EternalProbe (niveau, élite, mort, zone, grimoire, entraîneur, trajet, vol, repère `/ep mark`, une
+   quête rendue toutes les deux minutes au plus), sans chevauchement, et trois clips verticaux au plus. Miniature :
+   `--miniature <image>` ou `<vidéo>.miniature.jpg|png|webp` à côté de la vidéo.
+2. Relecture dans l'**Atelier vidéo de Jobwow** (artefact https://claude.ai/artifact/DSRxPCDtJQRUeL65i1cfvs) : ouvrir le
+   fichier, corriger heures, répliques (« Autre réplique »), sous-titres et clips, aperçu 16:9 et 9:16, puis copier le texte
+   dans le fichier.
+3. `npm run carnet:incrustation -- "<vidéo>.narration.json"` rend `<vidéo>.jobwow.mp4` et `<vidéo>.clip-N.mp4`
+   (`--sans-clips` pour s'en passer). Le médaillon rebondit quand Jobwow « parle », passe en gris à la mort, en doré au niveau.
+
+Répliques dans `content/repliques-jobwow.ts` (aucune classe citée : celle de Jobwow n'est jamais précisée), narration et
+graphe ffmpeg dans `lib/incrustation.ts`, images (sharp) et encodage dans `scripts/incrustation-video.ts`, contrôles dans
+`tests/incrustation.test.ts`. L'atelier embarque une copie des répliques : la republier quand la liste change.
+
 ## Règles des textes
 
 - Titres, noms de lieux et de quêtes seulement : aucun texte de quête recopié.
