@@ -46,7 +46,7 @@
     "carnet:incrustation": "tsx scripts/incrustation-video.ts",
     "carnet:voix": "tsx scripts/voix.ts",
     "voix:installer": "powershell -ExecutionPolicy Bypass -File scripts/installer-voix.ps1",
-    "addon:wow": "tsx scripts/addon-guides.ts \"C:\\WOW\\world of Warcraft\\_forever_\\Interface\\AddOns\\EternalRoutes\""
+    "addon:wow": "tsx scripts/addon-guides.ts \"C:\\WOW\\world of Warcraft\\_forever_\\Interface\\AddOns\\EternalRoutes\" && tsx scripts/addon-base.ts \"C:\\WOW\\world of Warcraft\\_forever_\\Interface\\AddOns\\EternalRoutes\""
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

@@ -1,12 +1,12 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { fichierCartes, fichierGuide, guidesAddon, nomFichierGuide, tocAvecGuides } from "@/lib/addon";
+import { fichierCartes, tocAvecGuides } from "@/lib/addon";
 
 /**
- * Écrit les guides de 1 à 60 du site dans le dossier de l'addon EternalRoutes :
+ * Prépare le dossier de l'addon EternalRoutes :
  *   npm run addon:guides -- <dossier EternalRoutes>
- * Produit Guides/site/<race>-<classe>.lua (un par race et classe), Maps.lua (carte du jeu par nom de zone)
- * et met à jour la liste des fichiers dans EternalRoutes.toc. Les guides enregistrés avec RouteProbe ne sont pas touchés.
+ * Écrit Maps.lua (carte du jeu par nom de zone), retire les anciens guides du site (Guides/site) et met à jour la liste
+ * des fichiers dans EternalRoutes.toc. Les routes enregistrées en jeu ne sont pas touchées.
  */
 
 const dossier = process.argv[2];
@@ -20,24 +20,12 @@ if (!existsSync(toc)) {
   process.exit(1);
 }
 
-const guides = guidesAddon();
-const vides = guides.filter((g) => g.steps.length === 0);
-if (vides.length) {
-  console.error(`Guides vides : ${vides.map((g) => g.id).join(", ")}. Lancer npm run base:quetes avant.`);
-  process.exit(1);
-}
-
+// Les guides de 1 à 60 du site ne partent plus dans l'addon (demande de Jobwow, 14/11/2026) : seules les routes
+// enregistrées en jeu (une par zone de départ, race et classe, puis les routes de faction) servent de référence.
+// Le dossier Guides/site est vidé et le .toc ne garde que Maps.lua entre ses repères.
 const site = path.join(dossier, "Guides", "site");
 rmSync(site, { recursive: true, force: true });
-mkdirSync(site, { recursive: true });
-
 const fichiers: string[] = [];
-for (const g of guides) {
-  const nom = nomFichierGuide(g);
-  writeFileSync(path.join(dossier, nom), fichierGuide(g), "utf8");
-  fichiers.push(nom);
-  console.log(`${nom} : ${g.steps.length} étapes, ${g.zoneCount} zones`);
-}
 writeFileSync(path.join(dossier, "Maps.lua"), fichierCartes(), "utf8");
 writeFileSync(toc, tocAvecGuides(readFileSync(toc, "utf8"), fichiers), "utf8");
-console.log(`${guides.length} guides écrits, EternalRoutes.toc mis à jour.`);
+console.log("Maps.lua écrit, guides du site retirés, EternalRoutes.toc mis à jour.");

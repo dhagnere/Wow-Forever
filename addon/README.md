@@ -50,6 +50,14 @@ et faites un clic droit sur « Grimoire d'Éclair de feu (Rang 2) » : votre dé
 Les sources (« sur : … ») ne sont plus collées au texte de l'objectif : elles sont dans la consigne. Textes dans `Locale.lua`
 (`HINT_…`, français et anglais), règles dans `Engine.ActionsEtape` et `Engine.ActionsSacs` (`GuideEngine.lua`).
 
+## Routes enregistrées seulement (EternalRoutes 0.13.5)
+
+Les 56 guides de 1 à 60 du site (un par race et classe) ne sont plus chargés par l'addon : seules les routes
+enregistrées en jeu servent de référence. Chaque route de départ s'affiche sous la forme
+« Départ · Clairières de Tirisfal · Mort-vivant · Démoniste · 1-6 » (zone, race et classe de l'enregistrement) ;
+les routes de faction gardent « Horde · zone · niveaux ». `npm run addon:wow` ne remet plus les guides du site :
+il écrit `Maps.lua` et la base de quêtes (`QuestDB.lua`).
+
 ## Une route de départ par classe (EternalRoutes 0.13.4)
 
 Chaque classe a ses quêtes et ses entraîneurs dès la zone de départ : une route de départ se garde désormais par zone

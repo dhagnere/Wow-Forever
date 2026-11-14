@@ -593,6 +593,7 @@ function Importer.Convertir(db)
         enregistreAvec = ("%s %s"):format(tostring(ctx.className or ctx.classFile), tostring(ctx.raceName or ctx.raceFile)),
         importe = date and date("%Y-%m-%d %H:%M") or nil,
         classeEnregistree = ctx.classFile,
+        raceEnregistree = ctx.raceFile,
         niveauDebut = niveauDebut,
         niveauMax = niveauMax,
         nbEntraineurs = nbEntraineurs,

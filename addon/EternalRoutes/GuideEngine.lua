@@ -951,6 +951,10 @@ local RACES_EN = { Human = "Human", Dwarf = "Dwarf", Gnome = "Gnome", NightElf =
     Orc = "Orc", Troll = "Troll", Scourge = "Undead", Tauren = "Tauren" }
 local RACES_FR = { Human = "Humain", Dwarf = "Nain", Gnome = "Gnome", NightElf = "Elfe de la nuit",
     Orc = "Orc", Troll = "Troll", Scourge = "Mort-vivant", Tauren = "Tauren" }
+local CLASSES_FR = { WARRIOR = "Guerrier", PALADIN = "Paladin", HUNTER = "Chasseur", ROGUE = "Voleur", PRIEST = "Prêtre",
+    SHAMAN = "Chaman", MAGE = "Mage", WARLOCK = "Démoniste", DRUID = "Druide" }
+local CLASSES_EN = { WARRIOR = "Warrior", PALADIN = "Paladin", HUNTER = "Hunter", ROGUE = "Rogue", PRIEST = "Priest",
+    SHAMAN = "Shaman", MAGE = "Mage", WARLOCK = "Warlock", DRUID = "Druid" }
 
 --- Nom d'une zone d'après sa carte (UiMap), sinon le nom enregistré.
 function Engine.NomCarte(map, defaut)
@@ -994,10 +998,19 @@ function Engine.NomGuide(g)
     local premiere = g.steps and g.steps[1]
     local zone = Engine.NomCarte(premiere and premiere.map, g.zone)
     if g.type == "depart" then
-        local noms = {}
-        for _, r in ipairs(g.races or {}) do noms[#noms + 1] = (Anglais() and RACES_EN or RACES_FR)[r] or r end
+        -- zone de départ · race · classe de l'enregistrement
+        local races = Anglais() and RACES_EN or RACES_FR
+        local race = g.raceEnregistree and races[g.raceEnregistree]
+        if not race and g.enregistreAvec then race = tostring(g.enregistreAvec):match("^%S+%s+(.+)$") end
+        if not race then
+            local noms = {}
+            for _, r in ipairs(g.races or {}) do noms[#noms + 1] = races[r] or r end
+            race = #noms > 0 and table.concat(noms, ", ") or nil
+        end
+        local classe = g.classeEnregistree and (Anglais() and CLASSES_EN or CLASSES_FR)[g.classeEnregistree] or g.classeEnregistree
         local fin = g.niveauMax or tonumber(tostring(g.name or ""):match("1%-(%d+)$")) or g.maxLevel or 10
-        return (ns.L.ROUTE_START or "%s%s 1-%d"):format(zone, #noms > 0 and (" (" .. table.concat(noms, ", ") .. ")") or "", fin)
+        local detail = (race and (" · " .. race) or "") .. (classe and (" · " .. classe) or "")
+        return (ns.L.ROUTE_START or "%s%s 1-%d"):format(zone, detail, fin)
     end
     local a, b = tostring(g.name or ""):match("(%d+)%-(%d+)$")
     return ("%s · %s · %s-%s"):format(tostring(g.faction or "Route"), zone,

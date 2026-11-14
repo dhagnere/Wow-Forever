@@ -406,8 +406,13 @@ BANC.joueur.classe, BANC.joueur.classeFichier, BANC.joueur.niveau = "Guerrier", 
 out[#out + 1] = ns.Engine.GetGuidesForPlayer()[1].id
 BANC.joueur.classe, BANC.joueur.classeFichier = "Mage", "MAGE"
 out[#out + 1] = tostring(#ns.Engine.GetGuidesForPlayer())
-return table.concat(out, " ")`);
-    expect(r).toBe("rp-depart-vallee-des-epreuves-warlock rp-depart-vallee-des-epreuves-warlock rp-depart-vallee-des-epreuves-warrior 2");
+-- nom affiché : zone de départ, race et classe de l'enregistrement
+ancienne.enregistreAvec = "Démoniste Troll"
+guerrier.raceEnregistree, guerrier.niveauMax = "Orc", 6
+return table.concat(out, " ") .. "\\n" .. ns.Engine.NomGuide(ancienne) .. "\\n" .. ns.Engine.NomGuide(guerrier)`).split("\n");
+    expect(r[0]).toBe("rp-depart-vallee-des-epreuves-warlock rp-depart-vallee-des-epreuves-warlock rp-depart-vallee-des-epreuves-warrior 2");
+    expect(r[1]).toBe("Départ · Vallée des Épreuves · Troll · Démoniste · 1-15");
+    expect(r[2]).toBe("Départ · Vallée des Épreuves · Orc · Guerrier · 1-6");
   });
 
   it("rappelle d'ouvrir le grimoire resté dans les sacs, et pas les autres objets", () => {
