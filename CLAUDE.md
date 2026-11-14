@@ -125,7 +125,7 @@ npm run video:miniature -- --image <image> --haut "…" --bas "…" --niveaux "1
 npm run carnet:video -- <dossier Warcraft Recorder>  # sur le PC de Jobwow : vidéos rangées par séance, assemblées, titre, description et chapitres YouTube (repères d'EternalProbe.lua ou RouteProbe.lua, --sonde <fichier> pour en donner un)
 npm run carnet:incrustation -- <vidéo, dossier ou .narration.json> [--preparer] [--miniature <image>] [--sans-clips]  # sur le PC de Jobwow : Jobwow incrusté (bulles, sous-titres, image de départ), vidéo 16:9 et clips verticaux
 npm run carnet:voix -- <vidéo>.narration.json [--reference <audio>] [--exaggeration 0.7] [--cfg 0.3] [--refaire]  # sur le PC de Jobwow : voix de Jobwow sur les bulles (Chatterbox, Python), mêlée au rendu
-npm run voix:installer   # sur le PC de Jobwow, une fois : Chatterbox, PyTorch (CUDA si carte NVIDIA) et le modèle (Python 3.11, environ 5 Go)
+npm run voix:installer   # sur le PC de Jobwow, une fois : environnement .voix (Python 3.10 à 3.14, installé à côté si besoin), Chatterbox, PyTorch (CUDA si carte NVIDIA) et le modèle (environ 5 Go)
 npm run addon:wow        # même chose, directement dans l'addon installé sur le PC de Jobwow (C:\WOW\world of Warcraft\_forever_\Interface\AddOns\EternalRoutes)
 ```
 

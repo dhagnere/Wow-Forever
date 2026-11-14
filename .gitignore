@@ -154,3 +154,6 @@ vite.config.ts.timestamp-*
 out/
 next-env.d.ts
 *.tsbuildinfo
+
+# Environnement Python de la voix de Jobwow (npm run voix:installer)
+.voix/

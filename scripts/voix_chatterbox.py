@@ -14,8 +14,8 @@ Les fichiers vont dans « voix-<vidéo>/ » à côté de la narration, qui reço
 (ou avec --refaire). Le rendu (npm run carnet:incrustation) mêle ensuite les voix au son du jeu, qu'il baisse pendant
 que Jobwow parle.
 
-Installation, une fois : pip install chatterbox-tts   (avec une carte NVIDIA, installer d'abord PyTorch pour CUDA,
-https://pytorch.org/get-started/locally/ ; sans carte, la génération tourne sur le processeur, plus lentement).
+Installation, une fois : npm run voix:installer (environnement .voix, Python 3.10 à 3.14, PyTorch pour CUDA si une
+carte NVIDIA est présente ; sans carte, la génération tourne sur le processeur, plus lentement).
 Le modèle se télécharge depuis Hugging Face au premier lancement.
 Mentionner dans la description YouTube : « Voix de Jobwow : synthèse vocale (Chatterbox, Resemble AI) ».
 """
