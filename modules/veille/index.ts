@@ -123,4 +123,4 @@ export { videosChaine, videosDepuisFlux, idChaineValide } from "./youtube/chaine
 
 // Guides à valider de Probe (/admin/probe) : codes de /ep export, publiés dans le guide de 1 à 60 sans déploiement.
 export type { EtatProbe, LigneProbe, PorteeProbe, ReleveProbe } from "./probe/depot";
-export { deposerGuideProbe, guidesProbe, lireGuideProbe, publierGuideProbe, decliner as declinerGuideProbe, parcoursProbePublies } from "./probe/depot";
+export { deposerGuideProbe, guidesProbe, lireGuideProbe, majGuideProbe, publierGuideProbe, decliner as declinerGuideProbe, parcoursProbePublies } from "./probe/depot";

@@ -70,6 +70,19 @@ export async function publierGuideProbe(id: number, portee: PorteeProbe, verific
   return (r.rowCount ?? 0) > 0;
 }
 
+/**
+ * Met à jour un guide pas encore en ligne : correctifs appliqués ou annulés (guide et vérification), portée choisie.
+ * Un guide publié n'est jamais modifié ici : on le retire, on le corrige, on le republie.
+ */
+export async function majGuideProbe(id: number, d: { guide?: unknown; verification?: unknown; portee?: PorteeProbe }): Promise<boolean> {
+  const r = await pool().query(
+    `UPDATE probe_guides SET guide = COALESCE($2::jsonb, guide), verification = COALESCE($3::jsonb, verification), portee = COALESCE($4, portee)
+     WHERE id = $1 AND etat IN ('a_valider', 'retire')`,
+    [id, d.guide === undefined ? null : JSON.stringify(d.guide), d.verification === undefined ? null : JSON.stringify(d.verification), d.portee ?? null],
+  );
+  return (r.rowCount ?? 0) > 0;
+}
+
 /** Écarte un guide à valider, ou retire un guide publié (il reste dans l'historique et peut être republié). */
 export async function decliner(id: number, etat: "ecarte" | "retire"): Promise<boolean> {
   const depuis = etat === "ecarte" ? "a_valider" : "publie";

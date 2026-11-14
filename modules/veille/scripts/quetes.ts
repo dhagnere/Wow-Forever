@@ -4,12 +4,15 @@ import { derniereVersion, tableCsv } from "../objets/wago";
 import { objetInterne } from "../objets/conversion";
 import { lancer } from "./_lanceur";
 import { VILLES, lignes, lireCsv, lireDump, n, preparerPositions, slugLieu, type Position } from "./_bases-libres";
+import { lireQuestie, type LieuQuestie } from "./_questie";
+import { CARTES_JEU } from "@/content/cartes-jeu";
+import { CLASSES_QUETES_FOREVER } from "@/content/classes-quetes-forever";
 
 /**
  * Guides de quêtes : quêtes de classe (chaînes, donneurs, objectifs, récompenses) et parcours de montée en niveau
  * par faction (zones dans l'ordre des niveaux, principaux donneurs).
  *
- *   npm run base:quetes -- <dump CMaNGOS classic-db (.sql ou .sql.gz)> <dossier db_world d'AzerothCore>
+ *   npm run base:quetes -- <dump CMaNGOS classic-db (.sql ou .sql.gz)> <dossier db_world d'AzerothCore> [--questie <clone QuestieDB>] [--en]
  *
  * Données de l'Azeroth d'origine : CMaNGOS classic-db (GPL v3), titres et noms français AzerothCore (GPL v2). Seules
  * les quêtes encore présentes dans les fichiers de Forever (table QuestV2) sont gardées. Aucun texte de quête n'est
@@ -17,6 +20,11 @@ import { VILLES, lignes, lireCsv, lireDump, n, preparerPositions, slugLieu, type
  * Résultat : content/quetes-jeu.json, lu par les pages /guides/quetes-de-classe/ et /guides/parcours/.
  * Avec --en : version anglaise (titres et noms d'origine de CMaNGOS, objets et sorts en anglais, objectifs rédigés en
  * anglais), écrite dans content/quetes-jeu.en.json et content/guide-jeu.en.json.
+ * Avec --questie <dossier> : les quêtes ajoutées par Forever, inconnues de CMaNGOS, sont prises dans les relevés en jeu des
+ * joueurs de Questie (clone de https://github.com/Questie/QuestieDB, dossiers « traces » seulement, voir _questie.ts) :
+ * titres (en français quand un joueur français les a vus), niveaux, PNJ et positions. Leur classe n'est pas relevée :
+ * une quête réservée à une classe se déclare dans content/classes-quetes-forever.ts. Les quêtes réservées aux Skyborne et
+ * celles de l'île de Zéphras restent à content/zephras.ts.
  */
 
 const CLASSES: [string, number][] = [
@@ -49,6 +57,8 @@ const nbClasses = (m: number) => [1, 2, 4, 8, 16, 64, 128, 256, 1024].filter((b)
 /** Champs de bataille (vallée d'Alterac, goulet des Chanteguerres, bassin Arathi) : leurs quêtes de niveau 60, données aux portes,
  *  ne sont pas des étapes de la route et faussaient la fourchette de niveaux des montagnes d'Alterac. */
 const CHAMPS_DE_BATAILLE = new Set([2597, 3277, 3358]);
+/** Île de départ des Skyborne : ses quêtes se saisissent dans content/zephras.ts, elle n'est pas une étape des routes de faction. */
+const ZEPHRAS = "ile-de-zephras";
 /** Types de quêtes laissés hors du parcours : JcJ, raid, donjon (on les fait en groupe, pas en suivant la route). */
 const TYPES_HORS_PARCOURS = new Set([41, 62, 81]);
 
@@ -56,13 +66,17 @@ type Ref = { t: "pnj" | "decor" | "objet"; id: number; n: string; b?: boolean };
 
 lancer("base:quetes", async () => {
   const EN = process.argv.includes("--en");
-  const [fichierDump, dossierLocales] = process.argv.slice(2).filter((a) => !a.startsWith("--"));
+  const args = process.argv.slice(2);
+  const iQuestie = args.indexOf("--questie");
+  const dossierQuestie = iQuestie >= 0 ? args[iQuestie + 1] : undefined;
+  if (iQuestie >= 0 && (!dossierQuestie || dossierQuestie.startsWith("--"))) throw new Error("--questie attend le dossier d'un clone de QuestieDB.");
+  const [fichierDump, dossierLocales] = args.filter((a, k) => !a.startsWith("--") && k !== (iQuestie >= 0 ? iQuestie + 1 : -1));
   const suffixe = EN ? ".en" : "";
   /** Objectifs rédigés à partir des données, dans la langue voulue. */
   const V = EN
-    ? { rapporter: "Bring", vaincre: "Kill", activer: "Use", utiliser: "Use", sur: "on", sortDemande: "the required spell", objet: "item" }
-    : { rapporter: "Rapporter", vaincre: "Vaincre", activer: "Activer", utiliser: "Utiliser", sur: "sur", sortDemande: "le sort demandé", objet: "objet" };
-  if (!fichierDump || !dossierLocales) throw new Error("Usage : npm run base:quetes -- <dump CMaNGOS> <dossier db_world AzerothCore>");
+    ? { rapporter: "Bring", vaincre: "Kill", activer: "Use", utiliser: "Use", sur: "on", sortDemande: "the required spell", objet: "item", cible: "Target:" }
+    : { rapporter: "Rapporter", vaincre: "Vaincre", activer: "Activer", utiliser: "Utiliser", sur: "sur", sortDemande: "le sort demandé", objet: "objet", cible: "Cible :" };
+  if (!fichierDump || !dossierLocales) throw new Error("Usage : npm run base:quetes -- <dump CMaNGOS> <dossier db_world AzerothCore> [--questie <clone QuestieDB>] [--en] (chemins réels, sans les chevrons)");
   const sql = await lireDump(fichierDump);
   const locale = async (f: string) => (await import("node:fs/promises")).readFile(path.join(dossierLocales, f), "utf8");
   const version = await derniereVersion();
@@ -87,6 +101,13 @@ lancer("base:quetes", async () => {
     const ennemi = camp === "alliance" ? FACTION_ALLIANCE : FACTION_HORDE;
     if (Number(f.EnemyGroup) & (groupe | 1)) return false;
     return ![0, 1, 2, 3, 4, 5, 6, 7].some((k) => Number(f[`Enemies_${k}`]) === ennemi);
+  };
+  /** PNJ relevés par Questie : faction amicale vue en jeu (« A », « H », « AH »), qui l'emporte sur la table du jeu. */
+  const amitie = new Map<number, string>();
+  const ouvertPnj = (id: number, camp: "alliance" | "horde") => {
+    const a = amitie.get(id);
+    if (a) return a.includes(camp === "alliance" ? "A" : "H");
+    return ouvertA(creatures.get(id)?.faction ?? 0, camp);
   };
 
   // --- Noms français.
@@ -130,8 +151,10 @@ lancer("base:quetes", async () => {
     objets: { id: number; n: string; q: number; choix: boolean; b: boolean }[]; sorts: string[]; argent: number;
   };
   const quetes = new Map<number, Q>();
+  const connuesCmangos = new Set<number>();
   for (const l of lignes(sql, "quest_template")) {
     const id = n(l.entry);
+    connuesCmangos.add(id);
     if (!quetesForever.has(id) || n(l.Method) === 1) continue;
     const depart = objetDeDepart.get(id);
     if (!donneurs.has(id) && !depart) continue;
@@ -179,6 +202,59 @@ lancer("base:quetes", async () => {
       objectifs, ciblesPnj, ciblesDecor, objetsRequis, objets, sorts: [...new Set(sorts)], argent: Math.max(0, n(l.RewOrReqMoney)),
     });
   }
+  // --- Quêtes ajoutées par Forever : relevés en jeu des joueurs de Questie.
+  const releve = dossierQuestie ? await lireQuestie(dossierQuestie, EN ? "enUS" : "frFR") : null;
+  const zonesDeCarte = new Map(Object.entries(CARTES_JEU).filter(([, c]) => c.type === "zone").map(([s, c]) => [c.id, s]));
+  const carteDeAire = (aire: number) => zonesDeCarte.get(releve?.uiMap.get(aire) ?? -1);
+  if (releve) {
+    for (const [id, p] of releve.pnj) {
+      if (!creatures.has(id) && p.nom) creatures.set(id, { nom: p.nom, faction: 0, loot: 0 });
+      if (p.amical) amitie.set(id, p.amical);
+    }
+    for (const [id, d] of releve.decor) if (!decor.has(id) && d.nom) decor.set(id, d.nom);
+    for (const [id, o] of releve.objets) if (!nomsObjets.has(id) && o.nom) nomsObjets.set(id, o.nom);
+    /** Toutes les cibles relevées d'une quête sont dans une instance (aucune carte de zone) : quête de donjon. */
+    const enInstance = (ids: number[]) => {
+      const vus = ids.map((id) => releve.pnj.get(id)).filter((p): p is LieuQuestie => !!p && !!p.zone);
+      return vus.length > 0 && vus.every((p) => !p.points.some(([aire]) => carteDeAire(aire)));
+    };
+    const compte = { ajoutees: 0, skyborne: 0, sansDonneur: 0, donjons: 0 };
+    for (const rq of releve.quetes.values()) {
+      if (connuesCmangos.has(rq.id) || !rq.nom || !rq.niveau) continue;
+      // Réservée aux Skyborne (aucune race d'origine dans le masque) : île de Zéphras, saisie à la main.
+      if (rq.races && !(rq.races & (ALLIANCE | HORDE))) { compte.skyborne++; continue; }
+      if (!rq.donneurs.pnj.length && !rq.donneurs.decor.length && !rq.donneurs.objet.length) { compte.sansDonneur++; continue; }
+      for (const id of rq.donneurs.pnj) ajouter(donneurs, rq.id, { t: "pnj", id, n: creatures.get(id)?.nom ?? "" });
+      for (const id of rq.donneurs.decor) ajouter(donneurs, rq.id, { t: "decor", id, n: decor.get(id) ?? "" });
+      for (const id of rq.donneurs.objet) ajouter(donneurs, rq.id, { t: "objet", id, n: nomsObjets.get(id) ?? "", ...(enBase.has(id) ? {} : { b: false }) });
+      for (const id of rq.receveurs.pnj) ajouter(receveurs, rq.id, { t: "pnj", id, n: creatures.get(id)?.nom ?? "" });
+      for (const id of rq.receveurs.decor) ajouter(receveurs, rq.id, { t: "decor", id, n: decor.get(id) ?? "" });
+      // Objectifs rédigés à partir des données : les relevés ne donnent ni les quantités ni l'action sur une créature.
+      const objectifs = [
+        ...rq.cibles.objets.map((id) => `${V.rapporter} ${nomsObjets.get(id) ?? `${V.objet} ${id}`}`),
+        ...rq.cibles.pnj.map((id) => creatures.get(id)?.nom).filter((x): x is string => !!x).map((nom) => `${V.cible} ${nom}`),
+        ...rq.cibles.decor.map((id) => decor.get(id)).filter((x): x is string => !!x).map((nom) => `${V.activer} ${nom}`),
+      ];
+      const ciblesPnj = [...rq.cibles.pnj];
+      const ciblesDecor = [...rq.cibles.decor];
+      for (const item of rq.cibles.objets) {
+        const o = releve.objets.get(item);
+        if (o && o.pnj.length <= 25) ciblesPnj.push(...o.pnj);
+        if (o && o.decor.length <= 25) ciblesDecor.push(...o.decor);
+      }
+      const donjon = enInstance(ciblesPnj);
+      if (donjon) compte.donjons++;
+      const premier = releve.pnj.get(rq.donneurs.pnj[0] ?? -1);
+      quetes.set(rq.id, {
+        id: rq.id, titre: rq.nom, niveau: rq.niveau, min: 0, classes: CLASSES_QUETES_FOREVER[rq.id] ?? 0, races: rq.races,
+        type: donjon ? 81 : 0, zone: premier?.zone ?? 0, prev: rq.prev, suite: rq.suite,
+        objectifs, ciblesPnj, ciblesDecor, objetsRequis: [...rq.cibles.objets], objets: [], sorts: [], argent: 0,
+      });
+      compte.ajoutees++;
+    }
+    console.log(`Relevés Questie : ${compte.ajoutees} quêtes de Forever ajoutées (dont ${compte.donjons} de donjon, hors parcours) ; écartées : ${compte.skyborne} réservées aux Skyborne, ${compte.sansDonneur} sans donneur relevé.`);
+  }
+
   // Qui lâche les objets demandés par les quêtes : monstres (butin direct) et objets du décor.
   const requis = new Set([...quetes.values()].flatMap((q) => q.objetsRequis));
   const sourcesPnj = new Map<number, Set<number>>();
@@ -303,6 +379,26 @@ lancer("base:quetes", async () => {
   }
   const posPnj = await positions("creature", "creature_spawn_entry", pnjCites, preferences);
   const posDecor = await positions("gameobject", "gameobject_spawn_entry", decorCites);
+  // PNJ et objets apparus avec Forever : positions relevées en jeu (déjà en % de la carte de la zone, cadre de Forever).
+  if (releve) {
+    const completer = (pos: Map<number, Position>, lieux: Map<number, LieuQuestie>, ids: Set<number>) => {
+      let nb = 0;
+      for (const id of ids) {
+        const l = lieux.get(id);
+        if (pos.has(id) || !l) continue;
+        const z: Position["z"] = {};
+        for (const [aire, x, y] of l.points) {
+          const s = carteDeAire(aire);
+          if (!s) continue;
+          const liste = (z[s] ??= []);
+          if (liste.length < 40 && !liste.some(([u, v]) => Math.abs(u - x) < 1.2 && Math.abs(v - y) < 1.2)) liste.push([x, y]);
+        }
+        if (Object.keys(z).length) { pos.set(id, { z }); nb++; }
+      }
+      return nb;
+    };
+    console.log(`Relevés Questie : ${completer(posPnj, releve.pnj, pnjCites)} PNJ et ${completer(posDecor, releve.decor, decorCites)} objets du décor placés.`);
+  }
   console.log(`${tuilesLues()} tuiles d'exploration lues.`);
 
   const zoneDe = (p?: Position) => {
@@ -317,11 +413,11 @@ lancer("base:quetes", async () => {
     const autre = TERRITOIRES[camp === "alliance" ? "horde" : "alliance"];
     for (const q of pourTous) {
       if (q.races && !(q.races & masque)) continue;
-      const pnj = (donneurs.get(q.id) ?? []).find((r) => r.t === "pnj" && ouvertA(creatures.get(r.id)?.faction ?? 0, camp) && zoneDe(posPnj.get(r.id)));
+      const pnj = (donneurs.get(q.id) ?? []).find((r) => r.t === "pnj" && ouvertPnj(r.id, camp) && zoneDe(posPnj.get(r.id)));
       if (!pnj) continue;
       const z = zoneDe(posPnj.get(pnj.id))!;
       // Les capitales ne sont pas une étape de la route : leurs quêtes renvoient vers les zones.
-      if (autre.has(z.lieu) || VILLES.has(z.lieu)) continue;
+      if (autre.has(z.lieu) || VILLES.has(z.lieu) || z.lieu === ZEPHRAS) continue;
       const e = parZone.get(z.lieu) ?? { niveaux: [] as number[], donneurs: new Map<number, { quetes: number; x: number; y: number }>() };
       e.niveaux.push(q.niveau);
       const d = e.donneurs.get(pnj.id) ?? { quetes: 0, x: z.x, y: z.y };
@@ -360,7 +456,8 @@ lancer("base:quetes", async () => {
       objectifs: q.objectifs, objets: q.objets, sorts: q.sorts, argent: q.argent,
     }];
   }));
-  const donnees = { version: { jeu: version, source: "CMaNGOS classic-db (GPL v3), titres et noms français AzerothCore (GPL v2)" }, classes, quetes: fiches, parcours };
+  const source = `CMaNGOS classic-db (GPL v3), titres et noms français AzerothCore (GPL v2)${releve ? ", quêtes de Forever relevées en jeu par les joueurs de Questie (QuestieDB, GPL v3)" : ""}`;
+  const donnees = { version: { jeu: version, source }, classes, quetes: fiches, parcours };
   await writeFile(path.join(process.cwd(), `content/quetes-jeu${suffixe}.json`), JSON.stringify(donnees));
 
   // --- Guide de 1 à 60 : pour chaque zone de la route, les quêtes dans l'ordre et les points de rassemblement.
@@ -416,7 +513,7 @@ lancer("base:quetes", async () => {
       for (const q of [...pourTous, ...quetesDeClasse]) {
         if (q.races && !(q.races & masque)) continue;
         if (q.niveau < bas || q.niveau > haut) continue;
-        const d = (donneurs.get(q.id) ?? []).find((r) => r.t !== "pnj" || ouvertA(creatures.get(r.id)?.faction ?? 0, camp));
+        const d = (donneurs.get(q.id) ?? []).find((r) => r.t !== "pnj" || ouvertPnj(r.id, camp));
         const ld = placer(d);
         if (!d || !ld || ld.lieu !== z.lieu) continue;
         const rec = (receveurs.get(q.id) ?? [])[0];

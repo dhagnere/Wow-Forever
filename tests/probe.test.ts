@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 // @ts-expect-error fengari n'a pas de types
 import { lauxlib, lua, lualib, to_luastring } from "fengari";
-import { guideDepuisExport, lireExport, porteeConseillee, verifierGuide, versParcoursReleves } from "@/lib/probe";
+import { corrigerGuide, guideDepuisExport, lireExport, porteeConseillee, texteCorrectif, verifierGuide, versParcoursReleves } from "@/lib/probe";
 
 vi.mock("server-only", () => ({}));
 
@@ -74,6 +74,29 @@ describe("conversion en guide et vérification", () => {
     const v = verifierGuide(mauvais, "race");
     expect(v.ok).toBe(false);
     expect(v.problemes.join(" ")).toMatch(/se rendrait avant d'être prise/);
+  });
+
+  it("propose des correctifs : la quête fautive sort du parcours relevé, le reste de l'ordre joué est gardé", () => {
+    const mauvais = guideDepuisExport(lireExport(code([
+      "10.0|pos|1411|0.4|0.6", "11.0|accept|4641|x", "12.0|turnin|4641|x", "13.0|turnin|788|x", "14.0|accept|788|x",
+    ])));
+    const avant = verifierGuide(mauvais, "race");
+    expect(avant.ok).toBe(false);
+    expect(avant.defauts?.some((d) => d.id === 788 && d.lieu === "durotar")).toBe(true);
+    const c = corrigerGuide(mauvais, "race");
+    expect(c.correctifs).toEqual([expect.objectContaining({ lieu: "durotar", id: 788, etapes: ["rendre:788", "prendre:788"] })]);
+    expect(c.guide.zones).toEqual([{ lieu: "durotar", etapes: ["prendre:4641", "rendre:4641"] }]);
+    expect(c.verification.ok).toBe(true);
+    expect(texteCorrectif(c.correctifs[0])).toMatch(/Durotar : « .+ » \(se rendrait avant d'être prise[^)]*\) retirée du parcours relevé \(2 étapes\)/);
+    // l'original n'est pas modifié
+    expect(mauvais.zones[0].etapes).toHaveLength(4);
+  });
+
+  it("ne propose rien quand le problème ne tient pas à une quête", () => {
+    const sansQuete = guideDepuisExport(lireExport(code(["10.0|pos|1411|0.4|0.6"])));
+    const c = corrigerGuide(sansQuete, "race");
+    expect(c.correctifs).toEqual([]);
+    expect(c.verification.ok).toBe(false);
   });
 
   it("étend une partie commune à toute la faction", () => {

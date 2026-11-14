@@ -2,9 +2,9 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { declinerGuideProbe, deposerGuideProbe, lireGuideProbe, parcoursProbePublies, publierGuideProbe, type PorteeProbe } from "@/modules/veille";
+import { declinerGuideProbe, deposerGuideProbe, lireGuideProbe, majGuideProbe, parcoursProbePublies, publierGuideProbe, type LigneProbe, type PorteeProbe } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
-import { guideDepuisExport, lireExport, porteeConseillee, verifierGuide, versParcoursReleves, type GuideProbe, type Verification } from "@/lib/probe";
+import { corrigerGuide, guideDepuisExport, lireExport, porteeConseillee, verifierGuide, versParcoursReleves, type GuideProbe, type Verification } from "@/lib/probe";
 import { cheminAnglais } from "@/lib/anglais";
 
 const PAGE = "/admin/probe/";
@@ -29,6 +29,11 @@ export async function analyserCode(f: FormData): Promise<void> {
   redirect(`${PAGE}?ok=${id}#guide-${id}`);
 }
 
+/** Parcours des autres guides publiés (sans ceux de ce guide, s'il a déjà été publié puis retiré). */
+async function autresPublies(ligne: LigneProbe) {
+  return (await parcoursProbePublies()).filter((r) => !ligne.releves.some((x) => x.race === r.race && x.lieu === r.lieu && x.source === r.source));
+}
+
 /** Pages du guide à rafraîchir après une publication ou un retrait, en français et en anglais. */
 function rafraichir(v: Verification) {
   for (const page of v.pages) {
@@ -50,16 +55,51 @@ export async function publier(f: FormData): Promise<void> {
   const ligne = Number.isInteger(id) ? await lireGuideProbe(id) : null;
   if (!ligne || !p) redirect(`${PAGE}?erreur=${encodeURIComponent("Guide introuvable.")}`);
   const g = ligne.guide as GuideProbe;
-  const autres = (await parcoursProbePublies()).filter((r) => !ligne.releves.some((x) => x.race === r.race && x.lieu === r.lieu && x.source === r.source));
-  const v = verifierGuide(g, p, autres);
+  const v = verifierGuide(g, p, await autresPublies(ligne));
   if (!v.ok) {
-    redirect(`${PAGE}?erreur=${encodeURIComponent(`Publication refusée : ${v.problemes[0]}`)}#guide-${id}`);
+    // la portée choisie est gardée : les correctifs proposés sont recalculés pour elle
+    await majGuideProbe(id, { portee: p, verification: v });
+    revalidatePath(PAGE);
+    redirect(`${PAGE}?erreur=${encodeURIComponent(`Publication refusée : ${v.problemes[0]} Des correctifs sont proposés sous le guide.`)}#guide-${id}`);
   }
   const source = `EternalProbe, ${g.personnage || "personnage inconnu"}, guide n° ${id}`;
   await publierGuideProbe(id, p, v, versParcoursReleves(g, p, source));
   rafraichir(v);
   revalidatePath(PAGE);
   redirect(`${PAGE}?publie=${id}#guide-${id}`);
+}
+
+/**
+ * « Appliquer les correctifs » : les quêtes qui cassent l'ordre sont retirées du parcours relevé (le guide les replace
+ * lui-même), le guide et sa vérification sont enregistrés. Rien n'est publié : le bouton « Publier » reste à cliquer.
+ */
+export async function corriger(f: FormData): Promise<void> {
+  await exigerAdmin();
+  const id = Number(f.get("id"));
+  const ligne = Number.isInteger(id) ? await lireGuideProbe(id) : null;
+  if (!ligne || (ligne.etat !== "a_valider" && ligne.etat !== "retire")) redirect(`${PAGE}?erreur=${encodeURIComponent("Guide introuvable ou déjà publié.")}`);
+  const g = ligne.guide as GuideProbe;
+  const c = corrigerGuide(g, ligne.portee, await autresPublies(ligne));
+  if (!c.correctifs.length) {
+    redirect(`${PAGE}?erreur=${encodeURIComponent(`Aucun correctif automatique possible : ${c.verification.problemes[0] ?? "rien à corriger."}`)}#guide-${id}`);
+  }
+  const guide: GuideProbe = { ...c.guide, zonesOrigine: g.zonesOrigine ?? g.zones, correctifs: [...(g.correctifs ?? []), ...c.correctifs] };
+  await majGuideProbe(id, { guide, verification: c.verification });
+  revalidatePath(PAGE);
+  redirect(`${PAGE}?corrige=${id}#guide-${id}`);
+}
+
+/** Annule tous les correctifs : l'ordre joué revient tel que reçu, revérifié. */
+export async function annulerCorrectifs(f: FormData): Promise<void> {
+  await exigerAdmin();
+  const id = Number(f.get("id"));
+  const ligne = Number.isInteger(id) ? await lireGuideProbe(id) : null;
+  const g = ligne?.guide as GuideProbe | undefined;
+  if (!ligne || !g?.zonesOrigine) redirect(`${PAGE}#guide-${id}`);
+  const guide: GuideProbe = { ...g, zones: g.zonesOrigine, zonesOrigine: undefined, correctifs: undefined };
+  await majGuideProbe(id, { guide, verification: verifierGuide(guide, ligne.portee, await autresPublies(ligne)) });
+  revalidatePath(PAGE);
+  redirect(`${PAGE}#guide-${id}`);
 }
 
 export async function ecarter(f: FormData): Promise<void> {
