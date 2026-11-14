@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Jobwow's Notebook — from 1 to 60 in WoW Forever",
-  description: "Every Sunday at 6 pm, Jobwow's week in WoW Forever: memorable quests, traps avoided, encounters on the road.",
+  description: "Jobwow's play sessions in WoW Forever, from 1 to 60, on video: chapters by zone and level, plus the weekly newsletter.",
   alternates: { canonical: "/en/notebook/", languages: { fr: "/carnet/", en: "/en/notebook/", "x-default": "/carnet/" } },
 };
 
@@ -33,9 +33,9 @@ export default async function NotebookEn() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/images/jobwow-512.png" width={140} height={140} alt="Jobwow's avatar: a Horde Undead, in-game screenshot" className="avatar-jobwow" />
             <div>
-              <p className="surtitre">Every Sunday at 6 pm, Paris time</p>
+              <p className="surtitre">Jobwow&apos;s Journal on video</p>
               <h1>Jobwow&apos;s Notebook</h1>
-              <p className="chapo">From 1 to 60 in WoW Forever, one week after another. The quests that stood out, the traps avoided, the encounters on the road.</p>
+              <p className="chapo">From 1 to 60 in WoW Forever, one session after another, recorded in game. Each video is split into chapters, by zone crossed and level gained; the newsletter sums up each week.</p>
               <div className="actions-bandeau">
                 {SITE.discord ? <a href={SITE.discord} className="btn btn-or" rel="noopener noreferrer" data-cta="discord-carnet-en">Reply to Jobwow on Discord</a> : null}
                 <Link href="/en/newsletter/" className={SITE.discord ? "btn btn-contour" : "btn btn-or"} data-cta="lettre-carnet-en">Get the newsletter</Link>
@@ -63,7 +63,7 @@ export default async function NotebookEn() {
             </section>
             <div className="encadre">
               <h2>Why this notebook?</h2>
-              <p className="doux" style={{ margin: 0, fontSize: 15 }}>News look alike from one site to another. A lived adventure does not. Here, everything is played before it is written.</p>
+              <p className="doux" style={{ margin: 0, fontSize: 15 }}>News look alike from one site to another. A lived adventure does not. Here, everything is played and recorded before it is told.</p>
             </div>
           </aside>
         </div>

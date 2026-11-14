@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listerPublies } from "@/modules/veille";
+import { listerPublies, videosChaine } from "@/modules/veille";
 import { CLASSES } from "@/content/classes";
 import { CarteArticle, FilArticles } from "@/components/Articles";
 import { Visuel } from "@/components/Visuels";
@@ -21,7 +21,7 @@ const TERRES = [
 ] as const;
 
 export default async function Accueil() {
-  const [recents, carnet] = await Promise.all([listerPublies({ limite: 9 }), listerPublies({ rubrique: "carnet", limite: 1 })]);
+  const [recents, videos] = await Promise.all([listerPublies({ limite: 9 }), videosChaine(SITE.youtubeChaine)]);
   const aLaUne = recents.slice(0, 3);
   const chroniques = recents.slice(3, 9);
 
@@ -131,14 +131,14 @@ export default async function Accueil() {
           <aside className="encadre-chaud cadre" style={{ flex: "1 1 300px" }} aria-labelledby="t-carnet">
             <h2 id="t-carnet" className="titre" style={{ margin: "0 0 8px", fontSize: 23, color: "var(--or-clair)" }}>Le carnet de Jobwow</h2>
             <p style={{ margin: "0 0 16px", color: "var(--texte-chaud)" }}>
-              Chaque dimanche à 18h, le récit de la semaine et une capture d&apos;écran. De 1 à 60, sans tricher.
+              Chaque séance de jeu en vidéo, découpée par zone et par niveau. De 1 à 60, sans tricher.
             </p>
-            {carnet[0] ? (
+            {videos[0] ? (
               <p style={{ margin: "0 0 16px" }}>
-                Dernier épisode : <Link href={`/articles/${carnet[0].slug}/`}>{carnet[0].titre}</Link>
+                Dernière vidéo : <a href={videos[0].lien} rel="noopener noreferrer" data-cta="video-accueil">{videos[0].titre}</a>
               </p>
             ) : (
-              <p style={{ margin: "0 0 16px", color: "var(--texte-chaud)" }}>Premier épisode le dimanche 8 novembre.</p>
+              <p style={{ margin: "0 0 16px", color: "var(--texte-chaud)" }}>Les premières vidéos arrivent bientôt sur la chaîne.</p>
             )}
             <Link href="/carnet/" className="titre" style={{ fontWeight: 700 }}>Ouvrir le carnet</Link>
           </aside>
