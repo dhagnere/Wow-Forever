@@ -605,7 +605,9 @@ function Importer.Convertir(db)
         for _, r in ipairs(depart.races or {}) do noms[#noms + 1] = NOMS_RACES[r] or r end
         route.type = "depart"
         -- une route de départ par zone et par classe : chaque classe a ses quêtes et ses entraîneurs
-        route.id = "rp-depart-" .. Slug(depart.nom) .. (ctx.classFile and ("-" .. ctx.classFile:lower()) or "")
+        -- une route de départ par zone, race et classe : chaque combinaison a ses quêtes et ses entraîneurs
+        route.id = "rp-depart-" .. Slug(depart.nom) .. (ctx.raceFile and ("-" .. ctx.raceFile:lower()) or "")
+            .. (ctx.classFile and ("-" .. ctx.classFile:lower()) or "")
         route.races = depart.races
         route.faction = depart.faction or ctx.faction
         route.minLevel = 1
@@ -662,27 +664,43 @@ function Importer.Reparer(g)
     return change
 end
 
---- Routes de départ importées avant la 0.13.4, une par zone pour toutes les classes : elles prennent le nom de
---- la classe qui les a enregistrées (rp-depart-<zone>-<classe>). L'ancien nom reste connu (renommees), pour que
---- les personnages qui la suivaient la retrouvent.
+--- Race d'une route ancienne (sans raceEnregistree) : d'après « Classe Race » noté à l'import, ou sa seule race.
+local RACE_PAR_NOM = { Humain = "Human", Human = "Human", Nain = "Dwarf", Dwarf = "Dwarf", Gnome = "Gnome",
+    ["Elfe de la nuit"] = "NightElf", ["Night Elf"] = "NightElf", Orc = "Orc", Troll = "Troll",
+    ["Mort-vivant"] = "Scourge", ["Morte-vivante"] = "Scourge", Undead = "Scourge", Tauren = "Tauren" }
+local function RaceDe(g)
+    if g.raceEnregistree then return g.raceEnregistree end
+    local nom = tostring(g.enregistreAvec or ""):match("^%S+%s+(.+)$")
+    if nom and RACE_PAR_NOM[nom] then return RACE_PAR_NOM[nom] end
+    if type(g.races) == "table" and #g.races == 1 then return g.races[1] end
+    return nil
+end
+Importer.RaceDe = RaceDe
+
+--- Routes de départ importées avant la 0.13.6 (une par zone, ou par zone et classe) : elles prennent le nom de la
+--- race et de la classe qui les ont enregistrées (rp-depart-<zone>-<race>-<classe>). L'ancien nom reste connu
+--- (renommees), pour que les personnages qui la suivaient la retrouvent.
 local function Renommer(stock)
     EternalRoutesRoutesDB.renommees = EternalRoutesRoutesDB.renommees or {}
     local a = {}
     for id, g in pairs(stock) do
-        if type(g) == "table" and g.type == "depart" and g.classeEnregistree and g.source == "RouteProbe"
-            and not tostring(id):find("%-" .. g.classeEnregistree:lower() .. "$") then
-            a[#a + 1] = id
+        local race = type(g) == "table" and RaceDe(g)
+        if race and g.type == "depart" and g.classeEnregistree and g.source == "RouteProbe" then
+            local suffixe = "-" .. race:lower() .. "-" .. g.classeEnregistree:lower()
+            if tostring(id):sub(-#suffixe) ~= suffixe then a[#a + 1] = { id = id, race = race, suffixe = suffixe } end
         end
     end
-    for _, id in ipairs(a) do
-        local g = stock[id]
-        local nouveau = id .. "-" .. g.classeEnregistree:lower()
+    for _, r in ipairs(a) do
+        local g = stock[r.id]
+        local base = tostring(r.id):gsub("%-" .. g.classeEnregistree:lower() .. "$", "")
+        local nouveau = base .. r.suffixe
+        g.raceEnregistree = g.raceEnregistree or r.race
         if not stock[nouveau] then
             g.id = nouveau
             stock[nouveau] = g
         end
-        stock[id] = nil
-        EternalRoutesRoutesDB.renommees[id] = nouveau
+        stock[r.id] = nil
+        EternalRoutesRoutesDB.renommees[r.id] = nouveau
     end
 end
 
@@ -803,10 +821,9 @@ function Importer.Importer()
     -- choisir la route si le personnage n'en suit aucune, ou s'il suivait déjà celle-ci
     if ns.Engine then
         local active = ns.Engine.GetActiveGuide()
-        local _, classe = UnitClass("player")
-        -- route de départ de sa propre classe : elle remplace celle d'une autre classe que le personnage suivait
-        local remplaceAutreClasse = active and g.type == "depart" and active.type == "depart" and classe
-            and g.classeEnregistree == classe and active.classeEnregistree ~= classe and active.zone == g.zone
+        -- route de départ plus proche du personnage (sa race et sa classe) : elle remplace celle qu'il suivait
+        local remplaceAutreClasse = active and g.type == "depart" and active.type == "depart" and active.zone == g.zone
+            and ns.Engine.Proximite(g) > ns.Engine.Proximite(active)
         if not active or ns.db.activeGuide == g.id or remplaceAutreClasse then
             for _, candidat in ipairs(ns.Engine.GetGuidesForPlayer()) do
                 if candidat.id == g.id then ns.Engine.LoadGuide(g.id) break end

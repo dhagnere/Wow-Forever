@@ -184,6 +184,15 @@ function Engine.DeSaClasse(g)
     return g ~= nil and classe ~= nil and g.source == "RouteProbe" and g.classeEnregistree == classe
 end
 
+--- Proximité d'une route enregistrée avec le personnage : 3 même race et même classe, 2 même classe,
+--- 1 même race, 0 sinon. Sert à choisir la route de départ quand plusieurs couvrent sa zone.
+function Engine.Proximite(g)
+    if not g or g.source ~= "RouteProbe" then return 0 end
+    local _, race = UnitRace("player")
+    local race_g = g.raceEnregistree or (ns.Importer and ns.Importer.RaceDe and ns.Importer.RaceDe(g))
+    return (Engine.DeSaClasse(g) and 2 or 0) + ((race and race_g == race) and 1 or 0)
+end
+
 function Engine.GetGuidesForPlayer()
     local list = {}
     for _, g in pairs(ns.guides) do
@@ -192,8 +201,8 @@ function Engine.GetGuidesForPlayer()
     table.sort(list, function(a, b)
         local pa, pb = a.priority or 0, b.priority or 0
         if pa ~= pb then return pa > pb end
-        local ca, cb = Engine.DeSaClasse(a), Engine.DeSaClasse(b)
-        if ca ~= cb then return ca end
+        local ca, cb = Engine.Proximite(a), Engine.Proximite(b)
+        if ca ~= cb then return ca > cb end
         if (a.minLevel or 0) ~= (b.minLevel or 0) then
             return (a.minLevel or 0) < (b.minLevel or 0)
         end
@@ -511,10 +520,11 @@ function Engine.GetActiveGuide()
     local id = ns.db.activeGuide
     -- route renommée (route de départ devenue propre à sa classe) : le personnage suit la nouvelle
     local renommees = type(EternalRoutesRoutesDB) == "table" and EternalRoutesRoutesDB.renommees
-    if id and not ns.guides[id] and renommees and renommees[id] and ns.guides[renommees[id]] then
-        id = renommees[id]
-        ns.db.activeGuide = id
+    local n = 0
+    while id and not ns.guides[id] and renommees and renommees[id] and n < 4 do
+        id, n = renommees[id], n + 1
     end
+    if id ~= ns.db.activeGuide and id and ns.guides[id] then ns.db.activeGuide = id end
     return Engine.GuidePourClasse((id and ns.guides[id]) or nil)
 end
 
@@ -1409,8 +1419,8 @@ function Engine.ChooseBestGuide()
     for _, g in ipairs(list) do
         if carte and Engine.CartesDe(g)[carte] then
             local mieux = not meilleur
-            if meilleur and Engine.DeSaClasse(g) ~= Engine.DeSaClasse(meilleur) and (g.minLevel or 1) == (meilleur.minLevel or 1) then
-                mieux = Engine.DeSaClasse(g)
+            if meilleur and Engine.Proximite(g) ~= Engine.Proximite(meilleur) and (g.minLevel or 1) == (meilleur.minLevel or 1) then
+                mieux = Engine.Proximite(g) > Engine.Proximite(meilleur)
             elseif meilleur then
                 mieux = (g.minLevel or 1) > (meilleur.minLevel or 1)
             end

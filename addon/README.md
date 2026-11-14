@@ -50,6 +50,13 @@ et faites un clic droit sur « Grimoire d'Éclair de feu (Rang 2) » : votre dé
 Les sources (« sur : … ») ne sont plus collées au texte de l'objectif : elles sont dans la consigne. Textes dans `Locale.lua`
 (`HINT_…`, français et anglais), règles dans `Engine.ActionsEtape` et `Engine.ActionsSacs` (`GuideEngine.lua`).
 
+## Une route de départ par zone, race et classe (EternalRoutes 0.13.6)
+
+Deux races partagent parfois une zone de départ (orcs et trolls à Durotar, nains et gnomes à Dun Morogh) : la route
+porte donc aussi la race (`rp-depart-<zone>-<race>-<classe>`). Un troll guerrier suit la route du troll guerrier ;
+à défaut celle d'un orc guerrier, puis celle d'un troll d'une autre classe, complétée par ses quêtes de classe et son
+entraîneur. Les routes déjà importées prennent leur nouveau nom au chargement de l'addon.
+
 ## Routes enregistrées seulement (EternalRoutes 0.13.5)
 
 Les 56 guides de 1 à 60 du site (un par race et classe) ne sont plus chargés par l'addon : seules les routes

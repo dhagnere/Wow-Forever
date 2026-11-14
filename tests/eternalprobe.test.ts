@@ -406,12 +406,20 @@ BANC.joueur.classe, BANC.joueur.classeFichier, BANC.joueur.niveau = "Guerrier", 
 out[#out + 1] = ns.Engine.GetGuidesForPlayer()[1].id
 BANC.joueur.classe, BANC.joueur.classeFichier = "Mage", "MAGE"
 out[#out + 1] = tostring(#ns.Engine.GetGuidesForPlayer())
+-- même zone pour deux races : le troll guerrier prend la route du troll guerrier, puis celle de l'orc guerrier
+local troll = Route("WARRIOR"); troll.id = "rp-depart-vallee-des-epreuves-troll-warrior"; troll.raceEnregistree = "Troll"; troll.races = { "Orc", "Troll" }
+guerrier.raceEnregistree = "Orc"; guerrier.races = { "Orc", "Troll" }
+ns.guides[troll.id] = troll
+BANC.joueur.classe, BANC.joueur.classeFichier, BANC.joueur.race, BANC.joueur.raceFichier = "Guerrier", "WARRIOR", "Troll", "Troll"
+out[#out + 1] = ns.Engine.GetGuidesForPlayer()[1].id
+ns.guides[troll.id] = nil
+out[#out + 1] = ns.Engine.GetGuidesForPlayer()[1].id
 -- nom affiché : zone de départ, race et classe de l'enregistrement
 ancienne.enregistreAvec = "Démoniste Troll"
 guerrier.raceEnregistree, guerrier.niveauMax = "Orc", 6
 return table.concat(out, " ") .. "\\n" .. ns.Engine.NomGuide(ancienne) .. "\\n" .. ns.Engine.NomGuide(guerrier)`).split("\n");
-    expect(r[0]).toBe("rp-depart-vallee-des-epreuves-warlock rp-depart-vallee-des-epreuves-warlock rp-depart-vallee-des-epreuves-warrior 2");
-    expect(r[1]).toBe("Départ · Vallée des Épreuves · Troll · Démoniste · 1-15");
+    expect(r[0]).toBe("rp-depart-vallee-des-epreuves-orc-warlock rp-depart-vallee-des-epreuves-orc-warlock rp-depart-vallee-des-epreuves-warrior 2 rp-depart-vallee-des-epreuves-troll-warrior rp-depart-vallee-des-epreuves-warrior");
+    expect(r[1]).toBe("Départ · Vallée des Épreuves · Orc · Démoniste · 1-15");
     expect(r[2]).toBe("Départ · Vallée des Épreuves · Orc · Guerrier · 1-6");
   });
 
