@@ -24,6 +24,9 @@ describe("phrase d'appel à l'action", () => {
   it("est la même, mot pour mot, sur tous les réseaux", () => {
     expect(phraseAppel()).toBe("👉 Abonne-toi à la Taverne Éternelle pour ne rien rater de WoW Forever, et retrouve tous nos guides sur taverne-eternelle.fr");
     for (const r of ["facebook", "reel", "x", "instagram", "tiktok"] as const) expect(texteReseau(r, article)).toContain(phraseAppel());
+    // Page Facebook sans lien : même phrase, le domaine remplacé par le bouton de la Page
+    expect(texteReseau("page-facebook", article)).toContain(phraseAppel(false));
+    expect(phraseAppel(false)).toBe(phraseAppel().replace("taverne-eternelle.fr", "notre site (bouton « Visiter le site » de la Page)"));
   });
   it("garde le lien vers l'article sur Facebook et X, et renvoie vers le site ailleurs", () => {
     expect(texteReseau("facebook", article)).toContain("Lire la suite à la Taverne : https://www.taverne-eternelle.fr/articles/bilan-beta/?utm_source=facebook&utm_medium=social&utm_campaign=veille");

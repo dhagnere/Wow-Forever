@@ -39,21 +39,37 @@ describe("préparation des images", () => {
 });
 
 describe("post Facebook", () => {
-  const base = { accrocheFacebook: "Accroche", texteFacebook: "Texte.", slug: "un-article", titre: "Titre" };
+  const base = { accrocheFacebook: "Accroche", texteFacebook: "Texte.", slug: "un-article", titre: "Titre", image: null };
+  const avecLiens = (f: () => void) => {
+    process.env.FACEBOOK_LIENS = "oui";
+    try { f(); } finally { delete process.env.FACEBOOK_LIENS; }
+  };
 
-  it("publie un post photo quand une image propre au post existe", () => {
+  it("publie sans lien par défaut (limite de Meta One) : post photo, renvoi vers le site par son nom", () => {
+    process.env.SITE_URL = "https://www.taverne-eternelle.fr";
+    const r = requeteFacebook({ ...base, imageFacebookId: null });
+    expect(r.chemin).toBe("photos");
+    expect(r.params.url).toBe("https://www.taverne-eternelle.fr/articles/un-article/image/");
+    expect(r.params.link).toBeUndefined();
+    expect(r.params.message).not.toMatch(/https?:|taverne-eternelle\.fr|www\./);
+    expect(r.params.message).toContain("bouton « Visiter le site »");
+    expect(requeteFacebook({ ...base, imageFacebookId: null, image: { id: 7, alt: "a", credit: "c" } }).params.url).toBe("https://www.taverne-eternelle.fr/medias/7/og/");
+    expect(requeteFacebook({ ...base, imageFacebookId: 42 }).params.url).toBe("https://www.taverne-eternelle.fr/medias/42/");
+  });
+
+  it("avec FACEBOOK_LIENS=oui : post photo quand une image propre au post existe", () => avecLiens(() => {
     process.env.SITE_URL = "https://www.taverne-eternelle.fr";
     const r = requeteFacebook({ ...base, imageFacebookId: 42 });
     expect(r.chemin).toBe("photos");
     expect(r.params.url).toBe("https://www.taverne-eternelle.fr/medias/42/");
     expect(r.params.message).toContain("Lire la suite à la Taverne : https://www.taverne-eternelle.fr/articles/un-article/?utm_source=facebook&utm_medium=social&utm_campaign=veille");
-  });
+  }));
 
-  it("publie un post lien sinon", () => {
+  it("avec FACEBOOK_LIENS=oui : post lien sinon", () => avecLiens(() => {
     const r = requeteFacebook({ ...base, imageFacebookId: null });
     expect(r.chemin).toBe("feed");
     expect(r.params.link).toBe("https://www.taverne-eternelle.fr/articles/un-article/?utm_source=facebook&utm_medium=social&utm_campaign=veille");
-  });
+  }));
 });
 
 describe("description de l'image", () => {

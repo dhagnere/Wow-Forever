@@ -5,7 +5,7 @@
 unpack = unpack or table.unpack
 
 BANC = {
-    t = 1000, frames = {}, minuteurs = {}, photos = 0, messages = {},
+    t = 1000, frames = {}, minuteurs = {}, photos = 0, messages = {}, bandeau = {},
     joueur = { nom = "Testeur", niveau = 3, race = "Orc", raceFichier = "Orc", classe = "Guerrier", classeFichier = "WARRIOR", faction = "Horde" },
     carte = 1411, x = 0.42, y = 0.68, zone = "Durotar",
     cible = nil, journal = {}, quete = nil, taxi = nil, enVol = false, combat = nil,
@@ -37,12 +37,17 @@ function CreateFrame(genre, nom)
     local c = NouveauCadre()
     BANC.frames[#BANC.frames + 1] = c
     -- bulle d'aide : sa 2e ligne donne le titre du PNJ (« <Entraîneur de démons> »)
+    -- bandeau discret des annonces (MessageFrame) : ses lignes sont gardées pour les tests
+    if genre == "MessageFrame" then
+        c.AddMessage = function(_, m) BANC.bandeau[#BANC.bandeau + 1] = m end
+    end
     if genre == "GameTooltip" and nom then
         _G[nom .. "TextLeft2"] = { GetText = function() return BANC.titrePnj end }
     end
     return c
 end
 UIParent, Minimap, GameTooltip = NouveauCadre(), NouveauCadre(), NouveauCadre()
+geterrorhandler = function() return function(e) error(e, 0) end end
 DEFAULT_CHAT_FRAME = { AddMessage = function(_, m) BANC.messages[#BANC.messages + 1] = m end }
 SlashCmdList, UISpecialFrames, SOUNDKIT = {}, {}, setmetatable({}, { __index = function() return 0 end })
 RaidNotice_AddMessage, PlaySound, ReloadUI = function() end, function() end, function() end

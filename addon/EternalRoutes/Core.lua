@@ -18,14 +18,52 @@ local defaults = {
     activeGuide   = nil,
     stepIndex     = 1,
     arrowEnabled  = true,
+    annonces      = "ecran",
     showNext      = true,
     miniMode      = false,
     scale         = 1,
 }
 
--- Message de chat (gère les retours à la ligne)
+-- Annonces automatiques : un bandeau discret en haut de l'écran, effacé en 2.5 s, au lieu du chat, pour ne pas
+-- encombrer les vidéos. Les réponses aux commandes de lecture (/er status, state, objs, quests, routes, rec dump, aide) restent dans le chat, pour être relues.
+-- Réglage : /er annonces ecran (par défaut) | chat | aucune.
+local DUREE_BANDEAU = 2.5
+local bandeauAnnonces
+local function BandeauAnnonces()
+    if bandeauAnnonces ~= nil then return bandeauAnnonces or nil end
+    local ok, f = pcall(function()
+        local m = CreateFrame("MessageFrame", "EternalRoutesAnnonces", UIParent)
+        m:SetSize(720, 64)
+        m:SetPoint("TOP", UIParent, "TOP", 0, -176)
+        m:SetFrameStrata("HIGH")
+        m:SetFontObject(GameFontHighlightSmall)
+        m:SetJustifyH("CENTER")
+        m:SetTimeVisible(DUREE_BANDEAU)
+        m:SetFadeDuration(0.4)
+        if m.SetInsertMode then pcall(m.SetInsertMode, m, "TOP") end
+        return m
+    end)
+    bandeauAnnonces = ok and f or false
+    return bandeauAnnonces or nil
+end
+
+--- Vrai pendant une commande de lecture : sa réponse va dans le chat quel que soit le réglage.
+ns.lecture = false
+
+-- Message (gère les retours à la ligne) : bandeau discret ou chat, selon le réglage et la commande en cours
 function ns.Print(msg)
     local text = tostring(msg)
+    local mode = (ns.db and ns.db.annonces) or "ecran"
+    if not ns.lecture and mode ~= "chat" then
+        if mode == "aucune" then return end
+        local f = BandeauAnnonces()
+        if f then
+            for line in (text .. "\n"):gmatch("(.-)\n") do
+                if line ~= "" then f:AddMessage(line, 1, 0.82, 0.4) end
+            end
+            return
+        end
+    end
     for line in (text .. "\n"):gmatch("(.-)\n") do
         DEFAULT_CHAT_FRAME:AddMessage(("|cff33ccff%s|r: %s"):format(ADDON_NAME, line))
     end
@@ -102,8 +140,19 @@ end
 --   /er options      réglages
 SLASH_ETERNALROUTES1 = "/eternalroutes"
 SLASH_ETERNALROUTES2 = "/er"
-SlashCmdList.ETERNALROUTES = function(msg)
+local function Commande(msg)
     msg = tostring(msg or ""):lower():match("^%s*(.-)%s*$") or ""
+
+    local mode = msg:match("^annonces%s*(%S*)$")
+    if mode then
+        if mode == "ecran" or mode == "écran" or mode == "chat" or mode == "aucune" then
+            ns.db.annonces = (mode == "écran") and "ecran" or mode
+        end
+        ns.lecture = true
+        ns.Print(("Annonces : %s (/er annonces ecran | chat | aucune). Bandeau effacé en %s s ; status, routes, quests et l'aide restent dans le chat.")
+            :format(ns.db.annonces or "ecran", tostring(DUREE_BANDEAU)))
+        return
+    end
 
     if msg == "reset" then
         if ns.db then ns.db.stepIndex = 1 end
@@ -214,6 +263,16 @@ SlashCmdList.ETERNALROUTES = function(msg)
     if ns.Window and ns.Window.Toggle then
         ns.Window.Toggle()
     end
+end
+
+--- Commandes de lecture : leur réponse reste dans le chat (le reste passe par le bandeau discret).
+local LECTURE = { status = true, state = true, objs = true, quests = true, routes = true, debug = true, fleche = true, ["flèche"] = true, arrow = true, ["rec dump"] = true, aide = true, help = true }
+SlashCmdList.ETERNALROUTES = function(msg)
+    local cle = tostring(msg or ""):lower():match("^%s*(.-)%s*$") or ""
+    ns.lecture = LECTURE[cle] or false
+    local ok, err = pcall(Commande, msg)
+    ns.lecture = false
+    if not ok then geterrorhandler()(err) end
 end
 
 -- Bouton minimap (déplaçable) : afficher / masquer le guide

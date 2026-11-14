@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PartageFacebook } from "@/components/PartageFacebook";
-import { AVIS_MINIMUM, DUREE_REEL_S, etatVideo, lienFrancais, lireParId, longueurX, messageFacebook, nomLangue, texteReseau } from "@/modules/veille";
+import { AVIS_MINIMUM, DUREE_REEL_S, etatVideo, imagePostFacebook, lienFrancais, lireParId, longueurX, messageFacebook, nomLangue, texteReseau } from "@/modules/veille";
+import { pageFacebookAvecLien } from "@/config/reseaux";
 import { TexteACopier } from "./Copier";
 import { PILIERS, RUBRIQUES } from "@/config/taxonomie";
 import { exigerAdmin } from "@/lib/admin";
@@ -86,7 +87,9 @@ export default async function EditerArticle({ params, searchParams }: { params: 
           <div className="encadre">
             <h2>Aperçu du post Facebook</h2>
             <p className="doux" style={{ margin: "0 0 8px", fontSize: 14 }}>
-              {a.imageFacebookId ? "Post photo, avec l'image propre au post." : a.image ? "Post lien, avec l'image d'en-tête recadrée." : "Post lien, avec l'image générée par le site."}
+              {pageFacebookAvecLien()
+                ? (a.imageFacebookId ? "Post photo, avec l'image propre au post." : a.image ? "Post lien, avec l'image d'en-tête recadrée." : "Post lien, avec l'image générée par le site.")
+                : "Post photo sans lien (limite de Meta One : deux liens par mois pour une Page non abonnée). Le texte renvoie vers le site par son nom et le bouton « Visiter le site » de la Page. FACEBOOK_LIENS=oui rétablit le lien."}
             </p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -97,8 +100,15 @@ export default async function EditerArticle({ params, searchParams }: { params: 
             <p style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: 15 }}>{messageFacebook(a)}</p>
             {a.statut === "publie" ? (
               <div className="partage" style={{ margin: "12px 0 0" }}>
-                <PartageFacebook url={`${SITE.url}/articles/${a.slug}/`} texte={messageFacebook(a)} libelle="Publier depuis la Page Facebook" page={adressePageFacebook()} />
-                <PartageFacebook url={`${SITE.url}/articles/${a.slug}/`} texte={messageFacebook(a)} libelle="Fenêtre de partage" className="btn btn-contour" />
+                <PartageFacebook
+                  url={`${SITE.url}/articles/${a.slug}/`}
+                  texte={messageFacebook(a)}
+                  libelle="Publier depuis la Page Facebook"
+                  page={adressePageFacebook()}
+                  consigne={pageFacebookAvecLien() ? undefined : "Texte du post copié, sans lien : sur la Page, « Créer une publication », ajoutez l'image téléchargée (« Image du post »), puis collez le texte (Ctrl+V)."}
+                />
+                {pageFacebookAvecLien() ? null : <a className="btn btn-contour" href={imagePostFacebook(a)} download target="_blank" rel="noopener">Image du post</a>}
+                <PartageFacebook url={`${SITE.url}/articles/${a.slug}/`} texte={texteReseau("facebook", a)} libelle="Partager depuis mon profil (avec lien)" className="btn btn-contour" />
               </div>
             ) : null}
             {a.facebookErreur ? <p className="alerte" style={{ marginTop: 12, fontSize: 14 }}>Dernier échec : {a.facebookErreur}</p> : null}

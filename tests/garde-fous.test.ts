@@ -70,9 +70,16 @@ describe("relais Facebook", () => {
   });
   it("pointe toujours vers le site et ajoute les mots-dièse", () => {
     process.env.SITE_URL = "https://www.taverne-eternelle.fr";
-    const m = messageFacebook({ accrocheFacebook: "Le donjon caché enfin révélé", texteFacebook: "Ce que l'on sait.", slug: "donjon-cache", titre: "t" });
-    expect(m).toContain("Lire la suite à la Taverne : https://www.taverne-eternelle.fr/articles/donjon-cache/?utm_source=facebook&utm_medium=social&utm_campaign=veille");
-    expect(m).toContain("#WoWForever #WorldofWarcraft");
+    const contenu = { accrocheFacebook: "Le donjon caché enfin révélé", texteFacebook: "Ce que l'on sait.", slug: "donjon-cache", titre: "t" };
+    // par défaut (limite de Meta One) : renvoi vers le site par son nom, sans lien ni domaine
+    const sansLien = messageFacebook(contenu);
+    expect(sansLien).toContain("Taverne Éternelle");
+    expect(sansLien).not.toMatch(/https?:|taverne-eternelle\.fr/);
+    expect(sansLien).toContain("#WoWForever #WorldofWarcraft");
+    process.env.FACEBOOK_LIENS = "oui";
+    try {
+      expect(messageFacebook(contenu)).toContain("Lire la suite à la Taverne : https://www.taverne-eternelle.fr/articles/donjon-cache/?utm_source=facebook&utm_medium=social&utm_campaign=veille");
+    } finally { delete process.env.FACEBOOK_LIENS; }
   });
 });
 
