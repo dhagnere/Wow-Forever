@@ -88,6 +88,29 @@ describe("EternalProbe dans un WoW simulé", () => {
   const lignes = sortie.split("\n");
   const de = (type: string) => lignes.filter((l) => l.split("|")[1] === type);
 
+  it("met les annonces automatiques dans un bandeau discret, et les réponses de lecture dans le chat", () => {
+    const r = executer(SIMULE, ...SONDE, `
+      BANC.Evenement("PLAYER_LOGIN")
+      SlashCmdList.ETERNALPROBE("start")
+      local a = #BANC.messages
+      SlashCmdList.ETERNALPROBE("context")
+      local b = #BANC.messages
+      SlashCmdList.ETERNALPROBE("annonces aucune")
+      local c1, c2 = #BANC.messages, #BANC.bandeau
+      SlashCmdList.ETERNALPROBE("mark essai")
+      local d1, d2 = #BANC.messages, #BANC.bandeau
+      SlashCmdList.ETERNALPROBE("annonces chat")
+      SlashCmdList.ETERNALPROBE("mark essai")
+      return table.concat({ a, b, c1, c2, d1, d2, #BANC.messages, EternalProbeDB.annonces }, "|")`).split("|");
+    const [a, b, c1, c2, d1, d2, fin, mode] = r;
+    expect(Number(a)).toBe(0); // chargement et /ep start : rien dans le chat
+    expect(Number(b)).toBeGreaterThan(0); // /ep context : lecture, dans le chat
+    expect(Number(c2)).toBeGreaterThan(0); // les annonces sont passées par le bandeau
+    expect([d1, d2]).toEqual([c1, c2]); // « aucune » : ni chat ni bandeau
+    expect(Number(fin)).toBeGreaterThan(Number(d1)); // « chat » : retour au chat
+    expect(mode).toBe("chat");
+  });
+
   it("ne touche à rien de réservé à l'interface de Blizzard (sinon le jeu bloque l'addon au chargement)", () => {
     expect(sortie).toMatch(/#bloque=$/);
   });

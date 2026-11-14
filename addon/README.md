@@ -50,6 +50,21 @@ et faites un clic droit sur « Grimoire d'Éclair de feu (Rang 2) » : votre dé
 Les sources (« sur : … ») ne sont plus collées au texte de l'objectif : elles sont dans la consigne. Textes dans `Locale.lua`
 (`HINT_…`, français et anglais), règles dans `Engine.ActionsEtape` et `Engine.ActionsSacs` (`GuideEngine.lua`).
 
+## Annonces discrètes (EternalProbe 0.11.0, EternalRoutes 0.13.0)
+
+Les messages automatiques des deux addons (début et fin d'enregistrement, sortie de la zone de départ, rappel de la
+vidéo, suite de route, quête abandonnée…) ne s'écrivent plus dans le chat : ils passent dans un petit bandeau en haut
+de l'écran, effacé en 2,5 secondes, pour ne pas rester dans les vidéos. Les réponses aux commandes de lecture restent
+dans le chat, pour être relues : `/ep dump`, `/ep context`, `/ep archives`, `/ep aide` ; `/er status`, `state`, `objs`,
+`quests`, `routes`, `rec dump`.
+
+- `/ep annonces aucune` et `/er annonces aucune` : silence complet (rien à l'écran ni dans le chat), pour filmer.
+- `/ep annonces chat` et `/er annonces chat` : retour à l'ancien fonctionnement.
+- `/ep annonces ecran` et `/er annonces ecran` : le bandeau (réglage par défaut).
+
+Le bandeau rouge de fin de zone de départ, qu'on ferme d'un clic, et l'alerte centrale de Warcraft (« raid warning »)
+restent affichés : ce sont des consignes à suivre.
+
 ## Publier un parcours sur le site
 
 1. En jeu : `/ep export`. La fenêtre montre un code déjà sélectionné : Ctrl+C. Après `/ep suite`, la zone de départ

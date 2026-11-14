@@ -61,8 +61,45 @@ local function DB()
     return EternalProbeDB
 end
 
+-- Annonces automatiques : un bandeau discret en haut de l'écran, effacé en 2.5 s, au lieu du chat, pour ne pas
+-- encombrer les vidéos. Les réponses aux commandes de lecture (/ep dump, context, archives, aide) restent dans le chat, pour être relues.
+-- Réglage : /ep annonces ecran (par défaut) | chat | aucune.
+local DUREE_BANDEAU = 2.5
+local bandeauAnnonces
+local function BandeauAnnonces()
+    if bandeauAnnonces ~= nil then return bandeauAnnonces or nil end
+    local ok, f = pcall(function()
+        local m = CreateFrame("MessageFrame", "EternalProbeAnnonces", UIParent)
+        m:SetSize(720, 64)
+        m:SetPoint("TOP", UIParent, "TOP", 0, -140)
+        m:SetFrameStrata("HIGH")
+        m:SetFontObject(GameFontHighlightSmall)
+        m:SetJustifyH("CENTER")
+        m:SetTimeVisible(DUREE_BANDEAU)
+        m:SetFadeDuration(0.4)
+        if m.SetInsertMode then pcall(m.SetInsertMode, m, "TOP") end
+        return m
+    end)
+    bandeauAnnonces = ok and f or false
+    return bandeauAnnonces or nil
+end
+
+--- Vrai pendant une commande de lecture : sa réponse va dans le chat quel que soit le réglage.
+local lecture = false
+
 local function Print(msg)
     local text = tostring(msg)
+    local mode = (type(EternalProbeDB) == "table" and EternalProbeDB.annonces) or "ecran"
+    if not lecture and mode ~= "chat" then
+        if mode == "aucune" then return end
+        local f = BandeauAnnonces()
+        if f then
+            for line in (text .. "\n"):gmatch("(.-)\n") do
+                if line ~= "" then f:AddMessage(line, 0.6, 0.85, 1) end
+            end
+            return
+        end
+    end
     for line in (text .. "\n"):gmatch("(.-)\n") do
         DEFAULT_CHAT_FRAME:AddMessage(("|cff33ccff%s|r: %s"):format(ADDON, line))
     end
@@ -324,10 +361,7 @@ local function Alerter(titre, texte, avecBouton)
         RaidNotice_AddMessage(RaidWarningFrame, titre, { r = 1, g = 0.2, b = 0.2 })
     end
     if PlaySound then PlaySound(SOUNDKIT and SOUNDKIT.RAID_WARNING or 8959) end
-    DEFAULT_CHAT_FRAME:AddMessage("|cffff3333" .. titre .. "|r")
-    for ligne in (texte .. "\n"):gmatch("(.-)\n") do
-        if ligne ~= "" then DEFAULT_CHAT_FRAME:AddMessage("|cffff7777" .. ligne .. "|r") end
-    end
+    Print("|cffff3333" .. titre .. "|r\n" .. texte)
 end
 
 local function AvecImport()
@@ -514,7 +548,7 @@ local function RappelVideo()
     if RaidNotice_AddMessage and RaidWarningFrame then
         RaidNotice_AddMessage(RaidWarningFrame, texte, { r = 1, g = 0.6, b = 0.2 })
     end
-    DEFAULT_CHAT_FRAME:AddMessage("|cffff9933" .. texte .. "|r")
+    Print("|cffff9933" .. texte .. "|r")
 end
 
 -- ---- sorts appris chez l'entraîneur ----------------------------------------
@@ -973,9 +1007,20 @@ end
 
 SLASH_ETERNALPROBE1 = "/ep"
 SLASH_ETERNALPROBE2 = "/eternalprobe"
-SlashCmdList.ETERNALPROBE = function(msg)
+local function Commande(msg)
     local raw = (msg or ""):match("^%s*(.-)%s*$") or ""
     local lower = raw:lower()
+
+    local mode = lower:match("^annonces%s*(%S*)$")
+    if mode then
+        if mode == "ecran" or mode == "écran" or mode == "chat" or mode == "aucune" then
+            DB().annonces = (mode == "écran") and "ecran" or mode
+        end
+        lecture = true
+        Print(("Annonces : %s (/ep annonces ecran | chat | aucune). Bandeau effacé en %s s ; dump, context, archives et l'aide restent dans le chat.")
+            :format(DB().annonces or "ecran", tostring(DUREE_BANDEAU)))
+        return
+    end
 
     if lower:match("^mark%s+") then
         local text = raw:sub(6)
@@ -1064,4 +1109,14 @@ if Minimap then
         GameTooltip:Show()
     end)
     mmBtn:SetScript("OnLeave", function() GameTooltip:Hide() end)
+end
+
+--- Commandes de lecture : leur réponse reste dans le chat (le reste passe par le bandeau discret).
+local LECTURE = { [""] = true, dump = true, context = true, archives = true, aide = true, help = true }
+SlashCmdList.ETERNALPROBE = function(msg)
+    local cle = ((msg or ""):match("^%s*(%S*)") or ""):lower()
+    lecture = LECTURE[cle] or false
+    local ok, err = pcall(Commande, msg)
+    lecture = false
+    if not ok then geterrorhandler()(err) end
 end
