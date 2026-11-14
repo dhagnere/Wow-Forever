@@ -603,12 +603,14 @@ function Importer.Convertir(db)
         local noms = {}
         for _, r in ipairs(depart.races or {}) do noms[#noms + 1] = NOMS_RACES[r] or r end
         route.type = "depart"
-        route.id = "rp-depart-" .. Slug(depart.nom)
+        -- une route de départ par zone et par classe : chaque classe a ses quêtes et ses entraîneurs
+        route.id = "rp-depart-" .. Slug(depart.nom) .. (ctx.classFile and ("-" .. ctx.classFile:lower()) or "")
         route.races = depart.races
         route.faction = depart.faction or ctx.faction
         route.minLevel = 1
         route.maxLevel = math.max(15, niveauMax + 5)
-        route.name = ("Départ · %s%s · 1-%d"):format(depart.nom, #noms > 0 and (" (" .. table.concat(noms, ", ") .. ")") or "", niveauMax)
+        route.name = ("Départ · %s%s%s · 1-%d"):format(depart.nom, #noms > 0 and (" (" .. table.concat(noms, ", ") .. ")") or "",
+            ctx.className and (" · " .. ctx.className) or "", niveauMax)
     else
         route.type = "faction"
         route.id = ("rp-%s-%d"):format(Slug(ctx.faction or "route"), niveauDebut)
@@ -659,8 +661,33 @@ function Importer.Reparer(g)
     return change
 end
 
+--- Routes de départ importées avant la 0.13.4, une par zone pour toutes les classes : elles prennent le nom de
+--- la classe qui les a enregistrées (rp-depart-<zone>-<classe>). L'ancien nom reste connu (renommees), pour que
+--- les personnages qui la suivaient la retrouvent.
+local function Renommer(stock)
+    EternalRoutesRoutesDB.renommees = EternalRoutesRoutesDB.renommees or {}
+    local a = {}
+    for id, g in pairs(stock) do
+        if type(g) == "table" and g.type == "depart" and g.classeEnregistree and g.source == "RouteProbe"
+            and not tostring(id):find("%-" .. g.classeEnregistree:lower() .. "$") then
+            a[#a + 1] = id
+        end
+    end
+    for _, id in ipairs(a) do
+        local g = stock[id]
+        local nouveau = id .. "-" .. g.classeEnregistree:lower()
+        if not stock[nouveau] then
+            g.id = nouveau
+            stock[nouveau] = g
+        end
+        stock[id] = nil
+        EternalRoutesRoutesDB.renommees[id] = nouveau
+    end
+end
+
 function Importer.Charger()
     ns.guides = ns.guides or {}
+    Renommer(Stock())
     for id, g in pairs(Stock()) do
         if type(g) == "table" and type(g.steps) == "table" then
             Importer.Reparer(g)
@@ -775,7 +802,11 @@ function Importer.Importer()
     -- choisir la route si le personnage n'en suit aucune, ou s'il suivait déjà celle-ci
     if ns.Engine then
         local active = ns.Engine.GetActiveGuide()
-        if not active or ns.db.activeGuide == g.id then
+        local _, classe = UnitClass("player")
+        -- route de départ de sa propre classe : elle remplace celle d'une autre classe que le personnage suivait
+        local remplaceAutreClasse = active and g.type == "depart" and active.type == "depart" and classe
+            and g.classeEnregistree == classe and active.classeEnregistree ~= classe and active.zone == g.zone
+        if not active or ns.db.activeGuide == g.id or remplaceAutreClasse then
             for _, candidat in ipairs(ns.Engine.GetGuidesForPlayer()) do
                 if candidat.id == g.id then ns.Engine.LoadGuide(g.id) break end
             end

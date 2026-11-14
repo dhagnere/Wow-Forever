@@ -384,6 +384,32 @@ return avant .. "\\n" .. consigne .. "\\n" .. Decrire() .. "\\n" .. EternalRoute
     expect(r[4]).toBe("4:Maximillion");
   });
 
+  it("garde une route de départ par classe, renomme l'ancienne et préfère celle de la classe jouée", () => {
+    const r = executer(SIMULE, ESPACE, ...MOTEUR, `
+local ns = EternalRoutes
+local function Route(classe)
+  return { source = "RouteProbe", type = "depart", classeEnregistree = classe, faction = "Horde", races = { "Orc" }, zone = "Vallée des Épreuves",
+    minLevel = 1, maxLevel = 15, priority = 10, steps = { { map = 1411, x = 1, y = 1, quests = { { kind = "prendre", id = 4641, name = "Votre place" } } } } }
+end
+local ancienne = Route("WARLOCK"); ancienne.id = "rp-depart-vallee-des-epreuves"
+EternalRoutesRoutesDB = { routes = { ["rp-depart-vallee-des-epreuves"] = ancienne } }
+ns.db.activeGuide = "rp-depart-vallee-des-epreuves"
+ns.Importer.Charger()
+local out = {}
+for id in pairs(EternalRoutesRoutesDB.routes) do out[#out + 1] = id end
+out[#out + 1] = ns.Engine.GetActiveGuide() and ns.db.activeGuide or "aucune"
+-- le guerrier enregistre sa propre route : elle passe devant celle du démoniste
+local guerrier = Route("WARRIOR"); guerrier.id = "rp-depart-vallee-des-epreuves-warrior"
+EternalRoutesRoutesDB.routes[guerrier.id] = guerrier
+ns.guides[guerrier.id] = guerrier
+BANC.joueur.classe, BANC.joueur.classeFichier, BANC.joueur.niveau = "Guerrier", "WARRIOR", 1
+out[#out + 1] = ns.Engine.GetGuidesForPlayer()[1].id
+BANC.joueur.classe, BANC.joueur.classeFichier = "Mage", "MAGE"
+out[#out + 1] = tostring(#ns.Engine.GetGuidesForPlayer())
+return table.concat(out, " ")`);
+    expect(r).toBe("rp-depart-vallee-des-epreuves-warlock rp-depart-vallee-des-epreuves-warlock rp-depart-vallee-des-epreuves-warrior 2");
+  });
+
   it("rappelle d'ouvrir le grimoire resté dans les sacs, et pas les autres objets", () => {
     const r = executer(SIMULE, ...SONDE, DEMONISTE, ESPACE, ...MOTEUR,
       'return table.concat(EternalRoutes.Engine.ActionsSacs(), "\\n")');

@@ -50,6 +50,22 @@ et faites un clic droit sur « Grimoire d'Éclair de feu (Rang 2) » : votre dé
 Les sources (« sur : … ») ne sont plus collées au texte de l'objectif : elles sont dans la consigne. Textes dans `Locale.lua`
 (`HINT_…`, français et anglais), règles dans `Engine.ActionsEtape` et `Engine.ActionsSacs` (`GuideEngine.lua`).
 
+## Une route de départ par classe (EternalRoutes 0.13.4)
+
+Chaque classe a ses quêtes et ses entraîneurs dès la zone de départ : une route de départ se garde désormais par zone
+**et par classe** (`rp-depart-<zone>-<classe>`). Enregistrer la zone de départ avec un guerrier n'écrase plus la
+route du démoniste : les deux coexistent.
+
+- Le personnage suit la route de départ de sa classe quand elle existe ; sinon celle d'une autre classe de sa race,
+  complétée comme avant (quêtes de classe, entraîneur de sa classe).
+- Importer la route de sa classe la fait suivre aussitôt, même si le personnage suivait celle d'une autre classe.
+- Les routes de départ importées avant la 0.13.4 prennent le nom de la classe qui les a enregistrées au chargement de
+  l'addon ; un personnage qui en suivait une la retrouve sans rien faire.
+- Les routes de faction (après la zone de départ) restent communes à toutes les classes.
+
+Pour couvrir une race, il faut donc enregistrer sa zone de départ une fois avec chaque classe, puis `/ep export depart`
+pour le site si besoin.
+
 ## Position exacte des PNJ dans la base intégrée (EternalRoutes 0.13.3)
 
 `QuestDB.lua` plaçait chaque donneur et receveur au centre de son village, comme le guide du site qui regroupe les PNJ

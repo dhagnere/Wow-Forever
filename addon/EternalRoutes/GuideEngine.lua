@@ -178,6 +178,12 @@ function Engine.GuideConvient(g, avecNiveau)
     return okFaction and okClass and okRace and okLevel
 end
 
+--- Route enregistrée avec la classe du personnage (sa route de départ, plutôt que celle d'une autre classe).
+function Engine.DeSaClasse(g)
+    local _, classe = UnitClass("player")
+    return g ~= nil and classe ~= nil and g.source == "RouteProbe" and g.classeEnregistree == classe
+end
+
 function Engine.GetGuidesForPlayer()
     local list = {}
     for _, g in pairs(ns.guides) do
@@ -186,6 +192,8 @@ function Engine.GetGuidesForPlayer()
     table.sort(list, function(a, b)
         local pa, pb = a.priority or 0, b.priority or 0
         if pa ~= pb then return pa > pb end
+        local ca, cb = Engine.DeSaClasse(a), Engine.DeSaClasse(b)
+        if ca ~= cb then return ca end
         if (a.minLevel or 0) ~= (b.minLevel or 0) then
             return (a.minLevel or 0) < (b.minLevel or 0)
         end
@@ -501,6 +509,12 @@ end
 
 function Engine.GetActiveGuide()
     local id = ns.db.activeGuide
+    -- route renommée (route de départ devenue propre à sa classe) : le personnage suit la nouvelle
+    local renommees = type(EternalRoutesRoutesDB) == "table" and EternalRoutesRoutesDB.renommees
+    if id and not ns.guides[id] and renommees and renommees[id] and ns.guides[renommees[id]] then
+        id = renommees[id]
+        ns.db.activeGuide = id
+    end
     return Engine.GuidePourClasse((id and ns.guides[id]) or nil)
 end
 
@@ -1381,7 +1395,13 @@ function Engine.ChooseBestGuide()
     local meilleur
     for _, g in ipairs(list) do
         if carte and Engine.CartesDe(g)[carte] then
-            if not meilleur or (g.minLevel or 1) > (meilleur.minLevel or 1) then meilleur = g end
+            local mieux = not meilleur
+            if meilleur and Engine.DeSaClasse(g) ~= Engine.DeSaClasse(meilleur) and (g.minLevel or 1) == (meilleur.minLevel or 1) then
+                mieux = Engine.DeSaClasse(g)
+            elseif meilleur then
+                mieux = (g.minLevel or 1) > (meilleur.minLevel or 1)
+            end
+            if mieux then meilleur = g end
         end
     end
     if meilleur then return meilleur end
