@@ -6,8 +6,8 @@ import { VideosChaine } from "@/components/VideosChaine";
 import { languesDe } from "@/lib/anglais";
 import { SITE } from "@/lib/site";
 
-// La liste suit la chaîne : relue au plus une fois par heure.
-export const revalidate = 3600;
+// La liste suit la chaîne : relue au plus toutes les 10 minutes (« Rafraîchir » dans /admin/videos pour tout de suite).
+export const revalidate = 600;
 
 export const metadata: Metadata = {
   title: "Les vidéos de Jobwow — le Journal en images",

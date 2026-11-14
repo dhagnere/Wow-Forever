@@ -43,17 +43,47 @@ export async function videosDepuisFlux(xml: string): Promise<VideoChaine[]> {
   });
 }
 
-/** Dernières vidéos de la chaîne ; liste vide si la chaîne n'est pas réglée ou si YouTube ne répond pas. */
+/** Étiquette du cache des vidéos de la chaîne : « Rafraîchir » dans /admin/videos la vide. */
+export const TAG_VIDEOS_CHAINE = "videos-chaine";
+
+/** Flux de la chaîne, puis, s'il ne répond pas ou reste vide, celui de sa liste « Mises en ligne » (UU…), parfois plus à jour. */
+const fluxDe = (chaineId: string) => [
+  `https://www.youtube.com/feeds/videos.xml?channel_id=${chaineId}`,
+  `https://www.youtube.com/feeds/videos.xml?playlist_id=UU${chaineId.slice(2)}`,
+];
+
+/**
+ * Dernières vidéos publiques de la chaîne ; liste vide si la chaîne n'est pas réglée ou si YouTube ne répond pas.
+ * Gardées 10 minutes en cache (YouTube met lui-même de quelques minutes à une heure à ajouter une vidéo à son flux).
+ */
 export async function videosChaine(chaineId: string): Promise<VideoChaine[]> {
   if (!idChaineValide(chaineId)) return [];
-  try {
-    const r = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${chaineId}`, {
-      signal: AbortSignal.timeout(8000),
-      next: { revalidate: 3600 },
-    } as RequestInit);
-    if (!r.ok) return [];
-    return await videosDepuisFlux(await r.text());
-  } catch {
-    return [];
+  for (const url of fluxDe(chaineId)) {
+    try {
+      const r = await fetch(url, { signal: AbortSignal.timeout(8000), next: { revalidate: 600, tags: [TAG_VIDEOS_CHAINE] } } as RequestInit);
+      if (!r.ok) continue;
+      const videos = await videosDepuisFlux(await r.text());
+      if (videos.length) return videos;
+    } catch {
+      // flux suivant
+    }
   }
+  return [];
+}
+
+export interface EtatFlux { url: string; statut: number | null; videos: number; titres: string[]; erreur: string | null }
+
+/** Diagnostic, sans cache, des deux flux de la chaîne (page /admin/videos) : réponse de YouTube et vidéos lues. */
+export async function etatFluxChaine(chaineId: string): Promise<EtatFlux[]> {
+  if (!idChaineValide(chaineId)) return [{ url: "", statut: null, videos: 0, titres: [], erreur: `Identifiant de chaîne invalide : « ${chaineId} ».` }];
+  return Promise.all(fluxDe(chaineId).map(async (url): Promise<EtatFlux> => {
+    try {
+      const r = await fetch(url, { signal: AbortSignal.timeout(8000), cache: "no-store" });
+      if (!r.ok) return { url, statut: r.status, videos: 0, titres: [], erreur: `YouTube répond ${r.status}.` };
+      const v = await videosDepuisFlux(await r.text());
+      return { url, statut: r.status, videos: v.length, titres: v.slice(0, 5).map((x) => x.titre), erreur: null };
+    } catch (e) {
+      return { url, statut: null, videos: 0, titres: [], erreur: e instanceof Error ? e.message : "YouTube ne répond pas." };
+    }
+  }));
 }
