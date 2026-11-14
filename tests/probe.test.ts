@@ -167,18 +167,24 @@ describe("de bout en bout : le code produit par EternalProbe se lit sur le site"
        BANC.journal[788] = { titre = "Nettoyer la vallée", niveau = 2, objectifs = {} }
        BANC.Evenement("QUEST_ACCEPTED", 788)
        local depart = EternalProbe.CodeExport(true)
-       local commune = EternalProbe.CodeExport()
-       return depart .. "\\n" .. commune`,
+       local commune = EternalProbe.CodeExport("commune")
+       local tout = EternalProbe.CodeExport()
+       return depart .. "\\n" .. commune .. "\\n" .. tout`,
     ];
     for (const m of morceaux) {
       if (lauxlib.luaL_dostring(L, to_luastring(m)) !== lua.LUA_OK) throw new Error(lua.lua_tojsstring(L, -1));
     }
-    const [depart, commune] = (lua.lua_tojsstring(L, -1) as string).split("\n");
+    const [depart, commune, tout] = (lua.lua_tojsstring(L, -1) as string).split("\n");
     const gd = guideDepuisExport(lireExport(depart));
     const gc = guideDepuisExport(lireExport(commune));
     expect(gd.partie).toBe("depart");
     expect(gd.zones[0].etapes).toEqual(["prendre:4641", "rendre:4641"]);
     expect(gc.partie).toBe("commune");
     expect(gc.zones[0].etapes).toEqual(["prendre:788"]);
+    // /ep export : zone de départ et suite réunies, portée de la race proposée
+    const gt = guideDepuisExport(lireExport(tout));
+    expect(gt.partie).toBe("complet");
+    expect(gt.zones.flatMap((z) => z.etapes)).toEqual(["prendre:4641", "rendre:4641", "prendre:788"]);
+    expect(porteeConseillee(gt)).toBe("race");
   });
 });

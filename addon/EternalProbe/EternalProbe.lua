@@ -902,7 +902,7 @@ function P.Suite()
     DB().departGarde = garde
     DB().partie = "commune"
     P.Start()
-    Print("Zone de départ gardée : /ep export depart donne son code pour le site, à tout moment.")
+    Print("Zone de départ gardée : /ep export la reprend avec la suite (ou seule : /ep export depart).")
 end
 
 function P.Stop()
@@ -1048,7 +1048,7 @@ local function Commande(msg)
     end
 
     if P.CommandeEnPlus and P.CommandeEnPlus(lower, raw) then return end
-    Print("Commandes : /ep start | stop | dump | context | clear | suite | archives | mark <texte> | trajet <nom> | trajet fin | export | export depart | photos on|off")
+    Print("Commandes : /ep start | stop | dump | context | clear | suite | archives | mark <texte> | trajet <nom> | trajet fin | export | export depart | export commune | photos on|off")
 end
 
 -- Bouton minimap (déplaçable) : démarrer / arrêter l'enregistrement

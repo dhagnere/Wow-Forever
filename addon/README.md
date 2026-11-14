@@ -3,7 +3,7 @@
 | Dossier | Rôle | État |
 |---|---|---|
 | `EternalRoutes/` | Guide pas à pas en jeu (fenêtre, flèche, auto-avance) | 0.12.1 : lit EternalProbe, puis RouteProbe ; consigne sous chaque étape (entraîneur, grimoire, objets à ramasser) ; niveaux lus au bon format |
-| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.10.1 : captures de la 0.8, trajets (`/ep trajet`), code à coller sur le site (`/ep export`, `/ep export depart`), titre des entraîneurs, grimoires achetés, nouveau niveau noté à la montée (`level|5|nouveau`) |
+| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.10.1 : captures de la 0.8, trajets (`/ep trajet`), code à coller sur le site (`/ep export`, `/ep export depart` (zone de départ seule ; depuis la 0.11.1, `/ep export` donne la zone de départ gardée et la suite réunies, `/ep export commune` la suite seule)), titre des entraîneurs, grimoires achetés, nouveau niveau noté à la montée (`level|5|nouveau`) |
 | `RouteProbe/` | Ancienne sonde d'enregistrement, gardée pour référence | 0.6.0, version jouée au 13/11 |
 
 Branche de travail : `dev-addon`. Chaque changement est relu puis fusionné dans `dev`.

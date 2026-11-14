@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { lireExport } from "@/lib/probe";
 // @ts-expect-error fengari n'a pas de types
 import { lauxlib, lua, lualib, to_luastring } from "fengari";
 
@@ -109,6 +110,33 @@ describe("EternalProbe dans un WoW simulé", () => {
     expect([d1, d2]).toEqual([c1, c2]); // « aucune » : ni chat ni bandeau
     expect(Number(fin)).toBeGreaterThan(Number(d1)); // « chat » : retour au chat
     expect(mode).toBe("chat");
+  });
+
+  it("/ep export reprend la zone de départ gardée par /ep suite avec la partie en cours", () => {
+    const EXPORT = lire("EternalProbe/Export.lua");
+    const prep = `
+      BANC.Evenement("PLAYER_LOGIN")
+      local db = EternalProbe.DB()
+      db.departGarde = { personnage = db.personnage, partie = "depart", carteDepart = 1411, context = db.context,
+        quests = { ["840"] = { name = "Ordres du kommandant" } },
+        events = { "10.0|accept|840|Ordres du kommandant", "20.0|turnin|840|Ordres du kommandant" } }
+      db.partie = "commune"
+      db.quests = { ["5441"] = { name = "Paresseux" } }
+      db.events = { "30.0|accept|5441|Paresseux" }
+    `;
+    const codes = executer(SIMULE, ...SONDE, EXPORT, prep + `
+      local tout = EternalProbe.CodeExport()
+      local depart = EternalProbe.CodeExport("depart")
+      local commune = EternalProbe.CodeExport("commune")
+      return tout .. "#" .. depart .. "#" .. commune`).split("#");
+    const [tout, depart, commune] = codes.map((c) => lireExport(c));
+    expect(tout.partie).toBe("complet");
+    expect([...tout.quetes.keys()].map(String).sort()).toEqual(["5441", "840"]);
+    expect(tout.evenements.map((e) => e.type)).toEqual(["accept", "turnin", "accept"]);
+    expect(depart.partie).toBe("depart");
+    expect([...depart.quetes.keys()].map(String)).toEqual(["840"]);
+    expect(commune.partie).toBe("commune");
+    expect([...commune.quetes.keys()].map(String)).toEqual(["5441"]);
   });
 
   it("ne touche à rien de réservé à l'interface de Blizzard (sinon le jeu bloque l'addon au chargement)", () => {
