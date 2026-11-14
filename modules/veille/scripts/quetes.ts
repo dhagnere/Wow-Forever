@@ -18,6 +18,7 @@ import { CLASSES_QUETES_FOREVER } from "@/content/classes-quetes-forever";
  * les quêtes encore présentes dans les fichiers de Forever (table QuestV2) sont gardées. Aucun texte de quête n'est
  * repris : les objectifs sont rédigés à partir des données (objets à rapporter, créatures à vaincre).
  * Résultat : content/quetes-jeu.json, lu par les pages /guides/quetes-de-classe/ et /guides/parcours/.
+ * Aussi : content/entraineurs-jeu.json (entraîneurs de classe placés sur les cartes), lu par npm run addon:base.
  * Avec --en : version anglaise (titres et noms d'origine de CMaNGOS, objets et sorts en anglais, objectifs rédigés en
  * anglais), écrite dans content/quetes-jeu.en.json et content/guide-jeu.en.json.
  * Avec --questie <dossier> : les quêtes ajoutées par Forever, inconnues de CMaNGOS, sont prises dans les relevés en jeu des
@@ -122,7 +123,12 @@ lancer("base:quetes", async () => {
   }
 
   const creatures = new Map<number, { nom: string; faction: number; loot: number }>();
-  for (const l of lignes(sql, "creature_template")) creatures.set(n(l.Entry), { nom: nomsCreatures.get(n(l.Entry)) ?? String(l.Name ?? ""), faction: n(l.Faction), loot: n(l.LootId) });
+  /** Entraîneurs de classe (drapeau « entraîneur », type 0) : identifiant → classe du jeu (1 guerrier… 11 druide). */
+  const entraineursClasse = new Map<number, number>();
+  for (const l of lignes(sql, "creature_template")) {
+    creatures.set(n(l.Entry), { nom: nomsCreatures.get(n(l.Entry)) ?? String(l.Name ?? ""), faction: n(l.Faction), loot: n(l.LootId) });
+    if (n(l.TrainerType) === 0 && n(l.TrainerClass) > 0 && n(l.NpcFlags) & 16) entraineursClasse.set(n(l.Entry), n(l.TrainerClass));
+  }
   const decor = new Map<number, string>();
   const lootDecor = new Map<number, number[]>();
   for (const l of lignes(sql, "gameobject_template")) {
@@ -377,6 +383,7 @@ lancer("base:quetes", async () => {
       if (r.t === "pnj") preferences.set(r.id, (preferences.get(r.id) ?? new Set()).add(z));
     }
   }
+  for (const id of entraineursClasse.keys()) pnjCites.add(id);
   const posPnj = await positions("creature", "creature_spawn_entry", pnjCites, preferences);
   const posDecor = await positions("gameobject", "gameobject_spawn_entry", decorCites);
   // PNJ et objets apparus avec Forever : positions relevées en jeu (déjà en % de la carte de la zone, cadre de Forever).
@@ -459,6 +466,19 @@ lancer("base:quetes", async () => {
   const source = `CMaNGOS classic-db (GPL v3), titres et noms français AzerothCore (GPL v2)${releve ? ", quêtes de Forever relevées en jeu par les joueurs de Questie (QuestieDB, GPL v3)" : ""}`;
   const donnees = { version: { jeu: version, source }, classes, quetes: fiches, parcours };
   await writeFile(path.join(process.cwd(), `content/quetes-jeu${suffixe}.json`), JSON.stringify(donnees));
+
+  // --- Entraîneurs de classe et leur position, pour l'addon (étapes « voir l'entraîneur » d'une autre classe que celle
+  // qui a enregistré la route) : content/entraineurs-jeu.json, lu par npm run addon:base.
+  const entraineurs = [...entraineursClasse.entries()]
+    .map(([id, cl]) => {
+      const f = (ouvertPnj(id, "alliance") ? "A" : "") + (ouvertPnj(id, "horde") ? "H" : "");
+      const l = Object.entries(posPnj.get(id)?.z ?? {}).flatMap(([lieu, pts]) => pts.map(([x, y]) => [lieu, x, y] as [string, number, number]));
+      return { id, n: creatures.get(id)?.nom ?? "", cl, f, l };
+    })
+    .filter((e) => e.f && e.l.length && e.n)
+    .sort((a, b) => a.cl - b.cl || a.id - b.id);
+  await writeFile(path.join(process.cwd(), `content/entraineurs-jeu${suffixe}.json`), JSON.stringify({ version: donnees.version, entraineurs }));
+  console.log(`${entraineurs.length} entraîneurs de classe placés.`);
 
   // --- Guide de 1 à 60 : pour chaque zone de la route, les quêtes dans l'ordre et les points de rassemblement.
   type Hub = { x: number; y: number; n: string[] };

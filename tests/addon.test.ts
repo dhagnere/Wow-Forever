@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CLASSE_JEU, PREMIER_ID_SAISI, baseQuetesAddon, nomsAnglaisAddon, chaineLua, fichierBaseQuetes, fichierCartes, fichierGuide, guidesAddon, tocAvecBase, tocAvecGuides, valeurLua } from "@/lib/addon";
+import { CLASSE_JEU, PREMIER_ID_SAISI, baseQuetesAddon, entraineursAddon, nomsAnglaisAddon, chaineLua, fichierBaseQuetes, fichierCartes, fichierGuide, guidesAddon, tocAvecBase, tocAvecGuides, valeurLua } from "@/lib/addon";
 import { combinaisons } from "@/lib/guide";
 
 const guides = guidesAddon();
@@ -114,6 +114,12 @@ describe("base de quêtes intégrée (QuestDB.lua)", () => {
     const lua = fichierBaseQuetes();
     expect(lua).toContain("ns.questDB = ns.questDB or {}");
     expect(lua).toContain("ns.questClassMask[3087] = 4");
+    // entraîneurs de classe : section présente, vide tant que base:quetes n'a pas produit content/entraineurs-jeu.json
+    expect(lua).toContain("ns.classTrainers = ns.classTrainers or {}");
+    for (const [cl, liste] of entraineursAddon()) {
+      expect([1, 2, 3, 4, 5, 7, 8, 9, 11]).toContain(cl);
+      for (const e of liste) expect(e[5]).toMatch(/^(A|H|AH)$/);
+    }
     const toc = tocAvecBase("Core.lua\nQuestNames.lua\nQuestRestrictions.lua\nGuideEngine.lua");
     expect(toc).toBe("Core.lua\nQuestNames.lua\nQuestDB.lua\nGuideEngine.lua");
     expect(tocAvecBase(toc)).toBe(toc);

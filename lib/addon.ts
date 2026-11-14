@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { CLASSES } from "@/content/classes";
 import { CARTES_EN } from "@/content/lieux-en";
@@ -316,6 +316,31 @@ export function nomsAnglaisAddon(): { zones: Map<number, string>; sorts: Map<num
   return { zones, sorts };
 }
 
+/** Entraîneur de classe pour l'addon : nom, nom anglais, carte du jeu (UiMap), x, y (en %), faction (« A », « H », « AH »). */
+export type EntraineurAddon = [string, string, number, number, number, string];
+
+/**
+ * Entraîneurs de classe placés (content/entraineurs-jeu.json, npm run base:quetes), par classe du jeu (1 guerrier… 11 druide).
+ * Vide tant que le fichier n'a pas été produit.
+ */
+export function entraineursAddon(): Map<number, EntraineurAddon[]> {
+  type Fichier = { entraineurs: { id: number; n: string; cl: number; f: string; l: [string, number, number][] }[] };
+  const lire = (f: string): Fichier => (existsSync(path.join(process.cwd(), f)) ? lireJson<Fichier>(f) : { entraineurs: [] });
+  const fr = lire("content/entraineurs-jeu.json");
+  const en = new Map(lire("content/entraineurs-jeu.en.json").entraineurs.map((e) => [e.id, e.n]));
+  const parClasse = new Map<number, EntraineurAddon[]>();
+  for (const e of fr.entraineurs) {
+    for (const [lieu, x, y] of e.l) {
+      const id = carte(lieu)?.id;
+      if (!id) continue;
+      const liste = parClasse.get(e.cl) ?? [];
+      liste.push([e.n, en.get(e.id) || e.n, id, arrondi(x), arrondi(y), e.f]);
+      parClasse.set(e.cl, liste);
+    }
+  }
+  return parClasse;
+}
+
 export function fichierBaseQuetes(): string {
   const { quetes, classes, races } = baseQuetesAddon();
   const { zones, sorts } = nomsAnglaisAddon();
@@ -342,6 +367,11 @@ export function fichierBaseQuetes(): string {
     ...[...zones.entries()].sort(([a], [b]) => a - b).map(([id, n]) => `ns.zoneNamesEn[${id}] = ${chaineLua(n)}`),
     `ns.spellNamesEn = ns.spellNamesEn or {}`,
     ...[...sorts.entries()].sort(([a], [b]) => a - b).map(([id, [n, r]]) => `ns.spellNamesEn[${id}] = ${valeurLua(r === null ? [n] : [n, r])}`),
+    ``,
+    `-- Entraîneurs de classe (bases libres), par classe du jeu : guerrier 1, paladin 2, chasseur 3, voleur 4, prêtre 5,`,
+    `--   chaman 7, mage 8, démoniste 9, druide 11. Chacun : { nom, nom anglais, carte, x, y, faction amie (A, H, AH) }.`,
+    `ns.classTrainers = ns.classTrainers or {}`,
+    ...[...entraineursAddon().entries()].sort(([a], [b]) => a - b).map(([cl, l]) => `ns.classTrainers[${cl}] = ${valeurLua(l)}`),
     ``,
     `-- Contenus propres à Forever (content/traductions-forever-en.ts) : nom affiché par le client français → nom anglais.`,
     `ns.traductionsEn = ns.traductionsEn or {}`,

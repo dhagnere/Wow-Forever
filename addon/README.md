@@ -50,6 +50,22 @@ et faites un clic droit sur « Grimoire d'Éclair de feu (Rang 2) » : votre dé
 Les sources (« sur : … ») ne sont plus collées au texte de l'objectif : elles sont dans la consigne. Textes dans `Locale.lua`
 (`HINT_…`, français et anglais), règles dans `Engine.ActionsEtape` et `Engine.ActionsSacs` (`GuideEngine.lua`).
 
+## Entraîneur de la classe jouée (EternalRoutes 0.13.2)
+
+Sur une route enregistrée avec une autre classe, les étapes « Voir l'entraîneur » menaient jusqu'ici à l'entraîneur de
+la classe qui l'avait enregistrée, ou disparaissaient. Chacune mène maintenant à l'entraîneur de la classe jouée le plus
+proche, sur la même carte, au même moment de la route : nom, position et flèche sont les siens.
+
+- Positions : base intégrée (`ns.classTrainers` dans `QuestDB.lua`, entraîneurs des bases libres placés par
+  `npm run base:quetes`, puis `npm run addon:wow`), complétée par les entraîneurs vus en jeu.
+- Entraîneur vu en jeu : chaque fois qu'un personnage ouvre la fenêtre de l'entraîneur de sa classe, l'addon retient
+  son nom et sa position pour tout le compte (`EternalRoutesRoutesDB.entraineursClasse`). C'est ce qui place les
+  entraîneurs propres à Forever, absents des bases libres.
+- Sans entraîneur connu sur la carte, l'étape reste sans flèche et invite à ouvrir une fois la fenêtre de l'entraîneur ;
+  la position est alors retenue et l'étape se met à jour.
+- Les visites d'entraîneur de métier, d'entraîneur de démons et les achats de grimoire restent réservés à la classe qui
+  a enregistré la route.
+
 ## Quêtes de classe sur une route d'une autre classe (EternalRoutes 0.13.1)
 
 Une route enregistrée avec un personnage sert à toutes les classes de sa race. Jusqu'ici, un guerrier qui suivait

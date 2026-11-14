@@ -363,6 +363,125 @@ function Engine.AvecQuetesDeClasse(g)
     return out, #ordre
 end
 
+-- ---------------------------------------------------------------------------
+-- Entraîneurs de la classe jouée
+-- ---------------------------------------------------------------------------
+-- Les visites d'entraîneur d'une route mènent à l'entraîneur de la classe qui l'a enregistrée. Pour une autre classe,
+-- l'étape est refaite vers l'entraîneur de la classe jouée le plus proche, sur la même carte : base intégrée
+-- (ns.classTrainers, QuestDB.lua), complétée par les entraîneurs vus en jeu (EternalRoutesRoutesDB, tout le compte).
+
+local ID_CLASSE = { WARRIOR = 1, PALADIN = 2, HUNTER = 3, ROGUE = 4, PRIEST = 5, SHAMAN = 7, MAGE = 8, WARLOCK = 9, DRUID = 11 }
+Engine.versionEntraineurs = 0
+
+local function EntraineursVus()
+    if type(EternalRoutesRoutesDB) ~= "table" then EternalRoutesRoutesDB = {} end
+    EternalRoutesRoutesDB.entraineursClasse = EternalRoutesRoutesDB.entraineursClasse or {}
+    return EternalRoutesRoutesDB.entraineursClasse
+end
+
+--- Entraîneurs de la classe du personnage, amis de sa faction : { nom, nomEn, map, x, y }.
+function Engine.EntraineursDeClasse()
+    local _, classe, idClasse = UnitClass("player")
+    idClasse = (type(idClasse) == "number" and idClasse) or ID_CLASSE[classe or ""]
+    local faction = PlayerFaction()
+    local lettre = faction == "Alliance" and "A" or faction == "Horde" and "H" or nil
+    local out = {}
+    for _, e in ipairs((ns.classTrainers and idClasse and ns.classTrainers[idClasse]) or {}) do
+        if not lettre or tostring(e[6] or "AH"):find(lettre, 1, true) then
+            out[#out + 1] = { nom = e[1], nomEn = e[2], map = e[3], x = e[4], y = e[5] }
+        end
+    end
+    for _, e in ipairs((classe and EntraineursVus()[classe]) or {}) do
+        if not e.faction or not faction or e.faction == faction then
+            out[#out + 1] = { nom = e.nom, nomEn = e.nom, map = e.map, x = e.x, y = e.y, vu = true }
+        end
+    end
+    return out
+end
+
+--- Entraîneur de la liste le plus proche d'un point, sur la même carte ; nil si la carte n'en a aucun.
+function Engine.EntraineurProche(map, x, y, liste)
+    local best, dmin
+    for _, e in ipairs(liste or Engine.EntraineursDeClasse()) do
+        if map and e.map == map then
+            local d = (x and y) and ((e.x - x) ^ 2 + (e.y - y) ^ 2) or 0
+            if not dmin or d < dmin then best, dmin = e, d end
+        end
+    end
+    return best
+end
+
+--- Titre d'un PNJ, lu sur la 2e ligne de sa bulle (« <Entraîneur des mages> »), ou "".
+local bulle
+local function SousTitre(unite)
+    local ok, texte = pcall(function()
+        if not (UnitExists and UnitExists(unite)) then return "" end
+        bulle = bulle or CreateFrame("GameTooltip", "EternalRoutesBulle", nil, "GameTooltipTemplate")
+        bulle:SetOwner(WorldFrame or UIParent, "ANCHOR_NONE")
+        bulle:SetUnit(unite)
+        local ligne = _G["EternalRoutesBulleTextLeft2"]
+        local t = ligne and ligne:GetText() or ""
+        bulle:Hide()
+        return t
+    end)
+    return ok and tostring(texte or "") or ""
+end
+
+--- Fenêtre d'entraîneur ouverte : un entraîneur de la classe du personnage (titre qui porte le nom de la classe)
+--- est retenu avec sa position, pour tout le compte. Renvoie true s'il a été noté.
+function Engine.NoterEntraineur(npc, titre)
+    local _, classe = UnitClass("player")
+    if not (classe and npc and npc ~= "") then return false end
+    titre = tostring(titre or SousTitre("npc")):lower()
+    local reconnu = false
+    for _, t in ipairs({ LOCALIZED_CLASS_NAMES_MALE or {}, LOCALIZED_CLASS_NAMES_FEMALE or {} }) do
+        local nom = t[classe]
+        if nom and nom ~= "" and titre:find(nom:lower(), 1, true) then reconnu = true end
+    end
+    if not reconnu then return false end
+    local map = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
+    local pos = map and C_Map.GetPlayerMapPosition and C_Map.GetPlayerMapPosition(map, "player")
+    if not pos then return false end
+    local x, y = pos:GetXY()
+    if not (x and y) or (x == 0 and y == 0) then return false end
+    local vus = EntraineursVus()
+    vus[classe] = vus[classe] or {}
+    local fiche = { nom = npc, map = map, x = math.floor(x * 1000 + 0.5) / 10, y = math.floor(y * 1000 + 0.5) / 10, faction = PlayerFaction() }
+    for i, e in ipairs(vus[classe]) do
+        if e.nom == npc and e.map == map then vus[classe][i] = fiche; Engine.versionEntraineurs = Engine.versionEntraineurs + 1 return true end
+    end
+    vus[classe][#vus[classe] + 1] = fiche
+    Engine.versionEntraineurs = Engine.versionEntraineurs + 1
+    return true
+end
+
+--- Visite d'entraîneur de la classe enregistrée → visite de l'entraîneur de la classe jouée, au même moment de la route.
+--- Les visites de métier, de familier et les achats de grimoire restent réservées à la classe enregistrée.
+function Engine.AvecEntraineursDeClasse(g)
+    local steps = (g and g.steps) or {}
+    local _, classe = UnitClass("player")
+    if not classe then return steps, 0 end
+    local anglais = GetLocale and GetLocale() ~= "frFR"
+    local liste = Engine.EntraineursDeClasse()
+    local out, nb = {}, 0
+    for _, st in ipairs(steps) do
+        local q = st.quests and st.quests[1]
+        if q and q.kind == "entrainer" and not q.metier and not q.familier and not q.achat
+            and st.class and st.class == g.classeEnregistree then
+            local e = Engine.EntraineurProche(st.map, st.x, st.y, liste)
+            local nom = e and ((anglais and e.nomEn) or e.nom) or nil
+            out[#out + 1] = { zone = st.zone, zoneIndex = st.zoneIndex, map = st.map, x = e and e.x or nil, y = e and e.y or nil,
+                location = nom, class = classe, niveau = st.niveau, ajoutClasse = true,
+                quests = { { kind = "entrainer", name = nom or ns.L.TRAINER_UNKNOWN, spells = {}, sansPosition = not e or nil,
+                    cle = ("%s-%s"):format(classe, tostring(q.cle or q.name)) } } }
+            nb = nb + 1
+        else
+            out[#out + 1] = st
+        end
+    end
+    return out, nb
+end
+
 local derives = setmetatable({}, { __mode = "k" })
 
 --- Guide à suivre pour ce personnage : la route telle quelle, ou une copie avec ses quêtes de classe
@@ -372,10 +491,11 @@ function Engine.GuidePourClasse(g)
     local _, classe = UnitClass("player")
     if not classe or classe == g.classeEnregistree then return g end
     local c = derives[g]
-    if c and c.classe == classe and c.nb == #(g.steps or {}) then return c.guide end
-    local steps, ajoutees = Engine.AvecQuetesDeClasse(g)
-    local guide = setmetatable({ steps = steps, quetesDeClasse = ajoutees }, { __index = g })
-    derives[g] = { classe = classe, nb = #(g.steps or {}), guide = guide }
+    if c and c.classe == classe and c.nb == #(g.steps or {}) and c.v == Engine.versionEntraineurs then return c.guide end
+    local avecEntraineurs, entraineurs = Engine.AvecEntraineursDeClasse(g)
+    local steps, ajoutees = Engine.AvecQuetesDeClasse(setmetatable({ steps = avecEntraineurs }, { __index = g }))
+    local guide = setmetatable({ steps = steps, quetesDeClasse = ajoutees, entraineursDeClasse = entraineurs }, { __index = g })
+    derives[g] = { classe = classe, nb = #(g.steps or {}), v = Engine.versionEntraineurs, guide = guide }
     return guide
 end
 
@@ -556,6 +676,7 @@ function Engine.ActionsEtape(q, objectifs)
             Ajouter(L.HINT_PROF_TRAIN)
         else
             Ajouter(L.HINT_CLASS_TRAIN)
+            if q.sansPosition then Ajouter(L.HINT_TRAINER_FIND) end
         end
         return out
     end
@@ -1178,6 +1299,7 @@ engineFrame:SetScript("OnEvent", function(self, event, ...)
     elseif event == "TRAINER_SHOW" then
         Engine.interacting = true
         entraineurOuvert = { npc = UnitName("npc") or UnitName("target"), metier = IsTradeskillTrainer and IsTradeskillTrainer() or false }
+        if not entraineurOuvert.metier then pcall(Engine.NoterEntraineur, entraineurOuvert.npc) end
         LogEvent(event)
     elseif event == "TRAINER_CLOSED" then
         Engine.interacting = false

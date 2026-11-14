@@ -340,6 +340,50 @@ return table.concat(out, " ")`);
     expect(r).toBe("prendre:840 prendre:841 prendre:100+ faire:100+ rendre:100+ rendre:841 prendre:101+ rendre:101+ route:3 demoniste:3");
   });
 
+  it("mène les visites d'entraîneur d'une autre classe à l'entraîneur de la classe jouée, et retient celui vu en jeu", () => {
+    const r = executer(SIMULE, ESPACE, ...MOTEUR, `
+BANC.joueur.classe, BANC.joueur.classeFichier, BANC.joueur.faction = "Mage", "MAGE", "Horde"
+local ns = EternalRoutes
+ns.classTrainers = { [8] = {
+  { "Isabella", "Isabella", 1420, 61, 52, "H" }, { "Loin", "Far", 1420, 10, 10, "H" },
+  { "Mage de l'Alliance", "Alliance mage", 1420, 31, 69, "A" }, { "Ailleurs", "Elsewhere", 1458, 30, 70, "H" },
+}, [9] = { { "Maximillion", "Maximillion", 1420, 30, 70, "H" } } }
+local function T(carte, x, y, champs)
+  local q = { kind = "entrainer", name = "Maximillion", spells = { { id = 688 } }, cle = "WARLOCK-maximillion-" .. carte }
+  for k, v in pairs(champs or {}) do q[k] = v end
+  return { map = carte, x = x, y = y, class = "WARLOCK", zoneIndex = 1, quests = { q } }
+end
+local route = { id = "rp-entr", source = "RouteProbe", classeEnregistree = "WARLOCK", niveauDebut = 1, niveauMax = 10, priority = 10,
+  steps = { T(1420, 30, 70), T(1420, 30, 70, { familier = "demon" }), T(1420, 40, 40, { metier = true }), T(1497, 50, 50) } }
+ns.guides["rp-entr"] = route
+ns.db.activeGuide = "rp-entr"
+local E = ns.Engine
+local function Decrire()
+  local out = {}
+  for _, st in ipairs(E.GetActiveGuide().steps) do
+    if E.StepApplies(st) then
+      local q = st.quests[1]
+      out[#out + 1] = ("%s@%s,%s,%s"):format(q.name, tostring(st.map), tostring(st.x), tostring(st.y))
+    end
+  end
+  return table.concat(out, " ")
+end
+local avant = Decrire()
+local consigne = table.concat(E.ActionsEtape(E.GetActiveGuide().steps[4].quests[1], {}), " / ")
+-- le mage ouvre la fenêtre de son entraîneur dans la carte 1497 : sa position est retenue pour tout le compte
+BANC.cible, BANC.titrePnj, BANC.carte, BANC.x, BANC.y = { nom = "Anastasia" }, "Entraîneuse des mages", 1497, 0.512, 0.634
+BANC.Evenement("TRAINER_SHOW")
+BANC.Evenement("TRAINER_CLOSED")
+BANC.cible, BANC.titrePnj = nil, nil
+return avant .. "\\n" .. consigne .. "\\n" .. Decrire() .. "\\n" .. EternalRoutesRoutesDB.entraineursClasse.MAGE[1].nom
+  .. "\\n" .. #route.steps .. ":" .. route.steps[1].quests[1].name`).split("\n");
+    expect(r[0]).toBe("Isabella@1420,61,52 Entraîneur de votre classe@1497,nil,nil");
+    expect(r[1]).toMatch(/ouvrez la fenêtre de votre entraîneur/);
+    expect(r[2]).toBe("Isabella@1420,61,52 Anastasia@1497,51.2,63.4");
+    expect(r[3]).toBe("Anastasia");
+    expect(r[4]).toBe("4:Maximillion");
+  });
+
   it("rappelle d'ouvrir le grimoire resté dans les sacs, et pas les autres objets", () => {
     const r = executer(SIMULE, ...SONDE, DEMONISTE, ESPACE, ...MOTEUR,
       'return table.concat(EternalRoutes.Engine.ActionsSacs(), "\\n")');

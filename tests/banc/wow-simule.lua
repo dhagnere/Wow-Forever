@@ -94,7 +94,12 @@ function UnitName(u)
 end
 function UnitLevel() return J.niveau end
 function UnitRace() return J.race, J.raceFichier, 2 end
-function UnitClass() return J.classe, J.classeFichier, 1 end
+local ID_CLASSES = { WARRIOR = 1, PALADIN = 2, HUNTER = 3, ROGUE = 4, PRIEST = 5, SHAMAN = 7, MAGE = 8, WARLOCK = 9, DRUID = 11 }
+function UnitClass() return J.classe, J.classeFichier, ID_CLASSES[J.classeFichier] or 1 end
+LOCALIZED_CLASS_NAMES_MALE = { WARRIOR = "Guerrier", PALADIN = "Paladin", HUNTER = "Chasseur", ROGUE = "Voleur", PRIEST = "Prêtre",
+    SHAMAN = "Chaman", MAGE = "Mage", WARLOCK = "Démoniste", DRUID = "Druide" }
+LOCALIZED_CLASS_NAMES_FEMALE = { WARRIOR = "Guerrière", PALADIN = "Paladin", HUNTER = "Chasseresse", ROGUE = "Voleuse", PRIEST = "Prêtresse",
+    SHAMAN = "Chamane", MAGE = "Mage", WARLOCK = "Démoniste", DRUID = "Druidesse" }
 function UnitFactionGroup() return J.faction end
 function UnitGUID(u)
     if u == "player" then return "Player-1" end
