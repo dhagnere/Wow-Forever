@@ -8,9 +8,9 @@ const SITES = ["https://www.taverne-eternelle.fr", "https://taverne-eternelle.fr
 
 describe("traduction automatique des Lettres", () => {
   it("renvoie les liens du site vers les pages anglaises, sans toucher aux autres", () => {
-    const md = "[Le Carnet](https://www.taverne-eternelle.fr/carnet/) · [vidéos](/carnet/videos/?x=1#haut) · [YouTube](https://www.youtube.com/@TheWowtoon) · [déjà](https://www.taverne-eternelle.fr/en/notebook/) · [page sans anglais](/admin/lettre/)";
+    const md = "[Le Carnet](https://www.taverne-eternelle.fr/carnet/) · [vidéos](/carnet/videos/?x=1#haut) · [YouTube](https://www.youtube.com/@Jobwow-taverne) · [déjà](https://www.taverne-eternelle.fr/en/notebook/) · [page sans anglais](/admin/lettre/)";
     expect(liensVersAnglais(md, cheminAnglais, SITES)).toBe(
-      "[Le Carnet](https://www.taverne-eternelle.fr/en/notebook/) · [vidéos](/en/notebook/videos/?x=1#haut) · [YouTube](https://www.youtube.com/@TheWowtoon) · [déjà](https://www.taverne-eternelle.fr/en/notebook/) · [page sans anglais](/admin/lettre/)",
+      "[Le Carnet](https://www.taverne-eternelle.fr/en/notebook/) · [vidéos](/en/notebook/videos/?x=1#haut) · [YouTube](https://www.youtube.com/@Jobwow-taverne) · [déjà](https://www.taverne-eternelle.fr/en/notebook/) · [page sans anglais](/admin/lettre/)",
     );
   });
 
