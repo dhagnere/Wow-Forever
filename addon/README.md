@@ -50,6 +50,13 @@ et faites un clic droit sur « Grimoire d'Éclair de feu (Rang 2) » : votre dé
 Les sources (« sur : … ») ne sont plus collées au texte de l'objectif : elles sont dans la consigne. Textes dans `Locale.lua`
 (`HINT_…`, français et anglais), règles dans `Engine.ActionsEtape` et `Engine.ActionsSacs` (`GuideEngine.lua`).
 
+## Position exacte des PNJ dans la base intégrée (EternalRoutes 0.13.3)
+
+`QuestDB.lua` plaçait chaque donneur et receveur au centre de son village, comme le guide du site qui regroupe les PNJ
+voisins en un seul point. Dans un même village, tous les entraîneurs avaient donc la même position : la flèche du
+« Parchemin simple » du guerrier visait la maison de l'entraîneur des démonistes. La base donne maintenant la position
+du PNJ lui-même (fiche de la quête), et le centre du village seulement quand le PNJ n'est pas placé.
+
 ## Entraîneur de la classe jouée (EternalRoutes 0.13.2)
 
 Sur une route enregistrée avec une autre classe, les étapes « Voir l'entraîneur » menaient jusqu'ici à l'entraîneur de

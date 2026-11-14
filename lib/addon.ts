@@ -247,18 +247,33 @@ export function baseQuetesAddon(): { quetes: Map<number, QueteBase>; classes: Ma
     return id ? [nom, nomEn || nom, id, arrondi(x), arrondi(y)] : undefined;
   };
 
+  /**
+   * Position du PNJ lui-même (fiche de la quête), plutôt que celle du village où le guide du site le regroupe avec ses
+   * voisins : dans un même village, chaque entraîneur a sa maison, et la flèche doit mener au bon.
+   */
+  const exact = (refs: FicheQuete["donneurs"] | undefined, nom: string, lieu: string) =>
+    refs?.find((p) => p.l && p.l.lieu === lieu && p.n === nom)?.l ?? (refs?.length === 1 && refs[0].l?.lieu === lieu ? refs[0].l : undefined);
+
   for (const camp of ["alliance", "horde"] as const) {
     for (const z of fr.guide[camp]) {
       for (const e of z.etapes) {
         if (e.id >= PREMIER_ID_SAISI || quetes.has(e.id)) continue;
         const ang = anglais.get(e.id)?.e;
+        const fiche = fichesFr.quetes[String(e.id)];
         const q: QueteBase = { t: e.t, nv: e.nv, min: e.min || e.nv };
         if (ang?.t && ang.t !== e.t) q.te = ang.t;
         if (e.av) q.av = e.av;
-        if (e.g >= 0) q.g = point(e.gn, ang?.gn, z.lieu, z.hubs[e.g].x, z.hubs[e.g].y);
+        if (e.g >= 0) {
+          const l = exact(fiche?.donneurs, e.gn, z.lieu);
+          q.g = point(e.gn, ang?.gn, z.lieu, l?.x ?? z.hubs[e.g].x, l?.y ?? z.hubs[e.g].y);
+        }
         // rendue au donneur quand aucun receveur n'est placé et qu'elle ne se rend pas ailleurs
         const hubRendu = e.r >= 0 ? e.r : !e.rl && e.g >= 0 ? e.g : -1;
-        if (hubRendu >= 0) q.r = point(e.rn, ang?.rn, z.lieu, z.hubs[hubRendu].x, z.hubs[hubRendu].y);
+        if (hubRendu >= 0) {
+          const nom = e.r >= 0 ? e.rn : e.gn;
+          const l = exact(e.r >= 0 ? fiche?.receveurs : fiche?.donneurs, nom, z.lieu);
+          q.r = point(e.rn, ang?.rn, z.lieu, l?.x ?? z.hubs[hubRendu].x, l?.y ?? z.hubs[hubRendu].y);
+        }
         const idCarte = carte(z.lieu)?.id;
         if (e.cib && idCarte) q.c = [idCarte, arrondi(e.cib.c[0]), arrondi(e.cib.c[1])];
         if (e.obj.length) q.obj = e.obj.join(" ; ");
