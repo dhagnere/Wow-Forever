@@ -62,8 +62,10 @@ Chatterbox Multilingual (Resemble AI, licence MIT, français), qui imite `visuel
 de Piper, enregistrements CC0, traitée « mort-vivant léger ») avec exaggeration 0,7 et cfg 0,3 (`scripts/voix_chatterbox.py`).
 Les fichiers vont dans `voix-<vidéo>/` ; la narration reçoit `voix`, `voixTexte`, `dureeVoix`, et la bulle dure le temps de
 la phrase. Le rendu mêle les voix au jeu, baissé à 35 % pendant qu'elles parlent ; une bulle modifiée après coup garde
-l'ancienne voix muette jusqu'au prochain `carnet:voix`. Installation sur le PC : Python, puis PyTorch (CUDA si carte NVIDIA)
-et `pip install chatterbox-tts`. Description YouTube : mentionner la voix de synthèse.
+l'ancienne voix muette jusqu'au prochain `carnet:voix`. Installation sur le PC, une seule fois : Python 3.11 (python.org,
+case « Add Python to PATH »), environ 5 Go libres, puis `npm run voix:installer` (`scripts/installer-voix.ps1` : chatterbox-tts,
+PyTorch pour CUDA si une carte NVIDIA est présente, téléchargement du modèle). Sans carte NVIDIA, la voix se calcule au
+processeur : plus lent, sans limite. Description YouTube : mentionner la voix de synthèse.
 
 Répliques dans `content/repliques-jobwow.ts` (aucune classe citée : celle de Jobwow n'est jamais précisée), narration et
 graphe ffmpeg dans `lib/incrustation.ts`, images (sharp) et encodage dans `scripts/incrustation-video.ts`, contrôles dans

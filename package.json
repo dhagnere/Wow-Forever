@@ -44,6 +44,7 @@
     "carnet:video": "tsx scripts/carnet-video.ts",
     "carnet:incrustation": "tsx scripts/incrustation-video.ts",
     "carnet:voix": "python scripts/voix_chatterbox.py",
+    "voix:installer": "powershell -ExecutionPolicy Bypass -File scripts/installer-voix.ps1",
     "addon:wow": "tsx scripts/addon-guides.ts \"C:\\WOW\\world of Warcraft\\_forever_\\Interface\\AddOns\\EternalRoutes\""
   },
   "dependencies": {
