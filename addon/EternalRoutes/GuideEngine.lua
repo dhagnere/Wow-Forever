@@ -1007,23 +1007,26 @@ function Engine.NomGuide(g)
     if g.source ~= "RouteProbe" then return g.name or g.id or "" end
     local premiere = g.steps and g.steps[1]
     local zone = Engine.NomCarte(premiere and premiere.map, g.zone)
+    local classe = g.classeEnregistree and (Anglais() and CLASSES_EN or CLASSES_FR)[g.classeEnregistree] or g.classeEnregistree
     if g.type == "depart" then
-        -- zone de départ · race · classe de l'enregistrement
+        -- « Départ Horde · Mort-vivant · Voleur · 1-6 » : faction, race et classe de l'enregistrement
         local races = Anglais() and RACES_EN or RACES_FR
-        local race = g.raceEnregistree and races[g.raceEnregistree]
-        if not race and g.enregistreAvec then race = tostring(g.enregistreAvec):match("^%S+%s+(.+)$") end
+        local imp = ns.Importer
+        local race = imp and imp.RaceDe and imp.RaceDe(g)
+        -- race d'un enregistrement fait hors de sa propre zone de départ : celles de la zone parcourue
+        if race and imp.CarteDeRace and premiere and imp.CarteDeRace(race) ~= premiere.map then race = nil end
+        race = race and races[race] or nil
         if not race then
             local noms = {}
             for _, r in ipairs(g.races or {}) do noms[#noms + 1] = races[r] or r end
-            race = #noms > 0 and table.concat(noms, ", ") or nil
+            race = #noms > 0 and table.concat(noms, ", ") or zone
         end
-        local classe = g.classeEnregistree and (Anglais() and CLASSES_EN or CLASSES_FR)[g.classeEnregistree] or g.classeEnregistree
         local fin = g.niveauMax or tonumber(tostring(g.name or ""):match("1%-(%d+)$")) or g.maxLevel or 10
-        local detail = (race and (" · " .. race) or "") .. (classe and (" · " .. classe) or "")
-        return (ns.L.ROUTE_START or "%s%s 1-%d"):format(zone, detail, fin)
+        local tete = (ns.L.ROUTE_DEPART or "Départ") .. (g.faction and (" " .. g.faction) or "")
+        return ("%s · %s%s · %s-%d"):format(tete, race, classe and (" · " .. classe) or "", tostring(g.niveauDebut or 1), fin)
     end
     local a, b = tostring(g.name or ""):match("(%d+)%-(%d+)$")
-    return ("%s · %s · %s-%s"):format(tostring(g.faction or "Route"), zone,
+    return ("%s · %s%s · %s-%s"):format(tostring(g.faction or "Route"), zone, classe and (" · " .. classe) or "",
         tostring(g.niveauDebut or a or g.minLevel or 1), tostring(g.niveauMax or b or g.maxLevel or 60))
 end
 

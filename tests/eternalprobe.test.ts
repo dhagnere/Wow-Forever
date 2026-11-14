@@ -418,9 +418,35 @@ out[#out + 1] = ns.Engine.GetGuidesForPlayer()[1].id
 ancienne.enregistreAvec = "Démoniste Troll"
 guerrier.raceEnregistree, guerrier.niveauMax = "Orc", 6
 return table.concat(out, " ") .. "\\n" .. ns.Engine.NomGuide(ancienne) .. "\\n" .. ns.Engine.NomGuide(guerrier)`).split("\n");
-    expect(r[0]).toBe("rp-depart-vallee-des-epreuves-orc-warlock rp-depart-vallee-des-epreuves-orc-warlock rp-depart-vallee-des-epreuves-warrior 2 rp-depart-vallee-des-epreuves-troll-warrior rp-depart-vallee-des-epreuves-warrior");
-    expect(r[1]).toBe("Départ · Vallée des Épreuves · Orc · Démoniste · 1-15");
-    expect(r[2]).toBe("Départ · Vallée des Épreuves · Orc · Guerrier · 1-6");
+    expect(r[0]).toBe("rp-depart-durotar-orc-warlock rp-depart-durotar-orc-warlock rp-depart-vallee-des-epreuves-warrior 2 rp-depart-vallee-des-epreuves-troll-warrior rp-depart-vallee-des-epreuves-warrior");
+    expect(r[1]).toBe("Départ Horde · Orc · Démoniste · 1-15");
+    expect(r[2]).toBe("Départ Horde · Orc · Guerrier · 1-6");
+  });
+
+  it("range sous « Départ » les morceaux enregistrés en partie commune dans la zone de départ, et les assemble", () => {
+    const r = executer(SIMULE, ESPACE, ...MOTEUR, `
+local ns = EternalRoutes
+local function Morceau(id, debut, fin, quete)
+  return { id = id, source = "RouteProbe", type = "faction", partie = "commune", classeEnregistree = "ROGUE",
+    enregistreAvec = "Voleur Mort-vivant", faction = "Horde", zone = "Clairières de Tirisfal", niveauDebut = debut, niveauMax = fin,
+    minLevel = 1, maxLevel = fin + 5, priority = 10, importe = "2026-11-14 2" .. debut .. ":00",
+    steps = { { map = 1420, x = 30, y = 70, quests = { { kind = "prendre", id = quete, name = "Q" .. quete } } } } }
+end
+local orgri = Morceau("rp-horde-12", 12, 12, 9); orgri.classeEnregistree = "WARLOCK"; orgri.steps[1].map = 1454; orgri.zone = "Orgrimmar"
+EternalRoutesRoutesDB = { routes = { ["rp-horde-1"] = Morceau("rp-horde-1", 1, 1, 363), ["rp-horde-2"] = Morceau("rp-horde-2", 2, 6, 364), ["rp-horde-12"] = orgri } }
+ns.db.activeGuide = "rp-horde-2"
+ns.Importer.Charger()
+local ids = {}
+for id in pairs(EternalRoutesRoutesDB.routes) do ids[#ids + 1] = id end
+table.sort(ids)
+local g = EternalRoutesRoutesDB.routes["rp-depart-clairiaeres-de-tirisfal-scourge-rogue"]
+ns.Engine.GetActiveGuide()
+return table.concat(ids, " ") .. "\\n" .. ns.Engine.NomGuide(g) .. "\\n" .. #g.steps .. " " .. ns.db.activeGuide
+  .. "\\n" .. ns.Engine.NomGuide(orgri)`).split("\n");
+    expect(r[0]).toBe("rp-depart-clairiaeres-de-tirisfal-scourge-rogue rp-horde-12");
+    expect(r[1]).toBe("Départ Horde · Mort-vivant · Voleur · 1-6");
+    expect(r[2]).toBe("2 rp-depart-clairiaeres-de-tirisfal-scourge-rogue");
+    expect(r[3]).toBe("Horde · Orgrimmar · Démoniste · 12-12");
   });
 
   it("rappelle d'ouvrir le grimoire resté dans les sacs, et pas les autres objets", () => {

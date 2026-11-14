@@ -868,6 +868,12 @@ function P.Start()
     if not db.partie then
         local cible = CarteDepart()
         db.partie = (cible and DansCarte(c.map, cible)) and "depart" or "commune"
+    elseif db.partie == "commune" and not db.departGarde and #(db.events or {}) <= 1 then
+        -- « partie commune » restée sans zone de départ gardée : un personnage qui démarre dans sa zone de départ,
+        -- sous son niveau de sortie, enregistre sa zone de départ
+        local cible = CarteDepart()
+        local z = cible and ZONES_DEPART[cible]
+        if z and DansCarte(c.map, cible) and (tonumber(c.level) or 1) <= (z.fin or 10) then db.partie = "depart" end
     end
     local cible = CarteDepart()
     local zone = cible and ZONES_DEPART[cible]

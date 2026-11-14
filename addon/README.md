@@ -50,6 +50,19 @@ et faites un clic droit sur « Grimoire d'Éclair de feu (Rang 2) » : votre dé
 Les sources (« sur : … ») ne sont plus collées au texte de l'objectif : elles sont dans la consigne. Textes dans `Locale.lua`
 (`HINT_…`, français et anglais), règles dans `Engine.ActionsEtape` et `Engine.ActionsSacs` (`GuideEngine.lua`).
 
+## Noms explicites et morceaux de zone de départ (EternalRoutes 0.13.7, EternalProbe 0.11.2)
+
+- Noms des routes : « Départ Horde · Mort-vivant · Voleur · 1-6 » pour une zone de départ (faction, race, classe,
+  niveaux) ; « Horde · Orgrimmar · Démoniste · 12-12 » pour la suite (faction, zone, classe de l'enregistrement).
+- Un enregistrement fait tout entier dans la zone de départ de sa race, sans dépasser son niveau de sortie, devient
+  une route de départ même si la sonde le marquait « partie commune » (reste d'un /ep suite ou d'un autre personnage).
+  Les routes déjà importées de cette façon (« Horde · Clairières de Tirisfal · 1-1 », « … · 2-6 ») sont rangées au
+  chargement, et leurs morceaux assemblés : un morceau qui reprend au niveau où le précédent s'arrêtait le prolonge.
+- Importer un nouveau morceau d'une route de départ (même race, même classe, à partir de son dernier niveau) la
+  prolonge au lieu de la remplacer.
+- EternalProbe 0.11.2 : un personnage qui démarre dans sa zone de départ, sous son niveau de sortie, enregistre sa zone
+  de départ même si la sauvegarde gardait « partie commune ».
+
 ## Une route de départ par zone, race et classe (EternalRoutes 0.13.6)
 
 Deux races partagent parfois une zone de départ (orcs et trolls à Durotar, nains et gnomes à Dun Morogh) : la route

@@ -96,13 +96,13 @@ end
 -- Une route enregistrée dans l'une d'elles sert à toutes ces races, quelle que soit la classe :
 -- les quêtes réservées aux autres classes sont masquées par le moteur.
 local ZONES_DEPART = {
-    [1429] = { nom = "Forêt d'Elwynn",          races = { "Human" },          faction = "Alliance" },
-    [1426] = { nom = "Dun Morogh",              races = { "Dwarf", "Gnome" }, faction = "Alliance" },
-    [1438] = { nom = "Teldrassil",              races = { "NightElf" },       faction = "Alliance" },
-    [1411] = { nom = "Durotar",                 races = { "Orc", "Troll" },   faction = "Horde" },
-    [1420] = { nom = "Clairières de Tirisfal",  races = { "Scourge" },        faction = "Horde" },
-    [1412] = { nom = "Mulgore",                 races = { "Tauren" },         faction = "Horde" },
-    [2521] = { nom = "Île de Zéphras",          races = nil,                  faction = nil },   -- Skyborne
+    [1429] = { nom = "Forêt d'Elwynn",          fin = 10, races = { "Human" },          faction = "Alliance" },
+    [1426] = { nom = "Dun Morogh",              fin = 10, races = { "Dwarf", "Gnome" }, faction = "Alliance" },
+    [1438] = { nom = "Teldrassil",              fin = 11, races = { "NightElf" },       faction = "Alliance" },
+    [1411] = { nom = "Durotar",                 fin = 14, races = { "Orc", "Troll" },   faction = "Horde" },
+    [1420] = { nom = "Clairières de Tirisfal",  fin = 12, races = { "Scourge" },        faction = "Horde" },
+    [1412] = { nom = "Mulgore",                 fin = 10, races = { "Tauren" },         faction = "Horde" },
+    [2521] = { nom = "Île de Zéphras",          fin = 10, races = nil,                  faction = nil },   -- Skyborne
 }
 Importer.ZONES_DEPART = ZONES_DEPART
 
@@ -539,6 +539,17 @@ function Importer.Convertir(db)
     if carteRace and partie ~= "commune" then
         for _, e in ipairs(etapes) do if e.carte == carteRace then departRace = ZONES_DEPART[carteRace] break end end
     end
+    -- « partie commune » restée d'un autre personnage ou d'un /ep suite trop tôt : un enregistrement fait tout entier
+    -- dans la zone de départ de la race, sans dépasser son niveau de sortie, reste une route de départ
+    if carteRace and partie == "commune" and #etapes > 0 then
+        local dedans = true
+        for _, e in ipairs(etapes) do if e.carte ~= carteRace then dedans = false break end end
+        local haut = tonumber(ctx.level) or 1
+        for _, e in ipairs(ev) do if e.k == "level" then haut = math.max(haut, NiveauAtteint(e)) end end
+        if dedans and haut <= (ZONES_DEPART[carteRace].fin or 10) + 1 then
+            departRace, partie = ZONES_DEPART[carteRace], "depart"
+        end
+    end
     if departRace then
         local gardees = {}
         for _, e in ipairs(etapes) do
@@ -677,30 +688,82 @@ local function RaceDe(g)
 end
 Importer.RaceDe = RaceDe
 
---- Routes de départ importées avant la 0.13.6 (une par zone, ou par zone et classe) : elles prennent le nom de la
---- race et de la classe qui les ont enregistrées (rp-depart-<zone>-<race>-<classe>). L'ancien nom reste connu
---- (renommees), pour que les personnages qui la suivaient la retrouvent.
+--- Carte de la zone de départ d'une race.
+local function CarteDeRace(race)
+    for carte, z in pairs(ZONES_DEPART) do
+        for _, r in ipairs(z.races or {}) do if r == race then return carte end end
+    end
+end
+Importer.CarteDeRace = CarteDeRace
+
+--- La route a-t-elle été faite tout entière dans la zone de départ de la race qui l'a enregistrée ?
+function Importer.DansSaZoneDeDepart(g)
+    local carte = CarteDeRace(RaceDe(g))
+    if not carte or type(g.steps) ~= "table" or #g.steps == 0 then return false end
+    for _, s in ipairs(g.steps) do if s.map ~= carte then return false end end
+    local haut = g.niveauMax or g.maxLevel or 60
+    return haut <= (ZONES_DEPART[carte].fin or 10) + 1
+end
+
+--- Identifiant d'une route de départ : rp-depart-<zone>-<race>-<classe> ; nil si sa race ne commence pas là.
+local function IdDepart(g)
+    local race = RaceDe(g)
+    local carte = CarteDeRace(race)
+    if not (carte and g.classeEnregistree and g.steps and g.steps[1] and g.steps[1].map == carte) then return nil end
+    return ("rp-depart-%s-%s-%s"):format(Slug(ZONES_DEPART[carte].nom), race:lower(), g.classeEnregistree:lower())
+end
+Importer.IdDepart = IdDepart
+
+--- Deux morceaux de la même route de départ : le second prolonge le premier s'il reprend à son niveau de fin ;
+--- sinon le plus récent l'emporte, l'autre est gardé dans « avant » (/er restaurer).
+local function Assembler(a, b)
+    if (b.niveauDebut or 1) < (a.niveauDebut or 1) then a, b = b, a end
+    if (b.niveauDebut or 1) > 1 and (b.niveauDebut or 1) >= (a.niveauMax or 1) - 1 then
+        for _, st in ipairs(b.steps) do a.steps[#a.steps + 1] = st end
+        a.niveauMax = math.max(a.niveauMax or 1, b.niveauMax or 1)
+        a.maxLevel = math.max(a.maxLevel or 15, (a.niveauMax or 1) + 5)
+        a.nbEntraineurs = (a.nbEntraineurs or 0) + (b.nbEntraineurs or 0)
+        if tostring(b.importe or "") > tostring(a.importe or "") then a.importe = b.importe end
+        a.cartesSet = nil
+        return a, nil
+    end
+    if tostring(b.importe or "") >= tostring(a.importe or "") then return b, a end
+    return a, b
+end
+Importer.Assembler = Assembler
+
+--- Au chargement : une route de faction faite tout entière dans la zone de départ devient route de départ ; chaque
+--- route de départ prend son identifiant rp-depart-<zone>-<race>-<classe>, les morceaux d'une même route sont
+--- assemblés. L'ancien identifiant reste connu (renommees), pour que les personnages qui la suivaient la retrouvent.
 local function Renommer(stock)
     EternalRoutesRoutesDB.renommees = EternalRoutesRoutesDB.renommees or {}
-    local a = {}
-    for id, g in pairs(stock) do
-        local race = type(g) == "table" and RaceDe(g)
-        if race and g.type == "depart" and g.classeEnregistree and g.source == "RouteProbe" then
-            local suffixe = "-" .. race:lower() .. "-" .. g.classeEnregistree:lower()
-            if tostring(id):sub(-#suffixe) ~= suffixe then a[#a + 1] = { id = id, race = race, suffixe = suffixe } end
+    EternalRoutesRoutesDB.avant = EternalRoutesRoutesDB.avant or {}
+    local ids = {}
+    for id in pairs(stock) do ids[#ids + 1] = id end
+    table.sort(ids)
+    for _, id in ipairs(ids) do
+        local g = stock[id]
+        if type(g) == "table" and g.source == "RouteProbe" and type(g.steps) == "table" then
+            if g.type ~= "depart" and g.classeEnregistree and Importer.DansSaZoneDeDepart(g) then
+                local carte = CarteDeRace(RaceDe(g))
+                local z = ZONES_DEPART[carte]
+                g.type, g.partie, g.races, g.faction = "depart", "depart", z.races, z.faction or g.faction
+                g.minLevel, g.niveauDebut = 1, g.niveauDebut or 1
+                g.maxLevel = math.max(15, (g.niveauMax or 1) + 5)
+            end
+            local nouveau = g.type == "depart" and g.classeEnregistree and IdDepart(g)
+            if nouveau and nouveau ~= id then
+                g.raceEnregistree = g.raceEnregistree or RaceDe(g)
+                stock[id] = nil
+                local garde, ecarte = g, nil
+                if stock[nouveau] then garde, ecarte = Assembler(stock[nouveau], g) end
+                garde.id = nouveau
+                stock[nouveau] = garde
+                if ecarte then EternalRoutesRoutesDB.avant[nouveau] = ecarte end
+                EternalRoutesRoutesDB.renommees[id] = nouveau
+                if ns.guides then ns.guides[id] = nil end
+            end
         end
-    end
-    for _, r in ipairs(a) do
-        local g = stock[r.id]
-        local base = tostring(r.id):gsub("%-" .. g.classeEnregistree:lower() .. "$", "")
-        local nouveau = base .. r.suffixe
-        g.raceEnregistree = g.raceEnregistree or r.race
-        if not stock[nouveau] then
-            g.id = nouveau
-            stock[nouveau] = g
-        end
-        stock[r.id] = nil
-        EternalRoutesRoutesDB.renommees[r.id] = nouveau
     end
 end
 
@@ -800,7 +863,17 @@ function Importer.Importer()
         EternalRoutesRoutesDB.avant = EternalRoutesRoutesDB.avant or {}
         EternalRoutesRoutesDB.avant[g.id] = Stock()[g.id]
     end
-    local gardees, perdues = Importer.Fusionner(g, Stock()[g.id])
+    local ancienne = Stock()[g.id]
+    local gardees, perdues = 0, 0
+    if ancienne and g.type == "depart" and (g.niveauDebut or 1) > 1 and (g.niveauDebut or 1) >= (ancienne.niveauMax or 1) - 1 then
+        -- l'enregistrement reprend où la route s'arrêtait : il la prolonge
+        local suite = Assembler(ancienne, g)
+        suite.id, suite.name = g.id, g.name
+        g = suite
+        ns.Print(ns.L.IMP_CONTINUE:format(g.niveauMax or 0))
+    else
+        gardees, perdues = Importer.Fusionner(g, ancienne)
+    end
     Stock()[g.id] = g
     ns.guides[g.id] = g
     local nbQuetes = 0
