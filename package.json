@@ -35,6 +35,7 @@
     "base:butin": "tsx modules/veille/scripts/butin.ts",
     "sorts:jeu": "tsx modules/veille/scripts/sorts-jeu.ts",
     "base:quetes": "tsx modules/veille/scripts/quetes.ts",
+    "base:quetes:en": "tsx modules/veille/scripts/quetes.ts --en",
     "zephras:jeu": "tsx modules/veille/scripts/zephras-jeu.ts",
     "lieux:en": "tsx modules/veille/scripts/lieux-en.ts",
     "addon:guides": "tsx scripts/addon-guides.ts",

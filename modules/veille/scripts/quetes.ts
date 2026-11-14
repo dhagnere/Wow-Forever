@@ -1,4 +1,5 @@
 import { writeFile } from "node:fs/promises";
+import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { derniereVersion, tableCsv } from "../objets/wago";
 import { objetInterne } from "../objets/conversion";
@@ -12,6 +13,7 @@ import { CLASSES_QUETES_FOREVER } from "@/content/classes-quetes-forever";
  * Guides de quêtes : quêtes de classe (chaînes, donneurs, objectifs, récompenses) et parcours de montée en niveau
  * par faction (zones dans l'ordre des niveaux, principaux donneurs).
  *
+ *   npm run base:quetes        (sans chemin : dossier « sources » voisin du projet ; npm run base:quetes:en pour l'anglais)
  *   npm run base:quetes -- <dump CMaNGOS classic-db (.sql ou .sql.gz)> <dossier db_world d'AzerothCore> [--questie <clone QuestieDB>] [--en]
  *
  * Données de l'Azeroth d'origine : CMaNGOS classic-db (GPL v3), titres et noms français AzerothCore (GPL v2). Seules
@@ -65,19 +67,47 @@ const TYPES_HORS_PARCOURS = new Set([41, 62, 81]);
 
 type Ref = { t: "pnj" | "decor" | "objet"; id: number; n: string; b?: boolean };
 
-lancer("base:quetes", async () => {
-  const EN = process.argv.includes("--en");
-  const args = process.argv.slice(2);
+/**
+ * Arguments de la commande. Sans chemin, les bases sont cherchées dans le dossier « sources » voisin du projet
+ * (ou SOURCES_QUETES) : classic-db/Full_DB/*.sql.gz, azerothcore-wotlk/data/sql/base/db_world, QuestieDB.
+ * PowerShell retire souvent le « -- » de npm run, et npm garde alors pour lui les options : « --en » peut aussi
+ * s'écrire « en » (ou QUETES_EN=oui), et « --questie » s'ajoute de lui-même quand le clone est là.
+ */
+function argumentsQuetes(args: string[]): { fichierDump: string; dossierLocales: string; dossierQuestie?: string; EN: boolean } {
+  const EN = args.includes("--en") || args.includes("en") || process.env.QUETES_EN === "oui" || process.env.npm_config_en === "true";
   const iQuestie = args.indexOf("--questie");
-  const dossierQuestie = iQuestie >= 0 ? args[iQuestie + 1] : undefined;
+  let dossierQuestie = iQuestie >= 0 ? args[iQuestie + 1] : process.env.npm_config_questie;
   if (iQuestie >= 0 && (!dossierQuestie || dossierQuestie.startsWith("--"))) throw new Error("--questie attend le dossier d'un clone de QuestieDB.");
-  const [fichierDump, dossierLocales] = args.filter((a, k) => !a.startsWith("--") && k !== (iQuestie >= 0 ? iQuestie + 1 : -1));
+  const positionnels = args.filter((a, k) => !a.startsWith("--") && a !== "en" && k !== (iQuestie >= 0 ? iQuestie + 1 : -1));
+  if (positionnels.some((a) => /^<.*>$/.test(a))) throw new Error(`Chevrons reçus (${positionnels.join(" ")}) : remplace <…> par les vrais chemins, ou lance simplement « npm run base:quetes ».`);
+  let [fichierDump, dossierLocales] = positionnels;
+  const sources = process.env.SOURCES_QUETES ?? path.resolve(process.cwd(), "..", "sources");
+  if (!fichierDump) {
+    const dossier = path.join(sources, "classic-db", "Full_DB");
+    const dump = existsSync(dossier) ? readdirSync(dossier).find((f) => /\.sql(\.gz)?$/.test(f)) : undefined;
+    if (!dump) throw new Error(`Dump CMaNGOS introuvable dans ${dossier}. Donne son chemin : npm run base:quetes -- "<fichier .sql.gz>" "<dossier db_world>"`);
+    fichierDump = path.join(dossier, dump);
+  }
+  dossierLocales ??= path.join(sources, "azerothcore-wotlk", "data", "sql", "base", "db_world");
+  if (!existsSync(path.join(dossierLocales, "creature_template_locale.sql"))) {
+    throw new Error(`Fichiers d'AzerothCore absents de ${dossierLocales}. Dans le clone d'AzerothCore : git sparse-checkout set data/sql/base/db_world`);
+  }
+  const traces = (d: string) => existsSync(path.join(d, "src", "corrections", "Forever", "traces", "foreverQuestTraces.lua"));
+  if (dossierQuestie && !traces(dossierQuestie)) {
+    throw new Error(`Relevés Questie absents de ${dossierQuestie}. Dans le clone de QuestieDB : git sparse-checkout set src/corrections/Forever/traces l10n/Forever/traces support/Forever/Zones`);
+  }
+  if (!dossierQuestie && !args.includes("--sans-questie") && traces(path.join(sources, "QuestieDB"))) dossierQuestie = path.join(sources, "QuestieDB");
+  console.log(`Dump : ${fichierDump}\nAzerothCore : ${dossierLocales}\nQuestie : ${dossierQuestie ?? "non"}\nLangue : ${EN ? "anglais" : "français"}`);
+  return { fichierDump, dossierLocales, dossierQuestie, EN };
+}
+
+lancer("base:quetes", async () => {
+  const { fichierDump, dossierLocales, dossierQuestie, EN } = argumentsQuetes(process.argv.slice(2));
   const suffixe = EN ? ".en" : "";
   /** Objectifs rédigés à partir des données, dans la langue voulue. */
   const V = EN
     ? { rapporter: "Bring", vaincre: "Kill", activer: "Use", utiliser: "Use", sur: "on", sortDemande: "the required spell", objet: "item", cible: "Target:" }
     : { rapporter: "Rapporter", vaincre: "Vaincre", activer: "Activer", utiliser: "Utiliser", sur: "sur", sortDemande: "le sort demandé", objet: "objet", cible: "Cible :" };
-  if (!fichierDump || !dossierLocales) throw new Error("Usage : npm run base:quetes -- <dump CMaNGOS> <dossier db_world AzerothCore> [--questie <clone QuestieDB>] [--en] (chemins réels, sans les chevrons)");
   const sql = await lireDump(fichierDump);
   const locale = async (f: string) => (await import("node:fs/promises")).readFile(path.join(dossierLocales, f), "utf8");
   const version = await derniereVersion();

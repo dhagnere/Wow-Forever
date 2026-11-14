@@ -109,7 +109,7 @@ npm run veille:videos    # vidéos des Reels demandées depuis l'éditeur et des
 npm run veille:liens     # remplace les liens Google News des sources par l'adresse directe des articles (aussi fait chaque matin)
 npm run base:importer    # base d'objets depuis wago.tools, caractéristiques comprises (si nouvelle version du jeu ; --forcer, --icones)
 npm run base:butin -- <dump CMaNGOS> <db_world AzerothCore>  # « où le trouver » → modules/veille/objets/donnees/butin.json.gz (fichier versionné)
-npm run base:quetes -- <dump CMaNGOS> <db_world AzerothCore> --questie <clone QuestieDB> # quêtes de classe et parcours de 1 à 60, quêtes de Forever comprises → content/quetes-jeu.json (fichier versionné ; chemins réels, sans chevrons, entre guillemets sous PowerShell)
+npm run base:quetes     # sans chemin : bases du dossier « sources » voisin du projet (classic-db, azerothcore-wotlk, QuestieDB pris d'office) ; npm run base:quetes:en pour l'anglais ; ou npm run base:quetes -- <dump CMaNGOS> <db_world AzerothCore> --questie <clone QuestieDB> : quêtes de classe et parcours de 1 à 60, quêtes de Forever comprises → content/quetes-jeu.json (fichier versionné ; chemins réels, sans chevrons, entre guillemets sous PowerShell)
 npm run base:quetes -- <dump CMaNGOS> <db_world AzerothCore> --questie <clone QuestieDB> --en  # même chose en anglais → content/quetes-jeu.en.json, content/guide-jeu.en.json
 npm run visuels:generer  # PNG de l'enseigne, de l'icône du site et de l'avatar de Jobwow, depuis visuels/
 npm run cartes:jeu       # cartes du monde (continents, zones, Zéphras) assemblées depuis les tuiles du jeu → public/images/jeu/cartes/
