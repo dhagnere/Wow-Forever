@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { videosChaine } from "@/modules/veille";
+import { etatFluxChaine, videosChaine } from "@/modules/veille";
 import { VIDEOS_PREPAREES } from "@/content/videos-preparees";
 import { LETTRES_PREPAREES } from "@/content/lettres-preparees";
 import { exigerAdmin } from "@/lib/admin";
 import { problemesVideo, publication } from "@/lib/videosPreparees";
 import { SITE, dateLongue } from "@/lib/site";
 import { TexteACopier } from "../veille/[id]/Copier";
+import { rafraichirVideos } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Vidéos" };
@@ -15,9 +16,11 @@ export const metadata: Metadata = { title: "Vidéos" };
  * Vidéos du Journal de Jobwow préparées pour YouTube (content/videos-preparees.ts) : titre et description, chapitres
  * compris, à coller dans YouTube Studio. Une vidéo passe « publiée » quand une vidéo publique de la chaîne porte son titre.
  */
-export default async function AdminVideos() {
+export default async function AdminVideos({ searchParams }: { searchParams: Promise<{ rafraichi?: string }> }) {
   await exigerAdmin();
-  const chaine = await videosChaine(SITE.youtubeChaine);
+  const q = await searchParams;
+  const [chaine, flux] = await Promise.all([videosChaine(SITE.youtubeChaine), etatFluxChaine(SITE.youtubeChaine)]);
+  const enDirect = Math.max(0, ...flux.map((f) => f.videos));
   const semaines = [...new Set(VIDEOS_PREPAREES.map((v) => v.semaine))].sort().reverse();
   const aPublier = VIDEOS_PREPAREES.filter((v) => !publication(v, chaine, VIDEOS_PREPAREES)).length;
   return (
@@ -28,6 +31,27 @@ export default async function AdminVideos() {
         dans <a href="https://studio.youtube.com/" rel="noopener noreferrer">YouTube Studio</a>, coller le titre et la description, puis publier en
         « Public ». Le filigrane de la chaîne s&apos;ajoute seul. Les Lettres de la semaine sont dans <Link href="/admin/lettre/">Lettre</Link>.
       </p>
+
+      <section className="encadre" style={{ marginTop: 16 }}>
+        <h2 style={{ marginTop: 0, fontSize: 19 }}>La chaîne vue par le site</h2>
+        {q.rafraichi ? <p className="succes" role="status">Pages des vidéos et du Carnet recalculées avec le flux du moment.</p> : null}
+        <p style={{ margin: "0 0 8px" }}>
+          Page publique <Link href="/carnet/videos/" target="_blank">Les vidéos de Jobwow</Link> : {chaine.length} vidéo(s) en mémoire, {enDirect} dans le flux de YouTube à l&apos;instant.
+        </p>
+        <ul className="doux" style={{ margin: "0 0 8px", fontSize: 14 }}>
+          {flux.map((f) => (
+            <li key={f.url}>
+              {f.url.includes("playlist_id") ? "Liste « Mises en ligne »" : "Flux de la chaîne"} :{" "}
+              {f.erreur ?? `${f.videos} vidéo(s)${f.titres.length ? ` (${f.titres.join(" · ")})` : ""}`}
+            </li>
+          ))}
+        </ul>
+        <p className="doux" style={{ margin: "0 0 10px", fontSize: 14 }}>
+          Seules les vidéos <strong>publiques</strong> y figurent : une vidéo privée, non répertoriée ou programmée n&apos;apparaît qu&apos;une fois publique.
+          YouTube met ensuite de quelques minutes à une heure à l&apos;ajouter à son flux ; le site le relit toutes les 10 minutes.
+        </p>
+        <form action={rafraichirVideos}><button type="submit" className="btn btn-or">Rafraîchir maintenant</button></form>
+      </section>
       {!semaines.length ? <p>Aucune vidéo préparée pour l&apos;instant : envoyez les liens des parties filmées.</p> : null}
       {semaines.map((s) => {
         const lettres = LETTRES_PREPAREES.filter((l) => l.semaine === s);

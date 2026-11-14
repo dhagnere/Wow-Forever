@@ -119,7 +119,8 @@ export { courrielConfigure, envoyerCourriel } from "./courriel/resend";
 
 // Chaîne YouTube : dernières vidéos lues dans le flux public (page « Les vidéos de Jobwow »).
 export type { VideoChaine } from "./youtube/chaine";
-export { videosChaine, videosDepuisFlux, idChaineValide } from "./youtube/chaine";
+export { videosChaine, videosDepuisFlux, idChaineValide, etatFluxChaine, TAG_VIDEOS_CHAINE } from "./youtube/chaine";
+export type { EtatFlux } from "./youtube/chaine";
 
 // Guides à valider de Probe (/admin/probe) : codes de /ep export, publiés dans le guide de 1 à 60 sans déploiement.
 export type { EtatProbe, LigneProbe, PorteeProbe, ReleveProbe } from "./probe/depot";
