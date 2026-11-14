@@ -312,6 +312,34 @@ return table.concat(out, "\\n")`).split("\n");
     ]);
   });
 
+  it("ajoute les quêtes de classe du personnage à une route enregistrée avec une autre classe", () => {
+    const r = executer(SIMULE, ESPACE, ...MOTEUR, `
+BANC.joueur.classe, BANC.joueur.classeFichier = "Guerrier", "WARRIOR"
+local ns = EternalRoutes
+ns.questDB = {
+  [840] = { t = "Ordres", nv = 1, min = 1, g = { "Kaltunk", "Kaltunk", 1420, 40, 60 } },
+  [841] = { t = "Sangliers", nv = 5, min = 5, g = { "Gornek", "Gornek", 1420, 42, 68 } },
+  [100] = { t = "Épreuve du guerrier", nv = 4, min = 4, g = { "Dannal", "Dannal", 1420, 61, 52 }, r = { "Dannal", "Dannal", 1420, 61, 52 }, c = { 1420, 70, 40 } },
+  [101] = { t = "Suite du guerrier", nv = 6, min = 6, av = 100, g = { "Dannal", "Dannal", 1420, 61, 52 }, r = { "Maître d'armes", "Weapon Master", 1458, 50, 50 } },
+  [102] = { t = "Épreuve du démoniste", nv = 4, min = 4, g = { "Maximillion", "Maximillion", 1420, 61, 52 } },
+  [103] = { t = "Pour tous", nv = 4, min = 4, g = { "Garde", "Guard", 1420, 50, 50 } },
+}
+ns.questClassMask = { [100] = 1, [101] = 1, [102] = 256, [103] = 1535 }
+local function E(kind, id, carte) return { map = carte or 1420, x = 1, y = 1, zoneIndex = 1, quests = { { kind = kind, id = id, name = ns.questDB[id].t } } } end
+local route = { id = "rp-test", source = "RouteProbe", classeEnregistree = "WARLOCK", niveauDebut = 1, niveauMax = 8, priority = 10,
+  steps = { E("prendre", 840), E("prendre", 841), E("rendre", 841) } }
+ns.guides["rp-test"] = route
+ns.db.activeGuide = "rp-test"
+local out = {}
+for _, st in ipairs(ns.Engine.GetActiveGuide().steps) do out[#out + 1] = st.quests[1].kind .. ":" .. st.quests[1].id .. (st.ajoutClasse and "+" or "") end
+-- la route enregistrée n'est pas modifiée, et le démoniste la voit telle quelle
+out[#out + 1] = "route:" .. #route.steps
+BANC.joueur.classe, BANC.joueur.classeFichier = "Démoniste", "WARLOCK"
+out[#out + 1] = "demoniste:" .. #ns.Engine.GetActiveGuide().steps
+return table.concat(out, " ")`);
+    expect(r).toBe("prendre:840 prendre:841 prendre:100+ faire:100+ rendre:100+ rendre:841 prendre:101+ rendre:101+ route:3 demoniste:3");
+  });
+
   it("rappelle d'ouvrir le grimoire resté dans les sacs, et pas les autres objets", () => {
     const r = executer(SIMULE, ...SONDE, DEMONISTE, ESPACE, ...MOTEUR,
       'return table.concat(EternalRoutes.Engine.ActionsSacs(), "\\n")');

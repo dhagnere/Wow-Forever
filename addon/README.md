@@ -50,6 +50,15 @@ et faites un clic droit sur « Grimoire d'Éclair de feu (Rang 2) » : votre dé
 Les sources (« sur : … ») ne sont plus collées au texte de l'objectif : elles sont dans la consigne. Textes dans `Locale.lua`
 (`HINT_…`, français et anglais), règles dans `Engine.ActionsEtape` et `Engine.ActionsSacs` (`GuideEngine.lua`).
 
+## Quêtes de classe sur une route d'une autre classe (EternalRoutes 0.13.1)
+
+Une route enregistrée avec un personnage sert à toutes les classes de sa race. Jusqu'ici, un guerrier qui suivait
+une route enregistrée par un démoniste ne voyait pas ses propres quêtes de classe : le démoniste ne les avait pas
+prises. EternalRoutes les ajoute maintenant d'après sa base de quêtes (`QuestDB.lua`) : chaque quête réservée à la
+classe jouée, donnée dans une zone de la route et à son niveau, apparaît avec ses étapes « prendre », « faire » et
+« rendre », juste après la première étape où le niveau demandé est atteint ; ses suites viennent après elle. La route
+enregistrée n'est pas modifiée : le démoniste la voit toujours telle qu'il l'a jouée.
+
 ## Annonces discrètes (EternalProbe 0.11.0, EternalRoutes 0.13.0)
 
 Les messages automatiques des deux addons (début et fin d'enregistrement, sortie de la zone de départ, rappel de la

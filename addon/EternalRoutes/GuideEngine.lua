@@ -202,11 +202,6 @@ function Engine.GetAllGuides()
     return list
 end
 
-function Engine.GetActiveGuide()
-    local id = ns.db.activeGuide
-    return (id and ns.guides[id]) or nil
-end
-
 function Engine.GetStepIndex()
     return ns.db.stepIndex or 1
 end
@@ -236,6 +231,157 @@ function Engine.QueteApplicable(q)
     -- races du jeu d'origine seulement (1 à 8) : une race nouvelle (Skyborne) n'est pas filtrée
     if rm and br and br <= 128 and not ABit(rm, br) then return false end
     return true
+end
+
+-- ---------------------------------------------------------------------------
+-- Quêtes de classe d'une route enregistrée avec une autre classe
+-- ---------------------------------------------------------------------------
+-- Une route RouteProbe sert à toutes les classes de sa race : les quêtes réservées à la classe qui l'a
+-- enregistrée sont masquées (QueteApplicable), mais celles de la classe jouée n'y sont pas. On les ajoute
+-- d'après la base intégrée (QuestDB.lua : masque de classe, niveau, donneur, receveur, secteur), sans toucher
+-- à la route enregistrée : le guide actif est une copie, propre à la classe du personnage.
+
+local TOUTES_CLASSES = { 1, 2, 4, 8, 16, 64, 128, 256, 1024 }
+--- Le masque laisse-t-il de côté au moins une classe ? (sinon la quête n'est pas une quête de classe)
+local function MasqueDeClasse(m)
+    for _, b in ipairs(TOUTES_CLASSES) do
+        if math.floor(m / b) % 2 == 0 then return true end
+    end
+    return false
+end
+
+local function NomCarteJeu(carte)
+    if carte and C_Map and C_Map.GetMapInfo then
+        local info = C_Map.GetMapInfo(carte)
+        if info and info.name and info.name ~= "" then return info.name end
+    end
+    return "?"
+end
+
+--- Étapes de la route, avec les quêtes de classe du personnage ajoutées (prendre, faire, rendre, à la suite).
+function Engine.AvecQuetesDeClasse(g)
+    local steps = (g and g.steps) or {}
+    local D, CM = ns.questDB, ns.questClassMask
+    local bc = BitJoueur(UnitClass)
+    if not (D and CM and bc) then return steps, 0 end
+    local anglais = GetLocale and GetLocale() ~= "frFR"
+
+    -- quêtes déjà dans la route, cartes traversées, niveau atteint à chaque étape (d'après les quêtes prises)
+    local presentes, cartes, niveau = {}, {}, {}
+    local courant = g.niveauDebut or 1
+    for i, st in ipairs(steps) do
+        if st.map then cartes[st.map] = true end
+        for _, q in ipairs(st.quests or {}) do
+            if q.id then
+                presentes[q.id] = true
+                local d = D[q.id]
+                if d and q.kind == "prendre" then courant = math.max(courant, d.min or d.nv or 1) end
+            end
+        end
+        niveau[i] = courant
+    end
+    local plafond = (g.niveauMax or 60) + 1
+    local function Candidate(id, d)
+        local cm = CM[id]
+        return cm and d.g and ABit(cm, bc) and MasqueDeClasse(cm) and not presentes[id]
+            and (d.min or d.nv or 1) <= plafond and Engine.QueteApplicable({ id = id })
+    end
+    -- premières quêtes : données dans une carte de la route, au niveau de la route ; puis leurs suites
+    local retenues, ordre = {}, {}
+    for id, d in pairs(D) do
+        if Candidate(id, d) and cartes[d.g[3]] and (d.min or d.nv or 1) >= (g.niveauDebut or 1) and not (d.av and Candidate(d.av, D[d.av] or {})) then
+            retenues[id] = true; ordre[#ordre + 1] = id
+        end
+    end
+    local ajout = true
+    while ajout do
+        ajout = false
+        for id, d in pairs(D) do
+            if not retenues[id] and d.av and retenues[d.av] and Candidate(id, d) then
+                retenues[id] = true; ordre[#ordre + 1] = id; ajout = true
+            end
+        end
+    end
+    if #ordre == 0 then return steps, 0 end
+    -- une quête passe après sa quête préalable, puis par niveau
+    local rang = {}
+    local function Rang(id)
+        if rang[id] then return rang[id] end
+        local d = D[id]
+        rang[id] = (d.av and retenues[d.av]) and (Rang(d.av) + 1) or 0
+        return rang[id]
+    end
+    table.sort(ordre, function(a, b)
+        local ma, mb = D[a].min or D[a].nv or 1, D[b].min or D[b].nv or 1
+        if ma ~= mb then return ma < mb end
+        if Rang(a) ~= Rang(b) then return Rang(a) < Rang(b) end
+        return a < b
+    end)
+
+    -- place de chaque quête : après la première étape de la route où le niveau est atteint, dans la carte du donneur
+    local apres = {}       -- [indice d'étape de la route] = { étapes ajoutées }
+    local placeDe = {}     -- [id] = indice
+    local function Etape(kind, id, d, lieu, base)
+        local carte, x, y, nom
+        if kind == "faire" then carte, x, y = lieu[1], lieu[2], lieu[3] else nom, carte, x, y = (anglais and lieu[2] or lieu[1]), lieu[3], lieu[4], lieu[5] end
+        local titre = anglais and d.te or d.t
+        local st = { zone = NomCarteJeu(carte), zoneIndex = base and base.zoneIndex or nil, map = carte, x = x, y = y,
+            location = nom, ajoutClasse = true, quests = { { kind = kind, id = id, name = titre } } }
+        if kind == "prendre" then st.accepts = { titre } elseif kind == "rendre" then st.turnins = { titre } end
+        return st
+    end
+    for _, id in ipairs(ordre) do
+        local d = D[id]
+        local mn = d.min or d.nv or 1
+        local mini = (d.av and placeDe[d.av]) or 0
+        local place
+        for i = math.max(1, mini), #steps do
+            if niveau[i] >= mn and steps[i].map == d.g[3] then place = i break end
+        end
+        if not place then
+            for i = math.max(1, mini), #steps do
+                if niveau[i] >= mn then place = i break end
+            end
+        end
+        place = math.max(place or #steps, mini)
+        placeDe[id] = place
+        local base = steps[place]
+        apres[place] = apres[place] or {}
+        local liste = apres[place]
+        liste[#liste + 1] = Etape("prendre", id, d, d.g, base)
+        if d.c then liste[#liste + 1] = Etape("faire", id, d, d.c, base) end
+        if d.r then liste[#liste + 1] = Etape("rendre", id, d, d.r, base) end
+    end
+    local out = {}
+    for i, st in ipairs(steps) do
+        out[#out + 1] = st
+        for _, a in ipairs(apres[i] or {}) do out[#out + 1] = a end
+    end
+    if #steps == 0 then
+        for _, a in ipairs(apres[0] or {}) do out[#out + 1] = a end
+    end
+    return out, #ordre
+end
+
+local derives = setmetatable({}, { __mode = "k" })
+
+--- Guide à suivre pour ce personnage : la route telle quelle, ou une copie avec ses quêtes de classe
+--- quand elle a été enregistrée avec une autre classe.
+function Engine.GuidePourClasse(g)
+    if not g or g.source ~= "RouteProbe" or not g.classeEnregistree then return g end
+    local _, classe = UnitClass("player")
+    if not classe or classe == g.classeEnregistree then return g end
+    local c = derives[g]
+    if c and c.classe == classe and c.nb == #(g.steps or {}) then return c.guide end
+    local steps, ajoutees = Engine.AvecQuetesDeClasse(g)
+    local guide = setmetatable({ steps = steps, quetesDeClasse = ajoutees }, { __index = g })
+    derives[g] = { classe = classe, nb = #(g.steps or {}), guide = guide }
+    return guide
+end
+
+function Engine.GetActiveGuide()
+    local id = ns.db.activeGuide
+    return Engine.GuidePourClasse((id and ns.guides[id]) or nil)
 end
 
 --- Quêtes de l'étape qui concernent le personnage.
