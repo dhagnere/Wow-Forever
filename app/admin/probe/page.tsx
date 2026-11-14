@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { guidesProbe, type LigneProbe } from "@/modules/veille";
+import { guidesProbe, parcoursProbePublies, type LigneProbe, type ReleveProbe } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
 import { dateLongue } from "@/lib/site";
 import { nomLieu } from "@/lib/quetes";
-import type { GuideProbe, Verification } from "@/lib/probe";
-import { analyserCode, ecarter, publier, retirer } from "./actions";
+import { corrigerGuide, texteCorrectif, type GuideProbe, type Verification } from "@/lib/probe";
+import { analyserCode, annulerCorrectifs, corriger, ecarter, publier, retirer } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Guides à valider de Probe" };
 
-type Props = { searchParams: Promise<{ erreur?: string; ok?: string; publie?: string }> };
+type Props = { searchParams: Promise<{ erreur?: string; ok?: string; publie?: string; corrige?: string }> };
 
 const PORTEES = [
   { valeur: "race", libelle: "Toutes les classes de cette race" },
@@ -25,9 +25,14 @@ function minutes(s: number | null) {
   return `${Math.floor(s / 60)} min ${String(s % 60).padStart(2, "0")} s`;
 }
 
-function Fiche({ l }: { l: LigneProbe }) {
+function Fiche({ l, publies = [] }: { l: LigneProbe; publies?: ReleveProbe[] }) {
   const g = l.guide as GuideProbe;
   const v = l.verification as Verification;
+  const modifiable = l.etat === "a_valider" || l.etat === "retire";
+  // Correctifs proposés, calculés à l'affichage avec les autres guides publiés (comme à la publication).
+  const proposition = modifiable && !v.ok
+    ? corrigerGuide(g, l.portee, publies.filter((r) => !l.releves.some((x) => x.race === r.race && x.lieu === r.lieu && x.source === r.source)))
+    : null;
   const lieu = (x: string | null) => (x ? nomLieu(x) : "zone inconnue");
   return (
     <article id={`guide-${l.id}`} className="encadre" style={{ marginBottom: 24 }}>
@@ -44,6 +49,39 @@ function Fiche({ l }: { l: LigneProbe }) {
           ? <>Vérification réussie : l&apos;ordre reste jouable dans {v.pages.length} guide(s). {v.reconnues} étape(s) sur {v.total} reprise(s) par le guide.</>
           : <>À corriger avant publication : <ul style={{ margin: "6px 0 0" }}>{v.problemes.map((p) => <li key={p}>{p}</li>)}</ul></>}
       </div>
+
+      {proposition && proposition.correctifs.length > 0 && (
+        <div className="encadre" style={{ marginTop: 12 }}>
+          <h3 style={{ marginTop: 0 }}>Correctifs proposés ({proposition.correctifs.length})</h3>
+          <ul>{proposition.correctifs.map((c) => <li key={`${c.lieu}-${c.id}`}>{texteCorrectif(c)}</li>)}</ul>
+          <p className="doux">
+            {proposition.verification.ok
+              ? <>Après correctifs : vérification réussie, {proposition.verification.reconnues} étape(s) sur {proposition.verification.total} gardée(s) dans l&apos;ordre joué.</>
+              : <>Après correctifs, il resterait : {proposition.verification.problemes[0]}</>}
+            {" "}Rien n&apos;est publié : le bouton « Publier » reste à cliquer ensuite.
+          </p>
+          <form action={corriger}>
+            <input type="hidden" name="id" value={l.id} />
+            <button type="submit" className="btn btn-or">Appliquer les correctifs</button>
+          </form>
+        </div>
+      )}
+      {proposition && !proposition.correctifs.length && (
+        <p className="doux">Aucun correctif automatique pour ces problèmes : ils ne tiennent pas à l&apos;ordre d&apos;une quête.</p>
+      )}
+
+      {g.correctifs && g.correctifs.length > 0 && (
+        <details style={{ marginTop: 12 }}>
+          <summary>Correctifs déjà appliqués ({g.correctifs.length})</summary>
+          <ul>{g.correctifs.map((c) => <li key={`${c.lieu}-${c.id}`}>{texteCorrectif(c)}</li>)}</ul>
+          {modifiable && (
+            <form action={annulerCorrectifs}>
+              <input type="hidden" name="id" value={l.id} />
+              <button type="submit" className="btn btn-contour">Annuler les correctifs</button>
+            </form>
+          )}
+        </details>
+      )}
 
       <h3>Zones jouées, dans l&apos;ordre</h3>
       <div className="tableau-boite">
@@ -120,7 +158,7 @@ function Fiche({ l }: { l: LigneProbe }) {
 export default async function AdminProbe({ searchParams }: Props) {
   await exigerAdmin();
   const q = await searchParams;
-  const [aValider, publies, archives] = await Promise.all([guidesProbe(["a_valider"]), guidesProbe(["publie"]), guidesProbe(["retire", "ecarte"])]);
+  const [aValider, publies, archives, releves] = await Promise.all([guidesProbe(["a_valider"]), guidesProbe(["publie"]), guidesProbe(["retire", "ecarte"]), parcoursProbePublies()]);
   return (
     <div>
       <h1 style={{ marginTop: 0 }}>Guides à valider de Probe</h1>
@@ -130,6 +168,7 @@ export default async function AdminProbe({ searchParams }: Props) {
       </p>
       {q.erreur && <p className="info" role="alert" style={{ borderColor: "#ff8d7a", color: "#ffd2c9", background: "rgba(255,141,122,0.08)" }}>{q.erreur}</p>}
       {q.ok && <p className="succes" role="status">Code lu : guide n° {q.ok} à relire ci-dessous.</p>}
+      {q.corrige && <p className="succes" role="status">Correctifs appliqués au guide n° {q.corrige} : relisez la vérification, puis publiez.</p>}
       {q.publie && <p className="succes" role="status">Guide n° {q.publie} publié : les pages concernées se mettent à jour dans la minute.</p>}
 
       <form action={analyserCode} className="formulaire" style={{ maxWidth: 820, marginBottom: 32 }}>
@@ -141,7 +180,7 @@ export default async function AdminProbe({ searchParams }: Props) {
       </form>
 
       <h2>À valider ({aValider.length})</h2>
-      {aValider.length ? aValider.map((l) => <Fiche key={l.id} l={l} />) : <p className="doux">Aucun guide en attente.</p>}
+      {aValider.length ? aValider.map((l) => <Fiche key={l.id} l={l} publies={releves} />) : <p className="doux">Aucun guide en attente.</p>}
 
       <h2 style={{ marginTop: 40 }}>Publiés ({publies.length})</h2>
       {publies.length ? publies.map((l) => <Fiche key={l.id} l={l} />) : <p className="doux">Aucun guide publié pour l&apos;instant.</p>}
@@ -149,7 +188,7 @@ export default async function AdminProbe({ searchParams }: Props) {
       {archives.length > 0 && (
         <details style={{ marginTop: 40 }}>
           <summary>Retirés et écartés ({archives.length})</summary>
-          {archives.map((l) => <Fiche key={l.id} l={l} />)}
+          {archives.map((l) => <Fiche key={l.id} l={l} publies={releves} />)}
         </details>
       )}
     </div>

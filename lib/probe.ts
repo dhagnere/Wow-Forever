@@ -89,7 +89,14 @@ export interface GuideProbe {
   trajets: TrajetProbe[];
   exploits: { nom: string; classement: string; lieu: string | null; x: number; y: number }[];
   evenements: number;
+  /** Correctifs appliqués depuis /admin/probe (« Appliquer les correctifs »), dans l'ordre. */
+  correctifs?: Correctif[];
+  /** Zones telles que jouées, gardées au premier correctif pour pouvoir l'annuler. */
+  zonesOrigine?: { lieu: string; etapes: string[] }[];
 }
+
+/** Une quête retirée du parcours relevé d'une zone : le guide la replace lui-même, dans un ordre jouable. */
+export interface Correctif { lieu: string; id: number; titre: string; raisons: string[]; etapes: string[] }
 
 const nombre = (s: string | undefined) => (s !== undefined && s !== "nil" && s !== "" && Number.isFinite(Number(s)) ? Number(s) : null);
 
@@ -207,9 +214,14 @@ export function versParcoursReleves(g: GuideProbe, portee: Portee, source: strin
 
 // ——— Vérification ———
 
+/** Problème rattaché à une quête d'une zone : c'est ce qu'un correctif sait réparer. */
+export interface Defaut { lieu: string; id: number; titre: string; raison: string }
+
 export interface Verification {
   ok: boolean;
   problemes: string[];
+  /** Problèmes réparables, quête par quête (absent des vérifications enregistrées avant les correctifs). */
+  defauts?: Defaut[];
   /** Étapes reprises par au moins un guide, sur le total des étapes jouées. */
   reconnues: number;
   total: number;
@@ -222,6 +234,7 @@ export interface Verification {
  */
 export function verifierGuide(g: GuideProbe, portee: Portee, autres: ParcoursReleve[] = []): Verification {
   const problemes: string[] = [];
+  const defauts: Defaut[] = [];
   if (!g.race) problemes.push("Race du personnage inconnue : le code ne dit pas à quel guide il s'applique.");
   if (portee === "classe" && !g.classe) problemes.push("Classe du personnage inconnue : choisissez la portée « toute la race ».");
   if (!g.zones.length) problemes.push("Aucune quête prise ni rendue dans ce code.");
@@ -243,15 +256,56 @@ export function verifierGuide(g: GuideProbe, portee: Portee, autres: ParcoursRel
         const p = rang.get(`prendre:${e.id}`), f = rang.get(`faire:${e.id}`), r = rang.get(`rendre:${e.id}`);
         const avant = e.av ? rang.get(`rendre:${e.av}`) : undefined;
         const ou = `${nomRace(race)} ${classe.nom.toLowerCase()}, ${nomLieu(z.lieu)} : « ${e.t} »`;
-        if (p !== undefined && f !== undefined && f < p) problemes.push(`${ou} se ferait avant d'être prise.`);
-        if (p !== undefined && r !== undefined && r < p) problemes.push(`${ou} se rendrait avant d'être prise.`);
-        if (f !== undefined && r !== undefined && r < f) problemes.push(`${ou} se rendrait avant d'être faite.`);
-        if (avant !== undefined && p !== undefined && p < avant) problemes.push(`${ou} se prendrait avant sa quête préalable.`);
+        const signaler = (raison: string) => {
+          problemes.push(`${ou} ${raison}.`);
+          defauts.push({ lieu: z.lieu, id: e.id, titre: e.t, raison });
+        };
+        if (p !== undefined && f !== undefined && f < p) signaler("se ferait avant d'être prise");
+        if (p !== undefined && r !== undefined && r < p) signaler("se rendrait avant d'être prise");
+        if (f !== undefined && r !== undefined && r < f) signaler("se rendrait avant d'être faite");
+        if (avant !== undefined && p !== undefined && p < avant) signaler("se prendrait avant sa quête préalable");
       }
     }
     if (touche) pages.push({ race: race.slug, classe: classe.slug, titre: `${nomRace(race)} ${classe.nom.toLowerCase()}` });
   }
   const total = g.zones.reduce((s, z) => s + z.etapes.length, 0);
   if (g.race && g.zones.length && !pages.length) problemes.push("Aucun guide ne passe par les zones jouées.");
-  return { ok: problemes.length === 0, problemes: [...new Set(problemes)].slice(0, 30), reconnues: reprises.size, total, pages };
+  const uniques = [...new Map(defauts.map((d) => [`${d.lieu}|${d.id}|${d.raison}`, d])).values()];
+  return { ok: problemes.length === 0, problemes: [...new Set(problemes)].slice(0, 30), defauts: uniques, reconnues: reprises.size, total, pages };
 }
+
+// ——— Correctifs ———
+
+/**
+ * Correctifs proposés avant publication : chaque quête dont l'ordre joué casse un guide (prise après avoir été faite,
+ * quête préalable pas encore rendue…) est retirée du parcours relevé de sa zone, toutes étapes comprises ; le guide la
+ * replace alors lui-même (planifier), dans un ordre jouable. Le reste de l'ordre joué est gardé. Répété tant qu'un retrait
+ * en entraîne un autre (quête suivante d'une quête retirée). Les problèmes sans quête (race inconnue, aucune zone) restent.
+ */
+export function corrigerGuide(g: GuideProbe, portee: Portee, autres: ParcoursReleve[] = []): { guide: GuideProbe; correctifs: Correctif[]; verification: Verification } {
+  let zones = g.zones.map((z) => ({ lieu: z.lieu, etapes: [...z.etapes] }));
+  const correctifs: Correctif[] = [];
+  let v = verifierGuide(g, portee, autres);
+  for (let tour = 0; tour < 20 && !v.ok && v.defauts?.length; tour++) {
+    let change = false;
+    for (const d of v.defauts) {
+      const z = zones.find((x) => x.lieu === d.lieu);
+      const retirees = z?.etapes.filter((cle) => Number(cle.split(":")[1]) === d.id) ?? [];
+      const deja = correctifs.find((c) => c.lieu === d.lieu && c.id === d.id);
+      if (deja) { if (!deja.raisons.includes(d.raison)) deja.raisons.push(d.raison); }
+      if (!z || !retirees.length) continue;
+      z.etapes = z.etapes.filter((cle) => !retirees.includes(cle));
+      if (deja) deja.etapes.push(...retirees);
+      else correctifs.push({ lieu: d.lieu, id: d.id, titre: d.titre, raisons: [d.raison], etapes: retirees });
+      change = true;
+    }
+    if (!change) break;
+    zones = zones.filter((z) => z.etapes.length);
+    v = verifierGuide({ ...g, zones }, portee, autres);
+  }
+  return { guide: { ...g, zones }, correctifs, verification: v };
+}
+
+/** Phrase d'un correctif, pour la page d'administration. */
+export const texteCorrectif = (c: Correctif) =>
+  `${nomLieu(c.lieu)} : « ${c.titre} » (${c.raisons.join(", ")}) retirée du parcours relevé (${c.etapes.length} étape${c.etapes.length > 1 ? "s" : ""}) ; le guide la replace lui-même dans un ordre jouable.`;
