@@ -1,4 +1,5 @@
 import { config } from "../config";
+import { pageFacebookAvecLien } from "@/config/reseaux";
 import { lienSuivi, texteReseau, urlArticle } from "../reseaux/textes";
 import { obtenirVideo } from "../reels/stockage";
 import { publierReelInstagram } from "../reseaux/instagram";
@@ -23,9 +24,12 @@ export function dansLaPlageHoraire(d = new Date()): boolean {
 
 export { urlArticle } from "../reseaux/textes";
 
-/** Texte du post Facebook : accroche, présentation, lien vers le site (jamais vers la source), phrase d'appel, mots-dièse. */
+/**
+ * Texte du post de la Page Facebook : accroche, présentation, renvoi vers le site (jamais vers la source), phrase
+ * d'appel, mots-dièse ; sans lien tant que FACEBOOK_LIENS n'est pas à « oui » (limite de Meta One).
+ */
 export function messageFacebook(a: Pick<Article, "accrocheFacebook" | "texteFacebook" | "slug" | "titre">): string {
-  return texteReseau("facebook", a);
+  return texteReseau("page-facebook", a);
 }
 
 export function urlMedia(id: number, variante: "une" | "og" = "une"): string {
@@ -35,15 +39,22 @@ export function urlMedia(id: number, variante: "une" | "og" = "une"): string {
 /**
  * Forme du post :
  *  - image Facebook fournie : post photo (l'image en grand, le lien vers l'article dans le texte) ;
- *  - sinon : post lien, dont Facebook tire l'aperçu des balises Open Graph de l'article
- *    (image d'en-tête recadrée, ou image générée par le site).
+ *  - sinon, avec lien (FACEBOOK_LIENS=oui) : post lien, dont Facebook tire l'aperçu des balises Open Graph de l'article
+ *    (image d'en-tête recadrée, ou image générée par le site) ;
+ *  - sinon, sans lien (par défaut, limite de Meta One) : post photo avec l'image d'aperçu de l'article.
  */
-export function requeteFacebook(a: Pick<Article, "accrocheFacebook" | "texteFacebook" | "slug" | "titre" | "imageFacebookId">): {
+export function imagePostFacebook(a: Pick<Article, "slug" | "imageFacebookId" | "image">): string {
+  if (a.imageFacebookId) return urlMedia(a.imageFacebookId);
+  if (a.image) return urlMedia(a.image.id, "og");
+  return `${config.siteUrl()}/articles/${a.slug}/image/`;
+}
+
+export function requeteFacebook(a: Pick<Article, "accrocheFacebook" | "texteFacebook" | "slug" | "titre" | "imageFacebookId" | "image">): {
   chemin: "photos" | "feed";
   params: Record<string, string>;
 } {
   const message = messageFacebook(a);
-  if (a.imageFacebookId) return { chemin: "photos", params: { url: urlMedia(a.imageFacebookId), message } };
+  if (a.imageFacebookId || !pageFacebookAvecLien()) return { chemin: "photos", params: { url: imagePostFacebook(a), message } };
   return { chemin: "feed", params: { message, link: lienSuivi(a.slug, "facebook") } };
 }
 

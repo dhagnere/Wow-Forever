@@ -1,4 +1,4 @@
-import { MOTS_DIESE, phraseAppel, RESEAUX, type Reseau } from "@/config/reseaux";
+import { MOTS_DIESE, pageFacebookAvecLien, phraseAppel, RESEAUX, type Reseau } from "@/config/reseaux";
 import { config } from "../config";
 import type { Article } from "../types";
 
@@ -28,7 +28,9 @@ function couper(texte: string, max: number): string {
 
 /**
  * Texte d'un post. Tous les réseaux reçoivent la même phrase d'appel à l'action.
- *  - Facebook : accroche, présentation, lien vers l'article, appel, mots-dièse.
+ *  - Facebook (partage depuis un profil) : accroche, présentation, lien vers l'article, appel, mots-dièse.
+ *  - Page Facebook : comme Facebook ; sans lien ni nom de domaine tant que FACEBOOK_LIENS n'est pas à « oui »
+ *    (limite de Meta One), avec un renvoi vers le site par son nom.
  *  - Reel, Instagram, TikTok : liens non cliquables, on renvoie vers le site par son nom.
  *  - X : 280 caractères, texte de présentation raccourci si besoin, appel et lien gardés.
  */
@@ -38,7 +40,11 @@ export function texteReseau(reseau: Reseau, a: Contenu): string {
   const appel = phraseAppel();
   const diese = MOTS_DIESE.join(" ");
 
-  if (reseau === "facebook") {
+  if (reseau === "page-facebook" && !pageFacebookAvecLien()) {
+    return [accroche, presentation, "📖 L'article complet est à la Taverne Éternelle : le lien est sur notre Page, bouton « Visiter le site ».", phraseAppel(false), diese]
+      .filter(Boolean).join("\n\n");
+  }
+  if (reseau === "facebook" || reseau === "page-facebook") {
     return [accroche, presentation, `📖 Lire la suite à la Taverne : ${lienSuivi(a.slug, "facebook")}`, appel, diese].filter(Boolean).join("\n\n");
   }
   const lien = lienSuivi(a.slug, "x");

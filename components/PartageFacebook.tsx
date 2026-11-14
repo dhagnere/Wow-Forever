@@ -11,14 +11,14 @@ import { useState } from "react";
  * souvent quand on publie en tant que Page : on clique sur « Créer une publication » et on colle le texte, dont le
  * lien vers l'article produit l'aperçu.
  */
-export function PartageFacebook({ url, texte, libelle = "Partager sur Facebook", cta, className = "btn btn-facebook", page }: {
-  url: string; texte: string; libelle?: string; cta?: string; className?: string; page?: string;
+export function PartageFacebook({ url, texte, libelle = "Partager sur Facebook", cta, className = "btn btn-facebook", page, consigne: consignePropre }: {
+  url: string; texte: string; libelle?: string; cta?: string; className?: string; page?: string; consigne?: string;
 }) {
   const [etat, setEtat] = useState<"" | "copie" | "echec">("");
   const lien = page ?? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-  const consigne = page
+  const consigne = consignePropre ?? (page
     ? "Texte du post copié : sur la Page, cliquez sur « Créer une publication » et collez-le (Ctrl+V, ou appui long puis Coller). L'aperçu de l'article se crée tout seul."
-    : "Texte du post copié : dans Facebook, collez-le dans « Quoi de neuf ? » (Ctrl+V, ou appui long puis Coller).";
+    : "Texte du post copié : dans Facebook, collez-le dans « Quoi de neuf ? » (Ctrl+V, ou appui long puis Coller).");
   function copier() {
     // Lancée pendant le clic (geste de l'utilisateur), sans retenir l'ouverture de la fenêtre.
     try {
