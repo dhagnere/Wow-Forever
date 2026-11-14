@@ -1,13 +1,13 @@
 /**
  * Journal de Jobwow en vidéo, sur le PC de Jobwow (jamais sur le serveur du site) :
  *
- *   npm run carnet:video -- "<dossier des vidéos de Warcraft Recorder>" [--sortie <dossier>] [--ecart 30] [--routeprobe <RouteProbe.lua>]
+ *   npm run carnet:video -- "<dossier des vidéos de Warcraft Recorder>" [--sortie <dossier>] [--ecart 30] [--sonde <EternalProbe.lua>]
  *
  * 1. range les vidéos dans l'ordre chronologique (date et heure du nom de fichier, sinon date du fichier) ;
  * 2. les regroupe par séance de jeu (plus de 30 minutes entre deux fichiers : nouvelle séance) ;
  * 3. assemble chaque séance en une vidéo, sans réencodage (ffmpeg, copie des flux) ;
  * 4. écrit à côté le titre et la description à coller dans YouTube Studio, avec les chapitres calculés à partir des
- *    repères de RouteProbe (zones, niveaux, /rp mark), datés par l'heure du PC.
+ *    repères d'EternalProbe ou de l'ancienne RouteProbe (zones, niveaux, /ep mark), datés par l'heure du PC.
  *
  * Le logo vient du filigrane de la chaîne (YouTube Studio > Personnalisation > Image de marque) : aucun réencodage.
  * L'envoi sur YouTube reste manuel : faire glisser la vidéo dans YouTube Studio et coller le texte.
@@ -16,7 +16,7 @@ import { execFile } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import ffmpeg from "@ffmpeg-installer/ffmpeg";
-import { chapitres, descriptionVideo, heureLocale, horodatage, lireTableLua, reperesRouteProbe, seances, titreVideo, type Clip, type Repere } from "@/lib/videoCarnet";
+import { chapitres, descriptionVideo, heureLocale, horodatage, lireSauvegardeSonde, reperesRouteProbe, seances, SONDES, titreVideo, type Clip, type Repere } from "@/lib/videoCarnet";
 
 const SITE = (process.env.SITE_URL ?? "https://www.taverne-eternelle.fr").replace(/\/+$/, "");
 const COMPTES_WOW = "C:\\WOW\\world of Warcraft\\_forever_\\WTF\\Account";
@@ -55,13 +55,13 @@ function debutDe(fichier: string, secondes: number): number {
   return local - Math.round(secondes * 1000);
 }
 
-/** Sauvegardes de RouteProbe trouvées dans l'installation de WoW (un fichier par compte), ou celle donnée en option. */
-function sauvegardesRouteProbe(): string[] {
-  const donnee = option("routeprobe");
+/** Sauvegardes d'EternalProbe et de RouteProbe trouvées dans l'installation de WoW (par compte), ou celle donnée en option. */
+function sauvegardesSonde(): string[] {
+  const donnee = option("sonde") ?? option("routeprobe");
   if (donnee) return [donnee];
   if (!existsSync(COMPTES_WOW)) return [];
   return readdirSync(COMPTES_WOW)
-    .map((compte) => path.join(COMPTES_WOW, compte, "SavedVariables", "RouteProbe.lua"))
+    .flatMap((compte) => SONDES.map((s) => path.join(COMPTES_WOW, compte, "SavedVariables", s.fichier)))
     .filter((f) => existsSync(f));
 }
 
@@ -108,14 +108,14 @@ async function main() {
     clips.push({ fichier: f, debut: debutDe(f, d), duree: d });
   }
 
-  // 2. repères de RouteProbe
+  // 2. repères de la sonde (EternalProbe, ou l'ancienne RouteProbe)
   const reperes: Repere[] = [];
-  for (const f of sauvegardesRouteProbe()) {
-    reperes.push(...reperesRouteProbe(lireTableLua(readFileSync(f, "utf8"))));
-    console.log(`Repères RouteProbe : ${f}`);
+  for (const f of sauvegardesSonde()) {
+    reperes.push(...reperesRouteProbe(lireSauvegardeSonde(readFileSync(f, "utf8"))));
+    console.log(`Repères de la sonde : ${f}`);
   }
   reperes.sort((a, b) => a.heure - b.heure);
-  if (!reperes.length) console.log("Aucun repère RouteProbe trouvé : les vidéos n'auront qu'un chapitre de départ (pensez à /reload en jeu pour sauvegarder).");
+  if (!reperes.length) console.log("Aucun repère de sonde trouvé : les vidéos n'auront qu'un chapitre de départ (pensez à /reload en jeu pour sauvegarder).");
 
   // 3 et 4. une vidéo et un texte par séance
   const parJour = new Map<string, number>();

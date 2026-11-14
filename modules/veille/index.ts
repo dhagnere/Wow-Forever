@@ -112,9 +112,6 @@ export { traduireLettre, traduireLettresEnAttente, empreinteLettre, CONSIGNES_TR
 /** Ferme la connexion à la base (scripts en ligne de commande hors du module). */
 export { fermer as fermerBase } from "./db/pool";
 
-// Relecture du guide de 1 à 60 en jeu (/admin/guides).
-export type { NoteEtape, RemarqueGuide } from "./guides/relecture";
-export { lireRelecture, enregistrerRelecture, avancementRelecture, remarquesRelecture, etapeValide, guideValide, lireBlocRemarques } from "./guides/relecture";
 
 // Courriels du site (Resend) : mot de passe oublié, confirmations, Lettre.
 export type { Courriel } from "./courriel/resend";
@@ -123,3 +120,7 @@ export { courrielConfigure, envoyerCourriel } from "./courriel/resend";
 // Chaîne YouTube : dernières vidéos lues dans le flux public (page « Les vidéos de Jobwow »).
 export type { VideoChaine } from "./youtube/chaine";
 export { videosChaine, videosDepuisFlux, idChaineValide } from "./youtube/chaine";
+
+// Guides à valider de Probe (/admin/probe) : codes de /ep export, publiés dans le guide de 1 à 60 sans déploiement.
+export type { EtatProbe, LigneProbe, PorteeProbe, ReleveProbe } from "./probe/depot";
+export { deposerGuideProbe, guidesProbe, lireGuideProbe, publierGuideProbe, decliner as declinerGuideProbe, parcoursProbePublies } from "./probe/depot";

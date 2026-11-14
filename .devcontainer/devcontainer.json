@@ -1,0 +1,24 @@
+{
+  "name": "La Taverne Éternelle",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "site",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "shutdownAction": "stopCompose",
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": { "label": "Site", "onAutoForward": "openPreview" }
+  },
+  "postCreateCommand": "bash .devcontainer/preparer.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": ["sumneko.lua", "vitest.explorer"],
+      "settings": {
+        "Lua.runtime.version": "Lua 5.1",
+        "Lua.diagnostics.globals": ["SlashCmdList", "DEFAULT_CHAT_FRAME", "C_QuestLog", "C_Map", "C_GossipInfo", "C_Timer", "CreateFrame", "UnitName", "UnitRace", "UnitClass", "UnitLevel", "UnitFactionGroup", "UnitGUID", "GetTime", "GetZoneText", "GetRealmName", "ReloadUI", "Screenshot", "time", "date"]
+      }
+    },
+    "codespaces": {
+      "openFiles": ["addon/README.md"]
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chapitres, descriptionVideo, heureLocale, horodatage, lireTableLua, positionDans, reperesRouteProbe, seances, titreVideo, type Clip } from "@/lib/videoCarnet";
+import { chapitres, descriptionVideo, heureLocale, horodatage, lireSauvegardeSonde, lireTableLua, positionDans, reperesRouteProbe, seances, titreVideo, type Clip } from "@/lib/videoCarnet";
 
 // Sauvegarde de RouteProbe telle que le jeu l'écrit : un orc en cours, un démoniste mis de côté.
 const SAUVEGARDE = `
@@ -8,10 +8,10 @@ RouteProbeDB = {
 	["events"] = {
 		"1000.0|clock|debut|2026-11-11 21:00:00", -- [1]
 		"1001.0|zone|Durotar|1411|0.42|0.68", -- [2]
-		"1300.0|level|3", -- [3]
+		"1300.0|level|3|nouveau", -- [3]
 		"1305.0|mark|Sortie de la \\"Vallée\\"", -- [4]
 		"1900.0|zone|Les Tarides|1413|0.5|0.5", -- [5]
-		"2500.0|level|4", -- [6]
+		"2500.0|level|4|nouveau", -- [6]
 		"3000.0|zone|Les Tarides|1413|0.5|0.5", -- [7]
 	},
 	["horloges"] = {
@@ -50,6 +50,20 @@ describe("sauvegarde de RouteProbe", () => {
     const marque = r.find((x) => x.type === "marqueur")!;
     expect(marque.heure).toBe(heureLocale("2026-11-11 21:05:05"));
     expect(marque.texte).toBe('Sortie de la "Vallée"');
+  });
+});
+
+describe("sauvegarde d'EternalProbe", () => {
+  it("lit EternalProbeDB comme RouteProbeDB : mêmes repères, même personnage", () => {
+    const eternal = SAUVEGARDE.replace("RouteProbeDB =", "EternalProbeDB =").replace('["enCours"] = true,', '["enCours"] = true,\n\t["format"] = 2,');
+    const db = lireSauvegardeSonde(eternal);
+    expect((db as Record<string, unknown>).format).toBe(2);
+    expect(reperesRouteProbe(db)).toEqual(reperesRouteProbe(lireTableLua(SAUVEGARDE)));
+  });
+
+  it("garde les anciennes sauvegardes de RouteProbe", () => {
+    expect(reperesRouteProbe(lireSauvegardeSonde(SAUVEGARDE)).length).toBeGreaterThan(0);
+    expect(lireSauvegardeSonde("-- vide")).toBeNull();
   });
 });
 
@@ -124,5 +138,13 @@ describe("séances et chapitres", () => {
     expect(horodatage(0)).toBe("0:00");
     expect(horodatage(872)).toBe("14:32");
     expect(horodatage(3725)).toBe("1:02:05");
+  });
+});
+
+describe("niveau atteint", () => {
+  it("lit le nouveau niveau des sondes récentes, et ajoute un aux anciennes, qui notaient l'ancien", async () => {
+    const { niveauAtteint } = await import("@/lib/videoCarnet");
+    expect(niveauAtteint("230029.6|level|2".split("|"))).toBe(3);
+    expect(niveauAtteint("230029.6|level|3|nouveau".split("|"))).toBe(3);
   });
 });

@@ -20,7 +20,11 @@ n'entre jamais dans le site.
    **Miniature** (`miniature`, obligatoire, une par vidéo) : 1280 × 720, 2 Mo au plus, dans `public/images/videos/`
    (`journal-<date>.jpg`, suffixe `-2` pour une deuxième séance le même jour). Elle s'affiche dans la fiche de l'admin,
    avec un lien de téléchargement ; le test refuse une vidéo préparée sans miniature.
-   - **Image** : une image nette du personnage de Jobwow tirée de la vidéo (ffmpeg, une image par seconde autour d'un
+   - **Image** (à partir du 13/11/2026) : une illustration fournie par Jobwow, différente pour chaque vidéo, qui montre
+     la progression du personnage ; gardée dans `visuels/videos/illustration-<numéro>.webp` (la première vidéo :
+     `illustration-01.webp`). Elle porte le logo de World of Warcraft Forever : créditer « © Blizzard Entertainment »
+     dans la description. Ne jamais aller chercher une illustration ailleurs.
+   - **Image** (avant le 13/11/2026, et à défaut d'illustration fournie) : une image nette du personnage de Jobwow tirée de la vidéo (ffmpeg, une image par seconde autour d'un
      moment fort : arrivée dans une ville, niveau gagné, gros plan). Effacer le nom flottant et les icônes d'interface
      collées au personnage (OpenCV, `cv2.inpaint`, masque sur le texte violet et sur les icônes) ; le bas de l'image
      passe sous le dégradé.
@@ -32,6 +36,42 @@ n'entre jamais dans le site.
 5. **Lettre de la semaine**, en français et en anglais, dans `content/lettres-preparees.ts` : le récit des séances, avec un
    lien vers `/carnet/videos/` (ou `/en/notebook/videos/`) et le Carnet. Elle s'importe en brouillon dans `/admin/lettre`.
 6. **Vérifier** (`npm run lint && npm test && npm run build`), puis pousser sur `dev`.
+
+## Jobwow incrusté (bulles et sous-titres)
+
+Décidé le 13 novembre 2026 : pas de voix ; Jobwow (sa capture, dans un médaillon) en bas à gauche, une bulle de réplique
+humoristique et un sous-titre à chaque moment fort, la miniature YouTube en image de départ, une vidéo 16:9 et des clips
+verticaux de 30 s. Gratuit, tout sur le PC de Jobwow. Une vidéo fournie donne une vidéo rendue (pas de regroupement).
+
+Un dossier (celui de Warcraft Recorder) est rangé par séances comme pour `carnet:video` (plus de 30 minutes d'écart : nouvelle
+séance), chaque séance assemblée sans réencodage dans « Journal de Jobwow » (`--sortie` pour un autre dossier) ; `--par-fichier`
+garde une vidéo par fichier.
+
+1. `npm run carnet:incrustation -- "<vidéo ou dossier>" --preparer` écrit `<vidéo>.narration.json` : intro, puis les moments
+   tirés des repères d'EternalProbe (niveau, élite, mort, zone, grimoire, entraîneur, trajet, vol, repère `/ep mark`, une
+   quête rendue toutes les deux minutes au plus), sans chevauchement, et trois clips verticaux au plus. Miniature :
+   `--miniature <image>` ou `<vidéo>.miniature.jpg|png|webp` à côté de la vidéo.
+2. Relecture dans l'**Atelier vidéo de Jobwow** (artefact https://claude.ai/artifact/DSRxPCDtJQRUeL65i1cfvs) : ouvrir le
+   fichier, corriger heures, répliques (« Autre réplique »), sous-titres et clips, aperçu 16:9 et 9:16, puis copier le texte
+   dans le fichier.
+3. `npm run carnet:incrustation -- "<vidéo>.narration.json"` rend `<vidéo>.jobwow.mp4` et `<vidéo>.clip-N.mp4`
+   (`--sans-clips` pour s'en passer). Le médaillon (portrait retouché « Taverne » : parties claires assombries, touche chaude, bords assombris) rebondit quand Jobwow « parle », passe en gris à la mort, en doré au niveau.
+
+**Voix de Jobwow** (choisie le 14/11) : `npm run carnet:voix -- "<vidéo>.narration.json"` fait dire chaque bulle par
+Chatterbox Multilingual (Resemble AI, licence MIT, français), qui imite `visuels/voix/jobwow-reference.mp3` (voix « Gilles »
+de Piper, enregistrements CC0, traitée « mort-vivant léger ») avec exaggeration 0,7 et cfg 0,3 (`scripts/voix_chatterbox.py`).
+Les fichiers vont dans `voix-<vidéo>/` ; la narration reçoit `voix`, `voixTexte`, `dureeVoix`, et la bulle dure le temps de
+la phrase. Le rendu mêle les voix au jeu, baissé à 35 % pendant qu'elles parlent ; une bulle modifiée après coup garde
+l'ancienne voix muette jusqu'au prochain `carnet:voix`. Installation sur le PC, une seule fois : environ 5 Go libres, puis
+`npm run voix:installer` (`scripts/installer-voix.ps1`). Le script choisit un Python compatible (3.10 à 3.14 : PyTorch
+audio n'existe pas pour 3.15) ou installe 3.12 à côté par `py install`, sans toucher à la dernière version ; il crée
+l'environnement `.voix/` (non versionné), y installe chatterbox-tts, PyTorch pour CUDA si une carte NVIDIA est présente,
+et télécharge le modèle. `carnet:voix` (`scripts/voix.ts`) lance `voix_chatterbox.py` avec ce Python. Sans carte NVIDIA, la voix se calcule au
+processeur : plus lent, sans limite. Description YouTube : mentionner la voix de synthèse.
+
+Répliques dans `content/repliques-jobwow.ts` (aucune classe citée : celle de Jobwow n'est jamais précisée), narration et
+graphe ffmpeg dans `lib/incrustation.ts`, images (sharp) et encodage dans `scripts/incrustation-video.ts`, contrôles dans
+`tests/incrustation.test.ts`. L'atelier embarque une copie des répliques : la republier quand la liste change.
 
 ## Règles des textes
 

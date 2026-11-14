@@ -10,7 +10,7 @@ export const SITE = {
   /** Conteneur Google Tag Manager. NEXT_PUBLIC_GTM_ID=off le désactive (développement local, par exemple). */
   gtmId: process.env.NEXT_PUBLIC_GTM_ID === "off" ? "" : (process.env.NEXT_PUBLIC_GTM_ID ?? "GTM-5KX55C25"),
   /** Chaîne YouTube de la Taverne ; NEXT_PUBLIC_YOUTUBE_URL la remplace si besoin (« off » masque les liens). */
-  youtube: process.env.NEXT_PUBLIC_YOUTUBE_URL === "off" ? "" : (process.env.NEXT_PUBLIC_YOUTUBE_URL || "https://www.youtube.com/@TheWowtoon"),
+  youtube: process.env.NEXT_PUBLIC_YOUTUBE_URL === "off" ? "" : (process.env.NEXT_PUBLIC_YOUTUBE_URL || "https://www.youtube.com/@Jobwow-taverne"),
   /** Identifiant « UC… » de la même chaîne, pour la liste des vidéos ; YOUTUBE_CHANNEL_ID le remplace si besoin. */
   youtubeChaine: process.env.YOUTUBE_CHANNEL_ID || "UCJGfW3y0BO7Dojj-kYh-_9g",
   /** Discord de la Taverne (lien d'invitation) : sans valeur, les boutons Discord ne s'affichent pas. */

@@ -1,0 +1,26 @@
+# Environnement de travail GitHub Codespaces : le site (Node 22) et sa base PostgreSQL.
+# Rien n'est installé sur le PC : tout tourne dans le Codespace, ouvert depuis le navigateur.
+services:
+  site:
+    image: mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity
+    environment:
+      DATABASE_URL: postgres://taverne:taverne@db:5432/taverne_eternelle
+      SITE_URL: http://localhost:3000
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: taverne
+      POSTGRES_PASSWORD: taverne
+      POSTGRES_DB: taverne_eternelle
+    volumes:
+      - base:/var/lib/postgresql/data
+
+volumes:
+  base:

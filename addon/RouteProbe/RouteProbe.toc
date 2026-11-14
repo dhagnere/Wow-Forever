@@ -1,0 +1,12 @@
+## Interface: 16001, 11500, 11501, 11502, 11503, 11504, 11505, 11506, 11507, 11508, 11509, 11510
+## Title: RouteProbe
+## Notes: Sonde d'enregistrement de parcours (addon indépendant)
+## Notes-frFR: Sonde d'enregistrement de parcours (addon indépendant)
+## Author: La Taverne Éternelle
+## Version: 0.6.0
+## Category: Quests
+## Category-frFR: Quêtes
+## X-Website: https://www.taverne-eternelle.fr/
+## SavedVariables: RouteProbeDB
+
+RouteProbe.lua

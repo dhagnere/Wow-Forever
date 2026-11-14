@@ -385,7 +385,7 @@ ALTER TABLE lettre_envois ADD COLUMN IF NOT EXISTS empreinte_source TEXT;
 ALTER TABLE lettre_envois ADD COLUMN IF NOT EXISTS traduction_erreur TEXT;
 CREATE UNIQUE INDEX IF NOT EXISTS lettre_envois_traduction_idx ON lettre_envois (traduction_de) WHERE traduction_de IS NOT NULL;
 
--- Relecture du guide de 1 à 60 en jeu (/admin/guides) : étape vérifiée et remarque, par guide.
+-- Ancienne relecture du guide (/admin/guides, retirée le 13/11/2026) : table gardée pour ses données, plus lue ni écrite.
 CREATE TABLE IF NOT EXISTS guides_relecture (
   guide     TEXT NOT NULL,
   etape     TEXT NOT NULL,
@@ -394,3 +394,22 @@ CREATE TABLE IF NOT EXISTS guides_relecture (
   maj_le    TIMESTAMPTZ NOT NULL DEFAULT now(),
   PRIMARY KEY (guide, etape)
 );
+
+-- Guides à valider de Probe (/admin/probe) : codes collés depuis /ep export, analysés, puis publiés ou écartés.
+-- Un guide publié alimente les pages du guide de 1 à 60 (parcours relevés, en tête de zone) sans déploiement.
+CREATE TABLE IF NOT EXISTS probe_guides (
+  id            SERIAL PRIMARY KEY,
+  recu_le       TIMESTAMPTZ NOT NULL DEFAULT now(),
+  personnage    TEXT NOT NULL DEFAULT '',
+  race          TEXT,
+  classe        TEXT,
+  faction       TEXT,
+  partie        TEXT,
+  portee        TEXT NOT NULL DEFAULT 'race' CHECK (portee IN ('classe', 'race', 'faction')),
+  etat          TEXT NOT NULL DEFAULT 'a_valider' CHECK (etat IN ('a_valider', 'publie', 'ecarte', 'retire')),
+  guide         JSONB NOT NULL,
+  verification  JSONB NOT NULL DEFAULT '{}'::jsonb,
+  releves       JSONB NOT NULL DEFAULT '[]'::jsonb,
+  decide_le     TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS probe_guides_etat_idx ON probe_guides (etat, recu_le DESC);
