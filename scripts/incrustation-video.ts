@@ -25,7 +25,7 @@ import {
   evenementsSonde, grapheRendu, preparerNarration, typographie, verifierNarration, voixAJour,
   type Calque, type Evenement, type Moment, type Narration,
 } from "@/lib/incrustation";
-import { chapitres, heureLocale, horodatage, lireSauvegardeSonde, positionDans, reperesRouteProbe, seances, SONDES, titreVideo, type Clip, type Repere, type Seance } from "@/lib/videoCarnet";
+import { chapitres, heureLocale, horodatage, lireSauvegardeSonde, positionDans, reperesRouteProbe, seances, SONDES, titreVideo, DOSSIER_VIDEOS, type Clip, type Repere, type Seance } from "@/lib/videoCarnet";
 
 const COMPTES_WOW = "C:\\WOW\\world of Warcraft\\_forever_\\WTF\\Account";
 const EXTENSIONS = new Set([".mp4", ".mkv", ".mov"]);
@@ -34,7 +34,11 @@ const POLICE_BULLE = "Georgia, Palatino Linotype, TeX Gyre Pagella, serif Bold";
 const POLICE_ST = "Segoe UI Semibold, Inter SemiBold, DejaVu Sans Bold, sans-serif";
 
 const option = (nom: string) => { const i = process.argv.indexOf(`--${nom}`); return i > 0 ? process.argv[i + 1] : undefined; };
-const drapeau = (nom: string) => process.argv.includes(`--${nom}`);
+// PowerShell retire souvent le « -- » de npm run, et npm garde alors les options pour lui : « preparer » sans tirets
+// et la variable npm_config_<nom> valent aussi
+const MOTS = ["preparer", "sans-clips", "par-fichier"];
+const drapeau = (nom: string) =>
+  process.argv.includes(`--${nom}`) || process.argv.includes(nom) || process.env[`npm_config_${nom.replace(/-/g, "_")}`] === "true";
 const sansExt = (f: string) => f.slice(0, -path.extname(f).length);
 
 function journalFfmpeg(args: string[]): Promise<string> {
@@ -230,8 +234,10 @@ function miniatureVoisine(video: string): string | null {
 }
 
 async function main() {
-  const cible = process.argv[2];
-  const usage = 'Usage : npm run carnet:incrustation -- "<vidéo, dossier ou .narration.json>" [--miniature <image>] [--sonde <fichier>] [--preparer] [--sans-clips]';
+  // sans cible donnée : le dossier D:\WOW, où se font toutes les opérations vidéo
+  const premier = process.argv[2];
+  const cible = premier && !premier.startsWith("--") && !MOTS.includes(premier) ? premier : DOSSIER_VIDEOS;
+  const usage = 'Usage : npm run carnet:incrustation [-- "<vidéo, dossier ou .narration.json, D:\\WOW par défaut>"] [--miniature <image>] [--sonde <fichier>] [--preparer] [--sans-clips]';
   if (!cible || cible.startsWith("--") || !existsSync(cible)) { console.error(`${cible ? `Introuvable : « ${cible} ».\n` : ""}${usage}`); process.exit(1); }
 
   // vidéos à traiter : une narration, un fichier, ou un dossier rangé par séances

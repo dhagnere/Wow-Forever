@@ -304,3 +304,6 @@ export function descriptionVideo(s: Seance, info: { liste: Chapitre[]; valides: 
   if (!info.valides) lignes.splice(2, info.liste.length + 2);
   return lignes.join("\n");
 }
+
+/** Dossier de toutes les opérations vidéo sur le PC de Jobwow (vidéos, narrations, rendus) ; DOSSIER_VIDEOS le remplace. */
+export const DOSSIER_VIDEOS = process.env.DOSSIER_VIDEOS || "D:\\WOW";
