@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { lettresCarnet, listerPublies, videosChaine } from "@/modules/veille";
+import { lettresCarnet, videosChaine } from "@/modules/veille";
 import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { JournalVideo } from "@/components/JournalVideo";
 import { LettresCarnet } from "@/components/LettresCarnet";
-import { SITE, dateLongue } from "@/lib/site";
+import { SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -16,8 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Carnet() {
-  const [episodes, videos, lettres] = await Promise.all([
-    listerPublies({ rubrique: "carnet", limite: 100 }),
+  const [videos, lettres] = await Promise.all([
     videosChaine(SITE.youtubeChaine),
     lettresCarnet("fr", 12),
   ]);
@@ -44,22 +43,8 @@ export default async function Carnet() {
       </section>
       <div className="wrap contenu">
         <div className="colonnes">
-          <section className="colonne-principale" aria-labelledby="t-episodes">
+          <section className="colonne-principale" aria-label="Le Journal de Jobwow">
             {videos.length ? <JournalVideo videos={videos} /> : null}
-            <h2 id="t-episodes" className="section-titre" style={{ fontSize: 26 }}>Les épisodes</h2>
-            {episodes.length ? (
-              <ol style={{ listStyle: "none", margin: 0, padding: "0 0 0 28px", borderLeft: "2px solid var(--bordure)", display: "flex", flexDirection: "column", gap: 28 }}>
-                {episodes.map((e) => (
-                  <li key={e.id}>
-                    <p className="surtitre">{e.publieLe ? dateLongue(e.publieLe) : ""}</p>
-                    <h3 style={{ margin: "0 0 6px", fontSize: 22 }}><Link href={`/articles/${e.slug}/`}>{e.titre}</Link></h3>
-                    <p className="doux" style={{ margin: 0 }}>{e.chapo}</p>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="doux">Premier épisode le dimanche 8 novembre à 18h.</p>
-            )}
             <LettresCarnet lettres={lettres} />
           </section>
           <aside className="colonne-laterale">

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { lettresCarnet, listerPubliesEn, videosChaine } from "@/modules/veille";
+import { lettresCarnet, videosChaine } from "@/modules/veille";
 import { LETTRES_PREPAREES } from "@/content/lettres-preparees";
 import { lettresCarnetEn } from "@/lib/lettresCarnet";
 import { Ariane } from "@/components/Ariane";
@@ -16,11 +16,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/en/notebook/", languages: { fr: "/carnet/", en: "/en/notebook/", "x-default": "/carnet/" } },
 };
 
-const dateEn = (d: Date) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" }).format(d);
 
 export default async function NotebookEn() {
-  const [episodes, videos, en, fr] = await Promise.all([
-    listerPubliesEn({ rubrique: "carnet", limite: 100 }),
+  const [videos, en, fr] = await Promise.all([
     videosChaine(SITE.youtubeChaine),
     lettresCarnet("en", 12),
     lettresCarnet("fr", 12),
@@ -49,22 +47,8 @@ export default async function NotebookEn() {
       </section>
       <div className="wrap contenu">
         <div className="colonnes">
-          <section className="colonne-principale" aria-labelledby="t-episodes">
+          <section className="colonne-principale" aria-label="Jobwow's Journal">
             {videos.length ? <JournalVideo langue="en" videos={videos} /> : null}
-            <h2 id="t-episodes" className="section-titre" style={{ fontSize: 26 }}>The episodes</h2>
-            {episodes.length ? (
-              <ol style={{ listStyle: "none", margin: 0, padding: "0 0 0 28px", borderLeft: "2px solid var(--bordure)", display: "flex", flexDirection: "column", gap: 28 }}>
-                {episodes.map((e) => (
-                  <li key={e.id}>
-                    <p className="surtitre">{e.publieLe ? dateEn(e.publieLe) : ""}</p>
-                    <h3 style={{ margin: "0 0 6px", fontSize: 22 }}><Link href={`/en/articles/${e.slug}/`}>{e.titre}</Link></h3>
-                    <p className="doux" style={{ margin: 0 }}>{e.chapo}</p>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="doux">First episode on Sunday 8 November at 6 pm, Paris time. Each episode is translated within an hour of its French publication.</p>
-            )}
             <LettresCarnet lettres={lettres} langue="en" />
           </section>
           <aside className="colonne-laterale">
