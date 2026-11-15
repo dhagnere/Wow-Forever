@@ -240,7 +240,7 @@ local out = {}
 for _, s in ipairs(route.steps) do
   local q = s.quests[1]
   if q.kind == "voyage" then
-    out[#out + 1] = table.concat({ q.mode, tostring(q.name), s.map, q.versCarte, tostring(q.vers), tostring(s.voyage) }, "|")
+    out[#out + 1] = table.concat({ q.mode, tostring(q.name), s.map, tostring(q.versCarte), tostring(q.vers), tostring(s.voyage) }, "|")
   end
 end
 return #route.steps .. "\\n" .. table.concat(out, "\\n")`;
@@ -252,6 +252,11 @@ return #route.steps .. "\\n" .. table.concat(out, "\\n")`;
     expect(sans.filter((l) => l.startsWith("vol|"))).toHaveLength(1);
     expect(Number(avec[0])).toBe(Number(sans[0]) + 1);
     expect(avec).toContain("zeppelin|Zeppelin Orgrimmar - Tirisfal|1411|1420|Clairières de Tirisfal|true");
+    // embarqué puis sonde arrêtée : l'étape garde le départ, sans arrivée connue
+    const ouvert = executer(SIMULE, ...SONDE, SEANCE,
+      'BANC.carte, BANC.zone, BANC.x, BANC.y = 1411, "Durotar", 0.50, 0.12; SlashCmdList.ETERNALPROBE("trajet Zeppelin")',
+      ESPACE, lire("EternalRoutes/Importer.lua"), VOYAGES).split("\n");
+    expect(ouvert).toContain("zeppelin|Zeppelin|1411|nil|nil|true");
   });
 
   it("préfère EternalProbeDB à l'ancienne RouteProbeDB", () => {
@@ -388,6 +393,34 @@ zep.steps[1].quests = { { kind = "voyage", mode = "zeppelin" } }; zep.steps[2].m
 out[#out + 1] = tostring(EternalRoutes.Importer.DansSaZoneDeDepart(zep))
 return table.concat(out, " ")`);
     expect(r).toBe("a c true false false");
+  });
+
+  it("note seul un zeppelin qui change de continent : départ au quai où l'on attendait, pas après une pierre de foyer", () => {
+    const r = executer(SIMULE, ...SONDE, SEANCE, `
+local P = EternalProbe
+BANC.continent = 0
+UnitPosition = function() return 0, 0, 0, BANC.continent end
+P.Start()
+-- attente au quai du zeppelin des Clairières de Tirisfal, puis traversée vers Durotar
+BANC.carte, BANC.zone, BANC.x, BANC.y = 1420, "Clairières de Tirisfal", 0.608, 0.588
+BANC.Avancer(12)
+BANC.x = 0.62; BANC.Avancer(2)
+BANC.continent = 1; BANC.carte, BANC.zone, BANC.x, BANC.y = 1411, "Durotar", 0.50, 0.12
+BANC.Avancer(10)
+-- retour par la pierre de foyer après une attente : rien de noté
+BANC.x = 0.55; BANC.Avancer(12)
+BANC.Evenement("UNIT_SPELLCAST_SUCCEEDED", "player", "x", 8690)
+BANC.continent = 0; BANC.carte, BANC.zone, BANC.x, BANC.y = 1420, "Clairières de Tirisfal", 0.61, 0.52
+BANC.Avancer(10)
+local t = {}
+for _, e in ipairs(EternalProbeDB.events) do if e:find("|trajet|") then t[#t + 1] = e:gsub("^[%d.]+|", ""):match("^([^|]+|[^|]+|[^|]+|[^|]+|[^|]+)") end end
+t[#t + 1] = P.ModeQuai(1434, 0.3) .. "/" .. P.ModeQuai(1434, 0.7) .. "/" .. P.ModeQuai(1453, 0.5)
+return table.concat(t, "\\n")`).split("\n");
+    expect(r).toEqual([
+      "trajet|debut|Zeppelin|Clairières de Tirisfal|1420",
+      "trajet|arrivee|Zeppelin|Durotar|1411",
+      "Zeppelin/Bateau/Bateau",
+    ]);
   });
 
   it("note un trajet d'un clic sur le bouton « Trajet » (zeppelin, bateau, arrivée, abandon) et le nomme d'après l'arrivée", () => {

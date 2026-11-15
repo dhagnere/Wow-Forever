@@ -25,7 +25,8 @@
     reste immobile 5 s dans une autre carte que celle du départ ; /ep trajet fin la note à la main,
     /ep trajet annule l'abandonne. Sans commande : le bouton « Trajet » (déplaçable, près de la minicarte) ou un
     raccourci clavier (Options > Raccourcis > EternalProbe) : clic gauche zeppelin, clic droit bateau, Maj + clic abandon ;
-    /ep bouton le masque ou l'affiche. Un trajet marche même sans enregistrement en cours, survit à un /reload,
+    /ep bouton le masque ou l'affiche. Un zeppelin ou un bateau qui change de continent est noté seul (0.11.5) :
+    départ au quai où l'on a attendu, sans clic. Un trajet marche même sans enregistrement en cours, survit à un /reload,
     et devient dans EternalRoutes (0.14) une étape « voyage » au départ de l'embarcadère, validée à l'arrivée ;
     un vol (taxi, puis vol depart et arrivee) donne de même une étape au maître de vol.
 
@@ -104,9 +105,10 @@ local function TrajetFin(issue)
     if P.MajBoutonTrajet then P.MajBoutonTrajet() end
 end
 
-local function TrajetDebut(nom)
+local function TrajetDebut(nom, depart)
     if trajet then TrajetFin("annule") end
     local zone, map, x, y = Ici()
+    if depart then zone, map, x, y = depart.zone, depart.map, depart.x, depart.y end
     if map == "nil" then P.Print("Position inconnue : impossible de noter le départ du trajet ici.") return end
     nom = (nom and nom ~= "") and nom or ("Trajet depuis " .. zone)
     trajet = { nom = nom, carte = map, zone = zone, t = GetTime(), immobile = 0 }
@@ -130,6 +132,48 @@ local function SuivreTrajet()
     trajet.dernier = { map = map, x = x, y = y }
     if trajet.immobile >= 5 then TrajetFin("arrivee") end
 end
+
+-- ---- trajets vus seuls : zeppelin ou bateau qui change de continent -----------------
+-- Le quai est l'endroit où l'on est resté immobile au moins 8 s (l'attente du transport) ; un changement de
+-- continent (écran de chargement en route) sans pierre de foyer ni mort, moins de 10 min après, ouvre le trajet
+-- depuis ce quai ; l'arrivée se note ensuite comme pour un trajet noté à la main.
+local quai, dernierePos, immobileQuai, continent, foyer = nil, nil, 0, nil, -999
+local SORTS_FOYER = { [8690] = true, [556] = true } -- pierre de foyer, rappel astral
+
+--- Zeppelin ou bateau, d'après le quai : les zeppelins de la Horde partent de Durotar, des Clairières de
+--- Tirisfal et de Grom'gol (nord de Strangleronce) ; tout le reste est un bateau.
+function P.ModeQuai(map, y)
+    if map == 1411 or map == 1420 then return "Zeppelin" end
+    if map == 1434 and y and y < 0.5 then return "Zeppelin" end
+    return "Bateau"
+end
+
+local function SuivreQuai()
+    local map, x, y = P.Position()
+    if map and x and x > 0 then
+        local d = dernierePos
+        if d and d.map == map and math.abs(x - d.x) < 0.002 and math.abs(y - d.y) < 0.002 then
+            immobileQuai = immobileQuai + 1
+        else
+            immobileQuai = 0
+        end
+        dernierePos = { map = map, x = x, y = y }
+        if immobileQuai >= 8 and not (UnitOnTaxi and UnitOnTaxi("player")) then
+            quai = { map = map, x = x, y = y, zone = GetZoneText and GetZoneText() or "?", t = GetTime() }
+        end
+    end
+    local inst = UnitPosition and select(4, UnitPosition("player"))
+    if inst == nil then return end
+    if continent ~= nil and inst ~= continent then
+        local mort = UnitIsDeadOrGhost and UnitIsDeadOrGhost("player")
+        if not trajet and not mort and GetTime() - foyer > 60 and quai and GetTime() - quai.t < 600 and P.EnCours() then
+            TrajetDebut(P.ModeQuai(quai.map, quai.y), quai)
+        end
+        quai = nil
+    end
+    continent = inst
+end
+P.SuivreQuai = SuivreQuai
 
 --- Après un /reload : reprendre le trajet noté dans la sauvegarde, s'il a moins de 15 minutes.
 local function ReprendreTrajet()
@@ -306,7 +350,7 @@ for _, ev in ipairs({
     "QUEST_ACCEPTED", "QUEST_COMPLETE", "QUEST_TURNED_IN",
     "TAXIMAP_OPENED", "UI_INFO_MESSAGE", "PLAYER_DEAD",
     "PLAYER_TARGET_CHANGED", "UPDATE_MOUSEOVER_UNIT", "UNIT_HEALTH",
-    "PLAYER_LEVEL_UP", "ZONE_CHANGED_NEW_AREA", "PLAYER_LOGIN",
+    "PLAYER_LEVEL_UP", "ZONE_CHANGED_NEW_AREA", "PLAYER_LOGIN", "UNIT_SPELLCAST_SUCCEEDED",
 }) do
     pcall(f.RegisterEvent, f, ev)
 end
@@ -384,6 +428,11 @@ f:SetScript("OnEvent", function(_, event, ...)
         return
     end
     if event == "PLAYER_LOGIN" then ReprendreTrajet(); PlacerBoutonTrajet(); MajBoutonTrajet() return end
+    if event == "UNIT_SPELLCAST_SUCCEEDED" then
+        local unite, _, sort = ...
+        if unite == "player" and SORTS_FOYER[sort] then foyer = GetTime() end
+        return
+    end
     if not P.EnCours() then return end
 
     if event == "QUEST_ACCEPTED" then
@@ -431,6 +480,7 @@ f:SetScript("OnUpdate", function(_, dt)
     if attente < 1 then return end
     attente = 0
     SuivreTrajet()
+    pcall(SuivreQuai)
     if not P.EnCours() or not UnitOnTaxi then return end
     local maintenant = UnitOnTaxi("player") and true or false
     if maintenant ~= enVol then

@@ -507,6 +507,14 @@ function Importer.Convertir(db)
         end
     end
 
+    -- trajet commencé en fin d'enregistrement (on a embarqué, puis arrêté la sonde) : l'étape garde le départ,
+    -- elle se valide quand on a quitté la carte du quai
+    if trajetOuvert and trajetOuvert.carte then
+        brutes[#brutes + 1] = { t = trajetOuvert.t, genre = "voyage", qid = 0, voyage = {
+            mode = ModeTrajet(trajetOuvert.nom), nom = trajetOuvert.nom, carte = trajetOuvert.carte,
+            x = trajetOuvert.x, y = trajetOuvert.y, vers = nil, versCarte = nil } }
+    end
+
     local ordre = { rendre = 0, faire = 1, entrainer = 2, voyage = 2, prendre = 3 }
     table.sort(brutes, function(a, b)
         if a.t ~= b.t then return a.t < b.t end
