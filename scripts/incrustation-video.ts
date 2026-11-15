@@ -362,6 +362,25 @@ async function main() {
 
   let evenements: Evenement[] | null = null;
   let reperes: Repere[] = [];
+  const chargerSonde = () => {
+    if (evenements) return;
+    evenements = [];
+    for (const f of sauvegardesSonde()) {
+      const db = lireSauvegardeSonde(readFileSync(f, "utf8"));
+      evenements.push(...evenementsSonde(db));
+      reperes.push(...reperesRouteProbe(db));
+      console.log(`Repères de la sonde : ${f}`);
+    }
+    evenements.sort((a, b) => a.heure - b.heure);
+    reperes = reperes.sort((a, b) => a.heure - b.heure);
+    if (!evenements.length) console.log("Aucun repère de sonde : seule l'intro sera commentée (/reload en jeu pour sauvegarder, ou --sonde <fichier>).");
+  };
+  // titre, description et chapitres pour YouTube, relus par l'Atelier (refaits à chaque passage)
+  const site = (process.env.SITE_URL ?? "https://www.taverne-eternelle.fr").replace(/\/+$/, "");
+  const ecrireYoutube = (base: string, seance: Seance) => {
+    const chap = chapitres(seance, reperes);
+    writeFileSync(`${base}.youtube.txt`, [`TITRE :`, titreVideo(seance, chap), "", "DESCRIPTION :", descriptionVideo(seance, chap, site)].join("\n"), "utf8");
+  };
   for (const { video, seance: seanceConnue, fichierN: donne, sources } of travaux) {
     const fichierN = donne ?? `${sansExt(video)}.narration.json`;
     const base = sansExt(fichierN).replace(/\.narration$/, "");
@@ -376,26 +395,16 @@ async function main() {
       const erreurs = verifierNarration(n);
       if (erreurs.length) { console.error(`${fichierN} :\n- ${erreurs.join("\n- ")}`); process.exit(1); }
       console.log(`Narration relue : ${fichierN} (${n.moments.length} moments, ${n.clips.length} clips)`);
+      if (seanceConnue) { chargerSonde(); ecrireYoutube(base, seanceConnue); }
       // miniature donnée par son nom : à côté de la narration
       if (n.miniature && !path.isAbsolute(n.miniature) && !/^[A-Za-z]:[\\/]/.test(n.miniature)) n.miniature = path.join(path.dirname(fichierN), n.miniature);
     } else {
-      if (!evenements) {
-        evenements = [];
-        for (const f of sauvegardesSonde()) {
-          const db = lireSauvegardeSonde(readFileSync(f, "utf8"));
-          evenements.push(...evenementsSonde(db));
-          reperes.push(...reperesRouteProbe(db));
-          console.log(`Repères de la sonde : ${f}`);
-        }
-        evenements.sort((a, b) => a.heure - b.heure);
-        reperes = reperes.sort((a, b) => a.heure - b.heure);
-        if (!evenements.length) console.log("Aucun repère de sonde : seule l'intro sera commentée (/reload en jeu pour sauvegarder, ou --sonde <fichier>).");
-      }
+      chargerSonde();
       const debut = seanceConnue?.debut ?? debutDe(video, duree);
       const seance: Seance = seanceConnue ?? { clips: [{ fichier: video, debut, duree }], debut, fin: debut + duree * 1000, duree };
       const chap = chapitres(seance, reperes);
       n = preparerNarration({
-        video: path.relative(path.dirname(fichierN), video) || path.basename(video), debut, dureeVideo: duree, evenements, fin: seance.fin,
+        video: path.relative(path.dirname(fichierN), video) || path.basename(video), debut, dureeVideo: duree, evenements: (evenements as Evenement[] | null) ?? [], fin: seance.fin,
         position: (h) => positionDans(seance, h),
         miniature: option("miniature") ?? miniatureVoisine(video) ?? (seance.clips.length > 1 ? miniatureVoisine(seance.clips[0].fichier) : null),
         titre: titreVideo(seance, chap),
@@ -403,9 +412,7 @@ async function main() {
       if (n.miniature) n.miniature = path.resolve(n.miniature);
       if (sources) n.sources = sources;
       writeFileSync(fichierN, JSON.stringify(n, null, 2), "utf8");
-      // titre, description et chapitres pour YouTube, relus par l'Atelier
-      const site = (process.env.SITE_URL ?? "https://www.taverne-eternelle.fr").replace(/\/+$/, "");
-      writeFileSync(`${base}.youtube.txt`, [`TITRE :`, titreVideo(seance, chap), "", "DESCRIPTION :", descriptionVideo(seance, chap, site)].join("\n"), "utf8");
+      ecrireYoutube(base, seance);
       console.log(`Narration préparée : ${fichierN} (${n.moments.length} moments, ${n.clips.length} clips). À relire dans l'atelier vidéo.`);
       if (!n.miniature) console.log("Miniature : elle se choisit dans l'Atelier, avec la relecture (ou --miniature <image>).");
     }

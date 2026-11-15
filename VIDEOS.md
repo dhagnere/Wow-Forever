@@ -45,7 +45,8 @@ verticaux de 30 s. Gratuit, tout sur le PC de Jobwow. Une vidéo fournie donne u
 
 **Le parcours en une commande (15/11/2026)** : déposer les vidéos dans `D:\WOW`, lancer `npm run carnet`. Les vidéos d'une
 même journée sont assemblées en une seule (`Journal de Jobwow/journal-jobwow_<date>.mp4`) avec une seule narration et un
-`.youtube.txt` ; une vidéo ajoutée ensuite refait l'assemblage et la narration (l'ancienne gardée en `.narration.avant.json`).
+`.youtube.txt` (titre, description avec chapitres et liens vers le site : Carnet, vidéos, guide de 1 à 60, carte de chaque
+zone traversée, base d'objets, Lettre, abonnement à la chaîne, Page Facebook ; refait à chaque passage) ; une vidéo ajoutée ensuite refait l'assemblage et la narration (l'ancienne gardée en `.narration.avant.json`).
 Dans l'Atelier, « Ouvrir le dossier D:\WOW » charge la narration de la journée et la vidéo assemblée (miniatures tirées
 d'elle) ; les sept étapes y sont marquées terminées, en cours ou à faire. « Valider et enregistrer » met la narration
 validée, miniature comprise (`miniatureImage`), dans les Téléchargements ; relancer `npm run carnet` la reprend toute

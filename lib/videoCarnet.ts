@@ -6,6 +6,8 @@
  */
 
 import { CARTES_JEU } from "@/content/cartes-jeu";
+import { lieuParNom } from "@/lib/cartes";
+import { SITE } from "@/lib/site";
 
 // ——— Lecture de la sauvegarde de RouteProbe (SavedVariables, syntaxe de table Lua) ———
 
@@ -289,19 +291,56 @@ export function titreVideo(s: Seance, info: { zones: string[]; niveaux: [number,
   return t.length <= 100 ? t : `${t.slice(0, 99)}…`;
 }
 
-export function descriptionVideo(s: Seance, info: { liste: Chapitre[]; valides: boolean; zones: string[] }, site: string): string {
+/** Liens de la description : pages du site qui existent, adresses complètes (https) seules sur leur ligne, pour que YouTube les rende cliquables. */
+export interface LiensChaine { youtube?: string; facebook?: string; discord?: string }
+
+export function liensDescription(site: string, zones: string[], reseaux: LiensChaine = SITE): string[] {
   const lignes = [
-    `Une séance de jeu sur WoW Forever${info.zones.length ? ` : ${info.zones.join(", ")}` : ""}.`,
-    "",
-    "Chapitres :",
-    ...info.liste.map((c) => `${horodatage(c.seconde)} ${c.titre}`),
-    "",
+    "▶ Sur La Taverne Éternelle",
+    `Le site : ${site}/`,
     `Le Carnet de Jobwow : ${site}/carnet/`,
-    `Le guide de 1 à 60 : ${site}/guides/parcours/`,
-    "",
-    "La Taverne Éternelle, site de fans indépendant, non affilié à Blizzard Entertainment.",
+    `Toutes les vidéos de Jobwow : ${site}/carnet/videos/`,
+    `Le guide de 1 à 60, par race et par classe : ${site}/guides/parcours/`,
   ];
-  if (!info.valides) lignes.splice(2, info.liste.length + 2);
+  // une carte par zone traversée, quand le site en a la page
+  const vues = new Set<string>();
+  for (const z of zones) {
+    const lieu = lieuParNom(z);
+    if (!lieu || vues.has(lieu) || vues.size >= 4) continue;
+    vues.add(lieu);
+    lignes.push(`La carte, ${z} : ${site}/cartes/${lieu}/`);
+  }
+  lignes.push(`La base d'objets : ${site}/base-de-donnees/`, `La Lettre de Jobwow, chaque semaine : ${site}/lettre/`);
+  const suivre: string[] = [];
+  if (reseaux.youtube) suivre.push(`S'abonner à la chaîne : ${reseaux.youtube.replace(/\/+$/, "")}?sub_confirmation=1`);
+  if (reseaux.facebook) suivre.push(`La Page Facebook : ${reseaux.facebook}`);
+  if (reseaux.discord) suivre.push(`Le Discord : ${reseaux.discord}`);
+  if (suivre.length) lignes.push("", "▶ Suivre la Taverne", ...suivre);
+  return lignes;
+}
+
+export function descriptionVideo(
+  s: Seance,
+  info: { liste: Chapitre[]; valides: boolean; zones: string[]; niveaux?: [number, number] | null },
+  site: string,
+  reseaux: LiensChaine = SITE,
+): string {
+  site = site.replace(/\/+$/, "");
+  const lieux = info.zones.length ? ` : ${info.zones.join(" → ")}` : "";
+  const niveaux = info.niveaux ? (info.niveaux[0] === info.niveaux[1] ? `, niveau ${info.niveaux[0]}` : `, niveaux ${info.niveaux[0]} à ${info.niveaux[1]}`) : "";
+  const lignes = [
+    `Le Journal de Jobwow, tavernier mort-vivant, sur WoW Forever${lieux}${niveaux}.`,
+    "Abonnez-vous pour suivre la montée jusqu'au 60 ; les cartes et les guides de la séance sont sur La Taverne Éternelle.",
+  ];
+  if (info.valides) lignes.push("", "Chapitres :", ...info.liste.map((c) => `${horodatage(c.seconde)} ${c.titre}`));
+  lignes.push(
+    "",
+    ...liensDescription(site, info.zones, reseaux),
+    "",
+    "La Taverne Éternelle, site de fans indépendant, non affilié à Blizzard Entertainment. World of Warcraft © Blizzard Entertainment.",
+    "",
+    "#WoWForever #WorldofWarcraft #JournalDeJobwow",
+  );
   return lignes.join("\n");
 }
 
