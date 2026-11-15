@@ -35,17 +35,19 @@
     "base:butin": "tsx modules/veille/scripts/butin.ts",
     "sorts:jeu": "tsx modules/veille/scripts/sorts-jeu.ts",
     "base:quetes": "tsx modules/veille/scripts/quetes.ts",
+    "base:quetes:en": "tsx modules/veille/scripts/quetes.ts --en",
     "zephras:jeu": "tsx modules/veille/scripts/zephras-jeu.ts",
     "lieux:en": "tsx modules/veille/scripts/lieux-en.ts",
     "addon:guides": "tsx scripts/addon-guides.ts",
     "addon:base": "tsx scripts/addon-base.ts",
     "kit:blizzard": "tsx scripts/kit-blizzard.ts",
     "video:miniature": "node scripts/miniature-video.mjs",
+    "carnet": "tsx scripts/incrustation-video.ts",
     "carnet:video": "tsx scripts/carnet-video.ts",
     "carnet:incrustation": "tsx scripts/incrustation-video.ts",
     "carnet:voix": "tsx scripts/voix.ts",
     "voix:installer": "powershell -ExecutionPolicy Bypass -File scripts/installer-voix.ps1",
-    "addon:wow": "tsx scripts/addon-guides.ts \"C:\\WOW\\world of Warcraft\\_forever_\\Interface\\AddOns\\EternalRoutes\""
+    "addon:wow": "tsx scripts/addon-guides.ts \"C:\\WOW\\world of Warcraft\\_forever_\\Interface\\AddOns\\EternalRoutes\" && tsx scripts/addon-base.ts \"C:\\WOW\\world of Warcraft\\_forever_\\Interface\\AddOns\\EternalRoutes\""
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

@@ -16,7 +16,7 @@ import { execFile } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import ffmpeg from "@ffmpeg-installer/ffmpeg";
-import { chapitres, descriptionVideo, heureLocale, horodatage, lireSauvegardeSonde, reperesRouteProbe, seances, SONDES, titreVideo, type Clip, type Repere } from "@/lib/videoCarnet";
+import { chapitres, descriptionVideo, heureLocale, horodatage, lireSauvegardeSonde, reperesRouteProbe, seances, SONDES, titreVideo, DOSSIER_VIDEOS, type Clip, type Repere } from "@/lib/videoCarnet";
 
 const SITE = (process.env.SITE_URL ?? "https://www.taverne-eternelle.fr").replace(/\/+$/, "");
 const COMPTES_WOW = "C:\\WOW\\world of Warcraft\\_forever_\\WTF\\Account";
@@ -71,8 +71,9 @@ function nomSeance(debut: number, n: number): string {
 }
 
 async function main() {
-  const dossier = process.argv[2];
-  const usage = 'Usage : npm run carnet:video -- "<dossier des vidéos>" [--sortie <dossier>] [--ecart 30]\n' +
+  // sans dossier donné : D:\WOW, dossier de toutes les opérations vidéo
+  const dossier = process.argv[2] && !process.argv[2].startsWith("--") ? process.argv[2] : DOSSIER_VIDEOS;
+  const usage = 'Usage : npm run carnet:video [-- "<dossier des vidéos, D:\\WOW par défaut>"] [--sortie <dossier>] [--ecart 30]\n' +
     'Sous PowerShell, si npm perd le chemin : npx tsx scripts/carnet-video.ts "<dossier des vidéos>"';
   if (!dossier || dossier.startsWith("--")) {
     console.error(`Aucun dossier reçu (arguments : ${JSON.stringify(process.argv.slice(2))}).\n${usage}`);

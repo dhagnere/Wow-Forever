@@ -6,6 +6,8 @@
  */
 
 import { CARTES_JEU } from "@/content/cartes-jeu";
+import { lieuParNom } from "@/lib/cartes";
+import { SITE } from "@/lib/site";
 
 // ——— Lecture de la sauvegarde de RouteProbe (SavedVariables, syntaxe de table Lua) ———
 
@@ -280,27 +282,77 @@ export function chapitres(s: Seance, tous: Repere[]): { liste: Chapitre[]; valid
 
 const DATE_FR = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 
-/** Titre de 100 caractères au plus (limite de YouTube). */
+/**
+ * Titre de 100 caractères au plus (limite de YouTube), jamais coupé au milieu : les niveaux restent entiers et, si la
+ * place manque, les zones se resserrent (zone du milieu remplacée par « … », puis moins de zones).
+ */
 export function titreVideo(s: Seance, info: { zones: string[]; niveaux: [number, number] | null }): string {
   const date = DATE_FR.format(new Date(s.debut)).replace(/^1 /, "1er ");
   const niv = info.niveaux ? (info.niveaux[0] === info.niveaux[1] ? ` · niveau ${info.niveaux[0]}` : ` · niveaux ${info.niveaux[0]} à ${info.niveaux[1]}`) : "";
-  const zones = info.zones.length ? ` · ${info.zones.slice(0, 3).join(" → ")}` : "";
-  const t = `Journal de Jobwow · ${date}${zones}${niv}`;
-  return t.length <= 100 ? t : `${t.slice(0, 99)}…`;
+  const z = info.zones.slice(0, 3);
+  const variantes: string[][] = [z];
+  if (z.length === 3) variantes.push([z[0], "…", z[2]]);
+  variantes.push(z.slice(0, 2), z.slice(0, 1), []);
+  for (const v of variantes) {
+    const t = `Journal de Jobwow · ${date}${v.length ? ` · ${v.join(" → ")}` : ""}${niv}`;
+    if (t.length <= 100) return t;
+  }
+  const t = `Journal de Jobwow · ${date}${niv}`;
+  return t.length <= 100 ? t : `${t.slice(0, 99).replace(/\s+\S*$/, "")}…`;
 }
 
-export function descriptionVideo(s: Seance, info: { liste: Chapitre[]; valides: boolean; zones: string[] }, site: string): string {
+/** Liens de la description : pages du site qui existent, adresses complètes (https) seules sur leur ligne, pour que YouTube les rende cliquables. */
+export interface LiensChaine { youtube?: string; facebook?: string; discord?: string }
+
+export function liensDescription(site: string, zones: string[], reseaux: LiensChaine = SITE): string[] {
   const lignes = [
-    `Une séance de jeu sur WoW Forever${info.zones.length ? ` : ${info.zones.join(", ")}` : ""}.`,
-    "",
-    "Chapitres :",
-    ...info.liste.map((c) => `${horodatage(c.seconde)} ${c.titre}`),
-    "",
+    "▶ Sur La Taverne Éternelle",
+    `Le site : ${site}/`,
     `Le Carnet de Jobwow : ${site}/carnet/`,
-    `Le guide de 1 à 60 : ${site}/guides/parcours/`,
-    "",
-    "La Taverne Éternelle, site de fans indépendant, non affilié à Blizzard Entertainment.",
+    `Toutes les vidéos de Jobwow : ${site}/carnet/videos/`,
+    `Le guide de 1 à 60, par race et par classe : ${site}/guides/parcours/`,
   ];
-  if (!info.valides) lignes.splice(2, info.liste.length + 2);
+  // une carte par zone traversée, quand le site en a la page
+  const vues = new Set<string>();
+  for (const z of zones) {
+    const lieu = lieuParNom(z);
+    if (!lieu || vues.has(lieu) || vues.size >= 4) continue;
+    vues.add(lieu);
+    lignes.push(`La carte, ${z} : ${site}/cartes/${lieu}/`);
+  }
+  lignes.push(`La base d'objets : ${site}/base-de-donnees/`, `La Lettre de Jobwow, chaque semaine : ${site}/lettre/`);
+  const suivre: string[] = [];
+  if (reseaux.youtube) suivre.push(`S'abonner à la chaîne : ${reseaux.youtube.replace(/\/+$/, "")}?sub_confirmation=1`);
+  if (reseaux.facebook) suivre.push(`La Page Facebook : ${reseaux.facebook}`);
+  if (reseaux.discord) suivre.push(`Le Discord : ${reseaux.discord}`);
+  if (suivre.length) lignes.push("", "▶ Suivre la Taverne", ...suivre);
+  return lignes;
+}
+
+export function descriptionVideo(
+  s: Seance,
+  info: { liste: Chapitre[]; valides: boolean; zones: string[]; niveaux?: [number, number] | null },
+  site: string,
+  reseaux: LiensChaine = SITE,
+): string {
+  site = site.replace(/\/+$/, "");
+  const lieux = info.zones.length ? ` : ${info.zones.join(" → ")}` : "";
+  const niveaux = info.niveaux ? (info.niveaux[0] === info.niveaux[1] ? `, niveau ${info.niveaux[0]}` : `, niveaux ${info.niveaux[0]} à ${info.niveaux[1]}`) : "";
+  const lignes = [
+    `Le Journal de Jobwow, tavernier mort-vivant, sur WoW Forever${lieux}${niveaux}.`,
+    "Abonnez-vous pour suivre la montée jusqu'au 60 ; les cartes et les guides de la séance sont sur La Taverne Éternelle.",
+  ];
+  if (info.valides) lignes.push("", "Chapitres :", ...info.liste.map((c) => `${horodatage(c.seconde)} ${c.titre}`));
+  lignes.push(
+    "",
+    ...liensDescription(site, info.zones, reseaux),
+    "",
+    "La Taverne Éternelle, site de fans indépendant, non affilié à Blizzard Entertainment. World of Warcraft © Blizzard Entertainment.",
+    "",
+    "#WoWForever #WorldofWarcraft #JournalDeJobwow",
+  );
   return lignes.join("\n");
 }
+
+/** Dossier de toutes les opérations vidéo sur le PC de Jobwow (vidéos, narrations, rendus) ; DOSSIER_VIDEOS le remplace. */
+export const DOSSIER_VIDEOS = process.env.DOSSIER_VIDEOS || "D:\\WOW";

@@ -1,7 +1,8 @@
 --[[----------------------------------------------------------------------------
     EternalProbe — Export.lua : /ep export, le code à coller sur le site.
 
-    /ep export depart : la zone de départ, gardée à part quand /ep suite lance la partie commune.
+    /ep export : tout ce que le personnage a joué (zone de départ gardée par /ep suite, puis partie en cours).
+    /ep export depart : la zone de départ seule ; /ep export commune : la partie en cours seule.
 
     La fenêtre montre un code déjà sélectionné : Ctrl+C, puis coller sur La Taverne Éternelle,
     Administration › Guides à valider (Probe). Rien à chercher dans le dossier WTF.
@@ -52,26 +53,49 @@ P.Base64 = Base64
 -- ---- le code ------------------------------------------------------------------------------------
 local function Champ(v) return (tostring(v == nil and "" or v):gsub("[|\n]", "/")) end
 
---- Code d'un enregistrement : celui en cours, ou (depart = true) la zone de départ gardée par /ep suite.
-function P.CodeExport(depart)
-    local db = depart and P.DB().departGarde or P.DB()
-    if not db then return "", 0, 0 end
+--- Enregistrements à exporter, dans l'ordre joué :
+---   mode "depart"  : la zone de départ gardée par /ep suite ;
+---   mode "commune" : l'enregistrement en cours seulement ;
+---   sinon (/ep export) : tout ce que le personnage a joué, zone de départ gardée puis enregistrement en cours.
+local function Parties(mode)
+    local db = P.DB()
+    local garde = db.departGarde
+    if garde and garde.personnage and db.personnage and garde.personnage ~= db.personnage then garde = nil end
+    if mode == "depart" then return { garde } end
+    if mode == "commune" or not garde then return { db } end
+    return { garde, db }
+end
+
+--- Code d'export (voir Parties pour le mode ; `true` vaut "depart", pour les appels d'avant).
+function P.CodeExport(mode)
+    if mode == true then mode = "depart" end
+    local parts = Parties(mode)
+    if not parts[1] then return "", 0, 0 end
+    local db, premiere = parts[#parts], parts[1]
     local c = db.context or {}
+    -- deux parties réunies : « complet » (le site propose alors la portée de la race, qui vaut pour les deux)
+    local partie = #parts > 1 and "complet" or db.partie
     local lignes = {
         "EP|1",
-        table.concat({ "ctx", Champ(db.personnage), Champ(c.raceFile), Champ(c.raceName), Champ(c.classFile),
-            Champ(c.faction), Champ(c.level), Champ(db.partie), Champ(db.carteDepart), Champ(c.map) }, "|"),
+        table.concat({ "ctx", Champ(db.personnage or premiere.personnage), Champ(c.raceFile), Champ(c.raceName), Champ(c.classFile),
+            Champ(c.faction), Champ(c.level), Champ(partie), Champ(premiere.carteDepart or db.carteDepart), Champ(c.map) }, "|"),
     }
-    local ids = {}
-    for k in pairs(db.quests or {}) do ids[#ids + 1] = tonumber(k) or k end
-    table.sort(ids, function(a, b) return tostring(a) < tostring(b) end)
-    for _, id in ipairs(ids) do
-        local q = db.quests[tostring(id)] or db.quests[id]
-        if q and q.name then lignes[#lignes + 1] = "q|" .. Champ(id) .. "|" .. Champ(q.name) end
+    local noms, ids = {}, {}
+    for _, part in ipairs(parts) do
+        for k, q in pairs(part.quests or {}) do
+            local id = tonumber(k) or k
+            if q and q.name and not noms[tostring(id)] then noms[tostring(id)] = q.name; ids[#ids + 1] = id end
+        end
     end
+    table.sort(ids, function(a, b) return tostring(a) < tostring(b) end)
+    for _, id in ipairs(ids) do lignes[#lignes + 1] = "q|" .. Champ(id) .. "|" .. Champ(noms[tostring(id)]) end
     local derniere, ecrite = nil, nil
     local nbEvenements = 0
-    for _, e in ipairs(db.events or {}) do
+    local evenements = {}
+    for _, part in ipairs(parts) do
+        for _, e in ipairs(part.events or {}) do evenements[#evenements + 1] = e end
+    end
+    for _, e in ipairs(evenements) do
         local genre = tostring(e):match("^[^|]*|([^|]*)")
         if genre == "pos" then
             derniere = e
@@ -148,18 +172,22 @@ local function Fenetre()
     return fenetre
 end
 
-function P.Exporter(depart)
-    local code, nbEvenements, nbQuetes = P.CodeExport(depart)
+function P.Exporter(mode)
+    if mode == true then mode = "depart" end
+    local code, nbEvenements, nbQuetes = P.CodeExport(mode)
     if nbEvenements == 0 then
-        P.Print(depart and "Aucune zone de départ gardée pour ce personnage (elle l'est par /ep suite)."
+        P.Print(mode == "depart" and "Aucune zone de départ gardée pour ce personnage (elle l'est par /ep suite)."
             or "Rien à exporter : aucun enregistrement pour ce personnage (/ep start, jouez, puis /ep export).")
         return
     end
+    local contenu = mode == "depart" and "zone de départ seule"
+        or mode == "commune" and "partie en cours seule"
+        or (#Parties() > 1 and "zone de départ et partie en cours" or "enregistrement en cours")
     Fenetre()
     zone.code = code
     zone:SetText(code)
-    info:SetText(("%d événements, %d quêtes, %d Ko. Ctrl+C pour copier, puis collez sur taverne-eternelle.fr, Administration › Guides à valider (Probe)."):format(
-        nbEvenements, nbQuetes, math.ceil(#code / 1024)))
+    info:SetText(("%s : %d événements, %d quêtes, %d Ko. Ctrl+C pour copier, puis collez sur taverne-eternelle.fr, Administration › Guides à valider (Probe)."):format(
+        contenu, nbEvenements, nbQuetes, math.ceil(#code / 1024)))
     fenetre:Show()
     zone:SetFocus()
     zone:HighlightText()
@@ -168,7 +196,8 @@ end
 
 local avant = P.CommandeEnPlus
 function P.CommandeEnPlus(lower, raw)
-    if lower == "export" then P.Exporter() return true end
-    if lower == "export depart" or lower == "export départ" then P.Exporter(true) return true end
+    if lower == "export" or lower == "export tout" then P.Exporter() return true end
+    if lower == "export depart" or lower == "export départ" then P.Exporter("depart") return true end
+    if lower == "export commune" or lower == "export suite" then P.Exporter("commune") return true end
     return avant and avant(lower, raw) or false
 end

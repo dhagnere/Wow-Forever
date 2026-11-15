@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { CLASSES } from "@/content/classes";
 import { CARTES_EN } from "@/content/lieux-en";
@@ -247,18 +247,33 @@ export function baseQuetesAddon(): { quetes: Map<number, QueteBase>; classes: Ma
     return id ? [nom, nomEn || nom, id, arrondi(x), arrondi(y)] : undefined;
   };
 
+  /**
+   * Position du PNJ lui-même (fiche de la quête), plutôt que celle du village où le guide du site le regroupe avec ses
+   * voisins : dans un même village, chaque entraîneur a sa maison, et la flèche doit mener au bon.
+   */
+  const exact = (refs: FicheQuete["donneurs"] | undefined, nom: string, lieu: string) =>
+    refs?.find((p) => p.l && p.l.lieu === lieu && p.n === nom)?.l ?? (refs?.length === 1 && refs[0].l?.lieu === lieu ? refs[0].l : undefined);
+
   for (const camp of ["alliance", "horde"] as const) {
     for (const z of fr.guide[camp]) {
       for (const e of z.etapes) {
         if (e.id >= PREMIER_ID_SAISI || quetes.has(e.id)) continue;
         const ang = anglais.get(e.id)?.e;
+        const fiche = fichesFr.quetes[String(e.id)];
         const q: QueteBase = { t: e.t, nv: e.nv, min: e.min || e.nv };
         if (ang?.t && ang.t !== e.t) q.te = ang.t;
         if (e.av) q.av = e.av;
-        if (e.g >= 0) q.g = point(e.gn, ang?.gn, z.lieu, z.hubs[e.g].x, z.hubs[e.g].y);
+        if (e.g >= 0) {
+          const l = exact(fiche?.donneurs, e.gn, z.lieu);
+          q.g = point(e.gn, ang?.gn, z.lieu, l?.x ?? z.hubs[e.g].x, l?.y ?? z.hubs[e.g].y);
+        }
         // rendue au donneur quand aucun receveur n'est placé et qu'elle ne se rend pas ailleurs
         const hubRendu = e.r >= 0 ? e.r : !e.rl && e.g >= 0 ? e.g : -1;
-        if (hubRendu >= 0) q.r = point(e.rn, ang?.rn, z.lieu, z.hubs[hubRendu].x, z.hubs[hubRendu].y);
+        if (hubRendu >= 0) {
+          const nom = e.r >= 0 ? e.rn : e.gn;
+          const l = exact(e.r >= 0 ? fiche?.receveurs : fiche?.donneurs, nom, z.lieu);
+          q.r = point(e.rn, ang?.rn, z.lieu, l?.x ?? z.hubs[hubRendu].x, l?.y ?? z.hubs[hubRendu].y);
+        }
         const idCarte = carte(z.lieu)?.id;
         if (e.cib && idCarte) q.c = [idCarte, arrondi(e.cib.c[0]), arrondi(e.cib.c[1])];
         if (e.obj.length) q.obj = e.obj.join(" ; ");
@@ -316,6 +331,31 @@ export function nomsAnglaisAddon(): { zones: Map<number, string>; sorts: Map<num
   return { zones, sorts };
 }
 
+/** Entraîneur de classe pour l'addon : nom, nom anglais, carte du jeu (UiMap), x, y (en %), faction (« A », « H », « AH »). */
+export type EntraineurAddon = [string, string, number, number, number, string];
+
+/**
+ * Entraîneurs de classe placés (content/entraineurs-jeu.json, npm run base:quetes), par classe du jeu (1 guerrier… 11 druide).
+ * Vide tant que le fichier n'a pas été produit.
+ */
+export function entraineursAddon(): Map<number, EntraineurAddon[]> {
+  type Fichier = { entraineurs: { id: number; n: string; cl: number; f: string; l: [string, number, number][] }[] };
+  const lire = (f: string): Fichier => (existsSync(path.join(process.cwd(), f)) ? lireJson<Fichier>(f) : { entraineurs: [] });
+  const fr = lire("content/entraineurs-jeu.json");
+  const en = new Map(lire("content/entraineurs-jeu.en.json").entraineurs.map((e) => [e.id, e.n]));
+  const parClasse = new Map<number, EntraineurAddon[]>();
+  for (const e of fr.entraineurs) {
+    for (const [lieu, x, y] of e.l) {
+      const id = carte(lieu)?.id;
+      if (!id) continue;
+      const liste = parClasse.get(e.cl) ?? [];
+      liste.push([e.n, en.get(e.id) || e.n, id, arrondi(x), arrondi(y), e.f]);
+      parClasse.set(e.cl, liste);
+    }
+  }
+  return parClasse;
+}
+
 export function fichierBaseQuetes(): string {
   const { quetes, classes, races } = baseQuetesAddon();
   const { zones, sorts } = nomsAnglaisAddon();
@@ -342,6 +382,11 @@ export function fichierBaseQuetes(): string {
     ...[...zones.entries()].sort(([a], [b]) => a - b).map(([id, n]) => `ns.zoneNamesEn[${id}] = ${chaineLua(n)}`),
     `ns.spellNamesEn = ns.spellNamesEn or {}`,
     ...[...sorts.entries()].sort(([a], [b]) => a - b).map(([id, [n, r]]) => `ns.spellNamesEn[${id}] = ${valeurLua(r === null ? [n] : [n, r])}`),
+    ``,
+    `-- Entraîneurs de classe (bases libres), par classe du jeu : guerrier 1, paladin 2, chasseur 3, voleur 4, prêtre 5,`,
+    `--   chaman 7, mage 8, démoniste 9, druide 11. Chacun : { nom, nom anglais, carte, x, y, faction amie (A, H, AH) }.`,
+    `ns.classTrainers = ns.classTrainers or {}`,
+    ...[...entraineursAddon().entries()].sort(([a], [b]) => a - b).map(([cl, l]) => `ns.classTrainers[${cl}] = ${valeurLua(l)}`),
     ``,
     `-- Contenus propres à Forever (content/traductions-forever-en.ts) : nom affiché par le client français → nom anglais.`,
     `ns.traductionsEn = ns.traductionsEn or {}`,

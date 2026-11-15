@@ -43,14 +43,33 @@ Décidé le 13 novembre 2026 : pas de voix ; Jobwow (sa capture, dans un médail
 humoristique et un sous-titre à chaque moment fort, la miniature YouTube en image de départ, une vidéo 16:9 et des clips
 verticaux de 30 s. Gratuit, tout sur le PC de Jobwow. Une vidéo fournie donne une vidéo rendue (pas de regroupement).
 
+**Le parcours en une commande (15/11/2026)** : déposer les vidéos dans `D:\WOW`, lancer `npm run carnet`. Les vidéos d'une
+même journée sont assemblées en une seule (`Journal de Jobwow/journal-jobwow_<date>.mp4`) avec une seule narration et un
+`.youtube.txt` (titre, description avec chapitres et liens vers le site : Carnet, vidéos, guide de 1 à 60, carte de chaque
+zone traversée, base d'objets, Lettre, abonnement à la chaîne, Page Facebook ; refait à chaque passage ; chapitres tirés des moments de la narration, zones, niveaux, élites, trajets,
+repères, décalés de l'image de départ, `chapitresNarration`, et suivis en direct dans l'Atelier pendant la relecture) ; une vidéo ajoutée ensuite refait l'assemblage et la narration (l'ancienne gardée en `.narration.avant.json`).
+Dans l'Atelier, « Ouvrir le dossier D:\WOW » charge la narration de la journée et la vidéo assemblée (miniatures tirées
+d'elle) ; les sept étapes y sont marquées terminées, en cours ou à faire. « Valider et enregistrer » met la narration
+validée, miniature comprise (`miniatureImage`), dans les Téléchargements ; relancer `npm run carnet` la reprend toute
+seule (Téléchargements, D:\WOW ou `DOSSIER_TELECHARGEMENTS`), écrit `<base>.miniature.jpg`, la place au début de la vidéo
+et rend `.jobwow.mp4` et les clips. `--ecart <minutes>` découpe par séance au lieu de la journée.
+
+**Dossier de travail : `D:\WOW`** (décidé le 15/11/2026). Toutes les opérations vidéo s'y font : vidéos de Warcraft
+Recorder, narrations, miniatures, rendus. Sans chemin, `npm run carnet:video` et `npm run carnet:incrustation` travaillent
+sur `D:\WOW` (`DOSSIER_VIDEOS` dans `lib/videoCarnet.ts`, la variable d'environnement du même nom le remplace) ; l'Atelier
+écrit ses commandes avec ce dossier.
+
 Un dossier (celui de Warcraft Recorder) est rangé par séances comme pour `carnet:video` (plus de 30 minutes d'écart : nouvelle
 séance), chaque séance assemblée sans réencodage dans « Journal de Jobwow » (`--sortie` pour un autre dossier) ; `--par-fichier`
 garde une vidéo par fichier.
 
-1. `npm run carnet:incrustation -- "<vidéo ou dossier>" --preparer` écrit `<vidéo>.narration.json` : intro, puis les moments
+1. `npm run carnet:incrustation preparer` (tout `D:\WOW`) ou `npm run carnet:incrustation -- "D:\WOW\<vidéo>.mp4" --preparer` écrit `<vidéo>.narration.json` : intro, puis les moments
    tirés des repères d'EternalProbe (niveau, élite, mort, zone, grimoire, entraîneur, trajet, vol, repère `/ep mark`, une
    quête rendue toutes les deux minutes au plus), sans chevauchement, et trois clips verticaux au plus. Miniature :
-   `--miniature <image>` ou `<vidéo>.miniature.jpg|png|webp` à côté de la vidéo.
+   `--miniature <image>` ou `<vidéo>.miniature.jpg|png|webp` à côté de la vidéo. L'Atelier la fabrique (bloc « Miniature
+   YouTube », depuis le 15/11) : il ouvre la vidéo dans le navigateur, sans rien envoyer, tire six images aux moments forts
+   et les compose en 1280 × 720 dans la mise en page de `visuels/miniature-video.html` ; le JPEG enregistré se range dans
+   D:\WOW à côté de la vidéo et sert aussi de miniature YouTube.
 2. Relecture dans l'**Atelier vidéo de Jobwow** (artefact https://claude.ai/artifact/DSRxPCDtJQRUeL65i1cfvs) : ouvrir le
    fichier, corriger heures, répliques (« Autre réplique »), sous-titres et clips, aperçu 16:9 et 9:16, puis copier le texte
    dans le fichier.

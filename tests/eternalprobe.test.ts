@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { lireExport } from "@/lib/probe";
 // @ts-expect-error fengari n'a pas de types
 import { lauxlib, lua, lualib, to_luastring } from "fengari";
 
@@ -111,6 +112,33 @@ describe("EternalProbe dans un WoW simulé", () => {
     expect(mode).toBe("chat");
   });
 
+  it("/ep export reprend la zone de départ gardée par /ep suite avec la partie en cours", () => {
+    const EXPORT = lire("EternalProbe/Export.lua");
+    const prep = `
+      BANC.Evenement("PLAYER_LOGIN")
+      local db = EternalProbe.DB()
+      db.departGarde = { personnage = db.personnage, partie = "depart", carteDepart = 1411, context = db.context,
+        quests = { ["840"] = { name = "Ordres du kommandant" } },
+        events = { "10.0|accept|840|Ordres du kommandant", "20.0|turnin|840|Ordres du kommandant" } }
+      db.partie = "commune"
+      db.quests = { ["5441"] = { name = "Paresseux" } }
+      db.events = { "30.0|accept|5441|Paresseux" }
+    `;
+    const codes = executer(SIMULE, ...SONDE, EXPORT, prep + `
+      local tout = EternalProbe.CodeExport()
+      local depart = EternalProbe.CodeExport("depart")
+      local commune = EternalProbe.CodeExport("commune")
+      return tout .. "#" .. depart .. "#" .. commune`).split("#");
+    const [tout, depart, commune] = codes.map((c) => lireExport(c));
+    expect(tout.partie).toBe("complet");
+    expect([...tout.quetes.keys()].map(String).sort()).toEqual(["5441", "840"]);
+    expect(tout.evenements.map((e) => e.type)).toEqual(["accept", "turnin", "accept"]);
+    expect(depart.partie).toBe("depart");
+    expect([...depart.quetes.keys()].map(String)).toEqual(["840"]);
+    expect(commune.partie).toBe("commune");
+    expect([...commune.quetes.keys()].map(String)).toEqual(["5441"]);
+  });
+
   it("ne touche à rien de réservé à l'interface de Blizzard (sinon le jeu bloque l'addon au chargement)", () => {
     expect(sortie).toMatch(/#bloque=$/);
   });
@@ -205,12 +233,25 @@ return route.source .. "|" .. tostring(route.type) .. "|" .. #route.steps .. "|"
     expect(Number(actions)).toBeGreaterThanOrEqual(2); // prendre et rendre au moins
   });
 
-  it("ignore un trajet noté dans l'enregistrement : même route qu'avant", () => {
-    const sans = executer(SIMULE, ...SONDE, SEANCE, ESPACE, lire("EternalRoutes/Importer.lua"), CONVERTIR);
+  it("fait du trajet noté une étape « voyage » au départ de l'embarcadère, et du vol pris une autre", () => {
+    const VOYAGES = `
+local route = assert(EternalRoutes.Importer.Convertir(EternalRoutes.Importer.Enregistrement()))
+local out = {}
+for _, s in ipairs(route.steps) do
+  local q = s.quests[1]
+  if q.kind == "voyage" then
+    out[#out + 1] = table.concat({ q.mode, tostring(q.name), s.map, q.versCarte, tostring(q.vers), tostring(s.voyage) }, "|")
+  end
+end
+return #route.steps .. "\\n" .. table.concat(out, "\\n")`;
+    const sans = executer(SIMULE, ...SONDE, SEANCE, ESPACE, lire("EternalRoutes/Importer.lua"), VOYAGES).split("\n");
     const avec = executer(SIMULE, ...SONDE, SEANCE,
-      'BANC.carte, BANC.zone = 1420, "Clairières de Tirisfal"; SlashCmdList.ETERNALPROBE("trajet Zeppelin"); BANC.carte = 1411; BANC.Avancer(10)',
-      ESPACE, lire("EternalRoutes/Importer.lua"), CONVERTIR);
-    expect(avec).toBe(sans);
+      'BANC.carte, BANC.zone, BANC.x, BANC.y = 1411, "Durotar", 0.50, 0.12; SlashCmdList.ETERNALPROBE("trajet Zeppelin Orgrimmar - Tirisfal"); BANC.carte, BANC.zone, BANC.x, BANC.y = 1420, "Clairières de Tirisfal", 0.61, 0.59; BANC.Avancer(10)',
+      ESPACE, lire("EternalRoutes/Importer.lua"), VOYAGES).split("\n");
+    // la séance du banc prend un vol ; le trajet en zeppelin ajoute une étape
+    expect(sans.filter((l) => l.startsWith("vol|"))).toHaveLength(1);
+    expect(Number(avec[0])).toBe(Number(sans[0]) + 1);
+    expect(avec).toContain("zeppelin|Zeppelin Orgrimmar - Tirisfal|1411|1420|Clairières de Tirisfal|true");
   });
 
   it("préfère EternalProbeDB à l'ancienne RouteProbeDB", () => {
@@ -247,6 +288,32 @@ EternalRoutes = { ADDON_NAME = "EternalRoutes", guides = {}, db = {}, questDB = 
 `;
   const MOTEUR = [lire("EternalRoutes/Locale.lua"), lire("EternalRoutes/Importer.lua"), lire("EternalRoutes/GuideEngine.lua")];
 
+  it("valide l'étape « voyage » à l'arrivée, pas pendant le vol, et dit quoi faire", () => {
+    const r = executer(SIMULE, ...SONDE, SEANCE, ESPACE, ...MOTEUR, `
+local E = EternalRoutes.Engine
+local q = { kind = "voyage", mode = "zeppelin", name = "Zeppelin Tirisfal - Orgrimmar", vers = "Durotar", depart = 1420, versCarte = 1411, versX = 50, versY = 12, cle = "voyage-zeppelin-1420-1411" }
+local v = { kind = "voyage", mode = "vol", depuis = "Orgrimmar, Durotar", vers = "Durotar", depart = 1411, versCarte = 1411, versX = 50, versY = 50, cle = "voyage-vol-1411-1411" }
+local out = {}
+BANC.carte, BANC.x, BANC.y, BANC.enVol = 1420, 0.61, 0.59, false
+out[#out + 1] = E.QuestState(q) .. " " .. E.QuestName(q) .. " / " .. table.concat(E.ActionsEtape(q, E.GetObjectives(q)), " ") .. " / " .. E.GetObjectives(q)[1].text
+BANC.carte = 1411
+out[#out + 1] = E.QuestState(q)
+BANC.x, BANC.y = 0.20, 0.20
+out[#out + 1] = E.QuestState(v) .. " " .. E.QuestName(v) .. " / " .. table.concat(E.ActionsEtape(v, E.GetObjectives(v)), " ")
+BANC.enVol = true; BANC.x, BANC.y = 0.50, 0.50
+out[#out + 1] = E.QuestState(v)
+BANC.enVol = false
+out[#out + 1] = E.QuestState(v)
+return table.concat(out, "\\n")`).split("\n");
+    expect(r).toEqual([
+      "available Zeppelin Tirisfal - Orgrimmar / Montez à bord à l'embarcadère indiqué par la flèche, puis attendez l'arrivée. / Arriver : Durotar",
+      "done",
+      "available Prendre le vol pour Durotar / Parlez au maître de vol (Orgrimmar, Durotar) et choisissez la destination.",
+      "in_progress",
+      "done",
+    ]);
+  });
+
   it("note le titre de l'entraîneur et le seul grimoire acheté", () => {
     const r = executer(SIMULE, ...SONDE, DEMONISTE, `
 local t = {}
@@ -282,6 +349,143 @@ return table.concat(out, "\\n")`).split("\n");
       "sans grimoire [available] Grimoire d'Éclair de feu (Rang 2)",
       "Choisissez une capacité pour votre démon. [available]",
     ]);
+  });
+
+  it("ajoute les quêtes de classe du personnage à une route enregistrée avec une autre classe", () => {
+    const r = executer(SIMULE, ESPACE, ...MOTEUR, `
+BANC.joueur.classe, BANC.joueur.classeFichier = "Guerrier", "WARRIOR"
+local ns = EternalRoutes
+ns.questDB = {
+  [840] = { t = "Ordres", nv = 1, min = 1, g = { "Kaltunk", "Kaltunk", 1420, 40, 60 } },
+  [841] = { t = "Sangliers", nv = 5, min = 5, g = { "Gornek", "Gornek", 1420, 42, 68 } },
+  [100] = { t = "Épreuve du guerrier", nv = 4, min = 4, g = { "Dannal", "Dannal", 1420, 61, 52 }, r = { "Dannal", "Dannal", 1420, 61, 52 }, c = { 1420, 70, 40 } },
+  [101] = { t = "Suite du guerrier", nv = 6, min = 6, av = 100, g = { "Dannal", "Dannal", 1420, 61, 52 }, r = { "Maître d'armes", "Weapon Master", 1458, 50, 50 } },
+  [102] = { t = "Épreuve du démoniste", nv = 4, min = 4, g = { "Maximillion", "Maximillion", 1420, 61, 52 } },
+  [103] = { t = "Pour tous", nv = 4, min = 4, g = { "Garde", "Guard", 1420, 50, 50 } },
+}
+ns.questClassMask = { [100] = 1, [101] = 1, [102] = 256, [103] = 1535 }
+local function E(kind, id, carte) return { map = carte or 1420, x = 1, y = 1, zoneIndex = 1, quests = { { kind = kind, id = id, name = ns.questDB[id].t } } } end
+local route = { id = "rp-test", source = "RouteProbe", classeEnregistree = "WARLOCK", niveauDebut = 1, niveauMax = 8, priority = 10,
+  steps = { E("prendre", 840), E("prendre", 841), E("rendre", 841) } }
+ns.guides["rp-test"] = route
+ns.db.activeGuide = "rp-test"
+local out = {}
+for _, st in ipairs(ns.Engine.GetActiveGuide().steps) do out[#out + 1] = st.quests[1].kind .. ":" .. st.quests[1].id .. (st.ajoutClasse and "+" or "") end
+-- la route enregistrée n'est pas modifiée, et le démoniste la voit telle quelle
+out[#out + 1] = "route:" .. #route.steps
+BANC.joueur.classe, BANC.joueur.classeFichier = "Démoniste", "WARLOCK"
+out[#out + 1] = "demoniste:" .. #ns.Engine.GetActiveGuide().steps
+return table.concat(out, " ")`);
+    expect(r).toBe("prendre:840 prendre:841 prendre:100+ faire:100+ rendre:100+ rendre:841 prendre:101+ rendre:101+ route:3 demoniste:3");
+  });
+
+  it("mène les visites d'entraîneur d'une autre classe à l'entraîneur de la classe jouée, et retient celui vu en jeu", () => {
+    const r = executer(SIMULE, ESPACE, ...MOTEUR, `
+BANC.joueur.classe, BANC.joueur.classeFichier, BANC.joueur.faction = "Mage", "MAGE", "Horde"
+local ns = EternalRoutes
+ns.classTrainers = { [8] = {
+  { "Isabella", "Isabella", 1420, 61, 52, "H" }, { "Loin", "Far", 1420, 10, 10, "H" },
+  { "Mage de l'Alliance", "Alliance mage", 1420, 31, 69, "A" }, { "Ailleurs", "Elsewhere", 1458, 30, 70, "H" },
+}, [9] = { { "Maximillion", "Maximillion", 1420, 30, 70, "H" } } }
+local function T(carte, x, y, champs)
+  local q = { kind = "entrainer", name = "Maximillion", spells = { { id = 688 } }, cle = "WARLOCK-maximillion-" .. carte }
+  for k, v in pairs(champs or {}) do q[k] = v end
+  return { map = carte, x = x, y = y, class = "WARLOCK", zoneIndex = 1, quests = { q } }
+end
+local route = { id = "rp-entr", source = "RouteProbe", classeEnregistree = "WARLOCK", niveauDebut = 1, niveauMax = 10, priority = 10,
+  steps = { T(1420, 30, 70), T(1420, 30, 70, { familier = "demon" }), T(1420, 40, 40, { metier = true }), T(1497, 50, 50) } }
+ns.guides["rp-entr"] = route
+ns.db.activeGuide = "rp-entr"
+local E = ns.Engine
+local function Decrire()
+  local out = {}
+  for _, st in ipairs(E.GetActiveGuide().steps) do
+    if E.StepApplies(st) then
+      local q = st.quests[1]
+      out[#out + 1] = ("%s@%s,%s,%s"):format(q.name, tostring(st.map), tostring(st.x), tostring(st.y))
+    end
+  end
+  return table.concat(out, " ")
+end
+local avant = Decrire()
+local consigne = table.concat(E.ActionsEtape(E.GetActiveGuide().steps[4].quests[1], {}), " / ")
+-- le mage ouvre la fenêtre de son entraîneur dans la carte 1497 : sa position est retenue pour tout le compte
+BANC.cible, BANC.titrePnj, BANC.carte, BANC.x, BANC.y = { nom = "Anastasia" }, "Entraîneuse des mages", 1497, 0.512, 0.634
+BANC.Evenement("TRAINER_SHOW")
+BANC.Evenement("TRAINER_CLOSED")
+BANC.cible, BANC.titrePnj = nil, nil
+return avant .. "\\n" .. consigne .. "\\n" .. Decrire() .. "\\n" .. EternalRoutesRoutesDB.entraineursClasse.MAGE[1].nom
+  .. "\\n" .. #route.steps .. ":" .. route.steps[1].quests[1].name`).split("\n");
+    expect(r[0]).toBe("Isabella@1420,61,52 Entraîneur de votre classe@1497,nil,nil");
+    expect(r[1]).toMatch(/ouvrez la fenêtre de votre entraîneur/);
+    expect(r[2]).toBe("Isabella@1420,61,52 Anastasia@1497,51.2,63.4");
+    expect(r[3]).toBe("Anastasia");
+    expect(r[4]).toBe("4:Maximillion");
+  });
+
+  it("garde une route de départ par classe, renomme l'ancienne et préfère celle de la classe jouée", () => {
+    const r = executer(SIMULE, ESPACE, ...MOTEUR, `
+local ns = EternalRoutes
+local function Route(classe)
+  return { source = "RouteProbe", type = "depart", classeEnregistree = classe, faction = "Horde", races = { "Orc" }, zone = "Vallée des Épreuves",
+    minLevel = 1, maxLevel = 15, priority = 10, steps = { { map = 1411, x = 1, y = 1, quests = { { kind = "prendre", id = 4641, name = "Votre place" } } } } }
+end
+local ancienne = Route("WARLOCK"); ancienne.id = "rp-depart-vallee-des-epreuves"
+EternalRoutesRoutesDB = { routes = { ["rp-depart-vallee-des-epreuves"] = ancienne } }
+ns.db.activeGuide = "rp-depart-vallee-des-epreuves"
+ns.Importer.Charger()
+local out = {}
+for id in pairs(EternalRoutesRoutesDB.routes) do out[#out + 1] = id end
+out[#out + 1] = ns.Engine.GetActiveGuide() and ns.db.activeGuide or "aucune"
+-- le guerrier enregistre sa propre route : elle passe devant celle du démoniste
+local guerrier = Route("WARRIOR"); guerrier.id = "rp-depart-vallee-des-epreuves-warrior"
+EternalRoutesRoutesDB.routes[guerrier.id] = guerrier
+ns.guides[guerrier.id] = guerrier
+BANC.joueur.classe, BANC.joueur.classeFichier, BANC.joueur.niveau = "Guerrier", "WARRIOR", 1
+out[#out + 1] = ns.Engine.GetGuidesForPlayer()[1].id
+BANC.joueur.classe, BANC.joueur.classeFichier = "Mage", "MAGE"
+out[#out + 1] = tostring(#ns.Engine.GetGuidesForPlayer())
+-- même zone pour deux races : le troll guerrier prend la route du troll guerrier, puis celle de l'orc guerrier
+local troll = Route("WARRIOR"); troll.id = "rp-depart-vallee-des-epreuves-troll-warrior"; troll.raceEnregistree = "Troll"; troll.races = { "Orc", "Troll" }
+guerrier.raceEnregistree = "Orc"; guerrier.races = { "Orc", "Troll" }
+ns.guides[troll.id] = troll
+BANC.joueur.classe, BANC.joueur.classeFichier, BANC.joueur.race, BANC.joueur.raceFichier = "Guerrier", "WARRIOR", "Troll", "Troll"
+out[#out + 1] = ns.Engine.GetGuidesForPlayer()[1].id
+ns.guides[troll.id] = nil
+out[#out + 1] = ns.Engine.GetGuidesForPlayer()[1].id
+-- nom affiché : zone de départ, race et classe de l'enregistrement
+ancienne.enregistreAvec = "Démoniste Troll"
+guerrier.raceEnregistree, guerrier.niveauMax = "Orc", 6
+return table.concat(out, " ") .. "\\n" .. ns.Engine.NomGuide(ancienne) .. "\\n" .. ns.Engine.NomGuide(guerrier)`).split("\n");
+    expect(r[0]).toBe("rp-depart-durotar-orc-warlock rp-depart-durotar-orc-warlock rp-depart-vallee-des-epreuves-warrior 2 rp-depart-vallee-des-epreuves-troll-warrior rp-depart-vallee-des-epreuves-warrior");
+    expect(r[1]).toBe("Départ Horde · Orc · Démoniste · 1-15");
+    expect(r[2]).toBe("Départ Horde · Orc · Guerrier · 1-6");
+  });
+
+  it("range sous « Départ » les morceaux enregistrés en partie commune dans la zone de départ, et les assemble", () => {
+    const r = executer(SIMULE, ESPACE, ...MOTEUR, `
+local ns = EternalRoutes
+local function Morceau(id, debut, fin, quete)
+  return { id = id, source = "RouteProbe", type = "faction", partie = "commune", classeEnregistree = "ROGUE",
+    enregistreAvec = "Voleur Mort-vivant", faction = "Horde", zone = "Clairières de Tirisfal", niveauDebut = debut, niveauMax = fin,
+    minLevel = 1, maxLevel = fin + 5, priority = 10, importe = "2026-11-14 2" .. debut .. ":00",
+    steps = { { map = 1420, x = 30, y = 70, quests = { { kind = "prendre", id = quete, name = "Q" .. quete } } } } }
+end
+local orgri = Morceau("rp-horde-12", 12, 12, 9); orgri.classeEnregistree = "WARLOCK"; orgri.steps[1].map = 1454; orgri.zone = "Orgrimmar"
+EternalRoutesRoutesDB = { routes = { ["rp-horde-1"] = Morceau("rp-horde-1", 1, 1, 363), ["rp-horde-2"] = Morceau("rp-horde-2", 2, 6, 364), ["rp-horde-12"] = orgri } }
+ns.db.activeGuide = "rp-horde-2"
+ns.Importer.Charger()
+local ids = {}
+for id in pairs(EternalRoutesRoutesDB.routes) do ids[#ids + 1] = id end
+table.sort(ids)
+local g = EternalRoutesRoutesDB.routes["rp-depart-clairiaeres-de-tirisfal-scourge-rogue"]
+ns.Engine.GetActiveGuide()
+return table.concat(ids, " ") .. "\\n" .. ns.Engine.NomGuide(g) .. "\\n" .. #g.steps .. " " .. ns.db.activeGuide
+  .. "\\n" .. ns.Engine.NomGuide(orgri)`).split("\n");
+    expect(r[0]).toBe("rp-depart-clairiaeres-de-tirisfal-scourge-rogue rp-horde-12");
+    expect(r[1]).toBe("Départ Horde · Mort-vivant · Voleur · 1-6");
+    expect(r[2]).toBe("2 rp-depart-clairiaeres-de-tirisfal-scourge-rogue");
+    expect(r[3]).toBe("Horde · Orgrimmar · Démoniste · 12-12");
   });
 
   it("rappelle d'ouvrir le grimoire resté dans les sacs, et pas les autres objets", () => {

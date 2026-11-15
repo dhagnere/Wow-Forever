@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { VideoChaine } from "@/modules/veille";
-import { VIDEOS_PREPAREES } from "@/content/videos-preparees";
-import { prepareeDe } from "@/lib/videosPreparees";
+import { miniatureDe } from "@/lib/miniatureVideo";
 import { SITE } from "@/lib/site";
 
 const FORMATS = {
@@ -33,14 +32,14 @@ const TEXTES = {
 };
 
 /**
- * Le Journal en vidéo, sur le Carnet et ses épisodes : la dernière vidéo de la chaîne (flux public), avec la miniature
- * gardée par le site quand elle a été préparée ici (aucune image chargée chez Google), puis les liens vers la page des
- * vidéos et la chaîne.
+ * Le Journal en vidéo, sur le Carnet et ses épisodes : la dernière vidéo de la chaîne (flux public), toujours avec son
+ * image (miniature gardée par le site, sinon celle de YouTube servie par le site : le visiteur ne contacte pas Google),
+ * puis les liens vers la page des vidéos et la chaîne.
  */
 export function JournalVideo({ langue = "fr", videos = [] }: { langue?: "fr" | "en"; videos?: VideoChaine[] }) {
   const t = TEXTES[langue];
   const derniere = videos[0];
-  const miniature = derniere ? prepareeDe(derniere, VIDEOS_PREPAREES)?.miniature : undefined;
+  const miniature = derniere ? miniatureDe(derniere) : undefined;
   const suffixe = langue === "en" ? "-en" : "";
   return (
     <section className="encadre journal-video" aria-labelledby={`t-journal-video-${langue}`}>

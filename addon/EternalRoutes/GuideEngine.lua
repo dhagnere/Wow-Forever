@@ -178,6 +178,21 @@ function Engine.GuideConvient(g, avecNiveau)
     return okFaction and okClass and okRace and okLevel
 end
 
+--- Route enregistrée avec la classe du personnage (sa route de départ, plutôt que celle d'une autre classe).
+function Engine.DeSaClasse(g)
+    local _, classe = UnitClass("player")
+    return g ~= nil and classe ~= nil and g.source == "RouteProbe" and g.classeEnregistree == classe
+end
+
+--- Proximité d'une route enregistrée avec le personnage : 3 même race et même classe, 2 même classe,
+--- 1 même race, 0 sinon. Sert à choisir la route de départ quand plusieurs couvrent sa zone.
+function Engine.Proximite(g)
+    if not g or g.source ~= "RouteProbe" then return 0 end
+    local _, race = UnitRace("player")
+    local race_g = g.raceEnregistree or (ns.Importer and ns.Importer.RaceDe and ns.Importer.RaceDe(g))
+    return (Engine.DeSaClasse(g) and 2 or 0) + ((race and race_g == race) and 1 or 0)
+end
+
 function Engine.GetGuidesForPlayer()
     local list = {}
     for _, g in pairs(ns.guides) do
@@ -186,6 +201,8 @@ function Engine.GetGuidesForPlayer()
     table.sort(list, function(a, b)
         local pa, pb = a.priority or 0, b.priority or 0
         if pa ~= pb then return pa > pb end
+        local ca, cb = Engine.Proximite(a), Engine.Proximite(b)
+        if ca ~= cb then return ca > cb end
         if (a.minLevel or 0) ~= (b.minLevel or 0) then
             return (a.minLevel or 0) < (b.minLevel or 0)
         end
@@ -200,11 +217,6 @@ function Engine.GetAllGuides()
     for id, g in pairs(ns.guides) do list[#list + 1] = g end
     table.sort(list, function(a, b) return Engine.NomGuide(a) < Engine.NomGuide(b) end)
     return list
-end
-
-function Engine.GetActiveGuide()
-    local id = ns.db.activeGuide
-    return (id and ns.guides[id]) or nil
 end
 
 function Engine.GetStepIndex()
@@ -236,6 +248,284 @@ function Engine.QueteApplicable(q)
     -- races du jeu d'origine seulement (1 à 8) : une race nouvelle (Skyborne) n'est pas filtrée
     if rm and br and br <= 128 and not ABit(rm, br) then return false end
     return true
+end
+
+-- ---------------------------------------------------------------------------
+-- Quêtes de classe d'une route enregistrée avec une autre classe
+-- ---------------------------------------------------------------------------
+-- Une route RouteProbe sert à toutes les classes de sa race : les quêtes réservées à la classe qui l'a
+-- enregistrée sont masquées (QueteApplicable), mais celles de la classe jouée n'y sont pas. On les ajoute
+-- d'après la base intégrée (QuestDB.lua : masque de classe, niveau, donneur, receveur, secteur), sans toucher
+-- à la route enregistrée : le guide actif est une copie, propre à la classe du personnage.
+
+local TOUTES_CLASSES = { 1, 2, 4, 8, 16, 64, 128, 256, 1024 }
+--- Le masque laisse-t-il de côté au moins une classe ? (sinon la quête n'est pas une quête de classe)
+local function MasqueDeClasse(m)
+    for _, b in ipairs(TOUTES_CLASSES) do
+        if math.floor(m / b) % 2 == 0 then return true end
+    end
+    return false
+end
+
+local function NomCarteJeu(carte)
+    if carte and C_Map and C_Map.GetMapInfo then
+        local info = C_Map.GetMapInfo(carte)
+        if info and info.name and info.name ~= "" then return info.name end
+    end
+    return "?"
+end
+
+--- Étapes de la route, avec les quêtes de classe du personnage ajoutées (prendre, faire, rendre, à la suite).
+function Engine.AvecQuetesDeClasse(g)
+    local steps = (g and g.steps) or {}
+    local D, CM = ns.questDB, ns.questClassMask
+    local bc = BitJoueur(UnitClass)
+    if not (D and CM and bc) then return steps, 0 end
+    local anglais = GetLocale and GetLocale() ~= "frFR"
+
+    -- quêtes déjà dans la route, cartes traversées, niveau atteint à chaque étape (d'après les quêtes prises)
+    local presentes, cartes, niveau = {}, {}, {}
+    local courant = g.niveauDebut or 1
+    for i, st in ipairs(steps) do
+        if st.map then cartes[st.map] = true end
+        for _, q in ipairs(st.quests or {}) do
+            if q.id then
+                presentes[q.id] = true
+                local d = D[q.id]
+                if d and q.kind == "prendre" then courant = math.max(courant, d.min or d.nv or 1) end
+            end
+        end
+        niveau[i] = courant
+    end
+    local plafond = (g.niveauMax or 60) + 1
+    local function Candidate(id, d)
+        local cm = CM[id]
+        return cm and d.g and ABit(cm, bc) and MasqueDeClasse(cm) and not presentes[id]
+            and (d.min or d.nv or 1) <= plafond and Engine.QueteApplicable({ id = id })
+    end
+    -- premières quêtes : données dans une carte de la route, au niveau de la route ; puis leurs suites
+    local retenues, ordre = {}, {}
+    for id, d in pairs(D) do
+        if Candidate(id, d) and cartes[d.g[3]] and (d.min or d.nv or 1) >= (g.niveauDebut or 1) and not (d.av and Candidate(d.av, D[d.av] or {})) then
+            retenues[id] = true; ordre[#ordre + 1] = id
+        end
+    end
+    local ajout = true
+    while ajout do
+        ajout = false
+        for id, d in pairs(D) do
+            if not retenues[id] and d.av and retenues[d.av] and Candidate(id, d) then
+                retenues[id] = true; ordre[#ordre + 1] = id; ajout = true
+            end
+        end
+    end
+    if #ordre == 0 then return steps, 0 end
+    -- une quête passe après sa quête préalable, puis par niveau
+    local rang = {}
+    local function Rang(id)
+        if rang[id] then return rang[id] end
+        local d = D[id]
+        rang[id] = (d.av and retenues[d.av]) and (Rang(d.av) + 1) or 0
+        return rang[id]
+    end
+    table.sort(ordre, function(a, b)
+        local ma, mb = D[a].min or D[a].nv or 1, D[b].min or D[b].nv or 1
+        if ma ~= mb then return ma < mb end
+        if Rang(a) ~= Rang(b) then return Rang(a) < Rang(b) end
+        return a < b
+    end)
+
+    -- place de chaque quête : après la première étape de la route où le niveau est atteint, dans la carte du donneur
+    local apres = {}       -- [indice d'étape de la route] = { étapes ajoutées }
+    local placeDe = {}     -- [id] = indice
+    local function Etape(kind, id, d, lieu, base)
+        local carte, x, y, nom
+        if kind == "faire" then carte, x, y = lieu[1], lieu[2], lieu[3] else nom, carte, x, y = (anglais and lieu[2] or lieu[1]), lieu[3], lieu[4], lieu[5] end
+        local titre = anglais and d.te or d.t
+        local st = { zone = NomCarteJeu(carte), zoneIndex = base and base.zoneIndex or nil, map = carte, x = x, y = y,
+            location = nom, ajoutClasse = true, quests = { { kind = kind, id = id, name = titre } } }
+        if kind == "prendre" then st.accepts = { titre } elseif kind == "rendre" then st.turnins = { titre } end
+        return st
+    end
+    for _, id in ipairs(ordre) do
+        local d = D[id]
+        local mn = d.min or d.nv or 1
+        local mini = (d.av and placeDe[d.av]) or 0
+        local place
+        for i = math.max(1, mini), #steps do
+            if niveau[i] >= mn and steps[i].map == d.g[3] then place = i break end
+        end
+        if not place then
+            for i = math.max(1, mini), #steps do
+                if niveau[i] >= mn then place = i break end
+            end
+        end
+        place = math.max(place or #steps, mini)
+        placeDe[id] = place
+        local base = steps[place]
+        apres[place] = apres[place] or {}
+        local liste = apres[place]
+        liste[#liste + 1] = Etape("prendre", id, d, d.g, base)
+        if d.c then liste[#liste + 1] = Etape("faire", id, d, d.c, base) end
+        if d.r then liste[#liste + 1] = Etape("rendre", id, d, d.r, base) end
+    end
+    local out = {}
+    for i, st in ipairs(steps) do
+        out[#out + 1] = st
+        for _, a in ipairs(apres[i] or {}) do out[#out + 1] = a end
+    end
+    if #steps == 0 then
+        for _, a in ipairs(apres[0] or {}) do out[#out + 1] = a end
+    end
+    return out, #ordre
+end
+
+-- ---------------------------------------------------------------------------
+-- Entraîneurs de la classe jouée
+-- ---------------------------------------------------------------------------
+-- Les visites d'entraîneur d'une route mènent à l'entraîneur de la classe qui l'a enregistrée. Pour une autre classe,
+-- l'étape est refaite vers l'entraîneur de la classe jouée le plus proche, sur la même carte : base intégrée
+-- (ns.classTrainers, QuestDB.lua), complétée par les entraîneurs vus en jeu (EternalRoutesRoutesDB, tout le compte).
+
+local ID_CLASSE = { WARRIOR = 1, PALADIN = 2, HUNTER = 3, ROGUE = 4, PRIEST = 5, SHAMAN = 7, MAGE = 8, WARLOCK = 9, DRUID = 11 }
+Engine.versionEntraineurs = 0
+
+local function EntraineursVus()
+    if type(EternalRoutesRoutesDB) ~= "table" then EternalRoutesRoutesDB = {} end
+    EternalRoutesRoutesDB.entraineursClasse = EternalRoutesRoutesDB.entraineursClasse or {}
+    return EternalRoutesRoutesDB.entraineursClasse
+end
+
+--- Entraîneurs de la classe du personnage, amis de sa faction : { nom, nomEn, map, x, y }.
+function Engine.EntraineursDeClasse()
+    local _, classe, idClasse = UnitClass("player")
+    idClasse = (type(idClasse) == "number" and idClasse) or ID_CLASSE[classe or ""]
+    local faction = PlayerFaction()
+    local lettre = faction == "Alliance" and "A" or faction == "Horde" and "H" or nil
+    local out = {}
+    for _, e in ipairs((ns.classTrainers and idClasse and ns.classTrainers[idClasse]) or {}) do
+        if not lettre or tostring(e[6] or "AH"):find(lettre, 1, true) then
+            out[#out + 1] = { nom = e[1], nomEn = e[2], map = e[3], x = e[4], y = e[5] }
+        end
+    end
+    for _, e in ipairs((classe and EntraineursVus()[classe]) or {}) do
+        if not e.faction or not faction or e.faction == faction then
+            out[#out + 1] = { nom = e.nom, nomEn = e.nom, map = e.map, x = e.x, y = e.y, vu = true }
+        end
+    end
+    return out
+end
+
+--- Entraîneur de la liste le plus proche d'un point, sur la même carte ; nil si la carte n'en a aucun.
+function Engine.EntraineurProche(map, x, y, liste)
+    local best, dmin
+    for _, e in ipairs(liste or Engine.EntraineursDeClasse()) do
+        if map and e.map == map then
+            local d = (x and y) and ((e.x - x) ^ 2 + (e.y - y) ^ 2) or 0
+            if not dmin or d < dmin then best, dmin = e, d end
+        end
+    end
+    return best
+end
+
+--- Titre d'un PNJ, lu sur la 2e ligne de sa bulle (« <Entraîneur des mages> »), ou "".
+local bulle
+local function SousTitre(unite)
+    local ok, texte = pcall(function()
+        if not (UnitExists and UnitExists(unite)) then return "" end
+        bulle = bulle or CreateFrame("GameTooltip", "EternalRoutesBulle", nil, "GameTooltipTemplate")
+        bulle:SetOwner(WorldFrame or UIParent, "ANCHOR_NONE")
+        bulle:SetUnit(unite)
+        local ligne = _G["EternalRoutesBulleTextLeft2"]
+        local t = ligne and ligne:GetText() or ""
+        bulle:Hide()
+        return t
+    end)
+    return ok and tostring(texte or "") or ""
+end
+
+--- Fenêtre d'entraîneur ouverte : un entraîneur de la classe du personnage (titre qui porte le nom de la classe)
+--- est retenu avec sa position, pour tout le compte. Renvoie true s'il a été noté.
+function Engine.NoterEntraineur(npc, titre)
+    local _, classe = UnitClass("player")
+    if not (classe and npc and npc ~= "") then return false end
+    titre = tostring(titre or SousTitre("npc")):lower()
+    local reconnu = false
+    for _, t in ipairs({ LOCALIZED_CLASS_NAMES_MALE or {}, LOCALIZED_CLASS_NAMES_FEMALE or {} }) do
+        local nom = t[classe]
+        if nom and nom ~= "" and titre:find(nom:lower(), 1, true) then reconnu = true end
+    end
+    if not reconnu then return false end
+    local map = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
+    local pos = map and C_Map.GetPlayerMapPosition and C_Map.GetPlayerMapPosition(map, "player")
+    if not pos then return false end
+    local x, y = pos:GetXY()
+    if not (x and y) or (x == 0 and y == 0) then return false end
+    local vus = EntraineursVus()
+    vus[classe] = vus[classe] or {}
+    local fiche = { nom = npc, map = map, x = math.floor(x * 1000 + 0.5) / 10, y = math.floor(y * 1000 + 0.5) / 10, faction = PlayerFaction() }
+    for i, e in ipairs(vus[classe]) do
+        if e.nom == npc and e.map == map then vus[classe][i] = fiche; Engine.versionEntraineurs = Engine.versionEntraineurs + 1 return true end
+    end
+    vus[classe][#vus[classe] + 1] = fiche
+    Engine.versionEntraineurs = Engine.versionEntraineurs + 1
+    return true
+end
+
+--- Visite d'entraîneur de la classe enregistrée → visite de l'entraîneur de la classe jouée, au même moment de la route.
+--- Les visites de métier, de familier et les achats de grimoire restent réservées à la classe enregistrée.
+function Engine.AvecEntraineursDeClasse(g)
+    local steps = (g and g.steps) or {}
+    local _, classe = UnitClass("player")
+    if not classe then return steps, 0 end
+    local anglais = GetLocale and GetLocale() ~= "frFR"
+    local liste = Engine.EntraineursDeClasse()
+    local out, nb = {}, 0
+    for _, st in ipairs(steps) do
+        local q = st.quests and st.quests[1]
+        if q and q.kind == "entrainer" and not q.metier and not q.familier and not q.achat
+            and st.class and st.class == g.classeEnregistree then
+            local e = Engine.EntraineurProche(st.map, st.x, st.y, liste)
+            local nom = e and ((anglais and e.nomEn) or e.nom) or nil
+            out[#out + 1] = { zone = st.zone, zoneIndex = st.zoneIndex, map = st.map, x = e and e.x or nil, y = e and e.y or nil,
+                location = nom, class = classe, niveau = st.niveau, ajoutClasse = true,
+                quests = { { kind = "entrainer", name = nom or ns.L.TRAINER_UNKNOWN, spells = {}, sansPosition = not e or nil,
+                    cle = ("%s-%s"):format(classe, tostring(q.cle or q.name)) } } }
+            nb = nb + 1
+        else
+            out[#out + 1] = st
+        end
+    end
+    return out, nb
+end
+
+local derives = setmetatable({}, { __mode = "k" })
+
+--- Guide à suivre pour ce personnage : la route telle quelle, ou une copie avec ses quêtes de classe
+--- quand elle a été enregistrée avec une autre classe.
+function Engine.GuidePourClasse(g)
+    if not g or g.source ~= "RouteProbe" or not g.classeEnregistree then return g end
+    local _, classe = UnitClass("player")
+    if not classe or classe == g.classeEnregistree then return g end
+    local c = derives[g]
+    if c and c.classe == classe and c.nb == #(g.steps or {}) and c.v == Engine.versionEntraineurs then return c.guide end
+    local avecEntraineurs, entraineurs = Engine.AvecEntraineursDeClasse(g)
+    local steps, ajoutees = Engine.AvecQuetesDeClasse(setmetatable({ steps = avecEntraineurs }, { __index = g }))
+    local guide = setmetatable({ steps = steps, quetesDeClasse = ajoutees, entraineursDeClasse = entraineurs }, { __index = g })
+    derives[g] = { classe = classe, nb = #(g.steps or {}), v = Engine.versionEntraineurs, guide = guide }
+    return guide
+end
+
+function Engine.GetActiveGuide()
+    local id = ns.db.activeGuide
+    -- route renommée (route de départ devenue propre à sa classe) : le personnage suit la nouvelle
+    local renommees = type(EternalRoutesRoutesDB) == "table" and EternalRoutesRoutesDB.renommees
+    local n = 0
+    while id and not ns.guides[id] and renommees and renommees[id] and n < 4 do
+        id, n = renommees[id], n + 1
+    end
+    if id ~= ns.db.activeGuide and id and ns.guides[id] then ns.db.activeGuide = id end
+    return Engine.GuidePourClasse((id and ns.guides[id]) or nil)
 end
 
 --- Quêtes de l'étape qui concernent le personnage.
@@ -399,6 +689,16 @@ function Engine.ActionsEtape(q, objectifs)
     local L, out, vus = ns.L, {}, {}
     local function Ajouter(t) if t and t ~= "" and not vus[t] then vus[t] = true; out[#out + 1] = t end end
     if not q then return out end
+    if q.kind == "voyage" then
+        if q.mode == "vol" then
+            Ajouter(q.depuis and L.HINT_FLIGHT_AT:format(TraduireEn(q.depuis)) or L.HINT_FLIGHT)
+        elseif q.mode == "zeppelin" or q.mode == "bateau" then
+            Ajouter(L.HINT_BOARD)
+        else
+            Ajouter(L.HINT_TRAVEL)
+        end
+        return out
+    end
     if q.kind == "entrainer" then
         if q.achat then
             Ajouter(q.familier == "demon" and L.HINT_DEMON_BUY or L.HINT_BOOK_BUY)
@@ -410,6 +710,7 @@ function Engine.ActionsEtape(q, objectifs)
             Ajouter(L.HINT_PROF_TRAIN)
         else
             Ajouter(L.HINT_CLASS_TRAIN)
+            if q.sansPosition then Ajouter(L.HINT_TRAINER_FIND) end
         end
         return out
     end
@@ -470,6 +771,61 @@ function Engine.EtatEntraineur(q)
     return "available"
 end
 
+-- ---------------------------------------------------------------------------
+-- Étapes « voyage » : zeppelin, bateau ou vol, validées à l'arrivée
+-- ---------------------------------------------------------------------------
+
+function Engine.EstVoyage(step)
+    local q = step and step.quests and step.quests[1]
+    return q ~= nil and q.kind == "voyage"
+end
+
+--- Étape de passage (entraîneur, voyage) : sautée quand une étape suivante est déjà avancée.
+function Engine.EstPassage(step)
+    return Engine.EstEntraineur(step) or Engine.EstVoyage(step)
+end
+
+local function PositionJoueur()
+    local carte = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
+    if not carte then return nil end
+    local p = C_Map.GetPlayerMapPosition and C_Map.GetPlayerMapPosition(carte, "player")
+    if not p then return carte end
+    local x, y = p.x, p.y
+    if (not x) and p.GetXY then x, y = p:GetXY() end
+    return carte, x and x * 100, y and y * 100
+end
+
+--- Arrivé ? Sur la carte d'arrivée, descendu du vol ; pour un vol dans la même carte, près du point d'arrivée.
+function Engine.EtatVoyage(q)
+    if ns.db and ns.db.voyages and q.cle and ns.db.voyages[q.cle] then return "done" end
+    if UnitOnTaxi and UnitOnTaxi("player") then return "in_progress" end
+    local carte, x, y = PositionJoueur()
+    if not (carte and q.versCarte and carte == q.versCarte) then return "available" end
+    local memeCarte = q.depart and q.depart == q.versCarte
+    if not memeCarte or not (q.versX and x) then return "done" end
+    local dx, dy = x - q.versX, y - q.versY
+    return (dx * dx + dy * dy) <= 36 and "done" or "available"
+end
+
+--- Garde le voyage de l'étape en cours comme fait (appelé quand on passe à l'étape suivante).
+function Engine.NoterVoyage(step)
+    if not Engine.EstVoyage(step) then return end
+    local q = step.quests[1]
+    if not q.cle then return end
+    ns.db.voyages = ns.db.voyages or {}
+    ns.db.voyages[q.cle] = true
+end
+
+local function NomVoyage(q)
+    local L = ns.L
+    local vers = q.vers and q.vers ~= "" and TraduireEn(q.vers) or "?"
+    if q.mode == "vol" then return L.TRAVEL_FLIGHT:format(vers) end
+    if q.mode == "zeppelin" then return L.TRAVEL_ZEPPELIN:format(vers) end
+    if q.mode == "bateau" then return L.TRAVEL_BOAT:format(vers) end
+    return L.TRAVEL_GO:format(vers)
+end
+Engine.NomVoyage = NomVoyage
+
 --- Fenêtre d'entraîneur fermée : valide l'étape en cours si c'est une visite du même genre.
 function Engine.EntraineurVu(npc, metier)
     local step = Engine.GetCurrentStep()
@@ -495,6 +851,11 @@ function Engine.MarchandVu(npc)
 end
 
 function Engine.GetObjectives(q)
+    if q and q.kind == "voyage" then
+        local fait = Engine.EtatVoyage(q) == "done"
+        local vers = q.vers and q.vers ~= "" and TraduireEn(q.vers) or "?"
+        return { { text = ns.L.OBJ_ARRIVE:format(vers), numFulfilled = 0, numRequired = 0, finished = fait } }
+    end
     if q and q.kind == "entrainer" and q.achat then
         local out, fait = {}, Engine.EtatEntraineur(q) == "done"
         for _, v in ipairs(q.livres or {}) do
@@ -646,6 +1007,11 @@ end
 function Engine.QuestName(q)
     if not q then return "" end
     if q.kind == "entrainer" then return TraduireEn(q.name) or "" end
+    if q.kind == "voyage" then
+        -- le nom donné au trajet (/ep trajet) en français ; sinon « Prendre le zeppelin pour … »
+        if q.name and q.name ~= "" and not Anglais() then return q.name end
+        return NomVoyage(q)
+    end
     -- version anglaise : le titre anglais passe avant celui du journal (langue du client)
     if ns.IsEnglish and ns.IsEnglish() then
         local b = q.id and ns.questDB and ns.questDB[q.id]
@@ -670,6 +1036,10 @@ local RACES_EN = { Human = "Human", Dwarf = "Dwarf", Gnome = "Gnome", NightElf =
     Orc = "Orc", Troll = "Troll", Scourge = "Undead", Tauren = "Tauren" }
 local RACES_FR = { Human = "Humain", Dwarf = "Nain", Gnome = "Gnome", NightElf = "Elfe de la nuit",
     Orc = "Orc", Troll = "Troll", Scourge = "Mort-vivant", Tauren = "Tauren" }
+local CLASSES_FR = { WARRIOR = "Guerrier", PALADIN = "Paladin", HUNTER = "Chasseur", ROGUE = "Voleur", PRIEST = "Prêtre",
+    SHAMAN = "Chaman", MAGE = "Mage", WARLOCK = "Démoniste", DRUID = "Druide" }
+local CLASSES_EN = { WARRIOR = "Warrior", PALADIN = "Paladin", HUNTER = "Hunter", ROGUE = "Rogue", PRIEST = "Priest",
+    SHAMAN = "Shaman", MAGE = "Mage", WARLOCK = "Warlock", DRUID = "Druid" }
 
 --- Nom d'une zone d'après sa carte (UiMap), sinon le nom enregistré.
 function Engine.NomCarte(map, defaut)
@@ -712,14 +1082,26 @@ function Engine.NomGuide(g)
     if g.source ~= "RouteProbe" then return g.name or g.id or "" end
     local premiere = g.steps and g.steps[1]
     local zone = Engine.NomCarte(premiere and premiere.map, g.zone)
+    local classe = g.classeEnregistree and (Anglais() and CLASSES_EN or CLASSES_FR)[g.classeEnregistree] or g.classeEnregistree
     if g.type == "depart" then
-        local noms = {}
-        for _, r in ipairs(g.races or {}) do noms[#noms + 1] = (Anglais() and RACES_EN or RACES_FR)[r] or r end
+        -- « Départ Horde · Mort-vivant · Voleur · 1-6 » : faction, race et classe de l'enregistrement
+        local races = Anglais() and RACES_EN or RACES_FR
+        local imp = ns.Importer
+        local race = imp and imp.RaceDe and imp.RaceDe(g)
+        -- race d'un enregistrement fait hors de sa propre zone de départ : celles de la zone parcourue
+        if race and imp.CarteDeRace and premiere and imp.CarteDeRace(race) ~= premiere.map then race = nil end
+        race = race and races[race] or nil
+        if not race then
+            local noms = {}
+            for _, r in ipairs(g.races or {}) do noms[#noms + 1] = races[r] or r end
+            race = #noms > 0 and table.concat(noms, ", ") or zone
+        end
         local fin = g.niveauMax or tonumber(tostring(g.name or ""):match("1%-(%d+)$")) or g.maxLevel or 10
-        return (ns.L.ROUTE_START or "%s%s 1-%d"):format(zone, #noms > 0 and (" (" .. table.concat(noms, ", ") .. ")") or "", fin)
+        local tete = (ns.L.ROUTE_DEPART or "Départ") .. (g.faction and (" " .. g.faction) or "")
+        return ("%s · %s%s · %s-%d"):format(tete, race, classe and (" · " .. classe) or "", tostring(g.niveauDebut or 1), fin)
     end
     local a, b = tostring(g.name or ""):match("(%d+)%-(%d+)$")
-    return ("%s · %s · %s-%s"):format(tostring(g.faction or "Route"), zone,
+    return ("%s · %s%s · %s-%s"):format(tostring(g.faction or "Route"), zone, classe and (" · " .. classe) or "",
         tostring(g.niveauDebut or a or g.minLevel or 1), tostring(g.niveauMax or b or g.maxLevel or 60))
 end
 
@@ -727,6 +1109,7 @@ end
 function Engine.QuestState(q)
     if not q then return "unknown" end
     if q.kind == "entrainer" then return Engine.EtatEntraineur(q) end
+    if q.kind == "voyage" then return Engine.EtatVoyage(q) end
     local ids = q.id and { q.id } or IdsFor(q.name)
     if not C_QuestLog then return "unknown" end
     if not ids then
@@ -833,6 +1216,7 @@ function Engine.Advance()
     ns.viewStep = nil
     local g = Engine.GetActiveGuide()
     if not g then return end
+    Engine.NoterVoyage(g.steps[Engine.GetStepIndex()])
     -- après la dernière étape : #steps + 1, le guide est terminé
     if Engine.GetStepIndex() <= #g.steps then
         ns.db.stepIndex = Engine.GetStepIndex() + 1
@@ -1032,6 +1416,7 @@ engineFrame:SetScript("OnEvent", function(self, event, ...)
     elseif event == "TRAINER_SHOW" then
         Engine.interacting = true
         entraineurOuvert = { npc = UnitName("npc") or UnitName("target"), metier = IsTradeskillTrainer and IsTradeskillTrainer() or false }
+        if not entraineurOuvert.metier then pcall(Engine.NoterEntraineur, entraineurOuvert.npc) end
         LogEvent(event)
     elseif event == "TRAINER_CLOSED" then
         Engine.interacting = false
@@ -1113,7 +1498,13 @@ function Engine.ChooseBestGuide()
     local meilleur
     for _, g in ipairs(list) do
         if carte and Engine.CartesDe(g)[carte] then
-            if not meilleur or (g.minLevel or 1) > (meilleur.minLevel or 1) then meilleur = g end
+            local mieux = not meilleur
+            if meilleur and Engine.Proximite(g) ~= Engine.Proximite(meilleur) and (g.minLevel or 1) == (meilleur.minLevel or 1) then
+                mieux = Engine.Proximite(g) > Engine.Proximite(meilleur)
+            elseif meilleur then
+                mieux = (g.minLevel or 1) > (meilleur.minLevel or 1)
+            end
+            if mieux then meilleur = g end
         end
     end
     if meilleur then return meilleur end
@@ -1234,10 +1625,10 @@ end
 -- rattrapage : avance jusqu'à la première étape non terminée, puis clamp
 --- Étape d'entraîneur non validée mais dépassée : l'étape de quête suivante est déjà faite ou entamée.
 function Engine.EntraineurDepasse(g, i)
-    if not Engine.EstEntraineur(g.steps[i]) then return false end
+    if not Engine.EstPassage(g.steps[i]) then return false end
     for j = i + 1, #g.steps do
         local s = g.steps[j]
-        if not Engine.EstEntraineur(s) and Engine.StepApplies(s) then
+        if not Engine.EstPassage(s) and Engine.StepApplies(s) then
             if Engine.StepIsComplete(s) then return true end
             for _, q in ipairs(Engine.QuetesApplicables(s)) do
                 local st = Engine.QuestState(q)

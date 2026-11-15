@@ -40,7 +40,7 @@ function Fiche({ l, publies = [] }: { l: LigneProbe; publies?: ReleveProbe[] }) 
         N° {l.id} · {g.personnage || "Personnage inconnu"} · {g.race ?? `race « ${g.raceFichier || "?"} »`}{g.classe ? ` ${g.classe}` : ""} · niveaux {g.niveaux[0]} à {g.niveaux[1]}
       </h2>
       <p className="doux" style={{ marginTop: 0 }}>
-        Reçu le {dateLongue(l.recuLe)} · {g.partie === "depart" ? "zone de départ" : g.partie === "commune" ? "partie commune" : "partie non précisée"} ·{" "}
+        Reçu le {dateLongue(l.recuLe)} · {g.partie === "depart" ? "zone de départ" : g.partie === "commune" ? "partie commune" : g.partie === "complet" ? "zone de départ et suite" : "partie non précisée"} ·{" "}
         {g.evenements} événements · état : <strong>{ETATS[l.etat]}</strong>{l.decideLe ? ` le ${dateLongue(l.decideLe)}` : ""}
       </p>
 

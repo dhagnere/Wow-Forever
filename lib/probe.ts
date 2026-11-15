@@ -81,7 +81,7 @@ export interface GuideProbe {
   classe: string | null;
   faction: "alliance" | "horde" | null;
   niveaux: [number, number];
-  partie: "depart" | "commune" | null;
+  partie: "depart" | "commune" | "complet" | null;
   /** Zones dans l'ordre joué, chacune avec ses étapes « prendre:<id> », « faire:<id> », « rendre:<id> » (ids du guide). */
   zones: { lieu: string; etapes: string[] }[];
   /** Quêtes jouées que le guide ne connaît pas encore (souvent des quêtes propres à Forever) : à saisir dans ajouts-forever. */
@@ -189,12 +189,12 @@ export function guideDepuisExport(e: ExportProbe): GuideProbe {
   return {
     personnage: e.personnage, race, raceFichier: e.raceFichier, classe, faction,
     niveaux: [Math.max(1, niveauMin || 1), Math.max(niveauMin || 1, niveauMax || 1)],
-    partie: e.partie === "depart" || e.partie === "commune" ? e.partie : null,
+    partie: e.partie === "depart" || e.partie === "commune" || e.partie === "complet" ? e.partie : null,
     zones, inconnues: [...inconnues.values()], trajets, exploits, evenements: e.evenements.length,
   };
 }
 
-/** Portée proposée d'office : la zone de départ vaut pour toutes les classes de la race, la partie commune pour toute la faction. */
+/** Portée proposée d'office : la zone de départ (ou départ et suite réunis, « complet ») vaut pour toutes les classes de la race, la partie commune pour toute la faction. */
 export const porteeConseillee = (g: GuideProbe): Portee => (g.partie === "commune" ? "faction" : "race");
 
 /** Races concernées par une portée. */

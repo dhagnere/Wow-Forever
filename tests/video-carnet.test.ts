@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { chapitres, descriptionVideo, heureLocale, horodatage, lireSauvegardeSonde, lireTableLua, positionDans, reperesRouteProbe, seances, titreVideo, type Clip } from "@/lib/videoCarnet";
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { chapitres, descriptionVideo, liensDescription, heureLocale, horodatage, lireSauvegardeSonde, lireTableLua, positionDans, reperesRouteProbe, seances, titreVideo, type Clip } from "@/lib/videoCarnet";
 
 // Sauvegarde de RouteProbe telle que le jeu l'écrit : un orc en cours, un démoniste mis de côté.
 const SAUVEGARDE = `
@@ -110,6 +112,41 @@ describe("séances et chapitres", () => {
     const d = descriptionVideo(s, c, "https://www.taverne-eternelle.fr");
     expect(d).toContain("0:00 Début de la séance · Durotar");
     expect(d).toContain("https://www.taverne-eternelle.fr/carnet/");
+  });
+
+  it("ne coupe jamais le titre au milieu : la zone du milieu se resserre, les niveaux restent entiers", () => {
+    const s = seances(clips)[0];
+    const zones = ["Clairières de Tirisfal", "Fossoyeuse", "Durotar"];
+    const titre = titreVideo(s, { zones, niveaux: [5, 12] });
+    expect(titre).toBe("Journal de Jobwow · 11 novembre 2026 · Clairières de Tirisfal → … → Durotar · niveaux 5 à 12");
+    expect(titre.length).toBeLessThanOrEqual(100);
+    const long = titreVideo(s, { zones: ["Une zone au nom vraiment très très long", "Une autre zone au nom interminable", "Encore une"], niveaux: [10, 20] });
+    expect(long.length).toBeLessThanOrEqual(100);
+    expect(long.endsWith("niveaux 10 à 20")).toBe(true);
+  });
+
+  it("met dans la description des liens complets, seuls sur leur ligne, vers des pages qui existent", () => {
+    const s = seances(clips)[0];
+    const c = chapitres(s, reperesRouteProbe(lireTableLua(SAUVEGARDE)));
+    const d = descriptionVideo(s, c, "https://www.taverne-eternelle.fr/", { youtube: "https://www.youtube.com/@Jobwow-taverne", facebook: "https://www.facebook.com/taverneeternelle" });
+    expect(d).toContain("niveaux 3 à 4");
+    expect(d).toContain("La carte, Durotar : https://www.taverne-eternelle.fr/cartes/durotar/");
+    expect(d).toContain("S'abonner à la chaîne : https://www.youtube.com/@Jobwow-taverne?sub_confirmation=1");
+    expect(d.length).toBeLessThanOrEqual(5000);
+    const liens = d.split("\n").filter((l) => l.includes("http"));
+    expect(liens.length).toBeGreaterThanOrEqual(8);
+    for (const l of liens) {
+      expect(l).toMatch(/ : https:\/\/\S+$/); // l'adresse termine la ligne : rien ne s'y colle
+      const u = new URL(l.split(" : ").pop()!);
+      if (u.hostname !== "www.taverne-eternelle.fr") continue;
+      expect(u.pathname.endsWith("/")).toBe(true);
+      const parties = u.pathname.split("/").filter(Boolean);
+      const page = parties[0] === "cartes" && parties[1]
+        ? "app/(site)/cartes/[lieu]/page.tsx"
+        : path.join("app/(site)", ...parties, "page.tsx");
+      expect(existsSync(path.join(process.cwd(), page)), u.pathname).toBe(true);
+    }
+    expect(liensDescription("https://x", ["Zone inconnue"], {})).not.toContain("La carte");
   });
 
   it("sans trois chapitres, la description n'en affiche aucun (YouTube les ignorerait)", () => {

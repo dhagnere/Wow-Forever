@@ -2,8 +2,8 @@
 
 | Dossier | Rôle | État |
 |---|---|---|
-| `EternalRoutes/` | Guide pas à pas en jeu (fenêtre, flèche, auto-avance) | 0.12.1 : lit EternalProbe, puis RouteProbe ; consigne sous chaque étape (entraîneur, grimoire, objets à ramasser) ; niveaux lus au bon format |
-| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.10.1 : captures de la 0.8, trajets (`/ep trajet`), code à coller sur le site (`/ep export`, `/ep export depart`), titre des entraîneurs, grimoires achetés, nouveau niveau noté à la montée (`level|5|nouveau`) |
+| `EternalRoutes/` | Guide pas à pas en jeu (fenêtre, flèche, auto-avance) | 0.14.0 : lit EternalProbe, puis RouteProbe ; consigne sous chaque étape (entraîneur, grimoire, objets à ramasser) ; une route de départ par zone, race et classe ; étapes « voyage » (zeppelin, bateau, vol) |
+| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.10.1 : captures de la 0.8, trajets (`/ep trajet`), code à coller sur le site (`/ep export`, `/ep export depart` (zone de départ seule ; depuis la 0.11.1, `/ep export` donne la zone de départ gardée et la suite réunies, `/ep export commune` la suite seule)), titre des entraîneurs, grimoires achetés, nouveau niveau noté à la montée (`level|5|nouveau`) |
 | `RouteProbe/` | Ancienne sonde d'enregistrement, gardée pour référence | 0.6.0, version jouée au 13/11 |
 
 Branche de travail : `dev-addon`. Chaque changement est relu puis fusionné dans `dev`.
@@ -20,6 +20,8 @@ Nouveaux événements, au même format « heure|type|… » (EternalRoutes ignor
 immobile 5 s dans une autre zone ; `/ep trajet fin` la note à la main, `/ep trajet annule` abandonne. Marche sans
 enregistrement en cours et survit à un `/reload`. Le site place un trajet d'après ses lieux de départ et d'arrivée,
 jamais d'après l'heure : on peut le rejouer après coup (aucune quête n'est en jeu).
+Dans EternalRoutes (0.14), le trajet devient une étape « Voyager » : flèche vers l'embarcadère, objectif « Arriver : … »,
+validée dès qu'on est sur la carte d'arrivée. Un vol pris chez un maître de vol donne la même étape, sans commande.
 
 **Entraîneurs et grimoires (0.10.0)** : l'événement `trainer` porte en 7e champ le titre du PNJ (« Entraîneur de démons »,
 « Dresseur de familiers »), lu sur sa bulle ; `livre` note un grimoire ou un livre acheté chez un vendeur (objet, nom,
@@ -49,6 +51,82 @@ Un grimoire ou un livre utilisable dans les sacs fait apparaître, quelle que so
 et faites un clic droit sur « Grimoire d'Éclair de feu (Rang 2) » : votre démon apprend la capacité. » (mode réduit compris).
 Les sources (« sur : … ») ne sont plus collées au texte de l'objectif : elles sont dans la consigne. Textes dans `Locale.lua`
 (`HINT_…`, français et anglais), règles dans `Engine.ActionsEtape` et `Engine.ActionsSacs` (`GuideEngine.lua`).
+
+## Noms explicites et morceaux de zone de départ (EternalRoutes 0.13.7, EternalProbe 0.11.2)
+
+- Noms des routes : « Départ Horde · Mort-vivant · Voleur · 1-6 » pour une zone de départ (faction, race, classe,
+  niveaux) ; « Horde · Orgrimmar · Démoniste · 12-12 » pour la suite (faction, zone, classe de l'enregistrement).
+- Un enregistrement fait tout entier dans la zone de départ de sa race, sans dépasser son niveau de sortie, devient
+  une route de départ même si la sonde le marquait « partie commune » (reste d'un /ep suite ou d'un autre personnage).
+  Les routes déjà importées de cette façon (« Horde · Clairières de Tirisfal · 1-1 », « … · 2-6 ») sont rangées au
+  chargement, et leurs morceaux assemblés : un morceau qui reprend au niveau où le précédent s'arrêtait le prolonge.
+- Importer un nouveau morceau d'une route de départ (même race, même classe, à partir de son dernier niveau) la
+  prolonge au lieu de la remplacer.
+- EternalProbe 0.11.2 : un personnage qui démarre dans sa zone de départ, sous son niveau de sortie, enregistre sa zone
+  de départ même si la sauvegarde gardait « partie commune ».
+
+## Une route de départ par zone, race et classe (EternalRoutes 0.13.6)
+
+Deux races partagent parfois une zone de départ (orcs et trolls à Durotar, nains et gnomes à Dun Morogh) : la route
+porte donc aussi la race (`rp-depart-<zone>-<race>-<classe>`). Un troll guerrier suit la route du troll guerrier ;
+à défaut celle d'un orc guerrier, puis celle d'un troll d'une autre classe, complétée par ses quêtes de classe et son
+entraîneur. Les routes déjà importées prennent leur nouveau nom au chargement de l'addon.
+
+## Routes enregistrées seulement (EternalRoutes 0.13.5)
+
+Les 56 guides de 1 à 60 du site (un par race et classe) ne sont plus chargés par l'addon : seules les routes
+enregistrées en jeu servent de référence. Chaque route de départ s'affiche sous la forme
+« Départ · Clairières de Tirisfal · Mort-vivant · Démoniste · 1-6 » (zone, race et classe de l'enregistrement) ;
+les routes de faction gardent « Horde · zone · niveaux ». `npm run addon:wow` ne remet plus les guides du site :
+il écrit `Maps.lua` et la base de quêtes (`QuestDB.lua`).
+
+## Une route de départ par classe (EternalRoutes 0.13.4)
+
+Chaque classe a ses quêtes et ses entraîneurs dès la zone de départ : une route de départ se garde désormais par zone
+**et par classe** (`rp-depart-<zone>-<classe>`). Enregistrer la zone de départ avec un guerrier n'écrase plus la
+route du démoniste : les deux coexistent.
+
+- Le personnage suit la route de départ de sa classe quand elle existe ; sinon celle d'une autre classe de sa race,
+  complétée comme avant (quêtes de classe, entraîneur de sa classe).
+- Importer la route de sa classe la fait suivre aussitôt, même si le personnage suivait celle d'une autre classe.
+- Les routes de départ importées avant la 0.13.4 prennent le nom de la classe qui les a enregistrées au chargement de
+  l'addon ; un personnage qui en suivait une la retrouve sans rien faire.
+- Les routes de faction (après la zone de départ) restent communes à toutes les classes.
+
+Pour couvrir une race, il faut donc enregistrer sa zone de départ une fois avec chaque classe, puis `/ep export depart`
+pour le site si besoin.
+
+## Position exacte des PNJ dans la base intégrée (EternalRoutes 0.13.3)
+
+`QuestDB.lua` plaçait chaque donneur et receveur au centre de son village, comme le guide du site qui regroupe les PNJ
+voisins en un seul point. Dans un même village, tous les entraîneurs avaient donc la même position : la flèche du
+« Parchemin simple » du guerrier visait la maison de l'entraîneur des démonistes. La base donne maintenant la position
+du PNJ lui-même (fiche de la quête), et le centre du village seulement quand le PNJ n'est pas placé.
+
+## Entraîneur de la classe jouée (EternalRoutes 0.13.2)
+
+Sur une route enregistrée avec une autre classe, les étapes « Voir l'entraîneur » menaient jusqu'ici à l'entraîneur de
+la classe qui l'avait enregistrée, ou disparaissaient. Chacune mène maintenant à l'entraîneur de la classe jouée le plus
+proche, sur la même carte, au même moment de la route : nom, position et flèche sont les siens.
+
+- Positions : base intégrée (`ns.classTrainers` dans `QuestDB.lua`, entraîneurs des bases libres placés par
+  `npm run base:quetes`, puis `npm run addon:wow`), complétée par les entraîneurs vus en jeu.
+- Entraîneur vu en jeu : chaque fois qu'un personnage ouvre la fenêtre de l'entraîneur de sa classe, l'addon retient
+  son nom et sa position pour tout le compte (`EternalRoutesRoutesDB.entraineursClasse`). C'est ce qui place les
+  entraîneurs propres à Forever, absents des bases libres.
+- Sans entraîneur connu sur la carte, l'étape reste sans flèche et invite à ouvrir une fois la fenêtre de l'entraîneur ;
+  la position est alors retenue et l'étape se met à jour.
+- Les visites d'entraîneur de métier, d'entraîneur de démons et les achats de grimoire restent réservés à la classe qui
+  a enregistré la route.
+
+## Quêtes de classe sur une route d'une autre classe (EternalRoutes 0.13.1)
+
+Une route enregistrée avec un personnage sert à toutes les classes de sa race. Jusqu'ici, un guerrier qui suivait
+une route enregistrée par un démoniste ne voyait pas ses propres quêtes de classe : le démoniste ne les avait pas
+prises. EternalRoutes les ajoute maintenant d'après sa base de quêtes (`QuestDB.lua`) : chaque quête réservée à la
+classe jouée, donnée dans une zone de la route et à son niveau, apparaît avec ses étapes « prendre », « faire » et
+« rendre », juste après la première étape où le niveau demandé est atteint ; ses suites viennent après elle. La route
+enregistrée n'est pas modifiée : le démoniste la voit toujours telle qu'il l'a jouée.
 
 ## Annonces discrètes (EternalProbe 0.11.0, EternalRoutes 0.13.0)
 
