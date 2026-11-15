@@ -22,7 +22,9 @@
 
     Trajets (zeppelin, bateau) : /ep trajet <nom> au moment d'embarquer. L'arrivée est notée seule dès qu'on
     reste immobile 5 s dans une autre carte que celle du départ ; /ep trajet fin la note à la main,
-    /ep trajet annule l'abandonne. Un trajet marche même sans enregistrement en cours, survit à un /reload,
+    /ep trajet annule l'abandonne. Sans commande : le bouton « Trajet » (déplaçable, près de la minicarte) ou un
+    raccourci clavier (Options > Raccourcis > EternalProbe) : clic gauche zeppelin, clic droit bateau, Maj + clic abandon ;
+    /ep bouton le masque ou l'affiche. Un trajet marche même sans enregistrement en cours, survit à un /reload,
     et devient dans EternalRoutes (0.14) une étape « voyage » au départ de l'embarcadère, validée à l'arrivée ;
     un vol (taxi, puis vol depart et arrivee) donne de même une étape au maître de vol.
 
@@ -98,6 +100,7 @@ local function TrajetFin(issue)
     end
     trajet = nil
     P.DB().trajet = nil
+    if P.MajBoutonTrajet then P.MajBoutonTrajet() end
 end
 
 local function TrajetDebut(nom)
@@ -137,7 +140,104 @@ local function ReprendreTrajet()
     P.Print(("Trajet « %s » repris après le rechargement."):format(t.nom))
 end
 
+-- ---- bouton « Trajet » (déplaçable) et raccourci clavier ------------------------
+-- Pour enregistrer une vidéo sans taper de commande : un clic au moment d'embarquer, l'arrivée est notée seule.
+-- Le nom reste générique (« Zeppelin », « Bateau ») : EternalRoutes en fait « Prendre le zeppelin pour <arrivée> ».
+
+local boutonTrajet
+
+local function MajBoutonTrajet()
+    if not boutonTrajet then return end
+    if trajet then boutonTrajet.icone:SetVertexColor(0.4, 1, 0.4) else boutonTrajet.icone:SetVertexColor(1, 1, 1) end
+end
+P.MajBoutonTrajet = MajBoutonTrajet
+
+--- Clic gauche : départ en zeppelin, ou arrivée si un trajet est en cours ; clic droit : départ en bateau ;
+--- Maj + clic : abandonner le trajet en cours.
+function P.TrajetBouton(bouton)
+    if IsShiftKeyDown and IsShiftKeyDown() then
+        if trajet then TrajetFin("annule") end
+    elseif trajet then
+        TrajetFin("arrivee")
+    else
+        TrajetDebut(bouton == "RightButton" and "Bateau" or "Zeppelin")
+    end
+    MajBoutonTrajet()
+end
+-- raccourci clavier (Échap > Options > Raccourcis > EternalProbe)
+function EternalProbe_Trajet() P.TrajetBouton("LeftButton") end
+function EternalProbe_TrajetBateau() P.TrajetBouton("RightButton") end
+BINDING_HEADER_ETERNALPROBE = "EternalProbe"
+BINDING_NAME_ETERNALPROBE_TRAJET = "Trajet en zeppelin (ou arrivée)"
+BINDING_NAME_ETERNALPROBE_TRAJETBATEAU = "Trajet en bateau (ou arrivée)"
+
+local function PlacerBoutonTrajet()
+    if not boutonTrajet then return end
+    local pos = P.DB().boutonTrajet
+    boutonTrajet:ClearAllPoints()
+    if pos and pos.x and pos.y then
+        boutonTrajet:SetPoint("CENTER", UIParent, "BOTTOMLEFT", pos.x, pos.y)
+    elseif Minimap then
+        boutonTrajet:SetPoint("TOPRIGHT", Minimap, "BOTTOMLEFT", 4, 4)
+    else
+        boutonTrajet:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    end
+    if P.DB().boutonTrajetCache then boutonTrajet:Hide() else boutonTrajet:Show() end
+end
+
+if CreateFrame and UIParent then
+    boutonTrajet = CreateFrame("Button", "EternalProbeTrajetButton", UIParent)
+    boutonTrajet:SetSize(30, 30)
+    boutonTrajet:SetFrameStrata("MEDIUM")
+    boutonTrajet:SetMovable(true)
+    boutonTrajet:SetClampedToScreen(true)
+    boutonTrajet:RegisterForDrag("LeftButton")
+    boutonTrajet:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    local fond = boutonTrajet:CreateTexture(nil, "BACKGROUND")
+    fond:SetTexture("Interface\\Minimap\\UI-Minimap-Background")
+    fond:SetSize(26, 26)
+    fond:SetPoint("CENTER")
+    boutonTrajet.icone = boutonTrajet:CreateTexture(nil, "ARTWORK")
+    boutonTrajet.icone:SetTexture("Interface\\Icons\\Ability_Hunter_Pathfinding")
+    boutonTrajet.icone:SetSize(22, 22)
+    boutonTrajet.icone:SetPoint("CENTER")
+    local bord = boutonTrajet:CreateTexture(nil, "OVERLAY")
+    bord:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
+    bord:SetSize(52, 52)
+    bord:SetPoint("TOPLEFT")
+    boutonTrajet:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
+    boutonTrajet:SetScript("OnDragStart", function(self) self:StartMoving() end)
+    boutonTrajet:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+        local x, y = self:GetCenter()
+        if x and y then P.DB().boutonTrajet = { x = x, y = y } end
+    end)
+    boutonTrajet:SetScript("OnClick", function(_, bouton) P.TrajetBouton(bouton) end)
+    boutonTrajet:SetScript("OnEnter", function(self)
+        if not GameTooltip then return end
+        GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+        GameTooltip:AddLine("EternalProbe · Trajet")
+        if trajet then
+            GameTooltip:AddLine(("En cours : %s, depuis %s."):format(trajet.nom, trajet.zone), 0.4, 1, 0.4)
+            GameTooltip:AddLine("L'arrivée sera notée seule. Clic : la noter maintenant.", 1, 1, 1)
+            GameTooltip:AddLine("Maj + clic : abandonner.", 1, 1, 1)
+        else
+            GameTooltip:AddLine("Clic gauche en embarquant : zeppelin.", 1, 1, 1)
+            GameTooltip:AddLine("Clic droit : bateau.", 1, 1, 1)
+        end
+        GameTooltip:AddLine("Glisser : déplacer · /ep bouton : masquer ou afficher", 0.7, 0.7, 0.7)
+        GameTooltip:Show()
+    end)
+    boutonTrajet:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
+end
+
 function P.CommandeEnPlus(lower, raw)
+    if lower == "bouton" then
+        P.DB().boutonTrajetCache = not P.DB().boutonTrajetCache
+        PlacerBoutonTrajet()
+        P.Print(P.DB().boutonTrajetCache and "Bouton « Trajet » masqué (/ep bouton pour le remettre)." or "Bouton « Trajet » affiché.")
+        return true
+    end
     if lower == "trajet fin" then TrajetFin("arrivee") return true end
     if lower == "trajet annule" then TrajetFin("annule") return true end
     if lower == "trajet" or lower:match("^trajet%s") then
@@ -274,7 +374,7 @@ f:SetScript("OnEvent", function(_, event, ...)
         if (...) == "target" then VerifierCible() end
         return
     end
-    if event == "PLAYER_LOGIN" then ReprendreTrajet() return end
+    if event == "PLAYER_LOGIN" then ReprendreTrajet(); PlacerBoutonTrajet(); MajBoutonTrajet() return end
     if not P.EnCours() then return end
 
     if event == "QUEST_ACCEPTED" then

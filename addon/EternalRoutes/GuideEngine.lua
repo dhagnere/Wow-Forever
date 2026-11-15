@@ -1031,7 +1031,8 @@ function Engine.QuestName(q)
     if q.kind == "entrainer" then return TraduireEn(q.name) or "" end
     if q.kind == "voyage" then
         -- le nom donné au trajet (/ep trajet) en français ; sinon « Prendre le zeppelin pour … »
-        if q.name and q.name ~= "" and not Anglais() then return q.name end
+        -- (« Zeppelin », « Bateau » du bouton Trajet : nom générique, la destination le complète)
+        if q.name and q.name:find("%s") and not Anglais() then return q.name end
         return NomVoyage(q)
     end
     -- version anglaise : le titre anglais passe avant celui du journal (langue du client)

@@ -22,6 +22,9 @@ enregistrement en cours et survit à un `/reload`. Le site place un trajet d'apr
 jamais d'après l'heure : on peut le rejouer après coup (aucune quête n'est en jeu).
 Dans EternalRoutes (0.14), le trajet devient une étape « Voyager » : flèche vers l'embarcadère, objectif « Arriver : … »,
 validée dès qu'on est sur la carte d'arrivée. Un vol pris chez un maître de vol donne la même étape, sans commande.
+Sans taper de commande (pratique en vidéo) : le bouton « Trajet » d'EternalProbe, près de la minicarte, se déplace au
+glisser ; clic gauche en embarquant dans un zeppelin, clic droit pour un bateau, Maj + clic pour abandonner. Un raccourci
+clavier fait la même chose (Échap > Options > Raccourcis > EternalProbe). `/ep bouton` masque ou affiche le bouton.
 
 **Entraîneurs et grimoires (0.10.0)** : l'événement `trainer` porte en 7e champ le titre du PNJ (« Entraîneur de démons »,
 « Dresseur de familiers »), lu sur sa bulle ; `livre` note un grimoire ou un livre acheté chez un vendeur (objet, nom,

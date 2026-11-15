@@ -313,6 +313,26 @@ return table.concat(out, " ")`);
     expect(r).toBe("a c true false false");
   });
 
+  it("note un trajet d'un clic sur le bouton « Trajet » (zeppelin, bateau, arrivée, abandon) et le nomme d'après l'arrivée", () => {
+    const r = executer(SIMULE, ...SONDE, SEANCE, `
+local P = EternalProbe
+BANC.carte, BANC.zone, BANC.x, BANC.y = 1411, "Durotar", 0.50, 0.12
+P.TrajetBouton("LeftButton")
+BANC.carte, BANC.zone, BANC.x, BANC.y = 1420, "Clairières de Tirisfal", 0.61, 0.59
+BANC.Avancer(10)
+P.TrajetBouton("RightButton")
+IsShiftKeyDown = function() return true end
+P.TrajetBouton("LeftButton")
+IsShiftKeyDown = function() return false end
+local t = {}
+for _, e in ipairs(EternalProbeDB.events) do if e:find("|trajet|") then t[#t + 1] = e:gsub("^[%d.]+|", ""):match("^([^|]+|[^|]+|[^|]+)") end end
+return table.concat(t, "\\n")`).split("\n");
+    expect(r).toEqual(["trajet|debut|Zeppelin", "trajet|arrivee|Zeppelin", "trajet|debut|Bateau", "trajet|annule|Bateau"]);
+    const nom = executer(SIMULE, ESPACE, ...MOTEUR, `
+return EternalRoutes.Engine.QuestName({ kind = "voyage", mode = "zeppelin", name = "Zeppelin", vers = "Clairières de Tirisfal" })`);
+    expect(nom).toBe("Prendre le zeppelin pour Clairières de Tirisfal");
+  });
+
   it("valide l'étape « voyage » à l'arrivée, pas pendant le vol, et dit quoi faire", () => {
     const r = executer(SIMULE, ...SONDE, SEANCE, ESPACE, ...MOTEUR, `
 local E = EternalRoutes.Engine
