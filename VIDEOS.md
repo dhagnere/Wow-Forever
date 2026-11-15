@@ -55,7 +55,10 @@ garde une vidéo par fichier.
 1. `npm run carnet:incrustation preparer` (tout `D:\WOW`) ou `npm run carnet:incrustation -- "D:\WOW\<vidéo>.mp4" --preparer` écrit `<vidéo>.narration.json` : intro, puis les moments
    tirés des repères d'EternalProbe (niveau, élite, mort, zone, grimoire, entraîneur, trajet, vol, repère `/ep mark`, une
    quête rendue toutes les deux minutes au plus), sans chevauchement, et trois clips verticaux au plus. Miniature :
-   `--miniature <image>` ou `<vidéo>.miniature.jpg|png|webp` à côté de la vidéo.
+   `--miniature <image>` ou `<vidéo>.miniature.jpg|png|webp` à côté de la vidéo. L'Atelier la fabrique (bloc « Miniature
+   YouTube », depuis le 15/11) : il ouvre la vidéo dans le navigateur, sans rien envoyer, tire six images aux moments forts
+   et les compose en 1280 × 720 dans la mise en page de `visuels/miniature-video.html` ; le JPEG enregistré se range dans
+   D:\WOW à côté de la vidéo et sert aussi de miniature YouTube.
 2. Relecture dans l'**Atelier vidéo de Jobwow** (artefact https://claude.ai/artifact/DSRxPCDtJQRUeL65i1cfvs) : ouvrir le
    fichier, corriger heures, répliques (« Autre réplique »), sous-titres et clips, aperçu 16:9 et 9:16, puis copier le texte
    dans le fichier.
