@@ -74,6 +74,7 @@ local function NettoyerObjectif(t)
 end
 
 local function Arrondi(v)
+    if not v then return nil end
     return math.floor(v * 10 + 0.5) / 10
 end
 
@@ -507,6 +508,16 @@ function Importer.Convertir(db)
         end
     end
 
+    -- pierre de foyer : liée à une auberge (étape devant l'aubergiste), puis utilisée (étape sans flèche)
+    for _, e in ipairs(ev) do
+        if e.k == "foyer" and (e.d[1] == "lie" or e.d[1] == "utilise") then
+            local carte, x, y = tonumber(e.d[3]), tonumber(e.d[4]), tonumber(e.d[5])
+            if carte and x and y then x, y = x * 100, y * 100 else carte, x, y = Position(e.t) end
+            brutes[#brutes + 1] = { t = e.t, genre = "foyer", qid = 0, foyer = {
+                action = e.d[1] == "lie" and "lier" or "utiliser", lieu = Rogner(e.d[2]), carte = carte, x = x, y = y } }
+        end
+    end
+
     -- trajet commencé en fin d'enregistrement (on a embarqué, puis arrêté la sonde) : l'étape garde le départ,
     -- elle se valide quand on a quitté la carte du quai
     if trajetOuvert and trajetOuvert.carte then
@@ -515,7 +526,7 @@ function Importer.Convertir(db)
             x = trajetOuvert.x, y = trajetOuvert.y, vers = nil, versCarte = nil } }
     end
 
-    local ordre = { rendre = 0, faire = 1, entrainer = 2, voyage = 2, prendre = 3 }
+    local ordre = { rendre = 0, faire = 1, entrainer = 2, voyage = 2, foyer = 2, prendre = 3 }
     table.sort(brutes, function(a, b)
         if a.t ~= b.t then return a.t < b.t end
         if ordre[a.genre] ~= ordre[b.genre] then return ordre[a.genre] < ordre[b.genre] end
@@ -525,7 +536,13 @@ function Importer.Convertir(db)
     -- regroupement par lieu
     local etapes = {}
     for _, b in ipairs(brutes) do
-      if b.genre == "voyage" then
+      if b.genre == "foyer" then
+        local v = b.foyer
+        local lier = v.action == "lier"
+        etapes[#etapes + 1] = { genre = "foyer", carte = v.carte, x = lier and v.x or nil, y = lier and v.y or nil,
+            quests = { { kind = "foyer", action = v.action, lieu = v.lieu, depart = v.carte,
+                cle = ("foyer-%s-%s-%d"):format(v.action, tostring(v.lieu), math.floor((b.t or 0) + 0.5)) } } }
+      elseif b.genre == "voyage" then
         local v = b.voyage
         etapes[#etapes + 1] = { genre = "voyage", carte = v.carte, x = v.x, y = v.y, location = v.depuis,
             quests = { { kind = "voyage", mode = v.mode, name = v.nom, depuis = v.depuis, vers = v.vers, depart = v.carte,
@@ -571,7 +588,7 @@ function Importer.Convertir(db)
     -- « faire ». Une quête absente de la base (propre à Forever) garde la position enregistrée.
     for _, e in ipairs(etapes) do
         e.source = "jeu"
-        for _, q in ipairs(e.genre == "voyage" and {} or e.quests) do
+        for _, q in ipairs((e.genre == "voyage" or e.genre == "foyer") and {} or e.quests) do
             local b = ns.questDB and ns.questDB[q.id]
             local p
             if b then
@@ -609,7 +626,7 @@ function Importer.Convertir(db)
     -- de la zone, c'est déjà la partie commune)
     local prolongee = false
     local premiere
-    for _, e in ipairs(etapes) do if e.genre ~= "voyage" then premiere = e break end end
+    for _, e in ipairs(etapes) do if e.genre ~= "voyage" and e.genre ~= "foyer" then premiere = e break end end
     if carteRace and partie == "commune" and premiere and premiere.carte == carteRace then
         local bas = tonumber(ctx.level) or 1
         for _, e in ipairs(ev) do if e.k == "level" then bas = math.min(bas, NiveauAtteint(e) - 1) break end end
@@ -640,8 +657,8 @@ function Importer.Convertir(db)
         local noms = {}
         for _, q in ipairs(e.quests) do noms[#noms + 1] = q.name end
         if e.genre == "prendre" then s.accepts = noms elseif e.genre == "rendre" then s.turnins = noms end
-        if e.genre == "voyage" then
-            s.voyage = true
+        if e.genre == "voyage" or e.genre == "foyer" then
+            s[e.genre] = true
         elseif e.genre == "entrainer" then
             -- l'ancre (dernière action de quête avant la visite) replace l'étape si la route est réenregistrée
             s.class, s.niveau, s.ancre = e.class, e.niveau, ancre
@@ -772,7 +789,10 @@ function Importer.DansSaZoneDeDepart(g)
     local carte = CarteDeRace(RaceDe(g))
     if not carte or type(g.steps) ~= "table" or #g.steps == 0 then return false end
     local premiere
-    for _, s in ipairs(g.steps) do if not (s.quests and s.quests[1] and s.quests[1].kind == "voyage") then premiere = s break end end
+    for _, s in ipairs(g.steps) do
+        local k = s.quests and s.quests[1] and s.quests[1].kind
+        if k ~= "voyage" and k ~= "foyer" then premiere = s break end
+    end
     if not premiere or premiere.map ~= carte then return false end
     return (g.niveauDebut or g.minLevel or 1) < (ZONES_DEPART[carte].fin or 10)
 end

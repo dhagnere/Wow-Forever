@@ -35,6 +35,7 @@ local ICONE_QUETE = {
     rendre  = "Interface\\GossipFrame\\ActiveQuestIcon",
     entrainer = "Interface\\GossipFrame\\TrainerGossipIcon",
     voyage = "Interface\\GossipFrame\\TaxiGossipIcon",
+    foyer = "Interface\\Icons\\INV_Misc_Rune_01",
 }
 
 local LARGEUR    = 380   -- fenêtre principale
@@ -89,7 +90,7 @@ local MAX_JOURNAL = 20   -- quêtes au plus dans le journal du jeu
 local function EtatVisuel(q, etat)
     if not q then return "prendre" end
     if etat == "done" then return "rendue" end
-    if q.kind == "entrainer" or q.kind == "voyage" then return "prendre" end
+    if q.kind == "entrainer" or q.kind == "voyage" or q.kind == "foyer" then return "prendre" end
     if etat == "complete" then return "pret" end
     if etat == "in_progress" then return "cours" end
     return "prendre"
@@ -99,7 +100,7 @@ local function BadgeEtat(q, ev)
     if ev == "pret" then return q.kind == "rendre" and L.BADGE_TO_TURNIN or L.BADGE_DONE_OBJ end
     if ev == "cours" then return q.kind == "prendre" and L.BADGE_ACCEPTED or L.BADGE_IN_PROGRESS end
     if q.kind == "entrainer" then return L.BADGE_TO_VISIT end
-    if q.kind == "voyage" then return L.BADGE_TO_TRAVEL end
+    if q.kind == "voyage" or q.kind == "foyer" then return L.BADGE_TO_TRAVEL end
     if q.kind == "prendre" then return L.BADGE_TO_TAKE end
     return L.BADGE_NOT_TAKEN
 end
@@ -355,7 +356,7 @@ end
 local function EtatLibelle(q, etat)
     if etat == "done" then return L.ST_DONE end
     if q.kind == "entrainer" then return L.ST_TO_TRAIN or "" end
-    if q.kind == "voyage" then return L.ST_TO_TRAVEL or "" end
+    if q.kind == "voyage" or q.kind == "foyer" then return L.ST_TO_TRAVEL or "" end
     if q.kind == "prendre" then
         return etat == "available" and L.ST_TO_TAKE or L.ST_TAKEN
     elseif q.kind == "rendre" then
@@ -545,8 +546,8 @@ local function RemplirQuete(r, q, largeur, location, source)
         tex = ICONE_QUETE.rendre
     elseif q.kind == "entrainer" then
         tex = ICONE_QUETE.entrainer
-    elseif q.kind == "voyage" then
-        tex = ICONE_QUETE.voyage
+    elseif q.kind == "voyage" or q.kind == "foyer" then
+        tex = ICONE_QUETE[q.kind]
     elseif q.kind == "prendre" and ev == "prendre" then
         tex = ICONE_QUETE.prendre
     elseif q.kind == "rendre" then
@@ -702,7 +703,7 @@ local function IndexRoute(guide)
     c = { n = #guide.steps, parId = {}, parNom = {} }
     for i, s in ipairs(guide.steps) do
         for _, q in ipairs(s.quests or {}) do
-            if q.kind ~= "entrainer" and q.kind ~= "voyage" then
+            if q.kind ~= "entrainer" and q.kind ~= "voyage" and q.kind ~= "foyer" then
                 -- l'identifiant d'abord : deux quêtes peuvent porter le même titre (233 et 234)
                 local e
                 if q.id then e = c.parId[q.id] elseif q.name then e = c.parNom[q.name] end

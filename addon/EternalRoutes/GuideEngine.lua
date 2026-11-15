@@ -711,6 +711,10 @@ function Engine.ActionsEtape(q, objectifs)
     local L, out, vus = ns.L, {}, {}
     local function Ajouter(t) if t and t ~= "" and not vus[t] then vus[t] = true; out[#out + 1] = t end end
     if not q then return out end
+    if q.kind == "foyer" then
+        Ajouter(q.action == "lier" and L.HINT_HEARTH_BIND or L.HINT_HEARTH_USE)
+        return out
+    end
     if q.kind == "voyage" then
         if q.mode == "vol" then
             Ajouter(q.depuis and L.HINT_FLIGHT_AT:format(TraduireEn(q.depuis)) or L.HINT_FLIGHT)
@@ -802,10 +806,29 @@ function Engine.EstVoyage(step)
     return q ~= nil and q.kind == "voyage"
 end
 
---- Étape de passage (entraîneur, voyage) : sautée quand une étape suivante est déjà avancée.
-function Engine.EstPassage(step)
-    return Engine.EstEntraineur(step) or Engine.EstVoyage(step)
+function Engine.EstFoyer(step)
+    local q = step and step.quests and step.quests[1]
+    return q ~= nil and q.kind == "foyer"
 end
+
+--- Étape de passage (entraîneur, voyage, pierre de foyer) : sautée quand une étape suivante est déjà avancée.
+function Engine.EstPassage(step)
+    return Engine.EstEntraineur(step) or Engine.EstVoyage(step) or Engine.EstFoyer(step)
+end
+
+--- Pierre de foyer : liée (l'auberge du foyer est la bonne) ou utilisée (notée au lancer, étape en cours).
+function Engine.EtatFoyer(q)
+    if ns.db and ns.db.foyers and q.cle and ns.db.foyers[q.cle] then return "done" end
+    if q.action == "lier" and GetBindLocation and q.lieu and GetBindLocation() == q.lieu then return "done" end
+    return "available"
+end
+
+local function NoterFoyer(q)
+    if not (q and q.cle) then return end
+    ns.db.foyers = ns.db.foyers or {}
+    ns.db.foyers[q.cle] = true
+end
+Engine.NoterFoyer = NoterFoyer
 
 local function PositionJoueur()
     local carte = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
@@ -835,6 +858,7 @@ end
 
 --- Garde le voyage de l'étape en cours comme fait (appelé quand on passe à l'étape suivante).
 function Engine.NoterVoyage(step)
+    if Engine.EstFoyer(step) then NoterFoyer(step.quests[1]) return end
     if not Engine.EstVoyage(step) then return end
     local q = step.quests[1]
     if not q.cle then return end
@@ -881,6 +905,12 @@ function Engine.MarchandVu(npc)
 end
 
 function Engine.GetObjectives(q)
+    if q and q.kind == "foyer" then
+        local fait = Engine.EtatFoyer(q) == "done"
+        local lieu = q.lieu and q.lieu ~= "" and TraduireEn(q.lieu) or "?"
+        return { { text = (q.action == "lier" and ns.L.OBJ_HEARTH_BIND or ns.L.OBJ_HEARTH_USE):format(lieu),
+            numFulfilled = 0, numRequired = 0, finished = fait } }
+    end
     if q and q.kind == "voyage" then
         local fait = Engine.EtatVoyage(q) == "done"
         local vers = q.vers and q.vers ~= "" and TraduireEn(q.vers) or nil
@@ -1037,6 +1067,10 @@ end
 function Engine.QuestName(q)
     if not q then return "" end
     if q.kind == "entrainer" then return TraduireEn(q.name) or "" end
+    if q.kind == "foyer" then
+        local lieu = q.lieu and q.lieu ~= "" and TraduireEn(q.lieu) or "?"
+        return (q.action == "lier" and ns.L.HEARTH_BIND or ns.L.HEARTH_USE):format(lieu)
+    end
     if q.kind == "voyage" then
         -- le nom donné au trajet (/ep trajet) en français ; sinon « Prendre le zeppelin pour … »
         -- (« Zeppelin », « Bateau » du bouton Trajet : nom générique, la destination le complète)
@@ -1141,6 +1175,7 @@ function Engine.QuestState(q)
     if not q then return "unknown" end
     if q.kind == "entrainer" then return Engine.EtatEntraineur(q) end
     if q.kind == "voyage" then return Engine.EtatVoyage(q) end
+    if q.kind == "foyer" then return Engine.EtatFoyer(q) end
     local ids = q.id and { q.id } or IdsFor(q.name)
     if not C_QuestLog then return "unknown" end
     if not ids then
@@ -1391,7 +1426,7 @@ engineFrame:RegisterEvent("QUEST_COMPLETE")
 engineFrame:RegisterEvent("QUEST_FINISHED")
 engineFrame:RegisterEvent("PLAYER_LEVEL_UP")
 for _, e in ipairs({ "TRAINER_SHOW", "TRAINER_CLOSED", "LEARNED_SPELL_IN_TAB", "SPELLS_CHANGED",
-    "MERCHANT_SHOW", "MERCHANT_CLOSED", "BAG_UPDATE_DELAYED" }) do
+    "MERCHANT_SHOW", "MERCHANT_CLOSED", "BAG_UPDATE_DELAYED", "UNIT_SPELLCAST_SUCCEEDED" }) do
     pcall(engineFrame.RegisterEvent, engineFrame, e)
 end
 local entraineurOuvert, marchandOuvert
@@ -1404,6 +1439,16 @@ local function LogEvent(text)
 end
 
 engineFrame:SetScript("OnEvent", function(self, event, ...)
+    if event == "UNIT_SPELLCAST_SUCCEEDED" then
+        -- pierre de foyer (ou rappel astral) lancée : l'étape « utiliser la pierre de foyer » en cours est faite
+        local unite, _, sort = ...
+        if unite == "player" and (sort == 8690 or sort == 556) then
+            local step = Engine.GetCurrentStep()
+            local q = step and step.quests and step.quests[1]
+            if q and q.kind == "foyer" and q.action == "utiliser" then NoterFoyer(q); Engine.Refresh() end
+        end
+        return
+    end
     if event == "QUEST_LOG_UPDATE" then
         questLogDirty = true
     elseif event == "QUEST_ACCEPTED" then

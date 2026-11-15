@@ -37,7 +37,10 @@ local ICONE = {
     vaincre   = "Interface\\CURSOR\\Attack",
     ramasser  = "Interface\\CURSOR\\Pickup",
     fait      = "Interface\\RAIDFRAME\\ReadyCheck-Ready",
+    foyer     = "Interface\\Icons\\INV_Misc_Rune_01",
 }
+local LOGO = "Interface\\AddOns\\EternalRoutes\\Textures\\logo"
+local PIERRE = 6948 -- pierre de foyer
 
 local function Actif() return ns.db and ns.db.style ~= "classique" end
 Sobre.Actif = Actif
@@ -128,8 +131,23 @@ local function Creer()
     f:Hide()
 
     -- en-tête : parcours, nom de la route, tracé, réglages, réduire, fermer
+    local logo = CreateFrame("Frame", nil, f)
+    logo:SetSize(24, 24)
+    logo:SetPoint("TOPLEFT", 4, -3)
+    logo.tex = logo:CreateTexture(nil, "ARTWORK")
+    logo.tex:SetAllPoints()
+    logo.tex:SetTexture(LOGO)
+    logo:EnableMouse(true)
+    logo:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        GameTooltip:SetText(L.SOBRE_LOGO, 1, 0.82, 0.3)
+        GameTooltip:Show()
+    end)
+    logo:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    f.logo = logo
+
     local menu = BoutonIcone(f, 14, "Interface\\Icons\\INV_Misc_Map_01", L.SOBRE_MENU)
-    menu:SetPoint("TOPLEFT", 3, -3)
+    menu:SetPoint("LEFT", logo, "RIGHT", 0, 0)
     menu:SetScript("OnClick", function() Window.ToggleRoute() end)
     f.menu = menu
 
@@ -151,7 +169,7 @@ local function Creer()
     f.trace = trace
 
     local titre = Texte(f, 12, 0.95, 0.95, 0.95)
-    titre:SetPoint("LEFT", menu, "RIGHT", 4, 0)
+    titre:SetPoint("LEFT", menu, "RIGHT", 2, 0)
     titre:SetPoint("RIGHT", trace, "LEFT", -4, 0)
     titre:SetWordWrap(false)
     f.titre = titre
@@ -214,6 +232,29 @@ local function Creer()
     f.barre:SetColorTexture(0.25, 0.75, 0.37, 1)
     f.barre:SetHeight(4)
     f.barre:SetPoint("BOTTOMLEFT", 1, 1)
+
+    -- pierre de foyer : un clic l'utilise (bouton sécurisé du jeu, comme une barre d'action)
+    local ok, pierre = pcall(CreateFrame, "Button", "EternalRoutesSobreFoyer", f, "SecureActionButtonTemplate")
+    if ok and pierre then
+        pierre:SetSize(20, 20)
+        pierre:SetAttribute("type", "item")
+        pierre:SetAttribute("item", "item:" .. PIERRE)
+        if pierre.RegisterForClicks then pierre:RegisterForClicks("AnyUp", "AnyDown") end
+        pierre.icone = pierre:CreateTexture(nil, "ARTWORK")
+        pierre.icone:SetAllPoints()
+        pierre.icone:SetTexture(ICONE.foyer)
+        local h = pierre:CreateTexture(nil, "HIGHLIGHT")
+        h:SetAllPoints()
+        h:SetColorTexture(1, 1, 1, 0.2)
+        pierre:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_TOP")
+            GameTooltip:SetText(L.SOBRE_HEARTH, 1, 1, 1)
+            GameTooltip:Show()
+        end)
+        pierre:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        pierre:Hide()
+        f.pierre = pierre
+    end
 
     -- distance de l'étape, mise à jour en continu
     local ecoule = 0
@@ -286,9 +327,10 @@ function Sobre.Taches(q)
     local etat = ns.Engine.GetQuestStatus(q)
     local nom = ns.Engine.QuestName(q)
     local out = {}
-    if q.kind == "voyage" or q.kind == "entrainer" then
+    if q.kind == "voyage" or q.kind == "entrainer" or q.kind == "foyer" then
         local fait = etat == "done"
-        out[1] = { texte = nom, compte = fait and L.SOBRE_DONE or "", couleur = fait and "vert" or "bleu", icone = ICONE[q.kind] }
+        out[1] = { texte = nom, compte = fait and L.SOBRE_DONE or "", couleur = fait and "vert" or "bleu", icone = ICONE[q.kind],
+            pierre = q.kind == "foyer" and q.action == "utiliser" and not fait }
     elseif q.kind == "prendre" then
         local pris = etat ~= "available" and etat ~= "unknown"
         out[1] = { texte = Verbe(q) .. " « " .. nom .. " »", compte = pris and L.SOBRE_DONE or "", couleur = pris and "vert" or "rouge",
@@ -339,6 +381,7 @@ function Sobre.Rafraichir()
     f.etape, f.lieuBase, f.lieuTexte = nil, "", nil
     f.trace.icone:SetVertexColor(1, 1, 1, (ns.db.traceCarte ~= false or ns.db.traceMini ~= false) and 1 or 0.35)
     f.retour:Hide()
+    local pierreSur
     if not guide then
         f.titre:SetText(L.CHOOSE_GUIDE)
         f.numero:SetText("")
@@ -389,6 +432,7 @@ function Sobre.Rafraichir()
                     r:SetPoint("TOPLEFT", 5, y)
                     r:SetPoint("TOPRIGHT", -5, y)
                     r:Show()
+                    if t.pierre then pierreSur = r end
                     y = y - 26
                 end
                 -- une consigne par quête, en gris sous ses lignes
@@ -408,6 +452,16 @@ function Sobre.Rafraichir()
                 end
             end
             f.suite:SetText(Suite(guide, vue + 1) or "")
+        end
+    end
+    -- le bouton sécurisé ne se déplace pas en combat : il garde alors sa place
+    if f.pierre and not (InCombatLockdown and InCombatLockdown()) then
+        if pierreSur then
+            f.pierre:ClearAllPoints()
+            f.pierre:SetPoint("RIGHT", pierreSur, "RIGHT", -4, 0)
+            f.pierre:Show()
+        else
+            f.pierre:Hide()
         end
     end
     for i = nL + 1, #lignes do lignes[i]:Hide() end

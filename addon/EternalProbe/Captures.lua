@@ -16,6 +16,7 @@
       photo       raison (niveau, zone, exploit, trajet)
       trajet      debut ou arrivee ou annule|nom du trajet|zone|carte|x|y (|durée en s à l'arrivée)
       vol choix   nom du point de vol choisi sur la carte des vols (avant « vol depart »)
+      foyer       lie ou utilise|auberge du foyer|carte|x|y (pierre liée à une auberge, pierre utilisée)
       livre       objet|nom|vendeur|titre du vendeur|carte|x|y|niveau du joueur (grimoire ou livre acheté)
 
     « trainer » (EternalProbe.lua) porte en 7e champ le titre du PNJ : EternalRoutes en tire l'action
@@ -146,6 +147,18 @@ function P.ModeQuai(map, y)
     if map == 1411 or map == 1420 then return "Zeppelin" end
     if map == 1434 and y and y < 0.5 then return "Zeppelin" end
     return "Bateau"
+end
+
+-- pierre de foyer liée à une nouvelle auberge : noté à l'endroit où l'on est (devant l'aubergiste)
+local lieuFoyer
+local function SuivreFoyer()
+    if not GetBindLocation then return end
+    local lieu = GetBindLocation()
+    if lieu and lieuFoyer and lieu ~= lieuFoyer and P.EnCours() then
+        local _, map, x, y = Ici()
+        Ev("foyer", "lie", lieu, map, x, y)
+    end
+    lieuFoyer = lieu or lieuFoyer
 end
 
 local function SuivreQuai()
@@ -430,7 +443,13 @@ f:SetScript("OnEvent", function(_, event, ...)
     if event == "PLAYER_LOGIN" then ReprendreTrajet(); PlacerBoutonTrajet(); MajBoutonTrajet() return end
     if event == "UNIT_SPELLCAST_SUCCEEDED" then
         local unite, _, sort = ...
-        if unite == "player" and SORTS_FOYER[sort] then foyer = GetTime() end
+        if unite == "player" and SORTS_FOYER[sort] then
+            foyer = GetTime()
+            if P.EnCours() then
+                local _, map, x, y = Ici()
+                Ev("foyer", "utilise", GetBindLocation and GetBindLocation() or "?", map, x, y)
+            end
+        end
         return
     end
     if not P.EnCours() then return end
@@ -481,6 +500,7 @@ f:SetScript("OnUpdate", function(_, dt)
     attente = 0
     SuivreTrajet()
     pcall(SuivreQuai)
+    pcall(SuivreFoyer)
     if not P.EnCours() or not UnitOnTaxi then return end
     local maintenant = UnitOnTaxi("player") and true or false
     if maintenant ~= enVol then

@@ -2,8 +2,8 @@
 
 | Dossier | Rôle | État |
 |---|---|---|
-| `EternalRoutes/` | Guide pas à pas en jeu (fenêtre, flèche, auto-avance) | 0.16.0 : fenêtre sobre et transparente (/er style classique pour l'ancienne) ; chemin tracé sur la carte et la minicarte (avec les vols connus) ; lit EternalProbe, puis RouteProbe ; consigne sous chaque étape (entraîneur, grimoire, objets à ramasser) ; une route de départ par zone, race et classe ; étapes « voyage » (zeppelin, bateau, vol) |
-| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.10.1 : captures de la 0.8, trajets (`/ep trajet`), code à coller sur le site (`/ep export`, `/ep export depart` (zone de départ seule ; depuis la 0.11.1, `/ep export` donne la zone de départ gardée et la suite réunies, `/ep export commune` la suite seule)), titre des entraîneurs, grimoires achetés, nouveau niveau noté à la montée (`level|5|nouveau`) |
+| `EternalRoutes/` | Guide pas à pas en jeu (fenêtre, flèche, auto-avance) | 0.16.2 : fenêtre sobre et transparente, logo de la Taverne (/er style classique pour l'ancienne) ; étapes « Foyer » (lier, utiliser d'un clic) ; chemin tracé sur la carte et la minicarte (avec les vols connus) ; lit EternalProbe, puis RouteProbe ; consigne sous chaque étape (entraîneur, grimoire, objets à ramasser) ; une route de départ par zone, race et classe ; étapes « voyage » (zeppelin, bateau, vol) |
+| `EternalProbe/` | Sonde de deuxième génération, remplace RouteProbe (`/ep`) | 0.11.6 : pierre de foyer liée et utilisée notée seule ; captures de la 0.8, trajets (`/ep trajet`), code à coller sur le site (`/ep export`, `/ep export depart` (zone de départ seule ; depuis la 0.11.1, `/ep export` donne la zone de départ gardée et la suite réunies, `/ep export commune` la suite seule)), titre des entraîneurs, grimoires achetés, nouveau niveau noté à la montée (`level|5|nouveau`) |
 | `RouteProbe/` | Ancienne sonde d'enregistrement, gardée pour référence | 0.6.0, version jouée au 13/11 |
 
 Branche de travail : `dev-addon`. Chaque changement est relu puis fusionné dans `dev`.
@@ -193,3 +193,11 @@ Ne pas déposer les sauvegardes (`WTF/…/SavedVariables`) : elles contiennent l
 
 Le dépôt contient un environnement **GitHub Codespaces** (`.devcontainer/`) : bouton **Code › Codespaces › Create codespace on dev-addon**.
 Le site et sa base démarrent dans le navigateur ; le mot de passe de `/admin` s'affiche à la création. `npm run dev` lance le site.
+
+## Pierre de foyer et logo (EternalRoutes 0.16.2, EternalProbe 0.11.6)
+
+- La sonde note seule la pierre de foyer : liée chez un aubergiste (le foyer du personnage change) et utilisée (pierre de foyer ou Rappel astral). Rien à taper pendant l'enregistrement.
+- À l'import, chaque événement devient une étape « Foyer » : « Lier la pierre de foyer : Brill », validée dès que le foyer est ce lieu ; « Utiliser la pierre de foyer (Brill) », validée au lancement de la pierre.
+- Dans la fenêtre sobre, la ligne « Utiliser la pierre de foyer » porte un bouton : un clic utilise la pierre. Le bouton est un bouton sécurisé du jeu ; il ne se déplace pas pendant un combat.
+- Le logo de la Taverne ouvre l'en-tête de la fenêtre sobre.
+- Les routes enregistrées avant la 0.11.6 n'ont pas ces étapes : elles apparaissent dans les enregistrements suivants.

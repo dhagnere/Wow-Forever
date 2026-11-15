@@ -314,6 +314,7 @@ out[#out + 1] = D({ kind = "faire", name = "Ravageurs", etat = "in_progress", ob
   { text = "Croc : 3/3", numFulfilled = 3, numRequired = 3, finished = true } } })
 out[#out + 1] = D({ kind = "rendre", name = "Ravageurs", etat = "complete" })
 out[#out + 1] = D({ kind = "voyage", mode = "zeppelin", vers = "Durotar", etat = "available" })
+out[#out + 1] = D({ kind = "foyer", action = "utiliser", lieu = "Brill", etat = "available" })
 -- ouverture, rafraîchissement, bascule : aucune erreur
 EternalRoutes.guides = { r = { id = "r", source = "RouteProbe", type = "faction", faction = "Horde", minLevel = 1, maxLevel = 60,
   steps = { { map = 1413, x = 50, y = 50, quests = { { kind = "prendre", name = "Ravageurs", etat = "available" } } },
@@ -332,6 +333,7 @@ return table.concat(out, "\\n")`).split("\n");
       "orange:Hyène tachetée tuée:2/7 | rouge:Plume de trotteur:0/5 | vert:Croc:3/3",
       "vert:Rendre « Ravageurs »:prêt",
       "bleu:Prendre le zeppelin pour Durotar:",
+      "bleu:Utiliser la pierre de foyer (Brill):",
       "ok",
     ]);
   });
@@ -420,6 +422,32 @@ return table.concat(t, "\\n")`).split("\n");
       "trajet|debut|Zeppelin|Clairières de Tirisfal|1420",
       "trajet|arrivee|Zeppelin|Durotar|1411",
       "Zeppelin/Bateau/Bateau",
+    ]);
+  });
+
+  it("note la pierre de foyer liée et utilisée, et en fait deux étapes « Foyer »", () => {
+    const r = executer(SIMULE, ...SONDE, SEANCE, `
+local P = EternalProbe
+BANC.foyer = "Brill"
+GetBindLocation = function() return BANC.foyer end
+P.Start()
+BANC.Avancer(2)
+BANC.carte, BANC.zone, BANC.x, BANC.y = 1411, "Durotar", 0.61, 0.52
+BANC.foyer = "Razor Hill"; BANC.Avancer(2)
+BANC.Evenement("UNIT_SPELLCAST_SUCCEEDED", "player", "x", 8690)
+BANC.Avancer(2)`, ESPACE, ...MOTEUR, `
+local route = assert(EternalRoutes.Importer.Convertir(EternalRoutes.Importer.Enregistrement()))
+local out = {}
+for _, s in ipairs(route.steps) do
+  local q = s.quests[1]
+  if q.kind == "foyer" then
+    out[#out + 1] = q.action .. "|" .. tostring(q.lieu) .. "|" .. tostring(s.x) .. "|" .. EternalRoutes.Engine.QuestName(q)
+  end
+end
+return table.concat(out, "\\n")`).split("\n");
+    expect(r).toEqual([
+      "lier|Razor Hill|61.0|Lier la pierre de foyer : Razor Hill",
+      "utiliser|Razor Hill|nil|Utiliser la pierre de foyer (Razor Hill)",
     ]);
   });
 
