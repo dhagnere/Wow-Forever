@@ -1120,7 +1120,7 @@ function Engine.NomGuide(g)
         end
         local fin = g.niveauMax or tonumber(tostring(g.name or ""):match("1%-(%d+)$")) or g.maxLevel or 10
         local tete = (ns.L.ROUTE_DEPART or "Départ") .. (g.faction and (" " .. g.faction) or "")
-        return ("%s · %s%s · %s-%d"):format(tete, race, classe and (" · " .. classe) or "", tostring(g.niveauDebut or 1), fin)
+        return ("%s · %s%s · %s-%d"):format(tete, race, classe and (" · " .. classe) or "", "1", fin) -- une route de départ commence toujours au niveau 1
     end
     local a, b = tostring(g.name or ""):match("(%d+)%-(%d+)$")
     return ("%s · %s%s · %s-%s"):format(tostring(g.faction or "Route"), zone, classe and (" · " .. classe) or "",
