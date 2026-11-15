@@ -282,13 +282,23 @@ export function chapitres(s: Seance, tous: Repere[]): { liste: Chapitre[]; valid
 
 const DATE_FR = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 
-/** Titre de 100 caractères au plus (limite de YouTube). */
+/**
+ * Titre de 100 caractères au plus (limite de YouTube), jamais coupé au milieu : les niveaux restent entiers et, si la
+ * place manque, les zones se resserrent (zone du milieu remplacée par « … », puis moins de zones).
+ */
 export function titreVideo(s: Seance, info: { zones: string[]; niveaux: [number, number] | null }): string {
   const date = DATE_FR.format(new Date(s.debut)).replace(/^1 /, "1er ");
   const niv = info.niveaux ? (info.niveaux[0] === info.niveaux[1] ? ` · niveau ${info.niveaux[0]}` : ` · niveaux ${info.niveaux[0]} à ${info.niveaux[1]}`) : "";
-  const zones = info.zones.length ? ` · ${info.zones.slice(0, 3).join(" → ")}` : "";
-  const t = `Journal de Jobwow · ${date}${zones}${niv}`;
-  return t.length <= 100 ? t : `${t.slice(0, 99)}…`;
+  const z = info.zones.slice(0, 3);
+  const variantes: string[][] = [z];
+  if (z.length === 3) variantes.push([z[0], "…", z[2]]);
+  variantes.push(z.slice(0, 2), z.slice(0, 1), []);
+  for (const v of variantes) {
+    const t = `Journal de Jobwow · ${date}${v.length ? ` · ${v.join(" → ")}` : ""}${niv}`;
+    if (t.length <= 100) return t;
+  }
+  const t = `Journal de Jobwow · ${date}${niv}`;
+  return t.length <= 100 ? t : `${t.slice(0, 99).replace(/\s+\S*$/, "")}…`;
 }
 
 /** Liens de la description : pages du site qui existent, adresses complètes (https) seules sur leur ligne, pour que YouTube les rende cliquables. */

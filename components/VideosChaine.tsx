@@ -1,5 +1,6 @@
 import type { VideoChaine } from "@/modules/veille";
 import { SITE } from "@/lib/site";
+import { miniatureDe } from "@/lib/miniatureVideo";
 
 const FORMATS = {
   fr: new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" }),
@@ -23,7 +24,7 @@ const TEXTES = {
   },
 };
 
-/** Liste des dernières vidéos de la chaîne (flux public), avec un lien vers YouTube pour chacune. */
+/** Liste des dernières vidéos de la chaîne (flux public), chacune avec son image (servie par le site) et un lien vers YouTube. */
 export function VideosChaine({ videos, langue = "fr" }: { videos: VideoChaine[]; langue?: "fr" | "en" }) {
   const t = TEXTES[langue];
   return (
@@ -32,6 +33,10 @@ export function VideosChaine({ videos, langue = "fr" }: { videos: VideoChaine[];
         <ol className="videos-chaine">
           {videos.map((v) => (
             <li key={v.id} className="encadre">
+              <a href={v.lien} className="videos-chaine-image" rel="noopener noreferrer" data-cta="video-youtube-image" tabIndex={-1} aria-hidden="true">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={miniatureDe(v)} width={1280} height={720} alt="" loading="lazy" />
+              </a>
               {v.publieLe ? <p className="surtitre" style={{ margin: 0 }}>{FORMATS[langue].format(new Date(v.publieLe))}</p> : null}
               <h2 style={{ margin: "4px 0 6px", fontSize: 21 }}>
                 <a href={v.lien} rel="noopener noreferrer" data-cta="video-youtube">{v.titre}</a>

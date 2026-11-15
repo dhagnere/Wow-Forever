@@ -114,6 +114,17 @@ describe("séances et chapitres", () => {
     expect(d).toContain("https://www.taverne-eternelle.fr/carnet/");
   });
 
+  it("ne coupe jamais le titre au milieu : la zone du milieu se resserre, les niveaux restent entiers", () => {
+    const s = seances(clips)[0];
+    const zones = ["Clairières de Tirisfal", "Fossoyeuse", "Durotar"];
+    const titre = titreVideo(s, { zones, niveaux: [5, 12] });
+    expect(titre).toBe("Journal de Jobwow · 11 novembre 2026 · Clairières de Tirisfal → … → Durotar · niveaux 5 à 12");
+    expect(titre.length).toBeLessThanOrEqual(100);
+    const long = titreVideo(s, { zones: ["Une zone au nom vraiment très très long", "Une autre zone au nom interminable", "Encore une"], niveaux: [10, 20] });
+    expect(long.length).toBeLessThanOrEqual(100);
+    expect(long.endsWith("niveaux 10 à 20")).toBe(true);
+  });
+
   it("met dans la description des liens complets, seuls sur leur ligne, vers des pages qui existent", () => {
     const s = seances(clips)[0];
     const c = chapitres(s, reperesRouteProbe(lireTableLua(SAUVEGARDE)));
