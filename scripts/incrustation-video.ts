@@ -31,7 +31,7 @@ import ffmpeg from "@ffmpeg-installer/ffmpeg";
 import sharp from "sharp";
 import { COULEUR_GENRE } from "@/content/repliques-jobwow";
 import {
-  evenementsSonde, grapheRendu, preparerNarration, typographie, verifierNarration, voixAJour,
+  chapitresNarration, evenementsSonde, grapheRendu, preparerNarration, typographie, verifierNarration, voixAJour,
   type Calque, type Evenement, type Moment, type Narration,
 } from "@/lib/incrustation";
 import { chapitres, descriptionVideo, heureLocale, horodatage, lireSauvegardeSonde, positionDans, reperesRouteProbe, seances, SONDES, titreVideo, DOSSIER_VIDEOS, type Clip, type Repere, type Seance } from "@/lib/videoCarnet";
@@ -377,8 +377,10 @@ async function main() {
   };
   // titre, description et chapitres pour YouTube, relus par l'Atelier (refaits à chaque passage)
   const site = (process.env.SITE_URL ?? "https://www.taverne-eternelle.fr").replace(/\/+$/, "");
-  const ecrireYoutube = (base: string, seance: Seance) => {
-    const chap = chapitres(seance, reperes);
+  const ecrireYoutube = (base: string, seance: Seance, n?: Narration) => {
+    // chapitres tirés de la narration (ses moments couvrent toute la journée), sinon des repères de la sonde
+    const parNarr = n ? chapitresNarration(n) : null;
+    const chap = parNarr && parNarr.valides ? parNarr : chapitres(seance, reperes);
     writeFileSync(`${base}.youtube.txt`, [`TITRE :`, titreVideo(seance, chap), "", "DESCRIPTION :", descriptionVideo(seance, chap, site)].join("\n"), "utf8");
   };
   for (const { video, seance: seanceConnue, fichierN: donne, sources } of travaux) {
@@ -395,7 +397,7 @@ async function main() {
       const erreurs = verifierNarration(n);
       if (erreurs.length) { console.error(`${fichierN} :\n- ${erreurs.join("\n- ")}`); process.exit(1); }
       console.log(`Narration relue : ${fichierN} (${n.moments.length} moments, ${n.clips.length} clips)`);
-      if (seanceConnue) { chargerSonde(); ecrireYoutube(base, seanceConnue); }
+      if (seanceConnue) { chargerSonde(); ecrireYoutube(base, seanceConnue, n); }
       // miniature donnée par son nom : à côté de la narration
       if (n.miniature && !path.isAbsolute(n.miniature) && !/^[A-Za-z]:[\\/]/.test(n.miniature)) n.miniature = path.join(path.dirname(fichierN), n.miniature);
     } else {
@@ -412,7 +414,7 @@ async function main() {
       if (n.miniature) n.miniature = path.resolve(n.miniature);
       if (sources) n.sources = sources;
       writeFileSync(fichierN, JSON.stringify(n, null, 2), "utf8");
-      ecrireYoutube(base, seance);
+      ecrireYoutube(base, seance, n);
       console.log(`Narration préparée : ${fichierN} (${n.moments.length} moments, ${n.clips.length} clips). À relire dans l'atelier vidéo.`);
       if (!n.miniature) console.log("Miniature : elle se choisit dans l'Atelier, avec la relecture (ou --miniature <image>).");
     }

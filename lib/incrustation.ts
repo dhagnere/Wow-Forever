@@ -10,6 +10,7 @@
 import { COULEUR_GENRE, GENRES_MOMENT, listeRepliques, ordreMelange, remplir, type GenreMoment } from "@/content/repliques-jobwow";
 import { CARTES_JEU } from "@/content/cartes-jeu";
 import { heureLocale, niveauAtteint, type ValeurLua } from "@/lib/videoCarnet";
+import { lieuParNom } from "@/lib/cartes";
 
 // ——— Événements de la sonde utiles à la narration ———
 
@@ -371,4 +372,51 @@ export function grapheRendu(p: PlanRendu): { entrees: string[][]; graphe: string
   if (!calques.length) lignes.push(`${v}null[vf]`);
   lignes.push(`${a}anull[af]`);
   return { entrees, graphe: lignes.join(";\n") };
+}
+
+/**
+ * Chapitres YouTube tirés des moments de la narration (zones, niveaux, élites, trajets, repères) :
+ * le premier à 0:00, chacun d'au moins 10 secondes, décalés de l'image de départ (introSecondes).
+ */
+export function chapitresNarration(n: Pick<Narration, "moments" | "introSecondes" | "dureeVideo">): {
+  liste: { seconde: number; titre: string }[]; valides: boolean; zones: string[]; niveaux: [number, number] | null;
+} {
+  const decalage = n.introSecondes > 0 ? n.introSecondes : 0;
+  const moments = [...n.moments].sort((a, b) => a.seconde - b.seconde);
+  const intro = moments.find((m) => m.genre === "intro");
+  const parties = (intro?.sousTitre ?? "").split(" · ").map((x) => x.trim()).filter((x) => x && !/^journal de jobwow$/i.test(x));
+  const zoneDepart = parties.find((x) => !/^niveau/i.test(x));
+  const niveauDepart = Number((parties.find((x) => /^niveau/i.test(x)) ?? "").replace(/\D/g, "")) || null;
+  const sansPoint = (t: string) => t.replace(/\s*[.:]\s*$/, "").trim();
+  const PRIORITE: Partial<Record<GenreMoment, number>> = { zone: 5, niveau: 4, exploit: 3, trajet: 2, marqueur: 2, vol: 1 };
+  const candidats: { seconde: number; titre: string; p: number }[] = [];
+  const zones: string[] = zoneDepart ? [zoneDepart] : [];
+  const niveaux: number[] = niveauDepart ? [niveauDepart] : [];
+  for (const m of moments) {
+    const st = m.sousTitre ?? "";
+    let titre = "";
+    if (m.genre === "zone") { const z = st.replace(/^Arrivée\s*:\s*/i, "").replace(/\.$/, "").trim(); if (z && !zones.includes(z)) zones.push(z); titre = `Arrivée : ${z}`; }
+    else if (m.genre === "niveau") { const x = Number((st.match(/\d+/) ?? [])[0]); if (x) { niveaux.push(x); titre = `Niveau ${x}`; } }
+    else if (m.genre === "exploit") titre = sansPoint(st);
+    else if (m.genre === "trajet") titre = sansPoint(st);
+    else if (m.genre === "vol") titre = "En vol";
+    else if (m.genre === "marqueur") titre = sansPoint(st);
+    if (titre && PRIORITE[m.genre]) candidats.push({ seconde: m.seconde + decalage, titre, p: PRIORITE[m.genre]! });
+  }
+  // au plus 60 chapitres : les moins importants partent d'abord
+  for (let p = 1; candidats.length > 59 && p <= 4; p++) for (let i = candidats.length - 1; i >= 0 && candidats.length > 59; i--) if (candidats[i].p === p) candidats.splice(i, 1);
+  const liste = [{ seconde: 0, titre: ["Début", zoneDepart, niveauDepart ? `niveau ${niveauDepart}` : null].filter(Boolean).join(" · ") }];
+  for (const c of candidats) {
+    const dernier = liste[liste.length - 1];
+    if (c.seconde - dernier.seconde < 10) {
+      // trop proche : réuni avec le précédent (deux titres au plus)
+      if (dernier.titre.split(" · ").length < 3 && !dernier.titre.includes(c.titre)) dernier.titre += ` · ${c.titre}`;
+      continue;
+    }
+    if (n.dureeVideo && c.seconde > n.dureeVideo + decalage - 10) continue;
+    liste.push({ seconde: Math.floor(c.seconde), titre: c.titre });
+  }
+  // pour le titre et les liens : les zones qui ont une carte (pas les sous-zones, une auberge…)
+  const grandes = zones.filter((z) => lieuParNom(z));
+  return { liste, valides: liste.length >= 3, zones: grandes.length ? grandes : zones, niveaux: niveaux.length ? [Math.min(...niveaux), Math.max(...niveaux)] : null };
 }

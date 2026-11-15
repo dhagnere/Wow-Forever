@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { REPLIQUES, REPLIQUES_CAPACITE, REPLIQUES_MORT_REPETEE, REPLIQUES_PALIERS, GENRES_MOMENT, listeRepliques, ordreMelange, replique } from "@/content/repliques-jobwow";
-import { choisirClips, evenementsSonde, grapheRendu, preparerNarration, typographie, verifierNarration, voixAJour, type Moment } from "@/lib/incrustation";
+import { chapitresNarration, choisirClips, evenementsSonde, grapheRendu, preparerNarration, typographie, verifierNarration, voixAJour, type Moment } from "@/lib/incrustation";
 import { heureLocale, lireSauvegardeSonde, positionDans, type Seance } from "@/lib/videoCarnet";
 
 // Jobwow incrusté dans les vidéos (npm run carnet:incrustation) : narration tirée des repères de la sonde, graphe ffmpeg.
@@ -159,5 +159,32 @@ describe("Voix des bulles", () => {
     expect(voixAJour(m)).toBe(true);
     expect(voixAJour({ ...m, bulle: "Niveau 4 ! Ça s'arrose." })).toBe(false);
     expect(voixAJour({ ...m, voix: undefined })).toBe(false);
+  });
+
+  it("tire les chapitres YouTube des moments : 0:00 d'abord, 10 s au moins entre deux, décalés de l'image de départ", () => {
+    const m = (seconde: number, genre: string, sousTitre: string) => ({ seconde, duree: 5, genre, bulle: "", sousTitre });
+    const c = chapitresNarration({
+      introSecondes: 4, dureeVideo: 4000,
+      moments: [
+        m(0, "intro", "Journal de Jobwow · Clairières de Tirisfal · niveau 5"),
+        m(3, "quete", "Quête rendue : X."),
+        m(60, "niveau", "Niveau 6 atteint : nouveaux sorts chez l'entraîneur."),
+        m(65, "exploit", "Chef vaincu (élite)."),
+        m(900, "zone", "Arrivée : La taverne des Pendus"),
+        m(1800, "zone", "Arrivée : Durotar"),
+        m(3000, "niveau", "Niveau 7 atteint."),
+        m(3995, "zone", "Arrivée : Orgrimmar"),
+      ] as never,
+    });
+    expect(c.liste).toEqual([
+      { seconde: 0, titre: "Début · Clairières de Tirisfal · niveau 5" },
+      { seconde: 64, titre: "Niveau 6 · Chef vaincu (élite)" },
+      { seconde: 904, titre: "Arrivée : La taverne des Pendus" },
+      { seconde: 1804, titre: "Arrivée : Durotar" },
+      { seconde: 3004, titre: "Niveau 7" },
+    ]);
+    expect(c.valides).toBe(true);
+    expect(c.zones).toEqual(["Clairières de Tirisfal", "Durotar", "Orgrimmar"]); // la dernière, trop près de la fin, n'a pas de chapitre mais compte
+    expect(c.niveaux).toEqual([5, 7]);
   });
 });
