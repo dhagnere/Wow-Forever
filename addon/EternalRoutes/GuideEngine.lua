@@ -193,11 +193,33 @@ function Engine.Proximite(g)
     return (Engine.DeSaClasse(g) and 2 or 0) + ((race and race_g == race) and 1 or 0)
 end
 
-function Engine.GetGuidesForPlayer()
-    local list = {}
-    for _, g in pairs(ns.guides) do
-        if Engine.GuideConvient(g, true) then list[#list + 1] = g end
+--- Une route valide par classe : pour un même départ (genre de route, carte de la première étape), seules restent
+--- les routes enregistrées les plus proches du personnage (même race et même classe d'abord).
+function Engine.UneParClasse(tous)
+    local function Cle(g)
+        local s1 = g.steps and g.steps[1]
+        return tostring(g.type or "") .. ":" .. tostring(s1 and s1.map or g.id)
     end
+    local meilleure = {}
+    for _, g in ipairs(tous) do
+        if g.source == "RouteProbe" then
+            local k, p = Cle(g), Engine.Proximite(g)
+            if not meilleure[k] or p > meilleure[k] then meilleure[k] = p end
+        end
+    end
+    local list = {}
+    for _, g in ipairs(tous) do
+        if g.source ~= "RouteProbe" or Engine.Proximite(g) >= meilleure[Cle(g)] then list[#list + 1] = g end
+    end
+    return list
+end
+
+function Engine.GetGuidesForPlayer()
+    local tous = {}
+    for _, g in pairs(ns.guides) do
+        if Engine.GuideConvient(g, true) then tous[#tous + 1] = g end
+    end
+    local list = Engine.UneParClasse(tous)
     table.sort(list, function(a, b)
         local pa, pb = a.priority or 0, b.priority or 0
         if pa ~= pb then return pa > pb end

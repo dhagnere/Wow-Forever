@@ -288,6 +288,27 @@ EternalRoutes = { ADDON_NAME = "EternalRoutes", guides = {}, db = {}, questDB = 
 `;
   const MOTEUR = [lire("EternalRoutes/Locale.lua"), lire("EternalRoutes/Importer.lua"), lire("EternalRoutes/GuideEngine.lua")];
 
+  it("une route valide par classe : celle de la classe du personnage cache les autres au même départ", () => {
+    const r = executer(SIMULE, ESPACE, ...MOTEUR, `
+local J = BANC.joueur
+J.race, J.raceFichier, J.classe, J.classeFichier, J.niveau = "Mort-vivant", "Scourge", "Voleur", "ROGUE", 5
+local function R(id, classe, type, carte2) return { id = id, source = "RouteProbe", type = type, faction = "Horde", races = { "Scourge" },
+  classeEnregistree = classe, raceEnregistree = "Scourge", minLevel = 1, maxLevel = 15, niveauDebut = 2, niveauMax = 12,
+  steps = { { map = 1420, x = 30, y = 70, quests = {} }, { map = carte2 or 1420, x = 50, y = 50, quests = {} } } } end
+EternalRoutes.guides = {
+  a = R("a", "ROGUE", "depart"), b = R("b", "WARLOCK", "depart"), c = R("c", "WARLOCK", "faction", 1458),
+}
+local out = {}
+for _, g in ipairs(EternalRoutes.Engine.GetGuidesForPlayer()) do out[#out + 1] = g.id end
+table.sort(out)
+-- une route qui commence dans la zone de départ, à son niveau, puis en sort (Fossoyeuse) : route de départ
+out[#out + 1] = tostring(EternalRoutes.Importer.DansSaZoneDeDepart(R("d", "ROGUE", "faction", 1458)))
+local tard = R("e", "ROGUE", "faction"); tard.niveauDebut = 13
+out[#out + 1] = tostring(EternalRoutes.Importer.DansSaZoneDeDepart(tard))
+return table.concat(out, " ")`);
+    expect(r).toBe("a c true false");
+  });
+
   it("valide l'étape « voyage » à l'arrivée, pas pendant le vol, et dit quoi faire", () => {
     const r = executer(SIMULE, ...SONDE, SEANCE, ESPACE, ...MOTEUR, `
 local E = EternalRoutes.Engine

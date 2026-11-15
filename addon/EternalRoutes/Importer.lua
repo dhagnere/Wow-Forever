@@ -591,18 +591,18 @@ function Importer.Convertir(db)
     if carteRace and partie ~= "commune" then
         for _, e in ipairs(etapes) do if e.carte == carteRace then departRace = ZONES_DEPART[carteRace] break end end
     end
-    -- « partie commune » restée d'un autre personnage ou d'un /ep suite trop tôt : un enregistrement fait tout entier
-    -- dans la zone de départ de la race, sans dépasser son niveau de sortie, reste une route de départ
-    if carteRace and partie == "commune" and #etapes > 0 then
-        local dedans = true
-        for _, e in ipairs(etapes) do if e.carte ~= carteRace then dedans = false break end end
-        local haut = tonumber(ctx.level) or 1
-        for _, e in ipairs(ev) do if e.k == "level" then haut = math.max(haut, NiveauAtteint(e)) end end
-        if dedans and haut <= (ZONES_DEPART[carteRace].fin or 10) + 1 then
-            departRace, partie = ZONES_DEPART[carteRace], "depart"
+    -- une route par classe : un enregistrement « partie commune » qui commence dans la zone de départ de la race,
+    -- à un niveau de cette zone, est sa route de départ, même s'il en sort ensuite (Fossoyeuse, le zeppelin…).
+    -- Ses étapes sont toutes gardées.
+    local prolongee = false
+    if carteRace and partie == "commune" and #etapes > 0 and etapes[1].carte == carteRace then
+        local bas = tonumber(ctx.level) or 1
+        for _, e in ipairs(ev) do if e.k == "level" then bas = math.min(bas, NiveauAtteint(e) - 1) break end end
+        if bas <= (ZONES_DEPART[carteRace].fin or 10) then
+            departRace, partie, prolongee = ZONES_DEPART[carteRace], "depart", true
         end
     end
-    if departRace then
+    if departRace and not prolongee then
         local gardees = {}
         for _, e in ipairs(etapes) do
             if ZONES_DEPART[e.carte] and e.carte ~= carteRace then ecartees = ecartees + 1 else gardees[#gardees + 1] = e end
@@ -751,12 +751,13 @@ end
 Importer.CarteDeRace = CarteDeRace
 
 --- La route a-t-elle été faite tout entière dans la zone de départ de la race qui l'a enregistrée ?
+--- Commence dans la zone de départ de sa race, à un niveau de cette zone : c'est sa route de départ (une par classe),
+--- même si elle en sort ensuite.
 function Importer.DansSaZoneDeDepart(g)
     local carte = CarteDeRace(RaceDe(g))
     if not carte or type(g.steps) ~= "table" or #g.steps == 0 then return false end
-    for _, s in ipairs(g.steps) do if s.map ~= carte then return false end end
-    local haut = g.niveauMax or g.maxLevel or 60
-    return haut <= (ZONES_DEPART[carte].fin or 10) + 1
+    if g.steps[1].map ~= carte then return false end
+    return (g.niveauDebut or g.minLevel or 1) <= (ZONES_DEPART[carte].fin or 10)
 end
 
 --- Identifiant d'une route de départ : rp-depart-<zone>-<race>-<classe> ; nil si sa race ne commence pas là.
@@ -781,6 +782,12 @@ local function Assembler(a, b)
         a.cartesSet = nil
         return a, nil
     end
+    -- l'une couvre l'autre (commence aussi tôt, va plus loin) : on garde la plus complète
+    local function Couvre(x, y)
+        return (x.niveauDebut or 1) <= (y.niveauDebut or 1) and (x.niveauMax or 1) > (y.niveauMax or 1)
+    end
+    if Couvre(a, b) then return a, b end
+    if Couvre(b, a) then return b, a end
     if tostring(b.importe or "") >= tostring(a.importe or "") then return b, a end
     return a, b
 end
