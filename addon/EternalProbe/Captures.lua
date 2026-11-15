@@ -23,7 +23,8 @@
     Trajets (zeppelin, bateau) : /ep trajet <nom> au moment d'embarquer. L'arrivée est notée seule dès qu'on
     reste immobile 5 s dans une autre carte que celle du départ ; /ep trajet fin la note à la main,
     /ep trajet annule l'abandonne. Un trajet marche même sans enregistrement en cours, survit à un /reload,
-    et ne crée aucune étape dans EternalRoutes : le site le place d'après ses lieux de départ et d'arrivée.
+    et devient dans EternalRoutes (0.14) une étape « voyage » au départ de l'embarcadère, validée à l'arrivée ;
+    un vol (taxi, puis vol depart et arrivee) donne de même une étape au maître de vol.
 
     Interdits du client : aucun événement ni fonction réservés à l'interface de Blizzard (le journal de
     combat, COMBAT_LOG_EVENT_UNFILTERED, fait bloquer l'addon par WoW Forever dès le chargement). Un élite

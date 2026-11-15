@@ -689,6 +689,16 @@ function Engine.ActionsEtape(q, objectifs)
     local L, out, vus = ns.L, {}, {}
     local function Ajouter(t) if t and t ~= "" and not vus[t] then vus[t] = true; out[#out + 1] = t end end
     if not q then return out end
+    if q.kind == "voyage" then
+        if q.mode == "vol" then
+            Ajouter(q.depuis and L.HINT_FLIGHT_AT:format(TraduireEn(q.depuis)) or L.HINT_FLIGHT)
+        elseif q.mode == "zeppelin" or q.mode == "bateau" then
+            Ajouter(L.HINT_BOARD)
+        else
+            Ajouter(L.HINT_TRAVEL)
+        end
+        return out
+    end
     if q.kind == "entrainer" then
         if q.achat then
             Ajouter(q.familier == "demon" and L.HINT_DEMON_BUY or L.HINT_BOOK_BUY)
@@ -761,6 +771,61 @@ function Engine.EtatEntraineur(q)
     return "available"
 end
 
+-- ---------------------------------------------------------------------------
+-- Étapes « voyage » : zeppelin, bateau ou vol, validées à l'arrivée
+-- ---------------------------------------------------------------------------
+
+function Engine.EstVoyage(step)
+    local q = step and step.quests and step.quests[1]
+    return q ~= nil and q.kind == "voyage"
+end
+
+--- Étape de passage (entraîneur, voyage) : sautée quand une étape suivante est déjà avancée.
+function Engine.EstPassage(step)
+    return Engine.EstEntraineur(step) or Engine.EstVoyage(step)
+end
+
+local function PositionJoueur()
+    local carte = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
+    if not carte then return nil end
+    local p = C_Map.GetPlayerMapPosition and C_Map.GetPlayerMapPosition(carte, "player")
+    if not p then return carte end
+    local x, y = p.x, p.y
+    if (not x) and p.GetXY then x, y = p:GetXY() end
+    return carte, x and x * 100, y and y * 100
+end
+
+--- Arrivé ? Sur la carte d'arrivée, descendu du vol ; pour un vol dans la même carte, près du point d'arrivée.
+function Engine.EtatVoyage(q)
+    if ns.db and ns.db.voyages and q.cle and ns.db.voyages[q.cle] then return "done" end
+    if UnitOnTaxi and UnitOnTaxi("player") then return "in_progress" end
+    local carte, x, y = PositionJoueur()
+    if not (carte and q.versCarte and carte == q.versCarte) then return "available" end
+    local memeCarte = q.depart and q.depart == q.versCarte
+    if not memeCarte or not (q.versX and x) then return "done" end
+    local dx, dy = x - q.versX, y - q.versY
+    return (dx * dx + dy * dy) <= 36 and "done" or "available"
+end
+
+--- Garde le voyage de l'étape en cours comme fait (appelé quand on passe à l'étape suivante).
+function Engine.NoterVoyage(step)
+    if not Engine.EstVoyage(step) then return end
+    local q = step.quests[1]
+    if not q.cle then return end
+    ns.db.voyages = ns.db.voyages or {}
+    ns.db.voyages[q.cle] = true
+end
+
+local function NomVoyage(q)
+    local L = ns.L
+    local vers = q.vers and q.vers ~= "" and TraduireEn(q.vers) or "?"
+    if q.mode == "vol" then return L.TRAVEL_FLIGHT:format(vers) end
+    if q.mode == "zeppelin" then return L.TRAVEL_ZEPPELIN:format(vers) end
+    if q.mode == "bateau" then return L.TRAVEL_BOAT:format(vers) end
+    return L.TRAVEL_GO:format(vers)
+end
+Engine.NomVoyage = NomVoyage
+
 --- Fenêtre d'entraîneur fermée : valide l'étape en cours si c'est une visite du même genre.
 function Engine.EntraineurVu(npc, metier)
     local step = Engine.GetCurrentStep()
@@ -786,6 +851,11 @@ function Engine.MarchandVu(npc)
 end
 
 function Engine.GetObjectives(q)
+    if q and q.kind == "voyage" then
+        local fait = Engine.EtatVoyage(q) == "done"
+        local vers = q.vers and q.vers ~= "" and TraduireEn(q.vers) or "?"
+        return { { text = ns.L.OBJ_ARRIVE:format(vers), numFulfilled = 0, numRequired = 0, finished = fait } }
+    end
     if q and q.kind == "entrainer" and q.achat then
         local out, fait = {}, Engine.EtatEntraineur(q) == "done"
         for _, v in ipairs(q.livres or {}) do
@@ -937,6 +1007,11 @@ end
 function Engine.QuestName(q)
     if not q then return "" end
     if q.kind == "entrainer" then return TraduireEn(q.name) or "" end
+    if q.kind == "voyage" then
+        -- le nom donné au trajet (/ep trajet) en français ; sinon « Prendre le zeppelin pour … »
+        if q.name and q.name ~= "" and not Anglais() then return q.name end
+        return NomVoyage(q)
+    end
     -- version anglaise : le titre anglais passe avant celui du journal (langue du client)
     if ns.IsEnglish and ns.IsEnglish() then
         local b = q.id and ns.questDB and ns.questDB[q.id]
@@ -1034,6 +1109,7 @@ end
 function Engine.QuestState(q)
     if not q then return "unknown" end
     if q.kind == "entrainer" then return Engine.EtatEntraineur(q) end
+    if q.kind == "voyage" then return Engine.EtatVoyage(q) end
     local ids = q.id and { q.id } or IdsFor(q.name)
     if not C_QuestLog then return "unknown" end
     if not ids then
@@ -1140,6 +1216,7 @@ function Engine.Advance()
     ns.viewStep = nil
     local g = Engine.GetActiveGuide()
     if not g then return end
+    Engine.NoterVoyage(g.steps[Engine.GetStepIndex()])
     -- après la dernière étape : #steps + 1, le guide est terminé
     if Engine.GetStepIndex() <= #g.steps then
         ns.db.stepIndex = Engine.GetStepIndex() + 1
@@ -1548,10 +1625,10 @@ end
 -- rattrapage : avance jusqu'à la première étape non terminée, puis clamp
 --- Étape d'entraîneur non validée mais dépassée : l'étape de quête suivante est déjà faite ou entamée.
 function Engine.EntraineurDepasse(g, i)
-    if not Engine.EstEntraineur(g.steps[i]) then return false end
+    if not Engine.EstPassage(g.steps[i]) then return false end
     for j = i + 1, #g.steps do
         local s = g.steps[j]
-        if not Engine.EstEntraineur(s) and Engine.StepApplies(s) then
+        if not Engine.EstPassage(s) and Engine.StepApplies(s) then
             if Engine.StepIsComplete(s) then return true end
             for _, q in ipairs(Engine.QuetesApplicables(s)) do
                 local st = Engine.QuestState(q)

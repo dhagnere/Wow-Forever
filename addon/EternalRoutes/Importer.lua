@@ -458,7 +458,53 @@ function Importer.Convertir(db)
         brutes[#brutes + 1] = { t = v.t, genre = "entrainer", qid = 0, visite = v }
     end
 
-    local ordre = { rendre = 0, faire = 1, entrainer = 2, prendre = 3 }
+    -- voyages : trajet noté par /ep trajet (zeppelin, bateau) ou vol pris chez un maître de vol.
+    -- L'étape montre l'embarcadère (ou le maître de vol) et se valide à l'arrivée.
+    local function ModeTrajet(nomTrajet)
+        local n = tostring(nomTrajet or ""):lower()
+        if n:find("zeppelin") then return "zeppelin" end
+        if n:find("bateau") or n:find("navire") or n:find("boat") or n:find("ship") then return "bateau" end
+        return "trajet"
+    end
+    local trajetOuvert, dernierTaxi, volOuvert
+    for _, e in ipairs(ev) do
+        if e.k == "trajet" and e.d[1] == "debut" then
+            local carte, x, y = tonumber(e.d[4]), tonumber(e.d[5]), tonumber(e.d[6])
+            if carte and x and y then x, y = x * 100, y * 100 else carte, x, y = Position(e.t) end
+            trajetOuvert = { t = e.t, nom = Rogner(e.d[2]), carte = carte, x = x, y = y }
+        elseif e.k == "trajet" and e.d[1] == "arrivee" and trajetOuvert then
+            local carte, x, y = tonumber(e.d[4]), tonumber(e.d[5]), tonumber(e.d[6])
+            if carte and carte ~= 0 then
+                brutes[#brutes + 1] = { t = trajetOuvert.t, genre = "voyage", qid = 0, voyage = {
+                    mode = ModeTrajet(trajetOuvert.nom), nom = trajetOuvert.nom, carte = trajetOuvert.carte,
+                    x = trajetOuvert.x, y = trajetOuvert.y, vers = Rogner(e.d[3]), versCarte = carte,
+                    versX = x and x * 100 or nil, versY = y and y * 100 or nil } }
+            end
+            trajetOuvert = nil
+        elseif e.k == "trajet" and e.d[1] == "annule" then
+            trajetOuvert = nil
+        elseif e.k == "taxi" then
+            local carte, x, y = tonumber(e.d[2]), tonumber(e.d[3]), tonumber(e.d[4])
+            dernierTaxi = { t = e.t, nom = Rogner(e.d[1]), carte = carte, x = x and x * 100, y = y and y * 100 }
+        elseif e.k == "vol" and e.d[1] == "depart" then
+            local carte, x, y = tonumber(e.d[2]), tonumber(e.d[3]), tonumber(e.d[4])
+            local depuis = dernierTaxi and e.t - dernierTaxi.t < 120 and dernierTaxi or nil
+            if depuis and depuis.carte and depuis.x then carte, x, y = depuis.carte, depuis.x, depuis.y
+            elseif carte and x and y then x, y = x * 100, y * 100
+            else carte, x, y = Position(e.t) end
+            volOuvert = { t = depuis and depuis.t or e.t, depuis = depuis and depuis.nom ~= "?" and depuis.nom or nil, carte = carte, x = x, y = y }
+        elseif e.k == "vol" and e.d[1] == "arrivee" and volOuvert then
+            local carte, x, y = tonumber(e.d[2]), tonumber(e.d[3]), tonumber(e.d[4])
+            if carte and x and y then
+                brutes[#brutes + 1] = { t = volOuvert.t, genre = "voyage", qid = 0, voyage = {
+                    mode = "vol", depuis = volOuvert.depuis, carte = volOuvert.carte, x = volOuvert.x, y = volOuvert.y,
+                    vers = NomZone(carte, nil), versCarte = carte, versX = x * 100, versY = y * 100 } }
+            end
+            volOuvert = nil
+        end
+    end
+
+    local ordre = { rendre = 0, faire = 1, entrainer = 2, voyage = 2, prendre = 3 }
     table.sort(brutes, function(a, b)
         if a.t ~= b.t then return a.t < b.t end
         if ordre[a.genre] ~= ordre[b.genre] then return ordre[a.genre] < ordre[b.genre] end
@@ -468,7 +514,13 @@ function Importer.Convertir(db)
     -- regroupement par lieu
     local etapes = {}
     for _, b in ipairs(brutes) do
-      if b.genre == "entrainer" then
+      if b.genre == "voyage" then
+        local v = b.voyage
+        etapes[#etapes + 1] = { genre = "voyage", carte = v.carte, x = v.x, y = v.y, location = v.depuis,
+            quests = { { kind = "voyage", mode = v.mode, name = v.nom, depuis = v.depuis, vers = v.vers, depart = v.carte,
+                versCarte = v.versCarte, versX = v.versX and Arrondi(v.versX) or nil, versY = v.versY and Arrondi(v.versY) or nil,
+                cle = ("voyage-%s-%d-%d"):format(v.mode, v.carte or 0, v.versCarte or 0) } } }
+      elseif b.genre == "entrainer" then
         local v = b.visite
         etapes[#etapes + 1] = { genre = "entrainer", carte = v.carte, x = v.x, y = v.y, location = v.npc,
             class = ctx.classFile, niveau = v.niveau,
@@ -508,7 +560,7 @@ function Importer.Convertir(db)
     -- « faire ». Une quête absente de la base (propre à Forever) garde la position enregistrée.
     for _, e in ipairs(etapes) do
         e.source = "jeu"
-        for _, q in ipairs(e.quests) do
+        for _, q in ipairs(e.genre == "voyage" and {} or e.quests) do
             local b = ns.questDB and ns.questDB[q.id]
             local p
             if b then
@@ -573,7 +625,9 @@ function Importer.Convertir(db)
         local noms = {}
         for _, q in ipairs(e.quests) do noms[#noms + 1] = q.name end
         if e.genre == "prendre" then s.accepts = noms elseif e.genre == "rendre" then s.turnins = noms end
-        if e.genre == "entrainer" then
+        if e.genre == "voyage" then
+            s.voyage = true
+        elseif e.genre == "entrainer" then
             -- l'ancre (dernière action de quête avant la visite) replace l'étape si la route est réenregistrée
             s.class, s.niveau, s.ancre = e.class, e.niveau, ancre
             nbEntraineurs = nbEntraineurs + 1

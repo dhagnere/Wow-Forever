@@ -233,12 +233,25 @@ return route.source .. "|" .. tostring(route.type) .. "|" .. #route.steps .. "|"
     expect(Number(actions)).toBeGreaterThanOrEqual(2); // prendre et rendre au moins
   });
 
-  it("ignore un trajet noté dans l'enregistrement : même route qu'avant", () => {
-    const sans = executer(SIMULE, ...SONDE, SEANCE, ESPACE, lire("EternalRoutes/Importer.lua"), CONVERTIR);
+  it("fait du trajet noté une étape « voyage » au départ de l'embarcadère, et du vol pris une autre", () => {
+    const VOYAGES = `
+local route = assert(EternalRoutes.Importer.Convertir(EternalRoutes.Importer.Enregistrement()))
+local out = {}
+for _, s in ipairs(route.steps) do
+  local q = s.quests[1]
+  if q.kind == "voyage" then
+    out[#out + 1] = table.concat({ q.mode, tostring(q.name), s.map, q.versCarte, tostring(q.vers), tostring(s.voyage) }, "|")
+  end
+end
+return #route.steps .. "\\n" .. table.concat(out, "\\n")`;
+    const sans = executer(SIMULE, ...SONDE, SEANCE, ESPACE, lire("EternalRoutes/Importer.lua"), VOYAGES).split("\n");
     const avec = executer(SIMULE, ...SONDE, SEANCE,
-      'BANC.carte, BANC.zone = 1420, "Clairières de Tirisfal"; SlashCmdList.ETERNALPROBE("trajet Zeppelin"); BANC.carte = 1411; BANC.Avancer(10)',
-      ESPACE, lire("EternalRoutes/Importer.lua"), CONVERTIR);
-    expect(avec).toBe(sans);
+      'BANC.carte, BANC.zone, BANC.x, BANC.y = 1411, "Durotar", 0.50, 0.12; SlashCmdList.ETERNALPROBE("trajet Zeppelin Orgrimmar - Tirisfal"); BANC.carte, BANC.zone, BANC.x, BANC.y = 1420, "Clairières de Tirisfal", 0.61, 0.59; BANC.Avancer(10)',
+      ESPACE, lire("EternalRoutes/Importer.lua"), VOYAGES).split("\n");
+    // la séance du banc prend un vol ; le trajet en zeppelin ajoute une étape
+    expect(sans.filter((l) => l.startsWith("vol|"))).toHaveLength(1);
+    expect(Number(avec[0])).toBe(Number(sans[0]) + 1);
+    expect(avec).toContain("zeppelin|Zeppelin Orgrimmar - Tirisfal|1411|1420|Clairières de Tirisfal|true");
   });
 
   it("préfère EternalProbeDB à l'ancienne RouteProbeDB", () => {
@@ -274,6 +287,32 @@ GetLocale = function() return "frFR" end
 EternalRoutes = { ADDON_NAME = "EternalRoutes", guides = {}, db = {}, questDB = {}, Print = function() end }
 `;
   const MOTEUR = [lire("EternalRoutes/Locale.lua"), lire("EternalRoutes/Importer.lua"), lire("EternalRoutes/GuideEngine.lua")];
+
+  it("valide l'étape « voyage » à l'arrivée, pas pendant le vol, et dit quoi faire", () => {
+    const r = executer(SIMULE, ...SONDE, SEANCE, ESPACE, ...MOTEUR, `
+local E = EternalRoutes.Engine
+local q = { kind = "voyage", mode = "zeppelin", name = "Zeppelin Tirisfal - Orgrimmar", vers = "Durotar", depart = 1420, versCarte = 1411, versX = 50, versY = 12, cle = "voyage-zeppelin-1420-1411" }
+local v = { kind = "voyage", mode = "vol", depuis = "Orgrimmar, Durotar", vers = "Durotar", depart = 1411, versCarte = 1411, versX = 50, versY = 50, cle = "voyage-vol-1411-1411" }
+local out = {}
+BANC.carte, BANC.x, BANC.y, BANC.enVol = 1420, 0.61, 0.59, false
+out[#out + 1] = E.QuestState(q) .. " " .. E.QuestName(q) .. " / " .. table.concat(E.ActionsEtape(q, E.GetObjectives(q)), " ") .. " / " .. E.GetObjectives(q)[1].text
+BANC.carte = 1411
+out[#out + 1] = E.QuestState(q)
+BANC.x, BANC.y = 0.20, 0.20
+out[#out + 1] = E.QuestState(v) .. " " .. E.QuestName(v) .. " / " .. table.concat(E.ActionsEtape(v, E.GetObjectives(v)), " ")
+BANC.enVol = true; BANC.x, BANC.y = 0.50, 0.50
+out[#out + 1] = E.QuestState(v)
+BANC.enVol = false
+out[#out + 1] = E.QuestState(v)
+return table.concat(out, "\\n")`).split("\n");
+    expect(r).toEqual([
+      "available Zeppelin Tirisfal - Orgrimmar / Montez à bord à l'embarcadère indiqué par la flèche, puis attendez l'arrivée. / Arriver : Durotar",
+      "done",
+      "available Prendre le vol pour Durotar / Parlez au maître de vol (Orgrimmar, Durotar) et choisissez la destination.",
+      "in_progress",
+      "done",
+    ]);
+  });
 
   it("note le titre de l'entraîneur et le seul grimoire acheté", () => {
     const r = executer(SIMULE, ...SONDE, DEMONISTE, `
