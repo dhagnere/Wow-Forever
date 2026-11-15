@@ -54,6 +54,28 @@ validée, miniature comprise (`miniatureImage`), dans les Téléchargements ; re
 seule (Téléchargements, D:\WOW ou `DOSSIER_TELECHARGEMENTS`), écrit `<base>.miniature.jpg`, la place au début de la vidéo
 et rend `.jobwow.mp4` et les clips. `--ecart <minutes>` découpe par séance au lieu de la journée.
 
+**Longues soirées : des parties de 15 à 20 minutes (15/11/2026, demandé par Jobwow)**. Une journée de plus de 20 minutes
+est découpée d'office (`lib/parties.ts`). Les coupes sont notées d'après la sonde : embarquement (zeppelin, bateau) 100,
+pause entre deux enregistrements 95, départ en vol 90, arrivée d'un trajet ou d'un vol 80 à 85, arrivée dans une zone 80,
+quête rendue 60 (75 si aucun autre objectif n'est entamé), niveau 55 ; toutes les 15 secondes, un « moment calme » noté
+selon le temps écoulé depuis la dernière activité. Une coupe pendant une mort et le retour au corps, ou pendant un combat
+contre un élite, est à éviter (−300) ; pendant un objectif de quête à moitié fait (avancé il y a moins de 3 minutes), elle
+perd 80 points, sauf un départ ou une pause. La coupe tombe juste après l'événement, le temps que la bulle finisse.
+Le meilleur jeu de coupes (`choisirParties`) donne des parties de 8 à 20 minutes, au mieux de 15 à 20 ; jamais plus de 20.
+Les parties sont numérotées par soirée. Fichiers, dans `Journal de Jobwow` :
+- `<journée>.parties.json` : le découpage et les coupes proposées (fins de chapitre, moments vraiment calmes) ;
+- `<journée>_p<n>.narration.json` : la narration de chaque partie (`extrait` : son morceau de la vidéo de la journée,
+  `partie` : numéro et total ; secondes comptées depuis le début de la partie, répliques propres à la partie) ;
+- `<journée>_p<n>.youtube.txt` : titre « Journal de Jobwow · 15 novembre 2026 – partie 2 · … » et description qui situe
+  la partie dans la soirée ; puis `<journée>_p<n>.miniature.jpg`, `.jobwow.mp4` et `.clip-N.mp4` au rendu.
+La vidéo de la journée n'est jamais recoupée : chaque partie en est tirée au rendu (`-ss` et `-t`, réencodage exact).
+Dans l'Atelier, la liste propose chaque partie ; le bloc « Découpage de la soirée » montre les parties sur une frise
+(clic : ouvrir la partie) et, pour chaque coupe, la liste des coupes possibles. « Enregistrer le découpage » met
+`<journée>.parties.json` dans les Téléchargements ; `npm run carnet` le reprend et refait la narration des seules parties
+dont les bornes ont changé (l'ancienne gardée en `.narration.avant.json`). La miniature porte « PARTIE n » en haut à droite
+(champ « Partie »). `--sans-parties` garde une seule vidéo ; une journée déjà préparée d'un seul tenant le reste, sauf avec
+`--decouper` (l'ancienne narration passe en `.narration.avant.json`).
+
 **Dossier de travail : `D:\WOW`** (décidé le 15/11/2026). Toutes les opérations vidéo s'y font : vidéos de Warcraft
 Recorder, narrations, miniatures, rendus. Sans chemin, `npm run carnet:video` et `npm run carnet:incrustation` travaillent
 sur `D:\WOW` (`DOSSIER_VIDEOS` dans `lib/videoCarnet.ts`, la variable d'environnement du même nom le remplace) ; l'Atelier

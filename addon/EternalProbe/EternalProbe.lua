@@ -1054,7 +1054,7 @@ local function Commande(msg)
     end
 
     if P.CommandeEnPlus and P.CommandeEnPlus(lower, raw) then return end
-    Print("Commandes : /ep start | stop | dump | context | clear | suite | archives | mark <texte> | trajet <nom> | trajet fin | export | export depart | export commune | photos on|off")
+    Print("Commandes : /ep start | stop | dump | context | clear | suite | archives | mark <texte> | trajet <nom> | trajet fin | bouton | export | export depart | export commune | photos on|off")
 end
 
 -- Bouton minimap (déplaçable) : démarrer / arrêter l'enregistrement

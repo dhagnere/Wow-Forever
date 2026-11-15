@@ -193,11 +193,33 @@ function Engine.Proximite(g)
     return (Engine.DeSaClasse(g) and 2 or 0) + ((race and race_g == race) and 1 or 0)
 end
 
-function Engine.GetGuidesForPlayer()
-    local list = {}
-    for _, g in pairs(ns.guides) do
-        if Engine.GuideConvient(g, true) then list[#list + 1] = g end
+--- Une route valide par classe : pour un même départ (genre de route, carte de la première étape), seules restent
+--- les routes enregistrées les plus proches du personnage (même race et même classe d'abord).
+function Engine.UneParClasse(tous)
+    local function Cle(g)
+        local s1 = g.steps and g.steps[1]
+        return tostring(g.type or "") .. ":" .. tostring(s1 and s1.map or g.id)
     end
+    local meilleure = {}
+    for _, g in ipairs(tous) do
+        if g.source == "RouteProbe" then
+            local k, p = Cle(g), Engine.Proximite(g)
+            if not meilleure[k] or p > meilleure[k] then meilleure[k] = p end
+        end
+    end
+    local list = {}
+    for _, g in ipairs(tous) do
+        if g.source ~= "RouteProbe" or Engine.Proximite(g) >= meilleure[Cle(g)] then list[#list + 1] = g end
+    end
+    return list
+end
+
+function Engine.GetGuidesForPlayer()
+    local tous = {}
+    for _, g in pairs(ns.guides) do
+        if Engine.GuideConvient(g, true) then tous[#tous + 1] = g end
+    end
+    local list = Engine.UneParClasse(tous)
     table.sort(list, function(a, b)
         local pa, pb = a.priority or 0, b.priority or 0
         if pa ~= pb then return pa > pb end
@@ -800,7 +822,11 @@ function Engine.EtatVoyage(q)
     if ns.db and ns.db.voyages and q.cle and ns.db.voyages[q.cle] then return "done" end
     if UnitOnTaxi and UnitOnTaxi("player") then return "in_progress" end
     local carte, x, y = PositionJoueur()
-    if not (carte and q.versCarte and carte == q.versCarte) then return "available" end
+    -- arrivée inconnue (trajet commencé en fin d'enregistrement) : fait dès qu'on a quitté la carte du quai
+    if not q.versCarte then
+        return (carte and q.depart and carte ~= q.depart) and "done" or "available"
+    end
+    if not (carte and carte == q.versCarte) then return "available" end
     local memeCarte = q.depart and q.depart == q.versCarte
     if not memeCarte or not (q.versX and x) then return "done" end
     local dx, dy = x - q.versX, y - q.versY
@@ -818,7 +844,11 @@ end
 
 local function NomVoyage(q)
     local L = ns.L
-    local vers = q.vers and q.vers ~= "" and TraduireEn(q.vers) or "?"
+    if not (q.vers and q.vers ~= "") then
+        return (q.mode == "zeppelin" and L.TRAVEL_ZEPPELIN0) or (q.mode == "bateau" and L.TRAVEL_BOAT0)
+            or (q.mode == "vol" and L.TRAVEL_FLIGHT0) or L.TRAVEL_GO0
+    end
+    local vers = TraduireEn(q.vers)
     if q.mode == "vol" then return L.TRAVEL_FLIGHT:format(vers) end
     if q.mode == "zeppelin" then return L.TRAVEL_ZEPPELIN:format(vers) end
     if q.mode == "bateau" then return L.TRAVEL_BOAT:format(vers) end
@@ -853,8 +883,8 @@ end
 function Engine.GetObjectives(q)
     if q and q.kind == "voyage" then
         local fait = Engine.EtatVoyage(q) == "done"
-        local vers = q.vers and q.vers ~= "" and TraduireEn(q.vers) or "?"
-        return { { text = ns.L.OBJ_ARRIVE:format(vers), numFulfilled = 0, numRequired = 0, finished = fait } }
+        local vers = q.vers and q.vers ~= "" and TraduireEn(q.vers) or nil
+        return { { text = vers and ns.L.OBJ_ARRIVE:format(vers) or ns.L.OBJ_ARRIVE0, numFulfilled = 0, numRequired = 0, finished = fait } }
     end
     if q and q.kind == "entrainer" and q.achat then
         local out, fait = {}, Engine.EtatEntraineur(q) == "done"
@@ -1009,7 +1039,8 @@ function Engine.QuestName(q)
     if q.kind == "entrainer" then return TraduireEn(q.name) or "" end
     if q.kind == "voyage" then
         -- le nom donné au trajet (/ep trajet) en français ; sinon « Prendre le zeppelin pour … »
-        if q.name and q.name ~= "" and not Anglais() then return q.name end
+        -- (« Zeppelin », « Bateau » du bouton Trajet : nom générique, la destination le complète)
+        if q.name and q.name:find("%s") and not Anglais() then return q.name end
         return NomVoyage(q)
     end
     -- version anglaise : le titre anglais passe avant celui du journal (langue du client)
@@ -1098,7 +1129,7 @@ function Engine.NomGuide(g)
         end
         local fin = g.niveauMax or tonumber(tostring(g.name or ""):match("1%-(%d+)$")) or g.maxLevel or 10
         local tete = (ns.L.ROUTE_DEPART or "Départ") .. (g.faction and (" " .. g.faction) or "")
-        return ("%s · %s%s · %s-%d"):format(tete, race, classe and (" · " .. classe) or "", tostring(g.niveauDebut or 1), fin)
+        return ("%s · %s%s · %s-%d"):format(tete, race, classe and (" · " .. classe) or "", "1", fin) -- une route de départ commence toujours au niveau 1
     end
     local a, b = tostring(g.name or ""):match("(%d+)%-(%d+)$")
     return ("%s · %s%s · %s-%s"):format(tostring(g.faction or "Route"), zone, classe and (" · " .. classe) or "",

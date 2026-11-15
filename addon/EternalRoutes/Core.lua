@@ -18,6 +18,8 @@ local defaults = {
     activeGuide   = nil,
     stepIndex     = 1,
     arrowEnabled  = true,
+    traceCarte    = true,
+    traceMini     = true,
     annonces      = "ecran",
     showNext      = true,
     miniMode      = false,
@@ -206,6 +208,18 @@ local function Commande(msg)
     if msg == "debug" then
         if ns.Engine then ns.Engine.debug = not ns.Engine.debug end
         ns.Print((ns.Engine and ns.Engine.debug) and ns.L.DEBUG_ON or ns.L.DEBUG_OFF)
+        return
+    end
+    if msg == "style" or msg:match("^style%s") then
+        if ns.Sobre then ns.Sobre.Style(msg:match("^style%s+(.+)$")) end
+        return
+    end
+    if msg == "opacite" or msg:match("^opacite%s") or msg:match("^opacity") then
+        if ns.Sobre then ns.Sobre.Opacite(msg:match("^%S+%s+(.+)$")) end
+        return
+    end
+    if msg == "trace" or msg:match("^trace%s") then
+        if ns.Trace then ns.Trace.Commande(msg:match("^trace%s+(.+)$")) end
         return
     end
     if msg == "fleche" or msg == "flèche" or msg == "arrow" then

@@ -1,0 +1,4 @@
+<Bindings>
+	<Binding name="ETERNALPROBE_TRAJET" header="ETERNALPROBE">EternalProbe_Trajet()</Binding>
+	<Binding name="ETERNALPROBE_TRAJETBATEAU">EternalProbe_TrajetBateau()</Binding>
+</Bindings>

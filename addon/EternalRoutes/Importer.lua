@@ -466,7 +466,7 @@ function Importer.Convertir(db)
         if n:find("bateau") or n:find("navire") or n:find("boat") or n:find("ship") then return "bateau" end
         return "trajet"
     end
-    local trajetOuvert, dernierTaxi, volOuvert
+    local trajetOuvert, dernierTaxi, volOuvert, volChoix
     for _, e in ipairs(ev) do
         if e.k == "trajet" and e.d[1] == "debut" then
             local carte, x, y = tonumber(e.d[4]), tonumber(e.d[5]), tonumber(e.d[6])
@@ -486,6 +486,8 @@ function Importer.Convertir(db)
         elseif e.k == "taxi" then
             local carte, x, y = tonumber(e.d[2]), tonumber(e.d[3]), tonumber(e.d[4])
             dernierTaxi = { t = e.t, nom = Rogner(e.d[1]), carte = carte, x = x and x * 100, y = y and y * 100 }
+        elseif e.k == "vol" and e.d[1] == "choix" then
+            volChoix = Rogner(e.d[2])
         elseif e.k == "vol" and e.d[1] == "depart" then
             local carte, x, y = tonumber(e.d[2]), tonumber(e.d[3]), tonumber(e.d[4])
             local depuis = dernierTaxi and e.t - dernierTaxi.t < 120 and dernierTaxi or nil
@@ -498,10 +500,19 @@ function Importer.Convertir(db)
             if carte and x and y then
                 brutes[#brutes + 1] = { t = volOuvert.t, genre = "voyage", qid = 0, voyage = {
                     mode = "vol", depuis = volOuvert.depuis, carte = volOuvert.carte, x = volOuvert.x, y = volOuvert.y,
-                    vers = NomZone(carte, nil), versCarte = carte, versX = x * 100, versY = y * 100 } }
+                    vers = (volChoix and volChoix ~= "?") and volChoix or NomZone(carte, nil), versCarte = carte,
+                    versX = x * 100, versY = y * 100 } }
             end
-            volOuvert = nil
+            volOuvert, volChoix = nil, nil
         end
+    end
+
+    -- trajet commencé en fin d'enregistrement (on a embarqué, puis arrêté la sonde) : l'étape garde le départ,
+    -- elle se valide quand on a quitté la carte du quai
+    if trajetOuvert and trajetOuvert.carte then
+        brutes[#brutes + 1] = { t = trajetOuvert.t, genre = "voyage", qid = 0, voyage = {
+            mode = ModeTrajet(trajetOuvert.nom), nom = trajetOuvert.nom, carte = trajetOuvert.carte,
+            x = trajetOuvert.x, y = trajetOuvert.y, vers = nil, versCarte = nil } }
     end
 
     local ordre = { rendre = 0, faire = 1, entrainer = 2, voyage = 2, prendre = 3 }
@@ -591,18 +602,22 @@ function Importer.Convertir(db)
     if carteRace and partie ~= "commune" then
         for _, e in ipairs(etapes) do if e.carte == carteRace then departRace = ZONES_DEPART[carteRace] break end end
     end
-    -- « partie commune » restée d'un autre personnage ou d'un /ep suite trop tôt : un enregistrement fait tout entier
-    -- dans la zone de départ de la race, sans dépasser son niveau de sortie, reste une route de départ
-    if carteRace and partie == "commune" and #etapes > 0 then
-        local dedans = true
-        for _, e in ipairs(etapes) do if e.carte ~= carteRace then dedans = false break end end
-        local haut = tonumber(ctx.level) or 1
-        for _, e in ipairs(ev) do if e.k == "level" then haut = math.max(haut, NiveauAtteint(e)) end end
-        if dedans and haut <= (ZONES_DEPART[carteRace].fin or 10) + 1 then
-            departRace, partie = ZONES_DEPART[carteRace], "depart"
+    -- une route par classe : un enregistrement « partie commune » qui commence dans la zone de départ de la race,
+    -- à un niveau de cette zone, est sa route de départ, même s'il en sort ensuite (Fossoyeuse, le zeppelin…).
+    -- Ses étapes sont toutes gardées.
+    -- (un voyage noté avant le départ, le zeppelin pris dans la zone de départ, ne compte pas ; au niveau de sortie
+    -- de la zone, c'est déjà la partie commune)
+    local prolongee = false
+    local premiere
+    for _, e in ipairs(etapes) do if e.genre ~= "voyage" then premiere = e break end end
+    if carteRace and partie == "commune" and premiere and premiere.carte == carteRace then
+        local bas = tonumber(ctx.level) or 1
+        for _, e in ipairs(ev) do if e.k == "level" then bas = math.min(bas, NiveauAtteint(e) - 1) break end end
+        if bas < (ZONES_DEPART[carteRace].fin or 10) then
+            departRace, partie, prolongee = ZONES_DEPART[carteRace], "depart", true
         end
     end
-    if departRace then
+    if departRace and not prolongee then
         local gardees = {}
         for _, e in ipairs(etapes) do
             if ZONES_DEPART[e.carte] and e.carte ~= carteRace then ecartees = ecartees + 1 else gardees[#gardees + 1] = e end
@@ -751,12 +766,15 @@ end
 Importer.CarteDeRace = CarteDeRace
 
 --- La route a-t-elle été faite tout entière dans la zone de départ de la race qui l'a enregistrée ?
+--- Commence dans la zone de départ de sa race, à un niveau de cette zone : c'est sa route de départ (une par classe),
+--- même si elle en sort ensuite.
 function Importer.DansSaZoneDeDepart(g)
     local carte = CarteDeRace(RaceDe(g))
     if not carte or type(g.steps) ~= "table" or #g.steps == 0 then return false end
-    for _, s in ipairs(g.steps) do if s.map ~= carte then return false end end
-    local haut = g.niveauMax or g.maxLevel or 60
-    return haut <= (ZONES_DEPART[carte].fin or 10) + 1
+    local premiere
+    for _, s in ipairs(g.steps) do if not (s.quests and s.quests[1] and s.quests[1].kind == "voyage") then premiere = s break end end
+    if not premiere or premiere.map ~= carte then return false end
+    return (g.niveauDebut or g.minLevel or 1) < (ZONES_DEPART[carte].fin or 10)
 end
 
 --- Identifiant d'une route de départ : rp-depart-<zone>-<race>-<classe> ; nil si sa race ne commence pas là.
@@ -781,6 +799,12 @@ local function Assembler(a, b)
         a.cartesSet = nil
         return a, nil
     end
+    -- l'une couvre l'autre (commence aussi tôt, va plus loin) : on garde la plus complète
+    local function Couvre(x, y)
+        return (x.niveauDebut or 1) <= (y.niveauDebut or 1) and (x.niveauMax or 1) > (y.niveauMax or 1)
+    end
+    if Couvre(a, b) then return a, b end
+    if Couvre(b, a) then return b, a end
     if tostring(b.importe or "") >= tostring(a.importe or "") then return b, a end
     return a, b
 end
@@ -951,7 +975,10 @@ function Importer.Importer()
         -- route de départ plus proche du personnage (sa race et sa classe) : elle remplace celle qu'il suivait
         local remplaceAutreClasse = active and g.type == "depart" and active.type == "depart" and active.zone == g.zone
             and ns.Engine.Proximite(g) > ns.Engine.Proximite(active)
-        if not active or ns.db.activeGuide == g.id or remplaceAutreClasse then
+        -- son propre enregistrement (même race, même classe) : la route importée devient la route suivie,
+        -- et la fenêtre se place à la dernière étape faite (LoadGuide puis SyncToProgress)
+        local sonEnregistrement = ns.Engine.Proximite and ns.Engine.Proximite(g) >= 3
+        if not active or ns.db.activeGuide == g.id or remplaceAutreClasse or sonEnregistrement then
             for _, candidat in ipairs(ns.Engine.GetGuidesForPlayer()) do
                 if candidat.id == g.id then ns.Engine.LoadGuide(g.id) break end
             end

@@ -2,7 +2,7 @@
 ## Title: EternalRoutes
 ## Notes: Guides de leveling — La Taverne Éternelle
 ## Author: La Taverne Éternelle
-## Version: 0.14.0
+## Version: 0.16.1
 ## Category: Quests
 ## Category-frFR: Quêtes
 ## X-Website: https://www.taverne-eternelle.fr/
@@ -18,5 +18,7 @@ QuestNames.lua
 QuestDB.lua
 GuideEngine.lua
 TomTomIntegration.lua
+Trace.lua
 GuideWindow.lua
+GuideSobre.lua
 Importer.lua

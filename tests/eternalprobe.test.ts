@@ -240,7 +240,7 @@ local out = {}
 for _, s in ipairs(route.steps) do
   local q = s.quests[1]
   if q.kind == "voyage" then
-    out[#out + 1] = table.concat({ q.mode, tostring(q.name), s.map, q.versCarte, tostring(q.vers), tostring(s.voyage) }, "|")
+    out[#out + 1] = table.concat({ q.mode, tostring(q.name), s.map, tostring(q.versCarte), tostring(q.vers), tostring(s.voyage) }, "|")
   end
 end
 return #route.steps .. "\\n" .. table.concat(out, "\\n")`;
@@ -252,6 +252,11 @@ return #route.steps .. "\\n" .. table.concat(out, "\\n")`;
     expect(sans.filter((l) => l.startsWith("vol|"))).toHaveLength(1);
     expect(Number(avec[0])).toBe(Number(sans[0]) + 1);
     expect(avec).toContain("zeppelin|Zeppelin Orgrimmar - Tirisfal|1411|1420|Clairières de Tirisfal|true");
+    // embarqué puis sonde arrêtée : l'étape garde le départ, sans arrivée connue
+    const ouvert = executer(SIMULE, ...SONDE, SEANCE,
+      'BANC.carte, BANC.zone, BANC.x, BANC.y = 1411, "Durotar", 0.50, 0.12; SlashCmdList.ETERNALPROBE("trajet Zeppelin")',
+      ESPACE, lire("EternalRoutes/Importer.lua"), VOYAGES).split("\n");
+    expect(ouvert).toContain("zeppelin|Zeppelin|1411|nil|nil|true");
   });
 
   it("préfère EternalProbeDB à l'ancienne RouteProbeDB", () => {
@@ -287,6 +292,156 @@ GetLocale = function() return "frFR" end
 EternalRoutes = { ADDON_NAME = "EternalRoutes", guides = {}, db = {}, questDB = {}, Print = function() end }
 `;
   const MOTEUR = [lire("EternalRoutes/Locale.lua"), lire("EternalRoutes/Importer.lua"), lire("EternalRoutes/GuideEngine.lua")];
+
+  it("fenêtre sobre : une ligne par tâche, colorée selon l'état, sans erreur à l'ouverture", () => {
+    const r = executer(SIMULE, ESPACE, ...MOTEUR, lire("EternalRoutes/TomTomIntegration.lua"), lire("EternalRoutes/Trace.lua"),
+      "StaticPopupDialogs = StaticPopupDialogs or {}; UISpecialFrames = UISpecialFrames or {}", lire("EternalRoutes/GuideWindow.lua"), lire("EternalRoutes/GuideSobre.lua"), `
+local E, S = EternalRoutes.Engine, EternalRoutes.Sobre
+EternalRoutes.db = EternalRoutes.db or {}
+StaticPopupDialogs = StaticPopupDialogs or {}
+UISpecialFrames = UISpecialFrames or {}
+EternalRoutes.SetLang = function() end
+EternalRoutes.IsEnglish = function() return false end
+E.GetQuestStatus = function(q) return q.etat end
+E.GetObjectives = function(q) return q.objs or {} end
+local out = {}
+local function D(q) local t = {} for _, l in ipairs(S.Taches(q)) do t[#t + 1] = l.couleur .. ":" .. l.texte .. ":" .. l.compte end return table.concat(t, " | ") end
+out[#out + 1] = D({ kind = "prendre", name = "Ravageurs", etat = "available" })
+out[#out + 1] = D({ kind = "prendre", name = "Ravageurs", etat = "in_progress" })
+out[#out + 1] = D({ kind = "faire", name = "Ravageurs", etat = "in_progress", objs = {
+  { text = "Hyène tachetée tuée : 2/7", numFulfilled = 2, numRequired = 7 },
+  { text = "Plume de trotteur : 0/5", numFulfilled = 0, numRequired = 5 },
+  { text = "Croc : 3/3", numFulfilled = 3, numRequired = 3, finished = true } } })
+out[#out + 1] = D({ kind = "rendre", name = "Ravageurs", etat = "complete" })
+out[#out + 1] = D({ kind = "voyage", mode = "zeppelin", vers = "Durotar", etat = "available" })
+-- ouverture, rafraîchissement, bascule : aucune erreur
+EternalRoutes.guides = { r = { id = "r", source = "RouteProbe", type = "faction", faction = "Horde", minLevel = 1, maxLevel = 60,
+  steps = { { map = 1413, x = 50, y = 50, quests = { { kind = "prendre", name = "Ravageurs", etat = "available" } } },
+            { map = 1413, x = 52, y = 50, quests = { { kind = "rendre", name = "Ravageurs", etat = "available" } } } } } }
+EternalRoutes.db.activeGuide, EternalRoutes.db.stepIndex = "r", 1
+EternalRoutes.Window.OnLogin()
+EternalRoutes.Window.Refresh()
+EternalRoutes.Window.Toggle(); EternalRoutes.Window.Toggle()
+EternalRoutes.Window.SetMini(true); EternalRoutes.Window.SetMini(false)
+EternalRoutes.viewStep = 2; EternalRoutes.Window.Refresh()
+out[#out + 1] = "ok"
+return table.concat(out, "\\n")`).split("\n");
+    expect(r).toEqual([
+      "rouge:Accepter « Ravageurs »:",
+      "vert:Accepter « Ravageurs »:fait",
+      "orange:Hyène tachetée tuée:2/7 | rouge:Plume de trotteur:0/5 | vert:Croc:3/3",
+      "vert:Rendre « Ravageurs »:prêt",
+      "bleu:Prendre le zeppelin pour Durotar:",
+      "ok",
+    ]);
+  });
+
+  it("trace le chemin en plusieurs points : à pied, ou par un vol connu quand il fait gagner du temps", () => {
+    const r = executer(SIMULE, ESPACE, ...MOTEUR, lire("EternalRoutes/Trace.lua"), `
+local T = EternalRoutes.Trace
+local noeuds = { { nom = "A", c = 1, x = 100, y = 0 }, { nom = "B", c = 1, x = 4900, y = 0 }, { nom = "Autre", c = 0, x = 0, y = 0 } }
+local out = {}
+local function Decrire(chemin, vol)
+  local t = {}
+  for _, p in ipairs(chemin) do t[#t + 1] = p.mode .. (p.nom and (":" .. p.nom) or "") end
+  return table.concat(t, ">") .. (vol and (" vol " .. vol.depuis .. "-" .. vol.vers) or "")
+end
+out[#out + 1] = Decrire(T.Planifier({ c = 1, x = 0, y = 0 }, { c = 1, x = 5000, y = 0 }, noeuds))
+out[#out + 1] = Decrire(T.Planifier({ c = 1, x = 0, y = 0 }, { c = 1, x = 300, y = 0 }, noeuds))
+out[#out + 1] = Decrire(T.Planifier({ c = 1, x = 0, y = 0 }, { c = 0, x = 10, y = 0 }, noeuds))
+out[#out + 1] = #T.Echantillons({ x = 0, y = 0 }, { x = 100, y = 0 }, 18)
+-- carte des vols ouverte : point courant noté pour le compte, points connus pour le personnage
+EternalRoutes.db = {}
+NumTaxiNodes = function() return 3 end
+local N = { { "Fossoyeuse, Clairières de Tirisfal", "CURRENT" }, { "Orgrimmar, Durotar", "REACHABLE" }, { "Lointain", "DISTANT" } }
+TaxiNodeName = function(i) return N[i][1] end
+TaxiNodeGetType = function(i) return N[i][2] end
+BANC.carte, BANC.x, BANC.y = 1420, 0.611, 0.588
+T.NoterPointsDeVol()
+local m = EternalRoutesRoutesDB.maitresVol["Fossoyeuse, Clairières de Tirisfal"]
+out[#out + 1] = m.map .. " " .. m.x .. " " .. m.y .. " " .. tostring(EternalRoutes.db.volsConnus["Orgrimmar, Durotar"]) .. " " .. tostring(EternalRoutes.db.volsConnus["Lointain"])
+return table.concat(out, "\\n")`).split("\n");
+    expect(r).toEqual([
+      "depart>pied:A>vol:B>pied vol A-B",
+      "depart>pied",
+      "depart>pied",
+      "5",
+      "1420 61.1 58.8 true nil",
+    ]);
+  });
+
+  it("une route valide par classe : celle de la classe du personnage cache les autres au même départ", () => {
+    const r = executer(SIMULE, ESPACE, ...MOTEUR, `
+local J = BANC.joueur
+J.race, J.raceFichier, J.classe, J.classeFichier, J.niveau = "Mort-vivant", "Scourge", "Voleur", "ROGUE", 5
+local function R(id, classe, type, carte2) return { id = id, source = "RouteProbe", type = type, faction = "Horde", races = { "Scourge" },
+  classeEnregistree = classe, raceEnregistree = "Scourge", minLevel = 1, maxLevel = 15, niveauDebut = 2, niveauMax = 12,
+  steps = { { map = 1420, x = 30, y = 70, quests = {} }, { map = carte2 or 1420, x = 50, y = 50, quests = {} } } } end
+EternalRoutes.guides = {
+  a = R("a", "ROGUE", "depart"), b = R("b", "WARLOCK", "depart"), c = R("c", "WARLOCK", "faction", 1458),
+}
+local out = {}
+for _, g in ipairs(EternalRoutes.Engine.GetGuidesForPlayer()) do out[#out + 1] = g.id end
+table.sort(out)
+-- une route qui commence dans la zone de départ, à son niveau, puis en sort (Fossoyeuse) : route de départ
+out[#out + 1] = tostring(EternalRoutes.Importer.DansSaZoneDeDepart(R("d", "ROGUE", "faction", 1458)))
+local tard = R("e", "ROGUE", "faction"); tard.niveauDebut = 13
+out[#out + 1] = tostring(EternalRoutes.Importer.DansSaZoneDeDepart(tard))
+-- partie commune ouverte par le zeppelin pris dans la zone de départ : reste une route de faction
+local zep = R("f", "WARLOCK", "faction", 1454); zep.niveauDebut = 12
+zep.steps[1].quests = { { kind = "voyage", mode = "zeppelin" } }; zep.steps[2].map = 1411
+out[#out + 1] = tostring(EternalRoutes.Importer.DansSaZoneDeDepart(zep))
+return table.concat(out, " ")`);
+    expect(r).toBe("a c true false false");
+  });
+
+  it("note seul un zeppelin qui change de continent : départ au quai où l'on attendait, pas après une pierre de foyer", () => {
+    const r = executer(SIMULE, ...SONDE, SEANCE, `
+local P = EternalProbe
+BANC.continent = 0
+UnitPosition = function() return 0, 0, 0, BANC.continent end
+P.Start()
+-- attente au quai du zeppelin des Clairières de Tirisfal, puis traversée vers Durotar
+BANC.carte, BANC.zone, BANC.x, BANC.y = 1420, "Clairières de Tirisfal", 0.608, 0.588
+BANC.Avancer(12)
+BANC.x = 0.62; BANC.Avancer(2)
+BANC.continent = 1; BANC.carte, BANC.zone, BANC.x, BANC.y = 1411, "Durotar", 0.50, 0.12
+BANC.Avancer(10)
+-- retour par la pierre de foyer après une attente : rien de noté
+BANC.x = 0.55; BANC.Avancer(12)
+BANC.Evenement("UNIT_SPELLCAST_SUCCEEDED", "player", "x", 8690)
+BANC.continent = 0; BANC.carte, BANC.zone, BANC.x, BANC.y = 1420, "Clairières de Tirisfal", 0.61, 0.52
+BANC.Avancer(10)
+local t = {}
+for _, e in ipairs(EternalProbeDB.events) do if e:find("|trajet|") then t[#t + 1] = e:gsub("^[%d.]+|", ""):match("^([^|]+|[^|]+|[^|]+|[^|]+|[^|]+)") end end
+t[#t + 1] = P.ModeQuai(1434, 0.3) .. "/" .. P.ModeQuai(1434, 0.7) .. "/" .. P.ModeQuai(1453, 0.5)
+return table.concat(t, "\\n")`).split("\n");
+    expect(r).toEqual([
+      "trajet|debut|Zeppelin|Clairières de Tirisfal|1420",
+      "trajet|arrivee|Zeppelin|Durotar|1411",
+      "Zeppelin/Bateau/Bateau",
+    ]);
+  });
+
+  it("note un trajet d'un clic sur le bouton « Trajet » (zeppelin, bateau, arrivée, abandon) et le nomme d'après l'arrivée", () => {
+    const r = executer(SIMULE, ...SONDE, SEANCE, `
+local P = EternalProbe
+BANC.carte, BANC.zone, BANC.x, BANC.y = 1411, "Durotar", 0.50, 0.12
+P.TrajetBouton("LeftButton")
+BANC.carte, BANC.zone, BANC.x, BANC.y = 1420, "Clairières de Tirisfal", 0.61, 0.59
+BANC.Avancer(10)
+P.TrajetBouton("RightButton")
+IsShiftKeyDown = function() return true end
+P.TrajetBouton("LeftButton")
+IsShiftKeyDown = function() return false end
+local t = {}
+for _, e in ipairs(EternalProbeDB.events) do if e:find("|trajet|") then t[#t + 1] = e:gsub("^[%d.]+|", ""):match("^([^|]+|[^|]+|[^|]+)") end end
+return table.concat(t, "\\n")`).split("\n");
+    expect(r).toEqual(["trajet|debut|Zeppelin", "trajet|arrivee|Zeppelin", "trajet|debut|Bateau", "trajet|annule|Bateau"]);
+    const nom = executer(SIMULE, ESPACE, ...MOTEUR, `
+return EternalRoutes.Engine.QuestName({ kind = "voyage", mode = "zeppelin", name = "Zeppelin", vers = "Clairières de Tirisfal" })`);
+    expect(nom).toBe("Prendre le zeppelin pour Clairières de Tirisfal");
+  });
 
   it("valide l'étape « voyage » à l'arrivée, pas pendant le vol, et dit quoi faire", () => {
     const r = executer(SIMULE, ...SONDE, SEANCE, ESPACE, ...MOTEUR, `

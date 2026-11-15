@@ -927,6 +927,7 @@ function RemplirListe()
     for _, g in ipairs(ns.Engine.GetAllGuides and ns.Engine.GetAllGuides() or {}) do
         if not ns.Engine.GuideConvient or ns.Engine.GuideConvient(g, false) then tous[#tous + 1] = g end
     end
+    if ns.Engine.UneParClasse then tous = ns.Engine.UneParClasse(tous) end
     local adaptes = {}
     for _, g in ipairs(ns.Engine.GetGuidesForPlayer and ns.Engine.GetGuidesForPlayer() or {}) do
         adaptes[g.id] = true

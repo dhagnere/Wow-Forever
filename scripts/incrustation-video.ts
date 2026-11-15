@@ -21,6 +21,14 @@
  *   comprise) est reprise d'elle-même : la miniature est écrite à côté et placée en image de départ ;
  * - une narration validée et pas encore rendue est rendue (vidéo 16:9 et clips verticaux).
  * --ecart <minutes> découpe par séance au lieu de la journée.
+ *
+ * Longues soirées (depuis le 15/11/2026) : une journée de plus de 20 minutes est découpée d'office en parties de 15 à
+ * 20 minutes (lib/parties.ts), coupées en fin de chapitre (embarquement, vol, arrivée dans une zone, quête rendue,
+ * niveau, pause entre deux enregistrements), jamais pendant une mort, un élite ou un objectif à moitié fait. Le
+ * découpage est écrit dans `<journée>.parties.json` (déplaçable dans l'Atelier, repris des Téléchargements comme la
+ * narration) ; chaque partie a sa narration `<journée>_p<n>.narration.json`, sa miniature, son `.youtube.txt`, sa vidéo
+ * `<journée>_p<n>.jobwow.mp4` et ses clips, tirés de la vidéo de la journée sans la recouper. --sans-parties garde une
+ * seule vidéo ; une journée déjà préparée d'un seul tenant le reste, sauf avec --decouper.
  * Encodage H.264 (preset veryfast, CRF 20) : compter quelques minutes par heure de vidéo.
  */
 import { spawn, execFile } from "node:child_process";
@@ -35,6 +43,10 @@ import {
   type Calque, type Evenement, type Moment, type Narration,
 } from "@/lib/incrustation";
 import { chapitres, descriptionVideo, heureLocale, horodatage, lireSauvegardeSonde, positionDans, reperesRouteProbe, seances, SONDES, titreVideo, DOSSIER_VIDEOS, type Clip, type Repere, type Seance } from "@/lib/videoCarnet";
+import {
+  choisirParties, coupesPossibles, coupesProposees, memesBornes, nomPartie, PARTIE_MAX, seanceDePartie, signauxSonde, verifierDecoupage,
+  type Decoupage, type Signal,
+} from "@/lib/parties";
 
 const COMPTES_WOW = "C:\\WOW\\world of Warcraft\\_forever_\\WTF\\Account";
 const EXTENSIONS = new Set([".mp4", ".mkv", ".mov"]);
@@ -45,7 +57,7 @@ const POLICE_ST = "Segoe UI Semibold, Inter SemiBold, DejaVu Sans Bold, sans-ser
 const option = (nom: string) => { const i = process.argv.indexOf(`--${nom}`); return i > 0 ? process.argv[i + 1] : undefined; };
 // PowerShell retire souvent le « -- » de npm run, et npm garde alors les options pour lui : « preparer » sans tirets
 // et la variable npm_config_<nom> valent aussi
-const MOTS = ["preparer", "sans-clips", "par-fichier"];
+const MOTS = ["preparer", "sans-clips", "par-fichier", "sans-parties", "decouper"];
 const drapeau = (nom: string) =>
   process.argv.includes(`--${nom}`) || process.argv.includes(nom) || process.env[`npm_config_${nom.replace(/-/g, "_")}`] === "true";
 const sansExt = (f: string) => f.slice(0, -path.extname(f).length);
@@ -216,7 +228,10 @@ async function rendre(n: Narration, video: string, audio: boolean, g: Gabarit, s
   });
   const fichierGraphe = path.join(travail, `graphe-${suf}.txt`);
   writeFileSync(fichierGraphe, graphe, "utf8");
-  const source = morceau ? ["-ss", String(morceau.debut), "-t", String(morceau.duree), "-i", video] : ["-i", video];
+  // une partie ne rend que son morceau de la vidéo de la journée (-ss avant -i : recherche rapide, coupe exacte au réencodage)
+  const dec = n.extrait?.debut ?? 0;
+  const source = morceau ? ["-ss", String(dec + morceau.debut), "-t", String(morceau.duree), "-i", video]
+    : n.extrait ? ["-ss", String(dec), "-t", String(n.extrait.duree), "-i", video] : ["-i", video];
   await encoder([
     "-hide_banner", "-y", "-loglevel", "error", "-stats",
     ...source, ...entrees.flat(),
@@ -265,22 +280,30 @@ function sortirMiniature(n: Narration, fichierN: string): boolean {
  * Narration validée dans l'Atelier, enregistrée dans les Téléchargements (« <base>.narration.json », ou « (1) »…) ou
  * déposée dans D:\WOW : reprise si elle est plus récente que celle du dossier et porte sur les mêmes vidéos.
  */
-function reprendreValidee(fichierN: string, sources: string[] | null): void {
-  const nom = path.basename(fichierN, ".narration.json");
-  const motif = new RegExp(`^${nom.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\.narration(?: ?\\(\\d+\\))?\\.json$`, "i");
-  const dossiers = [...new Set([process.env.DOSSIER_TELECHARGEMENTS ?? path.join(os.homedir(), "Downloads"), DOSSIER_VIDEOS, path.dirname(fichierN)])];
+/** Copie du même fichier enregistrée par l'Atelier (Téléchargements, « (1) »…) ou déposée dans D:\WOW, plus récente. */
+function plusRecentAilleurs(fichier: string, suffixe: string): { f: string; t: number } | null {
+  const nom = path.basename(fichier, suffixe);
+  const fin = suffixe.replace(/\.json$/, "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const motif = new RegExp(`^${nom.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${fin}(?: ?\\(\\d+\\))?\\.json$`, "i");
+  const dossiers = [...new Set([process.env.DOSSIER_TELECHARGEMENTS ?? path.join(os.homedir(), "Downloads"), DOSSIER_VIDEOS, path.dirname(fichier)])];
   let meilleur: { f: string; t: number } | null = null;
   for (const d of dossiers) {
     if (!existsSync(d)) continue;
     for (const f of readdirSync(d)) {
       const plein = path.join(d, f);
-      if (!motif.test(f) || path.resolve(plein) === path.resolve(fichierN)) continue;
+      if (!motif.test(f) || path.resolve(plein) === path.resolve(fichier)) continue;
       const t = statSync(plein).mtimeMs;
       if (!meilleur || t > meilleur.t) meilleur = { f: plein, t };
     }
   }
+  if (!meilleur) return null;
+  if (existsSync(fichier) && statSync(fichier).mtimeMs >= meilleur.t) return null;
+  return meilleur;
+}
+
+function reprendreValidee(fichierN: string, sources: string[] | null): void {
+  const meilleur = plusRecentAilleurs(fichierN, ".narration.json");
   if (!meilleur) return;
-  if (existsSync(fichierN) && statSync(fichierN).mtimeMs >= meilleur.t) return;
   let n: Narration;
   try { n = JSON.parse(readFileSync(meilleur.f, "utf8")) as Narration; } catch { console.log(`Narration illisible : ${meilleur.f}`); return; }
   if (!n.valide) return;
@@ -307,8 +330,87 @@ async function main() {
   const usage = 'Usage : npm run carnet:incrustation [-- "<vidéo, dossier ou .narration.json, D:\\WOW par défaut>"] [--miniature <image>] [--sonde <fichier>] [--preparer] [--sans-clips]';
   if (!cible || cible.startsWith("--") || !existsSync(cible)) { console.error(`${cible ? `Introuvable : « ${cible} ».\n` : ""}${usage}`); process.exit(1); }
 
-  // vidéos à traiter : une narration, un fichier, ou un dossier rangé par séances
-  const travaux: { video: string; seance: Seance | null; fichierN?: string; sources?: string[] }[] = [];
+  let evenements: Evenement[] | null = null;
+  let reperes: Repere[] = [];
+  let signaux: Signal[] = [];
+  const chargerSonde = () => {
+    if (evenements) return;
+    evenements = [];
+    for (const f of sauvegardesSonde()) {
+      const db = lireSauvegardeSonde(readFileSync(f, "utf8"));
+      evenements.push(...evenementsSonde(db));
+      reperes.push(...reperesRouteProbe(db));
+      signaux.push(...signauxSonde(db));
+      console.log(`Repères de la sonde : ${f}`);
+    }
+    evenements.sort((a, b) => a.heure - b.heure);
+    reperes = reperes.sort((a, b) => a.heure - b.heure);
+    signaux = signaux.sort((a, b) => a.heure - b.heure);
+    if (!evenements.length) console.log("Aucun repère de sonde : seule l'intro sera commentée (/reload en jeu pour sauvegarder, ou --sonde <fichier>).");
+  };
+
+  /**
+   * Découpage d'une longue soirée : repris de l'Atelier (Téléchargements) s'il a été déplacé, relu s'il porte sur les
+   * mêmes vidéos, sinon calculé d'après la sonde. Une partie dont les bornes ont changé repart d'une narration neuve.
+   */
+  const partiesDeLaJournee = async (nom: string, video: string, s: Seance, sources: string[], dossier: string) => {
+    chargerSonde();
+    const fichierD = path.join(dossier, `${nom}.parties.json`);
+    const memesSources = (d: Partial<Decoupage>) => !d.sources || JSON.stringify(d.sources) === JSON.stringify(sources);
+    const ailleurs = plusRecentAilleurs(fichierD, ".parties.json");
+    if (ailleurs) {
+      try {
+        const x = JSON.parse(readFileSync(ailleurs.f, "utf8")) as Decoupage;
+        const err = verifierDecoupage(x);
+        if (err.length) console.log(`${ailleurs.f} : découpage ignoré.\n- ${err.join("\n- ")}`);
+        else if (!memesSources(x)) console.log(`${ailleurs.f} : découpage fait pour d'autres vidéos (vidéos ajoutées depuis), ignoré.`);
+        else { writeFileSync(fichierD, JSON.stringify(x, null, 2), "utf8"); console.log(`Découpage déplacé dans l'Atelier repris : ${ailleurs.f} → ${fichierD}`); }
+      } catch { console.log(`Découpage illisible : ${ailleurs.f}`); }
+    }
+    let dec: Decoupage | null = null;
+    if (existsSync(fichierD)) {
+      try {
+        dec = JSON.parse(readFileSync(fichierD, "utf8")) as Decoupage;
+        if (verifierDecoupage(dec).length || !memesSources(dec)) dec = null;
+      } catch { dec = null; }
+    }
+    if (!dec) {
+      const coupes = coupesPossibles({ seance: s, dureeVideo: s.duree, signaux });
+      const parties = choisirParties(coupes, s.duree);
+      dec = { format: 1, video: path.relative(dossier, video) || path.basename(video), dureeVideo: Math.round(s.duree * 10) / 10, sources, parties, coupes: coupesProposees(coupes, parties) };
+      writeFileSync(fichierD, JSON.stringify(dec, null, 2), "utf8");
+      console.log(`${nom} : soirée de ${horodatage(s.duree)} découpée en ${parties.length} parties (${fichierD}) :`);
+      for (const p of parties) console.log(`  partie ${p.numero} : ${horodatage(p.debut)} → ${horodatage(p.debut + p.duree)} (${horodatage(p.duree)})${p.coupe ? `, coupe : ${p.coupe}` : ""}`);
+    }
+    const total = dec.parties.length;
+    // parties en trop d'un ancien découpage : mises de côté
+    for (let k = total + 1; existsSync(path.join(dossier, `${nomPartie(nom, k)}.narration.json`)); k++) {
+      const f = path.join(dossier, `${nomPartie(nom, k)}.narration.json`);
+      renameSync(f, f.replace(/\.narration\.json$/, ".narration.avant.json"));
+    }
+    return dec.parties.map((p) => {
+      const fichierP = path.join(dossier, `${nomPartie(nom, p.numero)}.narration.json`);
+      const sourcesP = [...sources, `partie ${p.numero}/${total}|${p.debut.toFixed(1)}|${p.duree.toFixed(1)}`];
+      if (existsSync(fichierP)) {
+        try {
+          const a = JSON.parse(readFileSync(fichierP, "utf8")) as Narration;
+          if (!memesBornes(a.extrait, p) || (a.sources && JSON.stringify(a.sources) !== JSON.stringify(sourcesP))) {
+            renameSync(fichierP, fichierP.replace(/\.narration\.json$/, ".narration.avant.json"));
+            console.log(`${nomPartie(nom, p.numero)} : coupe déplacée ou vidéos changées, narration refaite (l'ancienne est gardée en .narration.avant.json).`);
+          }
+        } catch { /* illisible : refaite plus bas par verifierNarration */ }
+      }
+      return {
+        video, seance: seanceDePartie(s, p), fichierN: fichierP,
+        sources: sourcesP,
+        partie: { numero: p.numero, total, journee: nom, debut: p.debut, duree: p.duree },
+      };
+    });
+  };
+
+  // vidéos à traiter : une narration, un fichier, ou un dossier rangé par séances (une longue soirée : une par partie)
+  type InfoPartie = { numero: number; total: number; journee: string; debut: number; duree: number };
+  const travaux: { video: string; seance: Seance | null; fichierN?: string; sources?: string[]; partie?: InfoPartie }[] = [];
   const parNarration = cible.endsWith(".narration.json");
   const bilan: string[] = [];
   if (parNarration) {
@@ -355,35 +457,29 @@ async function main() {
         renameSync(fichierN, fichierN.replace(/\.narration\.json$/, ".narration.avant.json"));
         console.log(`Vidéos ajoutées ou retirées pour ${nom} : narration refaite (l'ancienne est gardée en .narration.avant.json).`);
       }
+      // longue soirée : des parties de 15 à 20 minutes (une journée déjà préparée d'un seul tenant le reste, sauf --decouper)
+      if (!drapeau("sans-parties") && s.duree > PARTIE_MAX && (!existsSync(fichierN) || drapeau("decouper"))) {
+        if (existsSync(fichierN)) {
+          renameSync(fichierN, fichierN.replace(/\.narration\.json$/, ".narration.avant.json"));
+          console.log(`${nom} : narration d'un seul tenant mise de côté (.narration.avant.json), la soirée est découpée en parties.`);
+        }
+        for (const p of await partiesDeLaJournee(nom, video, s, sources, sortieDossier)) travaux.push(p);
+        continue;
+      }
       travaux.push({ video, seance: s, fichierN, sources });
     }
   } else travaux.push({ video: cible, seance: null });
   if (!travaux.length) { console.error(`Aucune vidéo trouvée dans ${cible}.`); process.exit(1); }
 
-  let evenements: Evenement[] | null = null;
-  let reperes: Repere[] = [];
-  const chargerSonde = () => {
-    if (evenements) return;
-    evenements = [];
-    for (const f of sauvegardesSonde()) {
-      const db = lireSauvegardeSonde(readFileSync(f, "utf8"));
-      evenements.push(...evenementsSonde(db));
-      reperes.push(...reperesRouteProbe(db));
-      console.log(`Repères de la sonde : ${f}`);
-    }
-    evenements.sort((a, b) => a.heure - b.heure);
-    reperes = reperes.sort((a, b) => a.heure - b.heure);
-    if (!evenements.length) console.log("Aucun repère de sonde : seule l'intro sera commentée (/reload en jeu pour sauvegarder, ou --sonde <fichier>).");
-  };
   // titre, description et chapitres pour YouTube, relus par l'Atelier (refaits à chaque passage)
   const site = (process.env.SITE_URL ?? "https://www.taverne-eternelle.fr").replace(/\/+$/, "");
-  const ecrireYoutube = (base: string, seance: Seance, n?: Narration) => {
-    // chapitres tirés de la narration (ses moments couvrent toute la journée), sinon des repères de la sonde
+  const ecrireYoutube = (base: string, seance: Seance, n?: Narration, partie?: InfoPartie) => {
+    // chapitres tirés de la narration (ses moments couvrent toute la journée, ou toute la partie), sinon des repères de la sonde
     const parNarr = n ? chapitresNarration(n) : null;
     const chap = parNarr && parNarr.valides ? parNarr : chapitres(seance, reperes);
-    writeFileSync(`${base}.youtube.txt`, [`TITRE :`, titreVideo(seance, chap), "", "DESCRIPTION :", descriptionVideo(seance, chap, site)].join("\n"), "utf8");
+    writeFileSync(`${base}.youtube.txt`, [`TITRE :`, titreVideo(seance, chap, partie?.numero), "", "DESCRIPTION :", descriptionVideo(seance, chap, site, undefined, partie)].join("\n"), "utf8");
   };
-  for (const { video, seance: seanceConnue, fichierN: donne, sources } of travaux) {
+  for (const { video, seance: seanceConnue, fichierN: donne, sources, partie } of travaux) {
     const fichierN = donne ?? `${sansExt(video)}.narration.json`;
     const base = sansExt(fichierN).replace(/\.narration$/, "");
     const nomCourt = path.basename(base);
@@ -397,7 +493,7 @@ async function main() {
       const erreurs = verifierNarration(n);
       if (erreurs.length) { console.error(`${fichierN} :\n- ${erreurs.join("\n- ")}`); process.exit(1); }
       console.log(`Narration relue : ${fichierN} (${n.moments.length} moments, ${n.clips.length} clips)`);
-      if (seanceConnue) { chargerSonde(); ecrireYoutube(base, seanceConnue, n); }
+      if (seanceConnue) { chargerSonde(); ecrireYoutube(base, seanceConnue, n, partie); }
       // miniature donnée par son nom : à côté de la narration
       if (n.miniature && !path.isAbsolute(n.miniature) && !/^[A-Za-z]:[\\/]/.test(n.miniature)) n.miniature = path.join(path.dirname(fichierN), n.miniature);
     } else {
@@ -406,22 +502,29 @@ async function main() {
       const seance: Seance = seanceConnue ?? { clips: [{ fichier: video, debut, duree }], debut, fin: debut + duree * 1000, duree };
       const chap = chapitres(seance, reperes);
       n = preparerNarration({
-        video: path.relative(path.dirname(fichierN), video) || path.basename(video), debut, dureeVideo: duree, evenements: (evenements as Evenement[] | null) ?? [], fin: seance.fin,
+        video: path.relative(path.dirname(fichierN), video) || path.basename(video), debut, dureeVideo: partie ? partie.duree : duree, evenements: (evenements as Evenement[] | null) ?? [], fin: seance.fin,
         position: (h) => positionDans(seance, h),
-        miniature: option("miniature") ?? miniatureVoisine(video) ?? (seance.clips.length > 1 ? miniatureVoisine(seance.clips[0].fichier) : null),
-        titre: titreVideo(seance, chap),
+        // une partie : pas de miniature voisine (celle de la journée entière ne la décrit pas), elle se choisit dans l'Atelier
+        miniature: option("miniature") ?? (partie ? null : miniatureVoisine(video) ?? (seance.clips.length > 1 ? miniatureVoisine(seance.clips[0].fichier) : null)),
+        titre: titreVideo(seance, chap, partie?.numero),
+        graine: partie ? `${path.basename(video)}#partie-${partie.numero}` : undefined,
       });
+      if (partie) {
+        n.extrait = { debut: partie.debut, duree: partie.duree };
+        n.partie = { numero: partie.numero, total: partie.total, journee: partie.journee };
+      }
       if (n.miniature) n.miniature = path.resolve(n.miniature);
       if (sources) n.sources = sources;
       writeFileSync(fichierN, JSON.stringify(n, null, 2), "utf8");
-      ecrireYoutube(base, seance, n);
+      ecrireYoutube(base, seance, n, partie);
       console.log(`Narration préparée : ${fichierN} (${n.moments.length} moments, ${n.clips.length} clips). À relire dans l'atelier vidéo.`);
       if (!n.miniature) console.log("Miniature : elle se choisit dans l'Atelier, avec la relecture (ou --miniature <image>).");
     }
-    if (drapeau("preparer")) { bilan.push(`${nomCourt} : narration prête, à relire et valider dans l'Atelier.`); continue; }
+    const etiquette = partie ? `${nomCourt} (partie ${partie.numero} sur ${partie.total}, ${horodatage(partie.duree)})` : nomCourt;
+    if (drapeau("preparer")) { bilan.push(`${etiquette} : narration prête, à relire et valider dans l'Atelier.`); continue; }
     const sortie = `${base}.jobwow.mp4`;
-    if (!parNarration && !n.valide) { bilan.push(`${nomCourt} : à relire et valider dans l'Atelier (ouvre le dossier D:\\WOW), puis relance npm run carnet.`); continue; }
-    if (!parNarration && existsSync(sortie) && statSync(sortie).mtimeMs > statSync(fichierN).mtimeMs) { bilan.push(`${nomCourt} : déjà rendue (${path.basename(sortie)}).`); continue; }
+    if (!parNarration && !n.valide) { bilan.push(`${etiquette} : à relire et valider dans l'Atelier (ouvre le dossier D:\\WOW), puis relance npm run carnet.`); continue; }
+    if (!parNarration && existsSync(sortie) && statSync(sortie).mtimeMs > statSync(fichierN).mtimeMs) { bilan.push(`${etiquette} : déjà rendue (${path.basename(sortie)}).`); continue; }
 
     const mini = await miniaturePrete(option("miniature") ?? n.miniature, travail);
     console.log(`Rendu 16:9 : ${sortie}`);
@@ -430,10 +533,10 @@ async function main() {
       for (const [i, c] of n.clips.entries()) {
         const s = `${base}.clip-${i + 1}.mp4`;
         console.log(`Clip vertical ${i + 1} (${c.titre}) : ${s}`);
-        await rendre(n, video, audio, VERTICAL, s, travail, { debut: c.debut, duree: Math.min(c.duree, duree - c.debut) }, null, path.dirname(fichierN));
+        await rendre(n, video, audio, VERTICAL, s, travail, { debut: c.debut, duree: Math.min(c.duree, (n.extrait?.duree ?? duree) - c.debut) }, null, path.dirname(fichierN));
       }
     }
-    bilan.push(`${nomCourt} : rendue → ${path.basename(sortie)}${n.clips.length && !drapeau("sans-clips") ? ` et ${n.clips.length} clip(s)` : ""}. À envoyer sur YouTube (miniature : ${n.miniature ? path.basename(n.miniature) : "aucune"}).`);
+    bilan.push(`${etiquette} : rendue → ${path.basename(sortie)}${n.clips.length && !drapeau("sans-clips") ? ` et ${n.clips.length} clip(s)` : ""}. À envoyer sur YouTube (miniature : ${n.miniature ? path.basename(n.miniature) : "aucune"}).`);
   }
   console.log("\n— Où en est chaque vidéo —");
   for (const b of bilan) console.log(`• ${b}`);
