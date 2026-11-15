@@ -13,10 +13,19 @@
  * 2. `<vidéo>.jobwow.mp4` : miniature YouTube en image de départ, médaillon de Jobwow en bas à gauche, bulles, sous-titres ;
  * 3. `<vidéo>.clip-1.mp4`… : clips verticaux 1080 × 1920 de 30 secondes (sauf --sans-clips).
  * --preparer s'arrête après la narration. Miniature : --miniature, sinon `<vidéo>.miniature.jpg|png` à côté de la vidéo.
+ *
+ * `npm run carnet` (dossier D:\WOW, depuis le 15/11/2026) fait l'étape suivante de chaque journée, à chaque lancement :
+ * - les vidéos d'une même journée sont assemblées en une seule (« Journal de Jobwow/journal-jobwow_<date>.mp4 »), avec
+ *   une seule narration ; une vidéo ajoutée ensuite refait l'assemblage et la narration (l'ancienne gardée en .avant.json) ;
+ * - la narration validée dans l'Atelier (bouton « Valider », fichier enregistré dans les Téléchargements, miniature
+ *   comprise) est reprise d'elle-même : la miniature est écrite à côté et placée en image de départ ;
+ * - une narration validée et pas encore rendue est rendue (vidéo 16:9 et clips verticaux).
+ * --ecart <minutes> découpe par séance au lieu de la journée.
  * Encodage H.264 (preset veryfast, CRF 20) : compter quelques minutes par heure de vidéo.
  */
 import { spawn, execFile } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import ffmpeg from "@ffmpeg-installer/ffmpeg";
 import sharp from "sharp";
@@ -25,7 +34,7 @@ import {
   evenementsSonde, grapheRendu, preparerNarration, typographie, verifierNarration, voixAJour,
   type Calque, type Evenement, type Moment, type Narration,
 } from "@/lib/incrustation";
-import { chapitres, heureLocale, horodatage, lireSauvegardeSonde, positionDans, reperesRouteProbe, seances, SONDES, titreVideo, DOSSIER_VIDEOS, type Clip, type Repere, type Seance } from "@/lib/videoCarnet";
+import { chapitres, descriptionVideo, heureLocale, horodatage, lireSauvegardeSonde, positionDans, reperesRouteProbe, seances, SONDES, titreVideo, DOSSIER_VIDEOS, type Clip, type Repere, type Seance } from "@/lib/videoCarnet";
 
 const COMPTES_WOW = "C:\\WOW\\world of Warcraft\\_forever_\\WTF\\Account";
 const EXTENSIONS = new Set([".mp4", ".mkv", ".mov"]);
@@ -227,6 +236,64 @@ async function miniaturePrete(f: string | null, travail: string): Promise<string
   return sortie;
 }
 
+/** Une vidéo par journée (heure du PC) : toutes les vidéos d'un même jour, dans l'ordre. */
+function parJour(clips: Clip[]): Seance[] {
+  const jours = new Map<string, Clip[]>();
+  for (const c of [...clips].sort((a, b) => a.debut - b.debut)) {
+    const j = new Date(c.debut).toISOString().slice(0, 10);
+    jours.set(j, [...(jours.get(j) ?? []), c]);
+  }
+  return [...jours.values()].map((cs) => ({
+    clips: cs, debut: cs[0].debut, fin: Math.max(...cs.map((c) => c.debut + c.duree * 1000)), duree: cs.reduce((t, c) => t + c.duree, 0),
+  }));
+}
+
+/** Miniature faite dans l'Atelier (data URL) : écrite en `<base>.miniature.jpg`, la narration ne garde que le nom. */
+function sortirMiniature(n: Narration, fichierN: string): boolean {
+  const m = /^data:image\/(?:jpeg|jpg|png|webp);base64,(.+)$/.exec(n.miniatureImage ?? "");
+  if (!m) { if (n.miniatureImage !== undefined) { delete n.miniatureImage; return true; } return false; }
+  const nom = `${path.basename(fichierN, ".narration.json")}.miniature.jpg`;
+  writeFileSync(path.join(path.dirname(fichierN), nom), Buffer.from(m[1], "base64"));
+  n.miniature = nom;
+  if (!(n.introSecondes > 0)) n.introSecondes = 4;
+  delete n.miniatureImage;
+  console.log(`Miniature de l'Atelier : ${path.join(path.dirname(fichierN), nom)}`);
+  return true;
+}
+
+/**
+ * Narration validée dans l'Atelier, enregistrée dans les Téléchargements (« <base>.narration.json », ou « (1) »…) ou
+ * déposée dans D:\WOW : reprise si elle est plus récente que celle du dossier et porte sur les mêmes vidéos.
+ */
+function reprendreValidee(fichierN: string, sources: string[] | null): void {
+  const nom = path.basename(fichierN, ".narration.json");
+  const motif = new RegExp(`^${nom.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\.narration(?: ?\\(\\d+\\))?\\.json$`, "i");
+  const dossiers = [...new Set([process.env.DOSSIER_TELECHARGEMENTS ?? path.join(os.homedir(), "Downloads"), DOSSIER_VIDEOS, path.dirname(fichierN)])];
+  let meilleur: { f: string; t: number } | null = null;
+  for (const d of dossiers) {
+    if (!existsSync(d)) continue;
+    for (const f of readdirSync(d)) {
+      const plein = path.join(d, f);
+      if (!motif.test(f) || path.resolve(plein) === path.resolve(fichierN)) continue;
+      const t = statSync(plein).mtimeMs;
+      if (!meilleur || t > meilleur.t) meilleur = { f: plein, t };
+    }
+  }
+  if (!meilleur) return;
+  if (existsSync(fichierN) && statSync(fichierN).mtimeMs >= meilleur.t) return;
+  let n: Narration;
+  try { n = JSON.parse(readFileSync(meilleur.f, "utf8")) as Narration; } catch { console.log(`Narration illisible : ${meilleur.f}`); return; }
+  if (!n.valide) return;
+  if (sources && n.sources && JSON.stringify(n.sources) !== JSON.stringify(sources)) {
+    console.log(`${meilleur.f} : validée pour d'autres vidéos que celles du jour (vidéos ajoutées depuis), ignorée.`);
+    return;
+  }
+  if (sources && !n.sources) n.sources = sources;
+  sortirMiniature(n, fichierN);
+  writeFileSync(fichierN, JSON.stringify(n, null, 2), "utf8");
+  console.log(`Narration validée reprise : ${meilleur.f} → ${fichierN}`);
+}
+
 function miniatureVoisine(video: string): string | null {
   const base = sansExt(video);
   for (const ext of [".miniature.jpg", ".miniature.png", ".miniature.webp", ".jpg", ".png", ".webp"]) if (existsSync(base + ext)) return base + ext;
@@ -241,10 +308,12 @@ async function main() {
   if (!cible || cible.startsWith("--") || !existsSync(cible)) { console.error(`${cible ? `Introuvable : « ${cible} ».\n` : ""}${usage}`); process.exit(1); }
 
   // vidéos à traiter : une narration, un fichier, ou un dossier rangé par séances
-  const travaux: { video: string; seance: Seance | null }[] = [];
-  if (cible.endsWith(".narration.json")) {
+  const travaux: { video: string; seance: Seance | null; fichierN?: string; sources?: string[] }[] = [];
+  const parNarration = cible.endsWith(".narration.json");
+  const bilan: string[] = [];
+  if (parNarration) {
     const n = JSON.parse(readFileSync(cible, "utf8")) as Narration;
-    travaux.push({ video: path.resolve(path.dirname(cible), n.video), seance: null });
+    travaux.push({ video: path.resolve(path.dirname(cible), n.video), seance: null, fichierN: cible });
   } else if (statSync(cible).isDirectory()) {
     const sortieDossier = option("sortie") ?? path.join(cible, "Journal de Jobwow");
     const fichiers = readdirSync(cible).sort()
@@ -252,34 +321,58 @@ async function main() {
       .map((nom) => path.join(cible, nom));
     const clips: Clip[] = [];
     for (const f of fichiers) { const { duree } = await infos(f); clips.push({ fichier: f, debut: debutDe(f, duree), duree }); }
+    // une vidéo par journée (ou par séance avec --ecart, ou par fichier avec --par-fichier)
     const groupes = drapeau("par-fichier") ? clips.map((c) => ({ clips: [c], debut: c.debut, fin: c.debut + c.duree * 1000, duree: c.duree }))
-      : seances(clips, Number(option("ecart") ?? 30));
+      : option("ecart") ? seances(clips, Number(option("ecart"))) : parJour(clips);
+    const parJourVu = new Map<string, number>();
     for (const s of groupes) {
-      if (s.clips.length === 1) { travaux.push({ video: s.clips[0].fichier, seance: s }); continue; }
       mkdirSync(sortieDossier, { recursive: true });
       const d = new Date(s.debut).toISOString();
-      const nom = `journal-jobwow_${d.slice(0, 10)}_${d.slice(11, 16).replace(":", "h")}`;
-      const video = path.join(sortieDossier, `${nom}${path.extname(s.clips[0].fichier).toLowerCase()}`);
-      if (!existsSync(video)) {
-        const liste = path.join(sortieDossier, `${nom}.liste.txt`);
-        writeFileSync(liste, s.clips.map((c) => `file '${c.fichier.replace(/\\/g, "/").replace(/'/g, "'\\''")}'`).join("\n"), "utf8");
-        console.log(`Assemblage de ${s.clips.length} fichiers (${horodatage(s.duree)}) : ${video}`);
-        await encoder(["-hide_banner", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", liste, "-c", "copy", "-movflags", "+faststart", video]);
-      } else console.log(`Déjà assemblée : ${video}`);
-      travaux.push({ video, seance: s });
+      const jour = d.slice(0, 10);
+      parJourVu.set(jour, (parJourVu.get(jour) ?? 0) + 1);
+      const plusieurs = groupes.filter((g) => new Date(g.debut).toISOString().slice(0, 10) === jour).length > 1;
+      const nom = plusieurs ? `journal-jobwow_${jour}_${d.slice(11, 16).replace(":", "h")}` : `journal-jobwow_${jour}`;
+      const sources = s.clips.map((c) => `${path.basename(c.fichier)}|${c.duree.toFixed(1)}`);
+      const fichierN = path.join(sortieDossier, `${nom}.narration.json`);
+      let change = false;
+      if (existsSync(fichierN)) {
+        try {
+          const ancienne = JSON.parse(readFileSync(fichierN, "utf8")) as Narration;
+          change = !!ancienne.sources && JSON.stringify(ancienne.sources) !== JSON.stringify(sources);
+        } catch { change = true; }
+      }
+      let video = s.clips[0].fichier;
+      if (s.clips.length > 1) {
+        video = path.join(sortieDossier, `${nom}${path.extname(s.clips[0].fichier).toLowerCase()}`);
+        if (!existsSync(video) || change) {
+          const liste = path.join(sortieDossier, `${nom}.liste.txt`);
+          writeFileSync(liste, s.clips.map((c) => `file '${c.fichier.replace(/\\/g, "/").replace(/'/g, "'\\''")}'`).join("\n"), "utf8");
+          console.log(`Assemblage de ${s.clips.length} fichiers (${horodatage(s.duree)}) : ${video}`);
+          await encoder(["-hide_banner", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", liste, "-c", "copy", "-movflags", "+faststart", video]);
+        } else console.log(`Déjà assemblée : ${video}`);
+      }
+      if (change) {
+        renameSync(fichierN, fichierN.replace(/\.narration\.json$/, ".narration.avant.json"));
+        console.log(`Vidéos ajoutées ou retirées pour ${nom} : narration refaite (l'ancienne est gardée en .narration.avant.json).`);
+      }
+      travaux.push({ video, seance: s, fichierN, sources });
     }
   } else travaux.push({ video: cible, seance: null });
-  if (!travaux.length) { console.error("Aucune vidéo trouvée."); process.exit(1); }
+  if (!travaux.length) { console.error(`Aucune vidéo trouvée dans ${cible}.`); process.exit(1); }
 
   let evenements: Evenement[] | null = null;
   let reperes: Repere[] = [];
-  for (const { video, seance: seanceConnue } of travaux) {
-    const fichierN = `${sansExt(video)}.narration.json`;
-    const travail = path.join(path.dirname(video), ".incrustation", path.basename(sansExt(video)));
+  for (const { video, seance: seanceConnue, fichierN: donne, sources } of travaux) {
+    const fichierN = donne ?? `${sansExt(video)}.narration.json`;
+    const base = sansExt(fichierN).replace(/\.narration$/, "");
+    const nomCourt = path.basename(base);
+    const travail = path.join(path.dirname(fichierN), ".incrustation", nomCourt);
     const { duree, audio } = await infos(video);
+    if (!parNarration) reprendreValidee(fichierN, sources ?? null);
     let n: Narration;
     if (existsSync(fichierN)) {
       n = JSON.parse(readFileSync(fichierN, "utf8")) as Narration;
+      if (sortirMiniature(n, fichierN)) writeFileSync(fichierN, JSON.stringify(n, null, 2), "utf8");
       const erreurs = verifierNarration(n);
       if (erreurs.length) { console.error(`${fichierN} :\n- ${erreurs.join("\n- ")}`); process.exit(1); }
       console.log(`Narration relue : ${fichierN} (${n.moments.length} moments, ${n.clips.length} clips)`);
@@ -300,32 +393,42 @@ async function main() {
       }
       const debut = seanceConnue?.debut ?? debutDe(video, duree);
       const seance: Seance = seanceConnue ?? { clips: [{ fichier: video, debut, duree }], debut, fin: debut + duree * 1000, duree };
+      const chap = chapitres(seance, reperes);
       n = preparerNarration({
-        video: path.basename(video), debut, dureeVideo: duree, evenements, fin: seance.fin,
+        video: path.relative(path.dirname(fichierN), video) || path.basename(video), debut, dureeVideo: duree, evenements, fin: seance.fin,
         position: (h) => positionDans(seance, h),
         miniature: option("miniature") ?? miniatureVoisine(video) ?? (seance.clips.length > 1 ? miniatureVoisine(seance.clips[0].fichier) : null),
-        titre: titreVideo(seance, chapitres(seance, reperes)),
+        titre: titreVideo(seance, chap),
       });
       if (n.miniature) n.miniature = path.resolve(n.miniature);
+      if (sources) n.sources = sources;
       writeFileSync(fichierN, JSON.stringify(n, null, 2), "utf8");
+      // titre, description et chapitres pour YouTube, relus par l'Atelier
+      const site = (process.env.SITE_URL ?? "https://www.taverne-eternelle.fr").replace(/\/+$/, "");
+      writeFileSync(`${base}.youtube.txt`, [`TITRE :`, titreVideo(seance, chap), "", "DESCRIPTION :", descriptionVideo(seance, chap, site)].join("\n"), "utf8");
       console.log(`Narration préparée : ${fichierN} (${n.moments.length} moments, ${n.clips.length} clips). À relire dans l'atelier vidéo.`);
-      if (!n.miniature) console.log("Pas de miniature trouvée : ajoutez --miniature <image> ou « miniature » dans la narration pour l'image de départ.");
+      if (!n.miniature) console.log("Miniature : elle se choisit dans l'Atelier, avec la relecture (ou --miniature <image>).");
     }
-    if (drapeau("preparer")) continue;
+    if (drapeau("preparer")) { bilan.push(`${nomCourt} : narration prête, à relire et valider dans l'Atelier.`); continue; }
+    const sortie = `${base}.jobwow.mp4`;
+    if (!parNarration && !n.valide) { bilan.push(`${nomCourt} : à relire et valider dans l'Atelier (ouvre le dossier D:\\WOW), puis relance npm run carnet.`); continue; }
+    if (!parNarration && existsSync(sortie) && statSync(sortie).mtimeMs > statSync(fichierN).mtimeMs) { bilan.push(`${nomCourt} : déjà rendue (${path.basename(sortie)}).`); continue; }
 
     const mini = await miniaturePrete(option("miniature") ?? n.miniature, travail);
-    const sortie = `${sansExt(video)}.jobwow.mp4`;
     console.log(`Rendu 16:9 : ${sortie}`);
     await rendre(n, video, audio, PAYSAGE, sortie, travail, null, mini, path.dirname(fichierN));
     if (!drapeau("sans-clips")) {
       for (const [i, c] of n.clips.entries()) {
-        const s = `${sansExt(video)}.clip-${i + 1}.mp4`;
+        const s = `${base}.clip-${i + 1}.mp4`;
         console.log(`Clip vertical ${i + 1} (${c.titre}) : ${s}`);
         await rendre(n, video, audio, VERTICAL, s, travail, { debut: c.debut, duree: Math.min(c.duree, duree - c.debut) }, null, path.dirname(fichierN));
       }
     }
+    bilan.push(`${nomCourt} : rendue → ${path.basename(sortie)}${n.clips.length && !drapeau("sans-clips") ? ` et ${n.clips.length} clip(s)` : ""}. À envoyer sur YouTube (miniature : ${n.miniature ? path.basename(n.miniature) : "aucune"}).`);
   }
-  console.log("Terminé. Envoyez la vidéo .jobwow.mp4 dans YouTube Studio, les clips en Shorts.");
+  console.log("\n— Où en est chaque vidéo —");
+  for (const b of bilan) console.log(`• ${b}`);
+  console.log("L'Atelier vidéo de Jobwow montre les mêmes étapes : ouvre-y le dossier D:\\WOW.");
 }
 
 main().catch((e) => { console.error(e instanceof Error ? e.message : e); process.exit(1); });

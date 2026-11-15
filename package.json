@@ -42,6 +42,7 @@
     "addon:base": "tsx scripts/addon-base.ts",
     "kit:blizzard": "tsx scripts/kit-blizzard.ts",
     "video:miniature": "node scripts/miniature-video.mjs",
+    "carnet": "tsx scripts/incrustation-video.ts",
     "carnet:video": "tsx scripts/carnet-video.ts",
     "carnet:incrustation": "tsx scripts/incrustation-video.ts",
     "carnet:voix": "tsx scripts/voix.ts",

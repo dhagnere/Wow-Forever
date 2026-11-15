@@ -106,6 +106,13 @@ export interface Narration {
   personnage: string | null;
   moments: Moment[];
   clips: ClipVertical[];
+  /** Fichiers assemblés (« nom|durée ») : une vidéo ajoutée ou retirée refait l'assemblage et la narration. */
+  sources?: string[];
+  /** Relue et validée dans l'Atelier : `npm run carnet` peut faire le rendu. */
+  valide?: boolean;
+  valideLe?: string;
+  /** Miniature faite dans l'Atelier (JPEG en data URL), écrite à côté de la narration par `npm run carnet`. */
+  miniatureImage?: string | null;
 }
 
 /** Priorité d'un genre quand deux moments se chevauchent (le plus petit l'emporte). */
