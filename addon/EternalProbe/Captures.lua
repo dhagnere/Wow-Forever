@@ -15,6 +15,7 @@
       exploit     nom|classement (elite, rareelite, rare, worldboss)|carte|x|y
       photo       raison (niveau, zone, exploit, trajet)
       trajet      debut ou arrivee ou annule|nom du trajet|zone|carte|x|y (|durée en s à l'arrivée)
+      vol choix   nom du point de vol choisi sur la carte des vols (avant « vol depart »)
       livre       objet|nom|vendeur|titre du vendeur|carte|x|y|niveau du joueur (grimoire ou livre acheté)
 
     « trainer » (EternalProbe.lua) porte en 7e champ le titre du PNJ : EternalRoutes en tire l'action
@@ -352,6 +353,14 @@ local function PointDeVol()
     end
     local _, map, x, y = Ici()
     Ev("taxi", courant, map, x, y, connus)
+end
+
+-- destination choisie sur la carte des vols (nom du point d'arrivée), notée au départ du vol
+if hooksecurefunc and TakeTaxiNode then
+    hooksecurefunc("TakeTaxiNode", function(i)
+        if not P.EnCours() or not TaxiNodeName then return end
+        Ev("vol", "choix", TaxiNodeName(i) or "?")
+    end)
 end
 
 --- Élite ou rare vaincu : la cible est morte, on connaissait son classement, et elle n'était pas à un autre joueur.

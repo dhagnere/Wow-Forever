@@ -288,6 +288,40 @@ EternalRoutes = { ADDON_NAME = "EternalRoutes", guides = {}, db = {}, questDB = 
 `;
   const MOTEUR = [lire("EternalRoutes/Locale.lua"), lire("EternalRoutes/Importer.lua"), lire("EternalRoutes/GuideEngine.lua")];
 
+  it("trace le chemin en plusieurs points : à pied, ou par un vol connu quand il fait gagner du temps", () => {
+    const r = executer(SIMULE, ESPACE, ...MOTEUR, lire("EternalRoutes/Trace.lua"), `
+local T = EternalRoutes.Trace
+local noeuds = { { nom = "A", c = 1, x = 100, y = 0 }, { nom = "B", c = 1, x = 4900, y = 0 }, { nom = "Autre", c = 0, x = 0, y = 0 } }
+local out = {}
+local function Decrire(chemin, vol)
+  local t = {}
+  for _, p in ipairs(chemin) do t[#t + 1] = p.mode .. (p.nom and (":" .. p.nom) or "") end
+  return table.concat(t, ">") .. (vol and (" vol " .. vol.depuis .. "-" .. vol.vers) or "")
+end
+out[#out + 1] = Decrire(T.Planifier({ c = 1, x = 0, y = 0 }, { c = 1, x = 5000, y = 0 }, noeuds))
+out[#out + 1] = Decrire(T.Planifier({ c = 1, x = 0, y = 0 }, { c = 1, x = 300, y = 0 }, noeuds))
+out[#out + 1] = Decrire(T.Planifier({ c = 1, x = 0, y = 0 }, { c = 0, x = 10, y = 0 }, noeuds))
+out[#out + 1] = #T.Echantillons({ x = 0, y = 0 }, { x = 100, y = 0 }, 18)
+-- carte des vols ouverte : point courant noté pour le compte, points connus pour le personnage
+EternalRoutes.db = {}
+NumTaxiNodes = function() return 3 end
+local N = { { "Fossoyeuse, Clairières de Tirisfal", "CURRENT" }, { "Orgrimmar, Durotar", "REACHABLE" }, { "Lointain", "DISTANT" } }
+TaxiNodeName = function(i) return N[i][1] end
+TaxiNodeGetType = function(i) return N[i][2] end
+BANC.carte, BANC.x, BANC.y = 1420, 0.611, 0.588
+T.NoterPointsDeVol()
+local m = EternalRoutesRoutesDB.maitresVol["Fossoyeuse, Clairières de Tirisfal"]
+out[#out + 1] = m.map .. " " .. m.x .. " " .. m.y .. " " .. tostring(EternalRoutes.db.volsConnus["Orgrimmar, Durotar"]) .. " " .. tostring(EternalRoutes.db.volsConnus["Lointain"])
+return table.concat(out, "\\n")`).split("\n");
+    expect(r).toEqual([
+      "depart>pied:A>vol:B>pied vol A-B",
+      "depart>pied",
+      "depart>pied",
+      "5",
+      "1420 61.1 58.8 true nil",
+    ]);
+  });
+
   it("une route valide par classe : celle de la classe du personnage cache les autres au même départ", () => {
     const r = executer(SIMULE, ESPACE, ...MOTEUR, `
 local J = BANC.joueur

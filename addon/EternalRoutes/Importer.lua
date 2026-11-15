@@ -466,7 +466,7 @@ function Importer.Convertir(db)
         if n:find("bateau") or n:find("navire") or n:find("boat") or n:find("ship") then return "bateau" end
         return "trajet"
     end
-    local trajetOuvert, dernierTaxi, volOuvert
+    local trajetOuvert, dernierTaxi, volOuvert, volChoix
     for _, e in ipairs(ev) do
         if e.k == "trajet" and e.d[1] == "debut" then
             local carte, x, y = tonumber(e.d[4]), tonumber(e.d[5]), tonumber(e.d[6])
@@ -486,6 +486,8 @@ function Importer.Convertir(db)
         elseif e.k == "taxi" then
             local carte, x, y = tonumber(e.d[2]), tonumber(e.d[3]), tonumber(e.d[4])
             dernierTaxi = { t = e.t, nom = Rogner(e.d[1]), carte = carte, x = x and x * 100, y = y and y * 100 }
+        elseif e.k == "vol" and e.d[1] == "choix" then
+            volChoix = Rogner(e.d[2])
         elseif e.k == "vol" and e.d[1] == "depart" then
             local carte, x, y = tonumber(e.d[2]), tonumber(e.d[3]), tonumber(e.d[4])
             local depuis = dernierTaxi and e.t - dernierTaxi.t < 120 and dernierTaxi or nil
@@ -498,9 +500,10 @@ function Importer.Convertir(db)
             if carte and x and y then
                 brutes[#brutes + 1] = { t = volOuvert.t, genre = "voyage", qid = 0, voyage = {
                     mode = "vol", depuis = volOuvert.depuis, carte = volOuvert.carte, x = volOuvert.x, y = volOuvert.y,
-                    vers = NomZone(carte, nil), versCarte = carte, versX = x * 100, versY = y * 100 } }
+                    vers = (volChoix and volChoix ~= "?") and volChoix or NomZone(carte, nil), versCarte = carte,
+                    versX = x * 100, versY = y * 100 } }
             end
-            volOuvert = nil
+            volOuvert, volChoix = nil, nil
         end
     end
 
