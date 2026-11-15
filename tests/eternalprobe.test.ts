@@ -305,8 +305,12 @@ table.sort(out)
 out[#out + 1] = tostring(EternalRoutes.Importer.DansSaZoneDeDepart(R("d", "ROGUE", "faction", 1458)))
 local tard = R("e", "ROGUE", "faction"); tard.niveauDebut = 13
 out[#out + 1] = tostring(EternalRoutes.Importer.DansSaZoneDeDepart(tard))
+-- partie commune ouverte par le zeppelin pris dans la zone de départ : reste une route de faction
+local zep = R("f", "WARLOCK", "faction", 1454); zep.niveauDebut = 12
+zep.steps[1].quests = { { kind = "voyage", mode = "zeppelin" } }; zep.steps[2].map = 1411
+out[#out + 1] = tostring(EternalRoutes.Importer.DansSaZoneDeDepart(zep))
 return table.concat(out, " ")`);
-    expect(r).toBe("a c true false");
+    expect(r).toBe("a c true false false");
   });
 
   it("valide l'étape « voyage » à l'arrivée, pas pendant le vol, et dit quoi faire", () => {

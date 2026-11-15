@@ -594,11 +594,15 @@ function Importer.Convertir(db)
     -- une route par classe : un enregistrement « partie commune » qui commence dans la zone de départ de la race,
     -- à un niveau de cette zone, est sa route de départ, même s'il en sort ensuite (Fossoyeuse, le zeppelin…).
     -- Ses étapes sont toutes gardées.
+    -- (un voyage noté avant le départ, le zeppelin pris dans la zone de départ, ne compte pas ; au niveau de sortie
+    -- de la zone, c'est déjà la partie commune)
     local prolongee = false
-    if carteRace and partie == "commune" and #etapes > 0 and etapes[1].carte == carteRace then
+    local premiere
+    for _, e in ipairs(etapes) do if e.genre ~= "voyage" then premiere = e break end end
+    if carteRace and partie == "commune" and premiere and premiere.carte == carteRace then
         local bas = tonumber(ctx.level) or 1
         for _, e in ipairs(ev) do if e.k == "level" then bas = math.min(bas, NiveauAtteint(e) - 1) break end end
-        if bas <= (ZONES_DEPART[carteRace].fin or 10) then
+        if bas < (ZONES_DEPART[carteRace].fin or 10) then
             departRace, partie, prolongee = ZONES_DEPART[carteRace], "depart", true
         end
     end
@@ -756,8 +760,10 @@ Importer.CarteDeRace = CarteDeRace
 function Importer.DansSaZoneDeDepart(g)
     local carte = CarteDeRace(RaceDe(g))
     if not carte or type(g.steps) ~= "table" or #g.steps == 0 then return false end
-    if g.steps[1].map ~= carte then return false end
-    return (g.niveauDebut or g.minLevel or 1) <= (ZONES_DEPART[carte].fin or 10)
+    local premiere
+    for _, s in ipairs(g.steps) do if not (s.quests and s.quests[1] and s.quests[1].kind == "voyage") then premiere = s break end end
+    if not premiere or premiere.map ~= carte then return false end
+    return (g.niveauDebut or g.minLevel or 1) < (ZONES_DEPART[carte].fin or 10)
 end
 
 --- Identifiant d'une route de départ : rp-depart-<zone>-<race>-<classe> ; nil si sa race ne commence pas là.
