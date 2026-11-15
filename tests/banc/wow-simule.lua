@@ -26,6 +26,12 @@ local function NouveauCadre()
         if k == "CreateTexture" or k == "CreateFontString" then return function() return NouveauCadre() end end
         if k == "GetWidth" or k == "GetHeight" then return function() return 140 end end
         if k == "GetCenter" then return function() return 0, 0 end end
+        -- un champ (minuscule) inconnu est vide ; seules les méthodes (Majuscule) ne font rien
+        if type(k) == "string" and k:match("^%l") then return nil end
+        if k == "GetFrameLevel" or k == "GetScale" or k == "GetEffectiveScale" then return function() return 1 end end
+        if k == "GetStringWidth" then return function() return 50 end end
+        if k == "GetStringHeight" then return function() return 12 end end
+        if k == "GetLeft" or k == "GetTop" or k == "GetRight" or k == "GetBottom" or k == "GetValue" then return function() return 0 end end
         if k == "IsShown" then return function() return false end end
         if k == "GetText" then return function() return "" end end
         if k == "GetFont" then return function() return "Fonts\\FRIZQT__.TTF", 12, "" end end

@@ -288,6 +288,49 @@ EternalRoutes = { ADDON_NAME = "EternalRoutes", guides = {}, db = {}, questDB = 
 `;
   const MOTEUR = [lire("EternalRoutes/Locale.lua"), lire("EternalRoutes/Importer.lua"), lire("EternalRoutes/GuideEngine.lua")];
 
+  it("fenêtre sobre : une ligne par tâche, colorée selon l'état, sans erreur à l'ouverture", () => {
+    const r = executer(SIMULE, ESPACE, ...MOTEUR, lire("EternalRoutes/TomTomIntegration.lua"), lire("EternalRoutes/Trace.lua"),
+      "StaticPopupDialogs = StaticPopupDialogs or {}; UISpecialFrames = UISpecialFrames or {}", lire("EternalRoutes/GuideWindow.lua"), lire("EternalRoutes/GuideSobre.lua"), `
+local E, S = EternalRoutes.Engine, EternalRoutes.Sobre
+EternalRoutes.db = EternalRoutes.db or {}
+StaticPopupDialogs = StaticPopupDialogs or {}
+UISpecialFrames = UISpecialFrames or {}
+EternalRoutes.SetLang = function() end
+EternalRoutes.IsEnglish = function() return false end
+E.GetQuestStatus = function(q) return q.etat end
+E.GetObjectives = function(q) return q.objs or {} end
+local out = {}
+local function D(q) local t = {} for _, l in ipairs(S.Taches(q)) do t[#t + 1] = l.couleur .. ":" .. l.texte .. ":" .. l.compte end return table.concat(t, " | ") end
+out[#out + 1] = D({ kind = "prendre", name = "Ravageurs", etat = "available" })
+out[#out + 1] = D({ kind = "prendre", name = "Ravageurs", etat = "in_progress" })
+out[#out + 1] = D({ kind = "faire", name = "Ravageurs", etat = "in_progress", objs = {
+  { text = "Hyène tachetée tuée : 2/7", numFulfilled = 2, numRequired = 7 },
+  { text = "Plume de trotteur : 0/5", numFulfilled = 0, numRequired = 5 },
+  { text = "Croc : 3/3", numFulfilled = 3, numRequired = 3, finished = true } } })
+out[#out + 1] = D({ kind = "rendre", name = "Ravageurs", etat = "complete" })
+out[#out + 1] = D({ kind = "voyage", mode = "zeppelin", vers = "Durotar", etat = "available" })
+-- ouverture, rafraîchissement, bascule : aucune erreur
+EternalRoutes.guides = { r = { id = "r", source = "RouteProbe", type = "faction", faction = "Horde", minLevel = 1, maxLevel = 60,
+  steps = { { map = 1413, x = 50, y = 50, quests = { { kind = "prendre", name = "Ravageurs", etat = "available" } } },
+            { map = 1413, x = 52, y = 50, quests = { { kind = "rendre", name = "Ravageurs", etat = "available" } } } } } }
+EternalRoutes.db.activeGuide, EternalRoutes.db.stepIndex = "r", 1
+EternalRoutes.Window.OnLogin()
+EternalRoutes.Window.Refresh()
+EternalRoutes.Window.Toggle(); EternalRoutes.Window.Toggle()
+EternalRoutes.Window.SetMini(true); EternalRoutes.Window.SetMini(false)
+EternalRoutes.viewStep = 2; EternalRoutes.Window.Refresh()
+out[#out + 1] = "ok"
+return table.concat(out, "\\n")`).split("\n");
+    expect(r).toEqual([
+      "rouge:Accepter « Ravageurs »:",
+      "vert:Accepter « Ravageurs »:fait",
+      "orange:Hyène tachetée tuée:2/7 | rouge:Plume de trotteur:0/5 | vert:Croc:3/3",
+      "vert:Rendre « Ravageurs »:prêt",
+      "bleu:Prendre le zeppelin pour Durotar:",
+      "ok",
+    ]);
+  });
+
   it("trace le chemin en plusieurs points : à pied, ou par un vol connu quand il fait gagner du temps", () => {
     const r = executer(SIMULE, ESPACE, ...MOTEUR, lire("EternalRoutes/Trace.lua"), `
 local T = EternalRoutes.Trace

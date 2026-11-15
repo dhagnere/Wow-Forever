@@ -967,7 +967,10 @@ function Importer.Importer()
         -- route de départ plus proche du personnage (sa race et sa classe) : elle remplace celle qu'il suivait
         local remplaceAutreClasse = active and g.type == "depart" and active.type == "depart" and active.zone == g.zone
             and ns.Engine.Proximite(g) > ns.Engine.Proximite(active)
-        if not active or ns.db.activeGuide == g.id or remplaceAutreClasse then
+        -- son propre enregistrement (même race, même classe) : la route importée devient la route suivie,
+        -- et la fenêtre se place à la dernière étape faite (LoadGuide puis SyncToProgress)
+        local sonEnregistrement = ns.Engine.Proximite and ns.Engine.Proximite(g) >= 3
+        if not active or ns.db.activeGuide == g.id or remplaceAutreClasse or sonEnregistrement then
             for _, candidat in ipairs(ns.Engine.GetGuidesForPlayer()) do
                 if candidat.id == g.id then ns.Engine.LoadGuide(g.id) break end
             end
