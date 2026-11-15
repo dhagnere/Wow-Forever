@@ -114,6 +114,12 @@ export interface Narration {
   valideLe?: string;
   /** Miniature faite dans l'Atelier (JPEG en data URL), écrite à côté de la narration par `npm run carnet`. */
   miniatureImage?: string | null;
+  /**
+   * Partie d'une longue soirée (lib/parties.ts) : morceau de la vidéo de la journée rendu par cette narration ;
+   * les secondes des moments et des clips comptent depuis son début, `dureeVideo` est sa durée.
+   */
+  extrait?: { debut: number; duree: number };
+  partie?: { numero: number; total: number; journee: string };
 }
 
 /** Priorité d'un genre quand deux moments se chevauchent (le plus petit l'emporte). */
@@ -164,6 +170,8 @@ export function preparerNarration(o: {
   video: string; debut: number; dureeVideo: number; evenements: Evenement[]; miniature: string | null; titre: string; introSecondes?: number;
   /** Séance de plusieurs fichiers assemblés : position d'une heure du PC dans la vidéo (null entre deux fichiers). */
   fin?: number; position?: (heure: number) => number | null;
+  /** Graine des répliques (la vidéo par défaut) : deux parties d'une même vidéo n'ont pas les mêmes répliques. */
+  graine?: string;
 }): Narration {
   const fin = o.fin ?? o.debut + o.dureeVideo * 1000;
   const position = o.position ?? ((h: number) => (h - o.debut) / 1000);
@@ -183,7 +191,7 @@ export function preparerNarration(o: {
     if (premier) niveau = String(Number(premier.valeurs.niveau) - 1);
   }
   if (!zone) zone = evts.find((e) => e.heure > o.debut && e.valeurs.zone)?.valeurs.zone;
-  const g = graine(o.video);
+  const g = graine(o.graine ?? o.video);
   // chaque liste est servie dans un ordre propre à la vidéo, sans redite avant d'avoir tout servi
   const rangs = new Map<string, number>();
   const piocher = (cle: string, liste: string[]) => {
@@ -268,6 +276,7 @@ export function verifierNarration(n: unknown): string[] {
   for (const [i, c] of (x.clips ?? []).entries()) {
     if (!(c.debut >= 0) || !(c.duree > 0) || c.duree > 60) e.push(`Clip ${i + 1} : début ou durée invalide (60 s au plus).`);
   }
+  if (x.extrait !== undefined && !(x.extrait && x.extrait.debut >= 0 && x.extrait.duree > 0)) e.push("Morceau de la vidéo (partie) invalide.");
   return e;
 }
 

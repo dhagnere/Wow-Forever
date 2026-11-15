@@ -286,8 +286,9 @@ const DATE_FR = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long"
  * Titre de 100 caractères au plus (limite de YouTube), jamais coupé au milieu : les niveaux restent entiers et, si la
  * place manque, les zones se resserrent (zone du milieu remplacée par « … », puis moins de zones).
  */
-export function titreVideo(s: Seance, info: { zones: string[]; niveaux: [number, number] | null }): string {
-  const date = DATE_FR.format(new Date(s.debut)).replace(/^1 /, "1er ");
+export function titreVideo(s: Seance, info: { zones: string[]; niveaux: [number, number] | null }, partie?: number): string {
+  // une partie d'une longue soirée (lib/parties.ts) : « 15 novembre 2026 – partie 2 »
+  const date = DATE_FR.format(new Date(s.debut)).replace(/^1 /, "1er ") + (partie ? ` – partie ${partie}` : "");
   const niv = info.niveaux ? (info.niveaux[0] === info.niveaux[1] ? ` · niveau ${info.niveaux[0]}` : ` · niveaux ${info.niveaux[0]} à ${info.niveaux[1]}`) : "";
   const z = info.zones.slice(0, 3);
   const variantes: string[][] = [z];
@@ -334,6 +335,7 @@ export function descriptionVideo(
   info: { liste: Chapitre[]; valides: boolean; zones: string[]; niveaux?: [number, number] | null },
   site: string,
   reseaux: LiensChaine = SITE,
+  partie?: { numero: number; total: number },
 ): string {
   site = site.replace(/\/+$/, "");
   const lieux = info.zones.length ? ` : ${info.zones.join(" → ")}` : "";
@@ -342,6 +344,11 @@ export function descriptionVideo(
     `Le Journal de Jobwow, tavernier mort-vivant, sur WoW Forever${lieux}${niveaux}.`,
     "Abonnez-vous pour suivre la montée jusqu'au 60 ; les cartes et les guides de la séance sont sur La Taverne Éternelle.",
   ];
+  if (partie && partie.total > 1) {
+    const soiree = DATE_FR.format(new Date(s.debut)).replace(/^1 /, "1er ");
+    const autour = [partie.numero > 1 ? `la partie ${partie.numero - 1} la précède` : null, partie.numero < partie.total ? `la partie ${partie.numero + 1} la suit` : null].filter(Boolean).join(", ");
+    lignes.push("", `Partie ${partie.numero} sur ${partie.total} de la soirée du ${soiree}${autour ? ` : ${autour}` : ""}. Toutes les parties sont dans la playlist « Le Journal de Jobwow · WoW Forever 1 à 60 ».`);
+  }
   if (info.valides) lignes.push("", "Chapitres :", ...info.liste.map((c) => `${horodatage(c.seconde)} ${c.titre}`));
   lignes.push(
     "",
