@@ -7,7 +7,7 @@
  * est gardée dans un fichier `.narration.json` à côté de la vidéo, modifiable dans l'atelier vidéo (artefact), puis
  * relue au rendu. Fonctions pures : sharp et ffmpeg restent dans scripts/incrustation-video.ts.
  */
-import { COULEUR_GENRE, GENRES_MOMENT, replique, type GenreMoment } from "@/content/repliques-jobwow";
+import { COULEUR_GENRE, GENRES_MOMENT, listeRepliques, ordreMelange, remplir, type GenreMoment } from "@/content/repliques-jobwow";
 import { CARTES_JEU } from "@/content/cartes-jeu";
 import { heureLocale, niveauAtteint, type ValeurLua } from "@/lib/videoCarnet";
 
@@ -183,8 +183,14 @@ export function preparerNarration(o: {
   }
   if (!zone) zone = evts.find((e) => e.heure > o.debut && e.valeurs.zone)?.valeurs.zone;
   const g = graine(o.video);
-  const rangs = new Map<GenreMoment, number>();
-  const prochaine = (genre: GenreMoment) => { const r = (rangs.get(genre) ?? g % 97); rangs.set(genre, r + 1); return r; };
+  // chaque liste est servie dans un ordre propre à la vidéo, sans redite avant d'avoir tout servi
+  const rangs = new Map<string, number>();
+  const piocher = (cle: string, liste: string[]) => {
+    const r = rangs.get(cle) ?? 0;
+    rangs.set(cle, r + 1);
+    return liste[ordreMelange(liste.length, g ^ graine(cle))[r % liste.length]];
+  };
+  let morts = 0;
 
   const candidats: Moment[] = [];
   for (const e of evts) {
@@ -211,9 +217,10 @@ export function preparerNarration(o: {
   gardes.sort((a, b) => a.seconde - b.seconde);
   const moments = gardes.map((m) => {
     const v = (m as Moment & { _valeurs?: Evenement["valeurs"] })._valeurs ?? { zone, niveau };
-    // entraîneur de démons : la réplique du choix de capacité
-    const rang = m.genre === "entraineur" && v.demons ? 3 : prochaine(m.genre);
-    return { seconde: m.seconde, duree: m.duree, genre: m.genre, bulle: replique(m.genre, rang, v), sousTitre: m.sousTitre };
+    if (m.genre === "mort") morts++;
+    // palier de niveau, choix d'une capacité, mort répétée : leurs propres répliques
+    const { cle, liste } = listeRepliques(m.genre, { niveau: v.niveau, demons: Boolean(v.demons), morts });
+    return { seconde: m.seconde, duree: m.duree, genre: m.genre, bulle: remplir(piocher(cle, liste), v), sousTitre: m.sousTitre };
   });
 
   return {

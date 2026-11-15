@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { REPLIQUES, GENRES_MOMENT, replique } from "@/content/repliques-jobwow";
+import { REPLIQUES, REPLIQUES_CAPACITE, REPLIQUES_MORT_REPETEE, REPLIQUES_PALIERS, GENRES_MOMENT, listeRepliques, ordreMelange, replique } from "@/content/repliques-jobwow";
 import { choisirClips, evenementsSonde, grapheRendu, preparerNarration, typographie, verifierNarration, voixAJour, type Moment } from "@/lib/incrustation";
 import { heureLocale, lireSauvegardeSonde, positionDans, type Seance } from "@/lib/videoCarnet";
 
@@ -38,7 +38,7 @@ describe("Narration d'une vidéo", () => {
     ]);
     expect(n.moments[0].sousTitre).toBe("Journal de Jobwow · Clairières de Tirisfal · niveau 3");
     expect(n.moments[2].bulle).toContain("Capitaine Perrine");
-    expect(n.moments[4].bulle).toBe(REPLIQUES.entraineur[3]);
+    expect(REPLIQUES_CAPACITE).toContain(n.moments[4].bulle);
     expect(n.introSecondes).toBe(4);
     for (let i = 1; i < n.moments.length; i++) expect(n.moments[i].seconde).toBeGreaterThanOrEqual(n.moments[i - 1].seconde + n.moments[i - 1].duree);
   });
@@ -87,14 +87,30 @@ describe("Narration d'une vidéo", () => {
 
 describe("Répliques de Jobwow", () => {
   it("existent pour chaque genre, tiennent dans une bulle et ne citent ni classe ni guide", () => {
-    for (const g of GENRES_MOMENT) {
-      expect(REPLIQUES[g].length).toBeGreaterThanOrEqual(3);
-      for (const r of REPLIQUES[g]) {
+    const toutes = [...Object.values(REPLIQUES), ...Object.values(REPLIQUES_PALIERS), REPLIQUES_CAPACITE, REPLIQUES_MORT_REPETEE];
+    for (const g of GENRES_MOMENT) expect(REPLIQUES[g].length).toBeGreaterThanOrEqual(12);
+    for (const liste of toutes) {
+      expect(new Set(liste).size).toBe(liste.length);
+      for (const r of liste) {
         expect(r.length).toBeLessThanOrEqual(95);
         expect(r).not.toMatch(/d[ée]moniste|guerrier|\bmage\b|pr[êe]tre|chasseur|voleur|druide|chaman|paladin|diablotin|zygor|wowhead/i);
       }
     }
     expect(replique("niveau", 0, { niveau: 7 })).toContain("Niveau 7");
+    // le nom de l'élite est toujours cité ; une réplique de zone sans {zone} reste rare
+    for (const r of REPLIQUES.exploit) expect(r).toContain("{nom}");
+    for (const r of [...REPLIQUES.mort, ...REPLIQUES_MORT_REPETEE, ...REPLIQUES_CAPACITE]) expect(r).not.toMatch(/\{(zone|nom)\}/);
+  });
+
+  it("choisit la liste selon le moment et sert chaque liste sans redite, dans un ordre propre à la vidéo", () => {
+    expect(listeRepliques("niveau", { niveau: 40 }).liste).toBe(REPLIQUES_PALIERS[40]);
+    expect(listeRepliques("niveau", { niveau: 41 }).liste).toBe(REPLIQUES.niveau);
+    expect(listeRepliques("entraineur", { demons: true }).liste).toBe(REPLIQUES_CAPACITE);
+    expect(listeRepliques("mort", { morts: 1 }).liste).toBe(REPLIQUES.mort);
+    expect(listeRepliques("mort", { morts: 2 }).liste).toBe(REPLIQUES_MORT_REPETEE);
+    const a = ordreMelange(20, 12345), b = ordreMelange(20, 678);
+    expect([...a].sort((x, y) => x - y)).toEqual(Array.from({ length: 20 }, (_, i) => i));
+    expect(a).not.toEqual(b);
   });
 
   it("met la typographie française", () => {
