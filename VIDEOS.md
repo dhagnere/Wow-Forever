@@ -74,7 +74,11 @@ Dans l'Atelier, la liste propose chaque partie ; le bloc « Découpage de la soi
 `<journée>.parties.json` dans les Téléchargements ; `npm run carnet` le reprend et refait la narration des seules parties
 dont les bornes ont changé (l'ancienne gardée en `.narration.avant.json`). La miniature porte « PARTIE n » en haut à droite
 (champ « Partie »). `--sans-parties` garde une seule vidéo ; une journée déjà préparée d'un seul tenant le reste, sauf avec
-`--decouper` (l'ancienne narration passe en `.narration.avant.json`). Ses moments et clips déjà relus sont alors repris
+`--decouper` (l'ancienne narration passe en `.narration.avant.json`).
+Rangement (16/11/2026) : chaque narration validée et chaque découpage enregistrés par l'Atelier sont repris dans
+`D:\WOW\Journal de Jobwow` (miniature écrite à côté) puis retirés des Téléchargements, doublons « (1) » compris
+(`rangerTelecharges`). Dans la frise de l'Atelier, chaque partie prend la couleur de son état (à relire, relue,
+miniature choisie, validée, rendue, envoyée), la partie ouverte est encadrée en doré. Ses moments et clips déjà relus sont alors repris
 dans chaque partie (`repriseDansPartie`, `relue` dans la narration : l'Atelier marque la relecture faite) ; une partie
 sans moment relu à son début reçoit sa propre intro. Restent à faire pour chaque partie : la miniature et la validation.
 

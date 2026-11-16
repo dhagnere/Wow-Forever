@@ -32,7 +32,7 @@
  * Encodage H.264 (preset veryfast, CRF 20) : compter quelques minutes par heure de vidéo.
  */
 import { spawn, execFile } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import ffmpeg from "@ffmpeg-installer/ffmpeg";
@@ -280,12 +280,33 @@ function sortirMiniature(n: Narration, fichierN: string): boolean {
  * Narration validée dans l'Atelier, enregistrée dans les Téléchargements (« <base>.narration.json », ou « (1) »…) ou
  * déposée dans D:\WOW : reprise si elle est plus récente que celle du dossier et porte sur les mêmes vidéos.
  */
-/** Copie du même fichier enregistrée par l'Atelier (Téléchargements, « (1) »…) ou déposée dans D:\WOW, plus récente. */
-function plusRecentAilleurs(fichier: string, suffixe: string): { f: string; t: number } | null {
+const DOSSIER_TELECHARGEMENTS = process.env.DOSSIER_TELECHARGEMENTS ?? path.join(os.homedir(), "Downloads");
+
+/** Le nom d'un fichier de l'Atelier et ses doublons du navigateur (« (1) », « (2) »…). */
+function motifCopies(fichier: string, suffixe: string): RegExp {
   const nom = path.basename(fichier, suffixe);
   const fin = suffixe.replace(/\.json$/, "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const motif = new RegExp(`^${nom.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${fin}(?: ?\\(\\d+\\))?\\.json$`, "i");
-  const dossiers = [...new Set([process.env.DOSSIER_TELECHARGEMENTS ?? path.join(os.homedir(), "Downloads"), DOSSIER_VIDEOS, path.dirname(fichier)])];
+  return new RegExp(`^${nom.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${fin}(?: ?\\(\\d+\\))?\\.json$`, "i");
+}
+
+/**
+ * Rangement dans D:\WOW (demandé par Jobwow le 16/11/2026) : une fois le fichier de l'Atelier repris dans « Journal de
+ * Jobwow », ses copies des Téléchargements (doublons « (1) » compris) sont retirées. Tout reste dans le dossier WOW.
+ */
+function rangerTelecharges(fichier: string, suffixe: string): void {
+  const d = DOSSIER_TELECHARGEMENTS;
+  if (!existsSync(d) || path.resolve(d) === path.resolve(path.dirname(fichier))) return;
+  const motif = motifCopies(fichier, suffixe);
+  for (const f of readdirSync(d)) {
+    if (!motif.test(f)) continue;
+    try { unlinkSync(path.join(d, f)); } catch { /* ouvert ailleurs : laissé */ }
+  }
+}
+
+/** Copie du même fichier enregistrée par l'Atelier (Téléchargements, « (1) »…) ou déposée dans D:\WOW, plus récente. */
+function plusRecentAilleurs(fichier: string, suffixe: string): { f: string; t: number } | null {
+  const motif = motifCopies(fichier, suffixe);
+  const dossiers = [...new Set([DOSSIER_TELECHARGEMENTS, DOSSIER_VIDEOS, path.dirname(fichier)])];
   let meilleur: { f: string; t: number } | null = null;
   for (const d of dossiers) {
     if (!existsSync(d)) continue;
@@ -314,7 +335,8 @@ function reprendreValidee(fichierN: string, sources: string[] | null): void {
   if (sources && !n.sources) n.sources = sources;
   sortirMiniature(n, fichierN);
   writeFileSync(fichierN, JSON.stringify(n, null, 2), "utf8");
-  console.log(`Narration validée reprise : ${meilleur.f} → ${fichierN}`);
+  rangerTelecharges(fichierN, ".narration.json");
+  console.log(`Narration validée rangée dans le dossier WOW : ${meilleur.f} → ${fichierN}${n.miniatureImage ? " (miniature comprise)" : ""}`);
 }
 
 function miniatureVoisine(video: string): string | null {
@@ -364,7 +386,11 @@ async function main() {
         const err = verifierDecoupage(x);
         if (err.length) console.log(`${ailleurs.f} : découpage ignoré.\n- ${err.join("\n- ")}`);
         else if (!memesSources(x)) console.log(`${ailleurs.f} : découpage fait pour d'autres vidéos (vidéos ajoutées depuis), ignoré.`);
-        else { writeFileSync(fichierD, JSON.stringify(x, null, 2), "utf8"); console.log(`Découpage déplacé dans l'Atelier repris : ${ailleurs.f} → ${fichierD}`); }
+        else {
+          writeFileSync(fichierD, JSON.stringify(x, null, 2), "utf8");
+          rangerTelecharges(fichierD, ".parties.json");
+          console.log(`Découpage déplacé dans l'Atelier rangé dans le dossier WOW : ${ailleurs.f} → ${fichierD}`);
+        }
       } catch { console.log(`Découpage illisible : ${ailleurs.f}`); }
     }
     let dec: Decoupage | null = null;
