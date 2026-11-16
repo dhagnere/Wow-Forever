@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { preparerNarration, evenementsSonde, verifierNarration } from "@/lib/incrustation";
 import {
-  choisirParties, coupesPossibles, coupesProposees, memesBornes, nomPartie, PARTIE_MAX, PARTIE_PLANCHER, seanceDePartie, signauxSonde, verifierDecoupage,
+  choisirParties, coupesPossibles, coupesProposees, memesBornes, nomPartie, PARTIE_MAX, PARTIE_PLANCHER, repriseDansPartie, seanceDePartie, signauxSonde, verifierDecoupage,
 } from "@/lib/parties";
 import { descriptionVideo, heureLocale, lireSauvegardeSonde, positionDans, titreVideo, type Seance } from "@/lib/videoCarnet";
 
@@ -160,5 +160,31 @@ describe("Une partie, comme une vidéo à part", () => {
   it("refuse un découpage troué ou mal numéroté", () => {
     expect(verifierDecoupage({ format: 1, dureeVideo: 100, parties: [{ numero: 1, debut: 0, duree: 40 }, { numero: 3, debut: 50, duree: 50 }] }))
       .toEqual(["Partie 2 : numéro 3 inattendu.", "Partie 2 : elle doit commencer à la fin de la précédente."]);
+  });
+});
+
+describe("Soirée découpée après coup (--decouper)", () => {
+  const m = (seconde: number, bulle: string, duree = 5) => ({ seconde, duree, genre: "quete" as const, bulle, sousTitre: "" });
+  const entiere = {
+    moments: [{ ...m(0, "Intro relue"), genre: "intro" as const }, m(300, "Relu A"), m(1066, "Relu B"), m(1067.5, "Relu C"), m(1500, "Relu D")],
+    clips: [{ debut: 290, duree: 30, titre: "A" }, { debut: 1050, duree: 30, titre: "à cheval" }, { debut: 1490, duree: 30, titre: "D" }],
+  };
+  const intro = { seconde: 0, duree: 5, genre: "intro" as const, bulle: "On reprend", sousTitre: "Journal de Jobwow · Durotar · niveau 6" };
+
+  it("range chaque moment relu dans sa partie, secondes depuis le début de la partie, sans en perdre à la coupe", () => {
+    const p1 = repriseDansPartie(entiere, { debut: 0, duree: 1068 }, intro);
+    expect(p1.moments.map((x) => [x.seconde, x.bulle, x.duree])).toEqual([[0, "Intro relue", 5], [300, "Relu A", 5], [1066, "Relu B", 2]]);
+    expect(p1.clips.map((c) => c.titre)).toEqual(["A"]);
+    const p2 = repriseDansPartie(entiere, { debut: 1068, duree: 1040 }, intro);
+    expect(p2.moments.map((x) => [x.seconde, x.bulle])).toEqual([[0, "Relu C"], [432, "Relu D"]]);
+    expect(p2.clips).toEqual([{ debut: 422, duree: 30, titre: "D" }]);
+  });
+
+  it("ne double pas l'intro quand un moment relu ouvre déjà la partie", () => {
+    const p = repriseDansPartie(entiere, { debut: 1067, duree: 1000 }, intro);
+    expect(p.moments.slice(0, 2).map((x) => [x.seconde, x.bulle])).toEqual([[0, "Relu B"], [0.5, "Relu C"]]);
+    expect(p.moments.filter((x) => x.genre === "intro")).toEqual([]);
+    const sansMoment = repriseDansPartie(entiere, { debut: 2000, duree: 600 }, intro);
+    expect(sansMoment.moments).toEqual([intro]);
   });
 });

@@ -9,6 +9,7 @@
  * (`<journée>_p<n>.narration.json`), sa miniature, son titre et sa description. Fonctions pures : le script reste
  * dans scripts/incrustation-video.ts.
  */
+import type { ClipVertical, Moment, Narration } from "@/lib/incrustation";
 import { heureLocale, positionDans, type Seance, type ValeurLua } from "@/lib/videoCarnet";
 
 /** Durées en secondes : visée de 15 à 20 minutes, jamais plus de 20, jamais moins de 8 (sauf vidéo entière). */
@@ -334,3 +335,25 @@ export function seanceDePartie(s: Seance, p: { debut: number; duree: number }): 
 
 /** Nom des fichiers d'une partie : `<journée>_p<n>` (la narration, la vidéo rendue, la miniature, le texte YouTube). */
 export const nomPartie = (journee: string, numero: number) => `${journee}_p${numero}`;
+
+/**
+ * Soirée découpée après coup (`--decouper`) : les moments et les clips déjà relus de la narration entière, rangés dans
+ * la partie qui les contient, secondes recomptées depuis son début. Une bulle qui finirait après la coupe est
+ * raccourcie ; une bulle qui commencerait à moins d'une seconde de la fin passe au début de la partie suivante (même
+ * frontière des deux côtés : aucun moment perdu ni doublé). Sans moment
+ * repris dans ses premières secondes, la partie reçoit l'intro préparée pour elle (`intro`).
+ */
+export function repriseDansPartie(entiere: Pick<Narration, "moments" | "clips">, p: { debut: number; duree: number }, intro?: Moment | null):
+  { moments: Moment[]; clips: ClipVertical[] } {
+  const fin = p.debut + p.duree;
+  const r = (x: number) => Math.round(x * 10) / 10;
+  const moments = entiere.moments
+    .filter((m) => m.seconde >= p.debut - 1 && m.seconde < fin - 1)
+    .map((m) => ({ ...m, seconde: r(Math.max(0, m.seconde - p.debut)), duree: r(Math.min(m.duree, fin - m.seconde)) }));
+  const premier = moments[0];
+  if (intro && (!premier || premier.seconde > intro.duree + 0.5)) moments.unshift({ ...intro, seconde: 0 });
+  const clips = entiere.clips
+    .filter((c) => c.debut >= p.debut - 0.05 && c.debut + c.duree <= fin + 0.05)
+    .map((c) => ({ ...c, debut: r(Math.max(0, c.debut - p.debut)) }));
+  return { moments, clips };
+}

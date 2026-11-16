@@ -120,6 +120,8 @@ export interface Narration {
    */
   extrait?: { debut: number; duree: number };
   partie?: { numero: number; total: number; journee: string };
+  /** Moments repris d'une narration déjà relue (soirée découpée après coup) : l'Atelier marque la relecture faite. */
+  relue?: string;
 }
 
 /** Priorité d'un genre quand deux moments se chevauchent (le plus petit l'emporte). */
