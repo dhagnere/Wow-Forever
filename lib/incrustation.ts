@@ -295,6 +295,12 @@ export interface Calque { fichier: string; x: string; y: string; debut: number; 
 export interface PlanRendu {
   largeur: number; hauteur: number;
   intro: { fichier: string; secondes: number } | null;
+  /**
+   * Carte de fin (16/11/2026, demandée par Jobwow) : le jeu s'éteint en fondu au noir (image et son) sur `fondu`
+   * secondes, puis la carte (« la suite de l'aventure », miniature de la partie suivante, adresse du site) apparaît
+   * en fondu et reste `secondes` secondes, le temps d'y poser les éléments de fin de YouTube.
+   */
+  outro?: { fichier: string; secondes: number; fondu: number } | null;
   audio: boolean;                     // la vidéo a une piste son
   dureeJeu: number;                   // durée de la partie de jeu rendue
   medaillons: { normal: string; mort: string; niveau: string; x: number; y: number; hauteur: number };
@@ -328,24 +334,28 @@ export function grapheRendu(p: PlanRendu): { entrees: string[][]; graphe: string
   const lignes: string[] = [];
   const decal = p.intro?.secondes ?? 0;
   const vertical = H > W;
+  // coupe exacte à la durée du jeu : à la jonction de deux enregistrements assemblés, la première image du fichier
+  // suivant porte un horodatage qui, sans cette coupe, étirait la vidéo jusqu'à la fin de la soirée (16/11/2026)
+  const coupe = `trim=duration=${n2(p.dureeJeu)},setpts=PTS-STARTPTS,`;
   // mise à la taille : en paysage on garde toute l'image ; en vertical, on recadre le centre
   lignes.push(vertical
-    ? `[0:v]scale=-2:${H},crop=${W}:${H},setsar=1,fps=30,format=yuv420p[jeu]`
-    : `[0:v]scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=30,format=yuv420p[jeu]`);
+    ? `[0:v]${coupe}scale=-2:${H},crop=${W}:${H},setsar=1,fps=30,format=yuv420p[jeu]`
+    : `[0:v]${coupe}scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=30,format=yuv420p[jeu]`);
   let k = 1;
   let audioJeu = "[0:a]";
+  const coupeA = `atrim=duration=${n2(p.dureeJeu)},asetpts=PTS-STARTPTS,`;
   if (!p.audio) {
     entrees.push(["-f", "lavfi", "-t", n2(p.dureeJeu), "-i", "anullsrc=r=48000:cl=stereo"]);
     audioJeu = `[${k++}:a]`;
   }
   const voix = p.voix ?? [];
   if (!voix.length) {
-    lignes.push(`${audioJeu}aresample=48000,aformat=channel_layouts=stereo[aj]`);
+    lignes.push(`${audioJeu}${p.audio ? coupeA : ""}aresample=48000,aformat=channel_layouts=stereo[aj]`);
   } else {
     // le jeu baisse pendant que Jobwow parle ; chaque voix est décalée à son heure et prolongée de silence,
     // pour que le mélange (ffmpeg 4.1 : amix divise par le nombre d'entrées) garde un volume constant
     const sous = voix.map((x) => `between(t,${n2(x.debut)},${n2(x.fin)})`).join("+");
-    lignes.push(`${audioJeu}aresample=48000,aformat=channel_layouts=stereo,volume=${VOLUME_JEU_SOUS_VOIX}:enable='${sous}'[ajeu]`);
+    lignes.push(`${audioJeu}${p.audio ? coupeA : ""}aresample=48000,aformat=channel_layouts=stereo,volume=${VOLUME_JEU_SOUS_VOIX}:enable='${sous}'[ajeu]`);
     const noms: string[] = [];
     voix.forEach((x, i) => {
       entrees.push(["-i", x.fichier]);
@@ -374,14 +384,27 @@ export function grapheRendu(p: PlanRendu): { entrees: string[][]; graphe: string
   if (p.etats.mort.length) calques.push({ fichier: m.mort, x: String(m.x), y: rebond, quand: intervalles(p.etats.mort, decal) });
   if (p.etats.niveau.length) calques.push({ fichier: m.niveau, x: String(m.x), y: rebond, quand: intervalles(p.etats.niveau, decal) });
   for (const c of p.calques) calques.push({ fichier: c.fichier, x: c.x, y: c.y, quand: `between(t,${n2(c.debut + decal)},${n2(c.fin + decal)})` });
+  const finV = p.outro ? "[vc]" : "[vf]", finA = p.outro ? "[ac]" : "[af]";
   calques.forEach((c, i) => {
     entrees.push(["-i", c.fichier]);
-    const sortie = i === calques.length - 1 ? "[vf]" : `[v${i + 1}c]`;
+    const sortie = i === calques.length - 1 ? finV : `[v${i + 1}c]`;
     lignes.push(`${v}[${k++}:v]overlay=x='${c.x}':y='${c.y}':eval=frame:enable='${c.quand}'${sortie}`);
     v = sortie;
   });
-  if (!calques.length) lignes.push(`${v}null[vf]`);
-  lignes.push(`${a}anull[af]`);
+  if (!calques.length) lignes.push(`${v}null${finV}`);
+  lignes.push(`${a}anull${finA}`);
+  if (p.outro) {
+    // fondu au noir de la fin du jeu, puis la carte de fin, qui apparaît en fondu, sur un silence
+    const fin = decal + p.dureeJeu, f = Math.min(p.outro.fondu, p.dureeJeu);
+    lignes.push(`[vc]fade=t=out:st=${n2(fin - f)}:d=${n2(f)}[vn]`);
+    lignes.push(`[ac]afade=t=out:st=${n2(fin - f)}:d=${n2(f)}[an]`);
+    entrees.push(["-loop", "1", "-framerate", "30", "-t", n2(p.outro.secondes), "-i", p.outro.fichier]);
+    const ov = k++;
+    entrees.push(["-f", "lavfi", "-t", n2(p.outro.secondes), "-i", "anullsrc=r=48000:cl=stereo"]);
+    const oa = k++;
+    lignes.push(`[${ov}:v]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},setsar=1,fps=30,format=yuv420p,fade=t=in:st=0:d=1.2[carte]`);
+    lignes.push(`[vn][an][carte][${oa}:a]concat=n=2:v=1:a=1[vf][af]`);
+  }
   return { entrees, graphe: lignes.join(";\n") };
 }
 
