@@ -430,7 +430,8 @@ async function main() {
       if (existsSync(fichierP)) {
         try {
           const a = JSON.parse(readFileSync(fichierP, "utf8")) as Narration;
-          if (!memesBornes(a.extrait, p) || (a.sources && JSON.stringify(a.sources) !== JSON.stringify(sourcesP))) {
+          // sans « extrait » (validée par une ancienne version de l'Atelier qui le perdait) : gardée, le morceau est rétabli plus bas
+          if ((a.extrait && !memesBornes(a.extrait, p)) || (a.sources && JSON.stringify(a.sources) !== JSON.stringify(sourcesP))) {
             renameSync(fichierP, fichierP.replace(/\.narration\.json$/, ".narration.avant.json"));
             console.log(`${nomPartie(nom, p.numero)} : coupe déplacée ou vidéos changées, narration refaite (l'ancienne est gardée en .narration.avant.json).`);
           }
@@ -525,7 +526,15 @@ async function main() {
     let n: Narration;
     if (existsSync(fichierN)) {
       n = JSON.parse(readFileSync(fichierN, "utf8")) as Narration;
-      if (sortirMiniature(n, fichierN)) writeFileSync(fichierN, JSON.stringify(n, null, 2), "utf8");
+      let changee = sortirMiniature(n, fichierN);
+      // partie validée sans son morceau (Atelier d'avant le 16/11) : on le rétablit d'après le découpage
+      if (partie && !n.extrait) {
+        n.extrait = { debut: partie.debut, duree: partie.duree };
+        n.partie = { numero: partie.numero, total: partie.total, journee: partie.journee };
+        changee = true;
+        console.log(`${nomCourt} : morceau de la partie rétabli (${horodatage(partie.debut)} → ${horodatage(partie.debut + partie.duree)}).`);
+      }
+      if (changee) writeFileSync(fichierN, JSON.stringify(n, null, 2), "utf8");
       const erreurs = verifierNarration(n);
       if (erreurs.length) { console.error(`${fichierN} :\n- ${erreurs.join("\n- ")}`); process.exit(1); }
       console.log(`Narration relue : ${fichierN} (${n.moments.length} moments, ${n.clips.length} clips)`);
@@ -570,7 +579,13 @@ async function main() {
     if (drapeau("preparer")) { bilan.push(`${etiquette} : narration prête, à relire et valider dans l'Atelier.`); continue; }
     const sortie = `${base}.jobwow.mp4`;
     if (!parNarration && !n.valide) { bilan.push(`${etiquette} : à relire et valider dans l'Atelier (ouvre le dossier D:\\WOW), puis relance npm run carnet.`); continue; }
-    if (!parNarration && existsSync(sortie) && statSync(sortie).mtimeMs > statSync(fichierN).mtimeMs) { bilan.push(`${etiquette} : déjà rendue (${path.basename(sortie)}).`); continue; }
+    if (!parNarration && existsSync(sortie) && statSync(sortie).mtimeMs > statSync(fichierN).mtimeMs) {
+      // un rendu d'une autre durée que prévu (partie rendue sur toute la soirée, par exemple) est refait
+      const attendue = (n.extrait?.duree ?? duree) + (n.miniature ? n.introSecondes || 0 : 0);
+      const rendue = await infos(sortie).then((x) => x.duree).catch(() => attendue);
+      if (Math.abs(rendue - attendue) <= 5) { bilan.push(`${etiquette} : déjà rendue (${path.basename(sortie)}).`); continue; }
+      console.log(`${path.basename(sortie)} dure ${horodatage(rendue)} au lieu de ${horodatage(attendue)} : rendu refait.`);
+    }
 
     const mini = await miniaturePrete(option("miniature") ?? n.miniature, travail);
     console.log(`Rendu 16:9 : ${sortie}`);
