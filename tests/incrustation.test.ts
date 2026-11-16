@@ -135,12 +135,19 @@ describe("Graphe ffmpeg", () => {
     expect(graphe).toContain("enable='between(t,54,65)'");       // médaillon gris à la mort
     expect(graphe).toContain("enable='gte(t,4)'");               // médaillon caché pendant l'image de départ
     expect(graphe.trim().endsWith("[a0]anull[af]")).toBe(true);
+    // carte de fin : fondu au noir du jeu (image et son), puis la carte en fondu, collée au bout
+    const avecCarte = grapheRendu({ ...plan, outro: { fichier: "carte.jpg", secondes: 8, fondu: 2.5 } });
+    expect(avecCarte.graphe).toContain(`[vc]fade=t=out:st=${plan.dureeJeu + 4 - 2.5}:d=2.5[vn]`);
+    expect(avecCarte.graphe).toContain("afade=t=out");
+    expect(avecCarte.graphe).toContain("fade=t=in:st=0:d=1.2[carte]");
+    expect(avecCarte.graphe.trim().endsWith("concat=n=2:v=1:a=1[vf][af]")).toBe(true);
+    expect(avecCarte.entrees.flat()).toContain("carte.jpg");
   });
 
   it("ajoute un silence quand la vidéo n'a pas de son, et recadre le centre en vertical", () => {
     const { entrees, graphe } = grapheRendu({ ...plan, audio: false, intro: null, largeur: 1080, hauteur: 1920 });
     expect(entrees[0]).toEqual(["-f", "lavfi", "-t", "75", "-i", "anullsrc=r=48000:cl=stereo"]);
-    expect(graphe).toContain("[0:v]scale=-2:1920,crop=1080:1920");
+    expect(graphe).toContain("[0:v]trim=duration=75,setpts=PTS-STARTPTS,scale=-2:1920,crop=1080:1920"); // coupé net à la durée du jeu
     expect(graphe).toContain("[1:a]aresample");
   });
 

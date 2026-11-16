@@ -78,7 +78,24 @@ dont les bornes ont changé (l'ancienne gardée en `.narration.avant.json`). La 
 Rangement (16/11/2026) : chaque narration validée et chaque découpage enregistrés par l'Atelier sont repris dans
 `D:\WOW\Journal de Jobwow` (miniature écrite à côté) puis retirés des Téléchargements, doublons « (1) » compris
 (`rangerTelecharges`). Dans la frise de l'Atelier, chaque partie prend la couleur de son état (à relire, relue,
-miniature choisie, validée, rendue, envoyée), la partie ouverte est encadrée en doré. Ses moments et clips déjà relus sont alors repris
+miniature choisie, validée, rendue, envoyée), la partie ouverte est encadrée en doré.
+
+**Carte de fin (16/11/2026, demandée par Jobwow)**. Chaque vidéo 16:9 se termine par un fondu au noir de 2,5 s (image
+et son), puis 8 s de carte de fin (`carteFin`, `outro` de `grapheRendu`) : « La suite de l'aventure… », la miniature de
+la partie suivante encadrée d'or avec son titre (zones, niveaux), et l'adresse du site ; pour la dernière partie ou une
+vidéo seule, « La suite de l'aventure au prochain épisode », le médaillon de Jobwow et l'appel à s'abonner. Les 8 s
+laissent la place aux éléments de fin de YouTube (vidéo suivante, playlist, S'abonner). Si la miniature de la partie
+suivante n'est pas encore choisie, la carte prend une image de son début et note « provisoire » dans
+`<base>.carte-fin.txt` : la vidéo est refaite au `npm run carnet` qui suit le choix de la miniature. Toutes les
+narrations validées sont rangées avant le premier rendu, pour que chaque carte trouve la miniature suivante.
+L'adresse du site s'écrit aussi sur la miniature (champ « Adresse du site » de l'Atelier) ; une image ne peut pas
+porter de lien cliquable, le lien reste en tête de la description.
+
+**Lecture des parties dans les enregistrements d'origine (16/11/2026)**. Une partie est lue par une liste concat des
+fichiers de D:\WOW (`listeMorceau` : `inpoint`/`outpoint` par fichier, d'après `sources`), avec `-reinit_filter 0` et
+une coupe nette dans le graphe (`trim=duration`). Une recherche (`-ss`) dans la vidéo assemblée faisait repartir
+l'horloge à la jonction de deux fichiers : la partie débordait jusqu'à la fin de la soirée. La durée de sortie est
+bornée (`-t`), et un rendu d'une durée inattendue est refait. Ses moments et clips déjà relus sont alors repris
 dans chaque partie (`repriseDansPartie`, `relue` dans la narration : l'Atelier marque la relecture faite) ; une partie
 sans moment relu à son début reçoit sa propre intro. Restent à faire pour chaque partie : la miniature et la validation.
 

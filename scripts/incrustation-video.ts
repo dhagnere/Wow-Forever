@@ -169,6 +169,68 @@ async function bandeau(texte: string, largeurMax: number, taille: number, sortie
   return { l, h };
 }
 
+/**
+ * Carte de fin 1920 × 1080 : fond bois sombre, « La suite de l'aventure… », puis la miniature de la partie suivante
+ * encadrée d'or et son titre ; pour la dernière partie (ou une vidéo seule), le médaillon de Jobwow et un appel à
+ * s'abonner. L'adresse du site en bas, en clair (une image ne peut pas porter de lien : il est dans la description).
+ */
+async function carteFin(o: { suivante: string | null; titreSuivante: string; site: string }, sortie: string): Promise<void> {
+  const W = 1920, H = 1080;
+  const fond = Buffer.from(`<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
+    <defs><radialGradient id="g" cx="50%" cy="45%" r="75%"><stop offset="0%" stop-color="#3a2b1f"/><stop offset="60%" stop-color="#1f1711"/><stop offset="100%" stop-color="#070504"/></radialGradient></defs>
+    <rect width="${W}" height="${H}" fill="url(#g)"/>
+    <rect x="40" y="40" width="${W - 80}" height="${H - 80}" rx="26" fill="none" stroke="#d6a840" stroke-opacity="0.55" stroke-width="3"/>
+  </svg>`);
+  const couches: { input: Buffer | string; left: number; top: number }[] = [];
+  const centre = async (texte: string, police: string, taille: number, couleur: string, y: number, largeur = 1600) => {
+    const t = await texteImage(texte, police, taille, largeur, couleur, true);
+    couches.push({ input: t.data, left: Math.round((W - (t.info.width ?? 0)) / 2), top: y });
+    return t.info.height ?? taille;
+  };
+  const adresse = o.site.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+  if (o.suivante) {
+    await centre("La suite de l'aventure…", POLICE_BULLE, 72, "#f3e6c8", 78);
+    const l = 1040, h = 585, x = Math.round((W - l) / 2), y = 200, b = 8;
+    const image = await sharp(o.suivante).resize(l, h, { fit: "cover" })
+      .composite([{ input: Buffer.from(`<svg width="${l}" height="${h}"><rect width="${l}" height="${h}" rx="18" fill="#fff"/></svg>`), blend: "dest-in" }])
+      .png().toBuffer();
+    couches.push({ input: Buffer.from(`<svg width="${l + 2 * b}" height="${h + 2 * b}"><rect width="${l + 2 * b}" height="${h + 2 * b}" rx="24" fill="#d6a840"/></svg>`), left: x - b, top: y - b });
+    couches.push({ input: image, left: x, top: y });
+    await centre(o.titreSuivante, POLICE_ST, 40, "#d6a840", y + h + 34);
+  } else {
+    await centre("La suite de l'aventure au prochain épisode", POLICE_BULLE, 72, "#f3e6c8", 110);
+    const fm = path.join(path.dirname(sortie), "carte-fin-medaillon.png");
+    const m = await medaillon(380, "normal", fm);
+    couches.push({ input: fm, left: Math.round((W - m.l) / 2), top: 270 });
+    await centre("Abonne-toi pour suivre la montée de Jobwow jusqu'au niveau 60", POLICE_ST, 40, "#d6a840", 270 + m.h + 40);
+  }
+  await centre(adresse, POLICE_ST, 46, "#ffffff", H - 150);
+  await sharp(fond).composite(couches).jpeg({ quality: 92 }).toFile(sortie);
+}
+
+const CARTE_FIN_SECONDES = 8;
+const CARTE_FIN_FONDU = 2.5;
+
+/**
+ * La partie qui suit (même soirée) : sa miniature choisie dans l'Atelier (`<journée>_p<n+1>.miniature.jpg`) et son
+ * titre court (zones, niveaux). Sans miniature encore choisie, la carte de fin prendra une image de son début
+ * (« provisoire ») et la vidéo sera refaite quand la miniature existera.
+ */
+function partieSuivante(partie: { numero: number; total: number; journee: string } | undefined, dossier: string):
+  { miniature: string | null; titre: string } | null {
+  if (!partie || partie.numero >= partie.total) return null;
+  const base = path.join(dossier, nomPartie(partie.journee, partie.numero + 1));
+  let titre = `Partie ${partie.numero + 1}`;
+  if (existsSync(`${base}.narration.json`)) {
+    try {
+      const ch = chapitresNarration(JSON.parse(readFileSync(`${base}.narration.json`, "utf8")) as Narration);
+      if (ch.zones.length) titre += ` · ${ch.zones.slice(0, 3).join(" → ")}`;
+      if (ch.niveaux) titre += ch.niveaux[0] === ch.niveaux[1] ? ` · niveau ${ch.niveaux[0]}` : ` · niveaux ${ch.niveaux[0]} à ${ch.niveaux[1]}`;
+    } catch { /* titre court */ }
+  }
+  return { miniature: existsSync(`${base}.miniature.jpg`) ? `${base}.miniature.jpg` : null, titre };
+}
+
 // ——— Rendus ———
 
 interface Gabarit { W: number; H: number; diametre: number; medX: number; medBas: number; bulleL: number; bulleT: number; stL: number; stT: number; stBas: number; stDecalX: number; bulleAuDessus: boolean }
@@ -176,7 +238,7 @@ const PAYSAGE: Gabarit = { W: 1920, H: 1080, diametre: 270, medX: 50, medBas: 90
 const VERTICAL: Gabarit = { W: 1080, H: 1920, diametre: 330, medX: 50, medBas: 520, bulleL: 960, bulleT: 54, stL: 960, stT: 52, stBas: 200, stDecalX: 0, bulleAuDessus: true };
 
 async function rendre(n: Narration, video: string, audio: boolean, g: Gabarit, sortie: string, travail: string,
-  morceau: { debut: number; duree: number } | null, miniature: string | null, dossierNarration: string) {
+  morceau: { debut: number; duree: number } | null, miniature: string | null, dossierNarration: string, carte: string | null = null) {
   mkdirSync(travail, { recursive: true });
   const suf = morceau ? `v${Math.round(morceau.debut)}` : "p";
   const med = {
@@ -217,6 +279,7 @@ async function rendre(n: Narration, video: string, audio: boolean, g: Gabarit, s
   const { entrees, graphe } = grapheRendu({
     largeur: g.W, hauteur: g.H, audio, dureeJeu,
     intro: miniature && n.introSecondes > 0 ? { fichier: miniature, secondes: n.introSecondes } : null,
+    outro: carte ? { fichier: carte, secondes: CARTE_FIN_SECONDES, fondu: CARTE_FIN_FONDU } : null,
     medaillons: { ...med, x: g.medX, y: medY, hauteur: dim.h },
     etats: {
       parle: avecBulle,
@@ -228,17 +291,53 @@ async function rendre(n: Narration, video: string, audio: boolean, g: Gabarit, s
   });
   const fichierGraphe = path.join(travail, `graphe-${suf}.txt`);
   writeFileSync(fichierGraphe, graphe, "utf8");
-  // une partie ne rend que son morceau de la vidéo de la journée (-ss avant -i : recherche rapide, coupe exacte au réencodage)
+  // une partie ne rend que son morceau de la soirée. Il est lu dans les enregistrements d'origine (liste concat avec
+  // inpoint/outpoint par fichier) : une recherche (-ss) dans la vidéo assemblée faisait reculer l'horodatage à la
+  // jonction de deux fichiers, et la partie débordait (16/11/2026). Sans les fichiers d'origine : -ss dans la journée.
   const dec = n.extrait?.debut ?? 0;
-  const source = morceau ? ["-ss", String(dec + morceau.debut), "-t", String(morceau.duree), "-i", video]
-    : n.extrait ? ["-ss", String(dec), "-t", String(n.extrait.duree), "-i", video] : ["-i", video];
+  const debutLu = dec + (morceau?.debut ?? 0), dureeLue = morceau?.duree ?? n.extrait?.duree ?? 0;
+  const liste = n.extrait ? listeMorceau(n, dossierNarration, debutLu, dureeLue, path.join(travail, `morceau-${suf}.txt`)) : null;
+  // -reinit_filter 0 : au passage d'un fichier à l'autre, ffmpeg ne refait pas le graphe (il remettait l'horloge à zéro)
+  const source = liste ? ["-reinit_filter", "0", "-f", "concat", "-safe", "0", "-i", liste]
+    : morceau ? ["-reinit_filter", "0", "-ss", String(dec + morceau.debut), "-t", String(morceau.duree), "-i", video]
+    : n.extrait ? ["-reinit_filter", "0", "-ss", String(dec), "-t", String(n.extrait.duree), "-i", video] : ["-reinit_filter", "0", "-i", video];
   await encoder([
     "-hide_banner", "-y", "-loglevel", "error", "-stats",
     ...source, ...entrees.flat(),
     "-filter_complex_script", fichierGraphe, "-map", "[vf]", "-map", "[af]",
+    // durée de sortie bornée (image de départ + jeu + carte de fin) : rien ne déborde, même si la source continue
+    "-t", String(Math.round(((miniature && n.introSecondes > 0 ? n.introSecondes : 0) + dureeJeu + (carte ? CARTE_FIN_SECONDES : 0)) * 1000) / 1000),
     "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p",
     "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", sortie,
   ]);
+}
+
+/**
+ * Liste concat d'un morceau de la soirée, lu dans les enregistrements d'origine : `sources` de la narration (« nom|durée »
+ * dans l'ordre, fichiers dans D:\WOW, voisin du dossier « Journal de Jobwow »), un fichier par ligne avec son point
+ * d'entrée et de sortie. null si un fichier manque (on lit alors la vidéo assemblée).
+ */
+function listeMorceau(n: Narration, dossierNarration: string, debut: number, duree: number, sortie: string): string | null {
+  const fichiers = (n.sources ?? []).map((s) => s.split("|")).filter((x) => x.length === 2 && /\.(mp4|mkv|mov)$/i.test(x[0]) && Number(x[1]) > 0);
+  if (!fichiers.length) return null;
+  const dossiers = [path.dirname(dossierNarration), dossierNarration, DOSSIER_VIDEOS];
+  const lignes: string[] = [];
+  let avant = 0;
+  for (const [nom, d] of fichiers) {
+    const dur = Number(d), a = Math.max(debut, avant), b = Math.min(debut + duree, avant + dur);
+    if (b - a > 0.05) {
+      const plein = path.isAbsolute(nom) ? nom : dossiers.map((x) => path.join(x, nom)).find((f) => existsSync(f));
+      if (!plein || !existsSync(plein)) return null;
+      lignes.push(`file '${plein.replace(/\\/g, "/").replace(/'/g, "'\\''")}'`);
+      if (a - avant > 0.05) lignes.push(`inpoint ${(a - avant).toFixed(3)}`);
+      if (avant + dur - b > 0.05) lignes.push(`outpoint ${(b - avant).toFixed(3)}`);
+    }
+    avant += dur;
+  }
+  if (!lignes.length) return null;
+  mkdirSync(path.dirname(sortie), { recursive: true });
+  writeFileSync(sortie, lignes.join("\n") + "\n", "utf8");
+  return sortie;
 }
 
 /** Miniature remise à 1920 × 1080 en JPEG (ffmpeg ne lit pas toujours le WebP). */
@@ -516,6 +615,8 @@ async function main() {
     const chap = parNarr && parNarr.valides ? parNarr : chapitres(seance, reperes);
     writeFileSync(`${base}.youtube.txt`, [`TITRE :`, titreVideo(seance, chap, partie?.numero), "", "DESCRIPTION :", descriptionVideo(seance, chap, site, undefined, partie)].join("\n"), "utf8");
   };
+  // toutes les narrations validées rangées d'abord : la carte de fin d'une partie montre la miniature de la suivante
+  if (!parNarration) for (const t of travaux) reprendreValidee(t.fichierN ?? `${sansExt(t.video)}.narration.json`, t.sources ?? null);
   for (const { video, seance: seanceConnue, fichierN: donne, sources, partie } of travaux) {
     const fichierN = donne ?? `${sansExt(video)}.narration.json`;
     const base = sansExt(fichierN).replace(/\.narration$/, "");
@@ -583,13 +684,35 @@ async function main() {
       // un rendu d'une autre durée que prévu (partie rendue sur toute la soirée, par exemple) est refait
       const attendue = (n.extrait?.duree ?? duree) + (n.miniature ? n.introSecondes || 0 : 0);
       const rendue = await infos(sortie).then((x) => x.duree).catch(() => attendue);
-      if (Math.abs(rendue - attendue) <= 5) { bilan.push(`${etiquette} : déjà rendue (${path.basename(sortie)}).`); continue; }
-      console.log(`${path.basename(sortie)} dure ${horodatage(rendue)} au lieu de ${horodatage(attendue)} : rendu refait.`);
+      const bonneDuree = Math.abs(rendue - attendue) <= 5 || Math.abs(rendue - attendue - CARTE_FIN_SECONDES) <= 5;
+      // carte de fin faite avec une image provisoire, et la miniature de la partie suivante est choisie depuis
+      const provisoire = existsSync(`${base}.carte-fin.txt`) && readFileSync(`${base}.carte-fin.txt`, "utf8").trim() === "provisoire"
+        && !!partieSuivante(partie, path.dirname(fichierN))?.miniature;
+      if (bonneDuree && !provisoire) { bilan.push(`${etiquette} : déjà rendue (${path.basename(sortie)}).`); continue; }
+      console.log(provisoire
+        ? `${path.basename(sortie)} : la miniature de la partie suivante est choisie, rendu refait pour la mettre sur la carte de fin.`
+        : `${path.basename(sortie)} dure ${horodatage(rendue)} au lieu de ${horodatage(attendue)} : rendu refait.`);
     }
 
     const mini = await miniaturePrete(option("miniature") ?? n.miniature, travail);
+    // carte de fin : la miniature de la partie suivante, ou une image de son début en attendant ; dernière partie :
+    // « au prochain épisode »
+    mkdirSync(travail, { recursive: true });
+    const suivante = partieSuivante(partie, path.dirname(fichierN));
+    let imageSuivante = suivante?.miniature ?? null;
+    if (suivante && !imageSuivante && partie) {
+      imageSuivante = path.join(travail, "image-partie-suivante.jpg");
+      const t = (n.extrait?.debut ?? partie.debut) + partie.duree + 45;
+      await journalFfmpeg(["-hide_banner", "-y", "-ss", String(t), "-i", video, "-frames:v", "1", "-q:v", "3", imageSuivante]);
+      if (!existsSync(imageSuivante)) imageSuivante = null;
+    }
+    const carte = path.join(travail, "carte-fin.jpg");
+    await carteFin({ suivante: suivante ? imageSuivante : null, titreSuivante: suivante?.titre ?? "", site }, carte);
     console.log(`Rendu 16:9 : ${sortie}`);
-    await rendre(n, video, audio, PAYSAGE, sortie, travail, null, mini, path.dirname(fichierN));
+    await rendre(n, video, audio, PAYSAGE, sortie, travail, null, mini, path.dirname(fichierN), carte);
+    const etatCarte = !suivante ? "fin" : suivante.miniature ? "miniature" : "provisoire";
+    writeFileSync(`${base}.carte-fin.txt`, etatCarte, "utf8");
+    if (etatCarte === "provisoire") console.log(`Carte de fin avec une image provisoire : choisis la miniature de la partie ${partie!.numero + 1} dans l'Atelier, la vidéo sera refaite au prochain npm run carnet.`);
     if (!drapeau("sans-clips")) {
       for (const [i, c] of n.clips.entries()) {
         const s = `${base}.clip-${i + 1}.mp4`;
