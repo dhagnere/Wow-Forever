@@ -44,7 +44,7 @@ import {
 } from "@/lib/incrustation";
 import { chapitres, descriptionVideo, heureLocale, horodatage, lireSauvegardeSonde, positionDans, reperesRouteProbe, seances, SONDES, titreVideo, DOSSIER_VIDEOS, type Clip, type Repere, type Seance } from "@/lib/videoCarnet";
 import {
-  choisirParties, coupesPossibles, coupesProposees, memesBornes, nomPartie, PARTIE_MAX, seanceDePartie, signauxSonde, verifierDecoupage,
+  choisirParties, coupesPossibles, coupesProposees, memesBornes, nomPartie, PARTIE_MAX, repriseDansPartie, seanceDePartie, signauxSonde, verifierDecoupage,
   type Decoupage, type Signal,
 } from "@/lib/parties";
 
@@ -383,6 +383,16 @@ async function main() {
       for (const p of parties) console.log(`  partie ${p.numero} : ${horodatage(p.debut)} → ${horodatage(p.debut + p.duree)} (${horodatage(p.duree)})${p.coupe ? `, coupe : ${p.coupe}` : ""}`);
     }
     const total = dec.parties.length;
+    // narration entière déjà relue, mise de côté par --decouper : ses moments sont repris dans chaque partie
+    let reprise: Narration | null = null;
+    const fichierEntier = path.join(dossier, `${nom}.narration.avant.json`);
+    if (existsSync(fichierEntier)) {
+      try {
+        const x = JSON.parse(readFileSync(fichierEntier, "utf8")) as Narration;
+        if (!x.partie && !verifierNarration(x).length && JSON.stringify(x.sources ?? []) === JSON.stringify(sources)) reprise = x;
+      } catch { /* illisible : narrations neuves */ }
+    }
+    if (reprise) console.log(`${nom} : les moments relus de la narration entière (${reprise.moments.length}) sont repris dans les parties.`);
     // parties en trop d'un ancien découpage : mises de côté
     for (let k = total + 1; existsSync(path.join(dossier, `${nomPartie(nom, k)}.narration.json`)); k++) {
       const f = path.join(dossier, `${nomPartie(nom, k)}.narration.json`);
@@ -403,13 +413,13 @@ async function main() {
       return {
         video, seance: seanceDePartie(s, p), fichierN: fichierP,
         sources: sourcesP,
-        partie: { numero: p.numero, total, journee: nom, debut: p.debut, duree: p.duree },
+        partie: { numero: p.numero, total, journee: nom, debut: p.debut, duree: p.duree, reprise },
       };
     });
   };
 
   // vidéos à traiter : une narration, un fichier, ou un dossier rangé par séances (une longue soirée : une par partie)
-  type InfoPartie = { numero: number; total: number; journee: string; debut: number; duree: number };
+  type InfoPartie = { numero: number; total: number; journee: string; debut: number; duree: number; reprise?: Narration | null };
   const travaux: { video: string; seance: Seance | null; fichierN?: string; sources?: string[]; partie?: InfoPartie }[] = [];
   const parNarration = cible.endsWith(".narration.json");
   const bilan: string[] = [];
@@ -512,12 +522,22 @@ async function main() {
       if (partie) {
         n.extrait = { debut: partie.debut, duree: partie.duree };
         n.partie = { numero: partie.numero, total: partie.total, journee: partie.journee };
+        if (partie.reprise) {
+          const intro = n.moments[0]?.genre === "intro" ? n.moments[0] : null;
+          const { moments, clips } = repriseDansPartie(partie.reprise, partie, intro);
+          n.moments = moments;
+          n.clips = clips;
+          n.relue = partie.reprise.valideLe ?? new Date().toISOString();
+          if (partie.reprise.personnage) n.personnage = partie.reprise.personnage;
+        }
       }
       if (n.miniature) n.miniature = path.resolve(n.miniature);
       if (sources) n.sources = sources;
       writeFileSync(fichierN, JSON.stringify(n, null, 2), "utf8");
       ecrireYoutube(base, seance, n, partie);
-      console.log(`Narration préparée : ${fichierN} (${n.moments.length} moments, ${n.clips.length} clips). À relire dans l'atelier vidéo.`);
+      console.log(n.relue
+        ? `Narration préparée : ${fichierN} (${n.moments.length} moments et ${n.clips.length} clips repris de ta relecture). Dans l'Atelier : miniature, puis validation.`
+        : `Narration préparée : ${fichierN} (${n.moments.length} moments, ${n.clips.length} clips). À relire dans l'atelier vidéo.`);
       if (!n.miniature) console.log("Miniature : elle se choisit dans l'Atelier, avec la relecture (ou --miniature <image>).");
     }
     const etiquette = partie ? `${nomCourt} (partie ${partie.numero} sur ${partie.total}, ${horodatage(partie.duree)})` : nomCourt;
