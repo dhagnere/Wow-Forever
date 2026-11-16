@@ -688,10 +688,13 @@ async function main() {
       // carte de fin faite avec une image provisoire, et la miniature de la partie suivante est choisie depuis
       const provisoire = existsSync(`${base}.carte-fin.txt`) && readFileSync(`${base}.carte-fin.txt`, "utf8").trim() === "provisoire"
         && !!partieSuivante(partie, path.dirname(fichierN))?.miniature;
-      if (bonneDuree && !provisoire) { bilan.push(`${etiquette} : déjà rendue (${path.basename(sortie)}).`); continue; }
+      // rendue avant la carte de fin (16/11/2026) : refaite pour l'avoir, comme demandé par Jobwow
+      const sansCarte = !existsSync(`${base}.carte-fin.txt`);
+      if (bonneDuree && !provisoire && !sansCarte) { bilan.push(`${etiquette} : déjà rendue (${path.basename(sortie)}).`); continue; }
       console.log(provisoire
         ? `${path.basename(sortie)} : la miniature de la partie suivante est choisie, rendu refait pour la mettre sur la carte de fin.`
-        : `${path.basename(sortie)} dure ${horodatage(rendue)} au lieu de ${horodatage(attendue)} : rendu refait.`);
+        : !bonneDuree ? `${path.basename(sortie)} dure ${horodatage(rendue)} au lieu de ${horodatage(attendue)} : rendu refait.`
+        : `${path.basename(sortie)} : rendue sans carte de fin, rendu refait pour l'ajouter.`);
     }
 
     const mini = await miniaturePrete(option("miniature") ?? n.miniature, travail);
