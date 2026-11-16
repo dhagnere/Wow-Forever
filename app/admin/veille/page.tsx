@@ -15,16 +15,19 @@ const ONGLETS: { statut: Statut; nom: string }[] = [
   { statut: "supprime", nom: "Corbeille" },
 ];
 
-function lien(statut: Statut, rubrique?: string) {
-  return `/admin/veille/?statut=${statut}${rubrique ? `&rubrique=${rubrique}` : ""}`;
+type Tri = "date" | "score";
+
+function lien(statut: Statut, rubrique?: string, tri: Tri = "date") {
+  return `/admin/veille/?statut=${statut}${rubrique ? `&rubrique=${rubrique}` : ""}${tri === "score" ? "&tri=score" : ""}`;
 }
 
-export default async function Veille({ searchParams }: { searchParams: Promise<{ statut?: string; rubrique?: string }> }) {
+export default async function Veille({ searchParams }: { searchParams: Promise<{ statut?: string; rubrique?: string; tri?: string }> }) {
   await exigerAdmin();
   const q = await searchParams;
   const statut: Statut = ONGLETS.some((o) => o.statut === q.statut) ? (q.statut as Statut) : "brouillon";
   const rubrique = q.rubrique && trouverRubrique(q.rubrique) ? q.rubrique : undefined;
-  const [articles, compteurs] = await Promise.all([listerPourAdmin(statut, rubrique), compterParRubrique()]);
+  const tri: Tri = q.tri === "score" ? "score" : "date";
+  const [articles, compteurs] = await Promise.all([listerPourAdmin(statut, rubrique, tri), compterParRubrique()]);
   const total = (s: Statut) => Object.values(compteurs).reduce((n, c) => n + (c[s] ?? 0), 0);
 
   return (
@@ -36,11 +39,11 @@ export default async function Veille({ searchParams }: { searchParams: Promise<{
           <form action={seDeconnecter}><button className="btn btn-contour" type="submit">Se déconnecter</button></form>
         </div>
       </div>
-      <p className="doux">Chaque matin, la veille dépose ici ses brouillons, classés par score et par thème. Relire, valider l&apos;avis de Jobwow, publier les meilleurs, supprimer les autres.</p>
+      <p className="doux">Chaque matin, la veille dépose ici ses brouillons, du plus récent au plus ancien (cliquez sur « Score » pour les classer par note). Relire, valider l&apos;avis de Jobwow, publier les meilleurs, supprimer les autres.</p>
 
       <nav className="onglets" aria-label="Statut">
         {ONGLETS.map((o) => (
-          <Link key={o.statut} href={lien(o.statut, rubrique)} aria-current={o.statut === statut ? "page" : undefined}>
+          <Link key={o.statut} href={lien(o.statut, rubrique, tri)} aria-current={o.statut === statut ? "page" : undefined}>
             {o.nom} ({total(o.statut)})
           </Link>
         ))}
@@ -50,12 +53,12 @@ export default async function Veille({ searchParams }: { searchParams: Promise<{
         <summary style={{ cursor: "pointer", fontWeight: 700 }}>Remplissage des pages de thème</summary>
         <p className="doux" style={{ margin: "8px 0 12px", fontSize: 15 }}>Articles en ligne et brouillons en attente, par rubrique. Cliquez pour filtrer.</p>
         <div className="onglets" style={{ marginBottom: 0 }}>
-          <Link href={lien(statut)} aria-current={!rubrique ? "page" : undefined}>Tous les thèmes</Link>
+          <Link href={lien(statut, undefined, tri)} aria-current={!rubrique ? "page" : undefined}>Tous les thèmes</Link>
           {RUBRIQUES.map((r) => {
             const c = compteurs[r.slug] ?? {};
             const vide = !c.publie;
             return (
-              <Link key={r.slug} href={lien(statut, r.slug)} aria-current={rubrique === r.slug ? "page" : undefined} title={vide ? "Aucun article en ligne" : undefined}>
+              <Link key={r.slug} href={lien(statut, r.slug, tri)} aria-current={rubrique === r.slug ? "page" : undefined} title={vide ? "Aucun article en ligne" : undefined}>
                 {r.nom} · {c.publie ?? 0} en ligne · {c.brouillon ?? 0} en attente{vide ? " ⚠" : ""}
               </Link>
             );
@@ -69,7 +72,12 @@ export default async function Veille({ searchParams }: { searchParams: Promise<{
         <div className="tableau-boite">
           <table className="admin-table">
             <thead>
-              <tr><th scope="col">Titre</th><th scope="col">Thème</th><th scope="col">Page pilier</th><th scope="col">Score</th><th scope="col">Date</th><th scope="col">État</th></tr>
+              <tr><th scope="col">Titre</th><th scope="col">Thème</th><th scope="col">Page pilier</th><th scope="col" aria-sort={tri === "score" ? "descending" : undefined}>
+                  <Link href={lien(statut, rubrique, "score")} title="Classer par score, le meilleur d'abord">Score{tri === "score" ? " ▼" : ""}</Link>
+                </th>
+                <th scope="col" aria-sort={tri === "date" ? "descending" : undefined}>
+                  <Link href={lien(statut, rubrique, "date")} title="Classer par date, la plus récente d'abord">Date{tri === "date" ? " ▼" : ""}</Link>
+                </th><th scope="col">État</th></tr>
             </thead>
             <tbody>
               {articles.map((a) => {
@@ -77,7 +85,7 @@ export default async function Veille({ searchParams }: { searchParams: Promise<{
                 return (
                   <tr key={a.id}>
                     <td><Link href={`/admin/veille/${a.id}/`}>{a.titre}</Link>{a.origine === "manuel" ? <span className="doux"> · écrit à la main</span> : null}</td>
-                    <td><Link href={lien(statut, a.rubrique)}>{nomRubrique(a.rubrique)}</Link></td>
+                    <td><Link href={lien(statut, a.rubrique, tri)}>{nomRubrique(a.rubrique)}</Link></td>
                     <td className="doux">{a.pilier ? `/${a.pilier}/` : "—"}</td>
                     <td>{a.score ?? "—"}</td>
                     <td>{dateCourte(a.publieLe ?? a.creeLe)}</td>

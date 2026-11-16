@@ -237,8 +237,10 @@ export async function compterPublies(rubrique?: string): Promise<number> {
   return Number(rows[0].n);
 }
 
-export async function listerPourAdmin(statut: Statut, rubrique?: string): Promise<Article[]> {
-  const ordre = statut === "brouillon" ? "score DESC NULLS LAST, cree_le DESC" : "COALESCE(publie_le, modifie_le) DESC";
+/** Liste de la relecture : la plus récente d'abord (par défaut), ou la mieux notée par la veille (`tri` « score »). */
+export async function listerPourAdmin(statut: Statut, rubrique?: string, tri: "date" | "score" = "date"): Promise<Article[]> {
+  const date = statut === "brouillon" ? "cree_le" : "COALESCE(publie_le, modifie_le)";
+  const ordre = tri === "score" ? `score DESC NULLS LAST, ${date} DESC` : `${date} DESC, score DESC NULLS LAST`;
   const { rows } = await pool().query<Ligne>(
     `SELECT * FROM articles WHERE statut=$1 AND ($2::text IS NULL OR rubrique=$2) ORDER BY ${ordre} LIMIT 200`,
     [statut, rubrique ?? null],
