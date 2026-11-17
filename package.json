@@ -54,7 +54,7 @@
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "csv-parse": "^7.0.3",
     "marked": "^18.1.2",
-    "next": "^16.4.3",
+    "next": "^16.4.6",
     "pg": "^8.23.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
