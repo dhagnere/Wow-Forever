@@ -222,6 +222,10 @@ describe("Personnages des vidéos (Jobwow, Jobwow TheSham)", () => {
     expect(personnageVideo("inconnu").id).toBe("jobwow");
     expect(personnageDuJeu("Jobwow-Forever")?.id).toBe("jobwow");
     expect(personnageDuJeu("Quelquun-Forever")).toBeNull();
+    // nom donné par Jobwow, sans espace en jeu, quelle que soit la casse
+    expect(personnageDuJeu("Jobwowthesham-Forever")?.id).toBe("thesham");
+    expect(personnageDuJeu("JobwowTheSham")?.id).toBe("thesham");
+    expect(personnageDuJeu("Jobwowthe-Forever")).toBeNull();
   });
 
   it("prépare une narration de TheSham : sa série dans l'intro, ses répliques, son profil noté", () => {

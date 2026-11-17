@@ -147,7 +147,7 @@ vertical, il occupe le bas de l'image et les sous-titres passent en haut. Police
 
 Choix du personnage : `npm run carnet -- --personnage thesham` (ou `thesham` seul si PowerShell retire le `--`) pour
 les narrations à préparer ; d'office quand le nom du personnage joué, noté par la sonde, figure dans `nomsEnJeu` de son
-profil ; sinon Jobwow. La narration le garde (`profil`), la carte de fin et le texte YouTube le suivent. Dans l'Atelier,
+profil (casse, espaces et accents ignorés : « Jobwow TheSham » reconnaît « Jobwowthesham » en jeu) ; sinon Jobwow. La narration le garde (`profil`), la carte de fin et le texte YouTube le suivent. Dans l'Atelier,
 le menu « Personnage » change d'avis après coup : les bulles sont réécrites avec les répliques du nouveau personnage
 (une bulle vidée reste vide) et revenir au précédent rend les siennes. La voix (`carnet:voix`) reste celle de Jobwow
 tant qu'aucune référence propre à TheSham n'est choisie.
