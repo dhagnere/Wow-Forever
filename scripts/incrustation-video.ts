@@ -36,10 +36,11 @@ import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameS
 import os from "node:os";
 import path from "node:path";
 import ffmpeg from "@ffmpeg-installer/ffmpeg";
-import sharp from "sharp";
+import sharp, { type OverlayOptions } from "sharp";
 import { COULEUR_GENRE } from "@/content/repliques-jobwow";
+import { PERSONNAGES, personnageVideo, type PersonnageVideo } from "@/content/personnages";
 import {
-  chapitresNarration, evenementsSonde, grapheRendu, preparerNarration, typographie, verifierNarration, voixAJour,
+  chapitresNarration, evenementsSonde, grapheRendu, intervallesApparition, preparerNarration, typographie, verifierNarration, voixAJour,
   type Calque, type Evenement, type Moment, type Narration,
 } from "@/lib/incrustation";
 import { chapitres, descriptionVideo, heureLocale, horodatage, lireSauvegardeSonde, positionDans, reperesRouteProbe, seances, SONDES, titreVideo, DOSSIER_VIDEOS, type Clip, type Repere, type Seance } from "@/lib/videoCarnet";
@@ -50,14 +51,26 @@ import {
 
 const COMPTES_WOW = "C:\\WOW\\world of Warcraft\\_forever_\\WTF\\Account";
 const EXTENSIONS = new Set([".mp4", ".mkv", ".mov"]);
-const AVATAR = path.join(process.cwd(), "public/images/jobwow-512.png");
+const avatarDe = (p: PersonnageVideo) => path.join(process.cwd(), p.avatar);
+// bulles façon bande dessinée (personnage « evenements ») : polices libres (OFL) livrées avec le dépôt, pour un
+// rendu identique sur tous les PC
+const POLICE_BD = { texte: "Comic Neue Bold", fichier: path.join(process.cwd(), "visuels/polices/ComicNeue-Bold.ttf") };
+const POLICE_CRI = { texte: "Bangers", fichier: path.join(process.cwd(), "visuels/polices/Bangers-Regular.ttf") };
 const POLICE_BULLE = "Georgia, Palatino Linotype, TeX Gyre Pagella, serif Bold";
 const POLICE_ST = "Segoe UI Semibold, Inter SemiBold, DejaVu Sans Bold, sans-serif";
 
 const option = (nom: string) => { const i = process.argv.indexOf(`--${nom}`); return i > 0 ? process.argv[i + 1] : undefined; };
 // PowerShell retire souvent le « -- » de npm run, et npm garde alors les options pour lui : « preparer » sans tirets
 // et la variable npm_config_<nom> valent aussi
-const MOTS = ["preparer", "sans-clips", "par-fichier", "sans-parties", "decouper"];
+const MOTS = ["preparer", "sans-clips", "par-fichier", "sans-parties", "decouper", ...Object.keys(PERSONNAGES)];
+/** Personnage demandé pour les narrations à préparer : --personnage thesham, ou « thesham » seul (PowerShell). */
+function personnageDemande(): string | null {
+  const env = process.env.npm_config_personnage;
+  const v = option("personnage") ?? (env && env !== "true" ? env : undefined) ?? process.argv.slice(2).find((a) => a in PERSONNAGES);
+  if (!v) return null;
+  if (!(v in PERSONNAGES)) { console.error(`Personnage inconnu : « ${v} ». Au choix : ${Object.keys(PERSONNAGES).join(", ")}.`); process.exit(1); }
+  return v;
+}
 const drapeau = (nom: string) =>
   process.argv.includes(`--${nom}`) || process.argv.includes(nom) || process.env[`npm_config_${nom.replace(/-/g, "_")}`] === "true";
 const sansExt = (f: string) => f.slice(0, -path.extname(f).length);
@@ -100,17 +113,18 @@ function sauvegardesSonde(): string[] {
 
 const echapper = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-async function texteImage(texte: string, police: string, taille: number, largeur: number, couleur: string, centre = false) {
+async function texteImage(texte: string, police: string, taille: number, largeur: number, couleur: string, centre = false, fichierPolice?: string) {
   return sharp({
     text: {
       text: `<span foreground="${couleur}">${echapper(typographie(texte))}</span>`,
       font: `${police} ${taille}`, width: largeur, rgba: true, wrap: "word", align: centre ? "centre" : "left", dpi: 72,
+      ...(fichierPolice && existsSync(fichierPolice) ? { fontfile: fichierPolice } : {}),
     },
   }).png().toBuffer({ resolveWithObject: true });
 }
 
 /** Portrait de Jobwow dans un médaillon rond (bois, liseré), son nom sur un cartouche ; gris à la mort, doré au niveau. */
-async function medaillon(diametre: number, etat: "normal" | "mort" | "niveau", sortie: string): Promise<{ l: number; h: number }> {
+async function medaillon(diametre: number, etat: "normal" | "mort" | "niveau", sortie: string, perso = personnageVideo()): Promise<{ l: number; h: number }> {
   const bord = Math.round(diametre * 0.085);
   const tot = diametre + 2 * bord;
   const cart = Math.round(diametre * 0.16);
@@ -118,7 +132,9 @@ async function medaillon(diametre: number, etat: "normal" | "mort" | "niveau", s
   // et netteté rendues, touche chaude, bords du cercle assombris pour que Jobwow ressorte sur le jeu
   const chaud = Buffer.from(`<svg width="${diametre}" height="${diametre}"><rect width="${diametre}" height="${diametre}" fill="#c98a3a" fill-opacity="0.16"/></svg>`);
   const vignette = Buffer.from(`<svg width="${diametre}" height="${diametre}"><defs><radialGradient id="g" cx="50%" cy="42%" r="62%"><stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity="0.75"/></radialGradient></defs><rect width="${diametre}" height="${diametre}" fill="url(#g)"/></svg>`);
-  const retouche = await sharp(AVATAR).extract({ left: 96, top: 20, width: 320, height: 320 }).resize(diametre, diametre)
+  // Jobwow : visage cadré dans son portrait 512 ; un autre personnage : carré du haut de son image
+  const source = perso.id === "jobwow" ? sharp(avatarDe(perso)).extract({ left: 96, top: 20, width: 320, height: 320 }) : sharp(avatarDe(perso));
+  const retouche = await source.resize(diametre, diametre, { fit: "cover", position: "top" })
     .modulate({ brightness: 0.7, saturation: 1.2 }).linear(1.15, 4).sharpen({ sigma: 1 })
     .composite([{ input: chaud, blend: "soft-light" }, { input: vignette }]).png().toBuffer();
   let portrait = sharp(retouche);
@@ -132,7 +148,7 @@ async function medaillon(diametre: number, etat: "normal" | "mort" | "niveau", s
     <circle cx="${tot / 2}" cy="${tot / 2}" r="${tot / 2 - 1}" fill="#5c3e1e"/>
     <circle cx="${tot / 2}" cy="${tot / 2}" r="${tot / 2 - bord * 0.45}" fill="none" stroke="${liseré}" stroke-width="${epais}"/>
   </svg>`);
-  const nom = await texteImage("Jobwow", "Georgia, TeX Gyre Schola, serif Bold", Math.round(cart * 0.62), 400, "#f3e6c8");
+  const nom = await texteImage(perso.nom, "Georgia, TeX Gyre Schola, serif Bold", Math.round(cart * 0.62), 400, "#f3e6c8");
   const lc = (nom.info.width ?? 100) + cart;
   const cartouche = Buffer.from(`<svg width="${lc}" height="${cart}"><rect x="1.5" y="1.5" width="${lc - 3}" height="${cart - 3}" rx="8" fill="#5c3e1e" stroke="${liseré}" stroke-width="3"/></svg>`);
   await sharp(cadre).composite([
@@ -159,6 +175,71 @@ async function bulle(texte: string, couleur: string, largeurMax: number, taille:
   return { l: l + 8, h: hb + pointe + 8 };
 }
 
+/**
+ * Buste détouré d'un personnage « evenements » (Jobwow TheSham), à la hauteur voulue : gris à la mort, auréolé d'or
+ * au niveau. Marge transparente autour pour l'auréole ; la base du buste reste au ras du bas de l'image.
+ */
+async function buste(perso: PersonnageVideo, hauteur: number, etat: "normal" | "mort" | "niveau", sortie: string): Promise<{ l: number; h: number; marge: number }> {
+  const marge = Math.round(hauteur * 0.04);
+  let img = sharp(avatarDe(perso)).resize({ height: hauteur });
+  if (etat === "mort") img = img.grayscale().modulate({ brightness: 0.75 });
+  const corps = await img.png().toBuffer({ resolveWithObject: true });
+  const l = corps.info.width + 2 * marge, h = corps.info.height + marge;
+  const couches: OverlayOptions[] = [];
+  if (etat === "niveau") {
+    // auréole : la silhouette floutée, teintée d'or, derrière le buste
+    const etendu = await sharp(corps.data).extend({ top: marge, left: marge, right: marge, bottom: 0, background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer();
+    const alpha = await sharp(etendu).extractChannel(3).blur(marge * 0.45).linear(3, 0).toBuffer();
+    const or = await sharp({ create: { width: l, height: h, channels: 3, background: "#f2c94c" } }).joinChannel(alpha).png().toBuffer();
+    couches.push({ input: or, left: 0, top: 0 });
+  }
+  couches.push({ input: corps.data, left: marge, top: marge });
+  await sharp({ create: { width: l, height: h, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } }).composite(couches).png().toFile(sortie);
+  return { l, h, marge };
+}
+
+/**
+ * Bulle façon bande dessinée : fond blanc, gros trait noir, ombre franche de la couleur du moment, queue vers le
+ * bas à gauche (la bouche du personnage), et un cri en lettres de BD sur un cartouche penché (« NIVEAU ! »).
+ * Rend la position de la pointe de la queue dans l'image, pour la poser sur la bouche.
+ */
+async function bulleComics(texte: string, cri: string | null, couleur: string, largeurMax: number, taille: number, sortie: string):
+  Promise<{ l: number; h: number; pointeX: number; pointeY: number }> {
+  const pad = Math.round(taille * 0.75), ep = Math.max(5, Math.round(taille / 6)), ombre = Math.round(taille * 0.22);
+  const t = await texteImage(texte, POLICE_BD.texte, taille, largeurMax - 2 * pad, "#111111", true, POLICE_BD.fichier);
+  const lt = t.info.width ?? 0, ht = t.info.height ?? 0;
+  const c = cri ? await texteImage(cri.toLocaleUpperCase("fr-FR"), POLICE_CRI.texte, Math.round(taille * 1.25), 1200, "#ffffff", false, POLICE_CRI.fichier) : null;
+  const hc = c ? (c.info.height ?? 0) + Math.round(taille * 0.3) : 0, lc = c ? (c.info.width ?? 0) + Math.round(taille * 0.9) : 0;
+  const haut = c ? Math.round(hc * 0.62) : 0;             // place du cartouche au-dessus de la bulle
+  const queue = Math.round(taille * 1.5);
+  const gauche = Math.round(queue * 0.75);               // la queue dépasse à gauche
+  const lb = Math.max(lt + 2 * pad, lc + taille), hb = ht + 2 * pad + (c ? Math.round(hc * 0.25) : 0);
+  const x0 = gauche + ep, y0 = haut + ep, r = Math.min(hb / 2, taille * 1.6);
+  const L = x0 + lb + ombre + ep, H = y0 + hb + queue + ombre + ep;
+  const px = ep, py = y0 + hb + queue;                    // pointe de la queue
+  const qa = x0 + Math.round(lb * 0.12), qb = x0 + Math.round(lb * 0.12) + Math.round(queue * 0.9);
+  const forme = (dx: number, dy: number, fond: string, trait: string) => `
+    <path d="M${qa + dx} ${y0 + hb - ep + dy} Q${qa - queue * 0.15 + dx} ${y0 + hb + queue * 0.55 + dy} ${px + dx} ${py + dy} Q${qa + queue * 0.6 + dx} ${y0 + hb + queue * 0.5 + dy} ${qb + dx} ${y0 + hb - ep + dy} Z" fill="${fond}" stroke="${trait}" stroke-width="${ep}" stroke-linejoin="round"/>
+    <rect x="${x0 + dx}" y="${y0 + dy}" width="${lb}" height="${hb}" rx="${r}" fill="${fond}" stroke="${trait}" stroke-width="${ep}"/>`;
+  const svg = Buffer.from(`<svg width="${L}" height="${H}" xmlns="http://www.w3.org/2000/svg">
+    ${forme(ombre, ombre, couleur, "#111")}
+    ${forme(0, 0, "#ffffff", "#111")}
+    <path d="M${qa + ep * 0.8} ${y0 + hb - ep} L${qb - ep * 0.8} ${y0 + hb - ep}" stroke="#fff" stroke-width="${ep * 1.6}"/>
+  </svg>`);
+  const couches: OverlayOptions[] = [{ input: t.data, left: x0 + Math.round((lb - lt) / 2), top: y0 + pad + (c ? Math.round(hc * 0.25) : 0) }];
+  if (c) {
+    const cartouche = Buffer.from(`<svg width="${lc + 2 * ep}" height="${hc + 2 * ep}" xmlns="http://www.w3.org/2000/svg">
+      <rect x="${ep / 2 + ep}" y="${ep / 2 + ep}" width="${lc - ep}" height="${hc - ep}" rx="6" fill="#111"/>
+      <rect x="${ep / 2}" y="${ep / 2}" width="${lc - ep}" height="${hc - ep}" rx="6" fill="${couleur}" stroke="#111" stroke-width="${ep}"/>
+    </svg>`);
+    const penche = await sharp(await sharp(cartouche).composite([{ input: c.data, left: Math.round((lc - (c.info.width ?? 0)) / 2), top: Math.round((hc - (c.info.height ?? 0)) / 2) }]).png().toBuffer())
+      .rotate(-5, { background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer({ resolveWithObject: true });
+    couches.push({ input: penche.data, left: Math.max(0, x0 + Math.round(taille * 0.4)), top: Math.max(0, y0 - Math.round(hc * 0.62) - Math.round((penche.info.height - hc) / 2)) });
+  }
+  await sharp(svg).composite(couches).png().toFile(sortie);
+  return { l: L, h: H, pointeX: px, pointeY: py };
+}
+
 /** Sous-titre blanc sur bandeau sombre arrondi, centré. */
 async function bandeau(texte: string, largeurMax: number, taille: number, sortie: string): Promise<{ l: number; h: number }> {
   const pad = Math.round(taille * 0.55);
@@ -174,7 +255,8 @@ async function bandeau(texte: string, largeurMax: number, taille: number, sortie
  * encadrée d'or et son titre ; pour la dernière partie (ou une vidéo seule), le médaillon de Jobwow et un appel à
  * s'abonner. L'adresse du site en bas, en clair (une image ne peut pas porter de lien : il est dans la description).
  */
-async function carteFin(o: { suivante: string | null; titreSuivante: string; site: string }, sortie: string): Promise<void> {
+async function carteFin(o: { suivante: string | null; titreSuivante: string; site: string; perso?: PersonnageVideo }, sortie: string): Promise<void> {
+  const perso = o.perso ?? personnageVideo();
   const W = 1920, H = 1080;
   const fond = Buffer.from(`<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
     <defs><radialGradient id="g" cx="50%" cy="45%" r="75%"><stop offset="0%" stop-color="#3a2b1f"/><stop offset="60%" stop-color="#1f1711"/><stop offset="100%" stop-color="#070504"/></radialGradient></defs>
@@ -200,9 +282,9 @@ async function carteFin(o: { suivante: string | null; titreSuivante: string; sit
   } else {
     await centre("La suite de l'aventure au prochain épisode", POLICE_BULLE, 72, "#f3e6c8", 110);
     const fm = path.join(path.dirname(sortie), "carte-fin-medaillon.png");
-    const m = await medaillon(380, "normal", fm);
-    couches.push({ input: fm, left: Math.round((W - m.l) / 2), top: 270 });
-    await centre("Abonne-toi pour suivre la montée de Jobwow jusqu'au niveau 60", POLICE_ST, 40, "#d6a840", 270 + m.h + 40);
+    const m = perso.apparition === "medaillon" ? await medaillon(380, "normal", fm, perso) : await buste(perso, 470, "normal", fm);
+    couches.push({ input: fm, left: Math.round((W - m.l) / 2), top: 250 });
+    await centre(`Abonne-toi pour suivre la montée de ${perso.nom} jusqu'au niveau 60`, POLICE_ST, 40, "#d6a840", 250 + m.h + 30);
   }
   await centre(adresse, POLICE_ST, 46, "#ffffff", H - 150);
   await sharp(fond).composite(couches).jpeg({ quality: 92 }).toFile(sortie);
@@ -237,17 +319,34 @@ interface Gabarit { W: number; H: number; diametre: number; medX: number; medBas
 const PAYSAGE: Gabarit = { W: 1920, H: 1080, diametre: 270, medX: 50, medBas: 90, bulleL: 680, bulleT: 44, stL: 1150, stT: 44, stBas: 50, stDecalX: 150, bulleAuDessus: false };
 const VERTICAL: Gabarit = { W: 1080, H: 1920, diametre: 330, medX: 50, medBas: 520, bulleL: 960, bulleT: 54, stL: 960, stT: 52, stBas: 200, stDecalX: 0, bulleAuDessus: true };
 
+/**
+ * Personnage « evenements » (Jobwow TheSham) : buste au ras du bas de l'image, à gauche ; bulle BD posée sur sa
+ * bouche (repérée dans l'image : 50 % de la largeur, 39 % de la hauteur). En vertical, le buste prend le bas de
+ * l'image et les sous-titres passent en haut.
+ */
+interface GabaritBD { hauteur: number; x: number; bulleL: number; bulleT: number; bouche: [number, number]; decalBulle: [number, number]; stHaut: number | null }
+const BD: Record<"paysage" | "vertical", GabaritBD> = {
+  paysage: { hauteur: 460, x: 0, bulleL: 760, bulleT: 46, bouche: [0.5, 0.39], decalBulle: [60, -75], stHaut: null },
+  vertical: { hauteur: 620, x: -20, bulleL: 660, bulleT: 50, bouche: [0.5, 0.39], decalBulle: [80, -70], stHaut: 230 },
+};
+
 async function rendre(n: Narration, video: string, audio: boolean, g: Gabarit, sortie: string, travail: string,
   morceau: { debut: number; duree: number } | null, miniature: string | null, dossierNarration: string, carte: string | null = null) {
   mkdirSync(travail, { recursive: true });
   const suf = morceau ? `v${Math.round(morceau.debut)}` : "p";
+  const perso = personnageVideo(n.profil);
+  const enBD = perso.apparition === "evenements";
   const med = {
     normal: path.join(travail, `med-${suf}-normal.png`), mort: path.join(travail, `med-${suf}-mort.png`), niveau: path.join(travail, `med-${suf}-niveau.png`),
   };
-  const dim = await medaillon(g.diametre, "normal", med.normal);
-  await medaillon(g.diametre, "mort", med.mort);
-  await medaillon(g.diametre, "niveau", med.niveau);
-  const medY = g.H - dim.h - g.medBas;
+  // médaillon permanent (Jobwow) ou buste qui surgit aux moments forts (TheSham)
+  const bd = BD[g.H > g.W ? "vertical" : "paysage"];
+  const dim: { l: number; h: number; marge?: number } = enBD ? await buste(perso, bd.hauteur, "normal", med.normal) : await medaillon(g.diametre, "normal", med.normal, perso);
+  if (enBD) { await buste(perso, bd.hauteur, "mort", med.mort); await buste(perso, bd.hauteur, "niveau", med.niveau); }
+  else { await medaillon(g.diametre, "mort", med.mort, perso); await medaillon(g.diametre, "niveau", med.niveau, perso); }
+  const medY = enBD ? g.H - dim.h : g.H - dim.h - g.medBas;
+  const marge = dim.marge ?? 0;
+  const bouche: [number, number] = [bd.x + marge + (dim.l - 2 * marge) * bd.bouche[0], medY + marge + (dim.h - marge) * bd.bouche[1]];
   const debut = morceau?.debut ?? 0;
   const dureeJeu = morceau?.duree ?? n.dureeVideo;
   const dedans = (m: Moment) => m.seconde + m.duree > debut && m.seconde < debut + dureeJeu;
@@ -255,7 +354,15 @@ async function rendre(n: Narration, video: string, audio: boolean, g: Gabarit, s
   const calques: Calque[] = [];
   for (const [i, m] of moments.entries()) {
     const fin = Math.min(dureeJeu, m.seconde + m.duree);
-    if (m.bulle.trim()) {
+    if (m.bulle.trim() && enBD) {
+      // la bulle suit le buste : elle paraît une fois qu'il est monté, et part avant qu'il redescende
+      const f = path.join(travail, `bulle-${suf}-${i}.png`);
+      const b = await bulleComics(m.bulle, perso.onomatopees?.[m.genre] ?? null, COULEUR_GENRE[m.genre], bd.bulleL, bd.bulleT, f);
+      const x = Math.min(g.W - b.l - 24, Math.round(bouche[0] + bd.decalBulle[0] - b.pointeX));
+      const y = Math.max(20, Math.round(bouche[1] + bd.decalBulle[1] - b.pointeY));
+      const d = m.seconde + 0.25, e = Math.max(d + 0.5, fin - 0.2);
+      calques.push({ fichier: f, x: String(x), y: String(y), debut: d, fin: e });
+    } else if (m.bulle.trim()) {
       const f = path.join(travail, `bulle-${suf}-${i}.png`);
       const b = await bulle(m.bulle, COULEUR_GENRE[m.genre], g.bulleL, g.bulleT, f);
       const x = g.bulleAuDessus ? g.medX + 10 : g.medX + dim.l - 14;
@@ -265,7 +372,8 @@ async function rendre(n: Narration, video: string, audio: boolean, g: Gabarit, s
     if (m.sousTitre.trim()) {
       const f = path.join(travail, `st-${suf}-${i}.png`);
       await bandeau(m.sousTitre, g.stL, g.stT, f);
-      calques.push({ fichier: f, x: `(W-w)/2+${g.stDecalX}`, y: `H-h-${g.stBas}`, debut: m.seconde, fin });
+      const enHaut = enBD && bd.stHaut !== null;
+      calques.push({ fichier: f, x: `(W-w)/2+${enHaut ? 0 : g.stDecalX}`, y: enHaut ? String(bd.stHaut) : `H-h-${g.stBas}`, debut: m.seconde, fin });
     }
   }
   const avecBulle = moments.filter((m) => m.bulle.trim()).map((m) => [m.seconde, Math.min(dureeJeu, m.seconde + m.duree)] as [number, number]);
@@ -280,7 +388,11 @@ async function rendre(n: Narration, video: string, audio: boolean, g: Gabarit, s
     largeur: g.W, hauteur: g.H, audio, dureeJeu,
     intro: miniature && n.introSecondes > 0 ? { fichier: miniature, secondes: n.introSecondes } : null,
     outro: carte ? { fichier: carte, secondes: CARTE_FIN_SECONDES, fondu: CARTE_FIN_FONDU } : null,
-    medaillons: { ...med, x: g.medX, y: medY, hauteur: dim.h },
+    medaillons: enBD ? null : { ...med, x: g.medX, y: medY, hauteur: dim.h },
+    apparitions: enBD ? (() => {
+      const iv = intervallesApparition(moments, dureeJeu);
+      return { x: bd.x, y: medY, hauteur: dim.h, variantes: (["normal", "mort", "niveau"] as const).map((v) => ({ fichier: med[v], intervalles: iv[v] })) };
+    })() : null,
     etats: {
       parle: avecBulle,
       mort: moments.filter((m) => m.genre === "mort").map((m) => [m.seconde, Math.min(dureeJeu, m.seconde + m.duree + 6)]),
@@ -432,6 +544,10 @@ function reprendreValidee(fichierN: string, sources: string[] | null): void {
     return;
   }
   if (sources && !n.sources) n.sources = sources;
+  // personnage de la narration préparée gardé (un Atelier ancien ne le renvoyait pas) : ses bulles sont écrites pour lui
+  if (!n.profil && existsSync(fichierN)) {
+    try { const avant = JSON.parse(readFileSync(fichierN, "utf8")) as Narration; if (avant.profil) n.profil = avant.profil; } catch { /* rien à garder */ }
+  }
   sortirMiniature(n, fichierN);
   writeFileSync(fichierN, JSON.stringify(n, null, 2), "utf8");
   rangerTelecharges(fichierN, ".narration.json");
@@ -613,7 +729,8 @@ async function main() {
     // chapitres tirés de la narration (ses moments couvrent toute la journée, ou toute la partie), sinon des repères de la sonde
     const parNarr = n ? chapitresNarration(n) : null;
     const chap = parNarr && parNarr.valides ? parNarr : chapitres(seance, reperes);
-    writeFileSync(`${base}.youtube.txt`, [`TITRE :`, titreVideo(seance, chap, partie?.numero), "", "DESCRIPTION :", descriptionVideo(seance, chap, site, undefined, partie)].join("\n"), "utf8");
+    const perso = personnageVideo(n?.profil);
+    writeFileSync(`${base}.youtube.txt`, [`TITRE :`, titreVideo(seance, chap, partie?.numero, perso), "", "DESCRIPTION :", descriptionVideo(seance, chap, site, undefined, partie, perso)].join("\n"), "utf8");
   };
   // toutes les narrations validées rangées d'abord : la carte de fin d'une partie montre la miniature de la suivante
   if (!parNarration) for (const t of travaux) reprendreValidee(t.fichierN ?? `${sansExt(t.video)}.narration.json`, t.sources ?? null);
@@ -654,7 +771,10 @@ async function main() {
         miniature: option("miniature") ?? (partie ? null : miniatureVoisine(video) ?? (seance.clips.length > 1 ? miniatureVoisine(seance.clips[0].fichier) : null)),
         titre: titreVideo(seance, chap, partie?.numero),
         graine: partie ? `${path.basename(video)}#partie-${partie.numero}` : undefined,
+        profil: personnageDemande(),
       });
+      // titre de la série du personnage (Journal de Jobwow, Journal de Jobwow TheSham…)
+      n.titre = titreVideo(seance, chap, partie?.numero, personnageVideo(n.profil));
       if (partie) {
         n.extrait = { debut: partie.debut, duree: partie.duree };
         n.partie = { numero: partie.numero, total: partie.total, journee: partie.journee };
@@ -665,6 +785,9 @@ async function main() {
           n.clips = clips;
           n.relue = partie.reprise.valideLe ?? new Date().toISOString();
           if (partie.reprise.personnage) n.personnage = partie.reprise.personnage;
+          // la relecture reprise garde son personnage : ses bulles ont été écrites pour lui
+          if (partie.reprise.profil) n.profil = partie.reprise.profil; else delete n.profil;
+          n.titre = titreVideo(seance, chap, partie.numero, personnageVideo(n.profil));
         }
       }
       if (n.miniature) n.miniature = path.resolve(n.miniature);
@@ -710,7 +833,7 @@ async function main() {
       if (!existsSync(imageSuivante)) imageSuivante = null;
     }
     const carte = path.join(travail, "carte-fin.jpg");
-    await carteFin({ suivante: suivante ? imageSuivante : null, titreSuivante: suivante?.titre ?? "", site }, carte);
+    await carteFin({ suivante: suivante ? imageSuivante : null, titreSuivante: suivante?.titre ?? "", site, perso: personnageVideo(n.profil) }, carte);
     console.log(`Rendu 16:9 : ${sortie}`);
     await rendre(n, video, audio, PAYSAGE, sortie, travail, null, mini, path.dirname(fichierN), carte);
     const etatCarte = !suivante ? "fin" : suivante.miniature ? "miniature" : "provisoire";

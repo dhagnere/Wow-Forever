@@ -8,6 +8,7 @@
  * relue au rendu. Fonctions pures : sharp et ffmpeg restent dans scripts/incrustation-video.ts.
  */
 import { COULEUR_GENRE, GENRES_MOMENT, listeRepliques, ordreMelange, remplir, type GenreMoment } from "@/content/repliques-jobwow";
+import { PERSONNAGES, personnageDuJeu, personnageVideo } from "@/content/personnages";
 import { CARTES_JEU } from "@/content/cartes-jeu";
 import { heureLocale, niveauAtteint, type ValeurLua } from "@/lib/videoCarnet";
 import { lieuParNom } from "@/lib/cartes";
@@ -120,6 +121,8 @@ export interface Narration {
    */
   extrait?: { debut: number; duree: number };
   partie?: { numero: number; total: number; journee: string };
+  /** Personnage des vidéos (content/personnages.ts : « thesham »…) ; absent : Jobwow le tavernier. */
+  profil?: string;
   /** Moments repris d'une narration déjà relue (soirée découpée après coup) : l'Atelier marque la relecture faite. */
   relue?: string;
 }
@@ -134,9 +137,9 @@ const ECART_QUETES = 120;         // une quête rendue commentée toutes les deu
 const DUREE_CLIP = 30;
 
 /** Ce qui se passe à l'écran, en clair (sous-titre). */
-export function sousTitre(genre: GenreMoment, v: Evenement["valeurs"]): string {
+export function sousTitre(genre: GenreMoment, v: Evenement["valeurs"], serie = "Journal de Jobwow"): string {
   switch (genre) {
-    case "intro": return ["Journal de Jobwow", v.zone, v.niveau ? `niveau ${v.niveau}` : null].filter(Boolean).join(" · ");
+    case "intro": return [serie, v.zone, v.niveau ? `niveau ${v.niveau}` : null].filter(Boolean).join(" · ");
     case "zone": return `Arrivée : ${v.zone}`;
     case "niveau": return `Niveau ${v.niveau} atteint${Number(v.niveau) % 2 === 0 ? " : nouveaux sorts chez l'entraîneur" : ""}.`;
     case "mort": return `Mort${v.zone ? ` (${v.zone})` : ""} : retour au corps.`;
@@ -174,11 +177,14 @@ export function preparerNarration(o: {
   fin?: number; position?: (heure: number) => number | null;
   /** Graine des répliques (la vidéo par défaut) : deux parties d'une même vidéo n'ont pas les mêmes répliques. */
   graine?: string;
+  /** Personnage des vidéos (content/personnages.ts) ; sinon d'après le nom joué, sinon Jobwow. */
+  profil?: string | null;
 }): Narration {
   const fin = o.fin ?? o.debut + o.dureeVideo * 1000;
   const position = o.position ?? ((h: number) => (h - o.debut) / 1000);
   const personnage = personnageJoue(o.evenements, o.debut, fin);
   const evts = personnage ? o.evenements.filter((e) => e.personnage === personnage) : [];
+  const perso = o.profil ? personnageVideo(o.profil) : personnageDuJeu(personnage) ?? personnageVideo();
   // état au départ : dernière zone et dernier niveau connus avant la vidéo
   let zone: string | undefined, niveau: string | undefined;
   for (const e of evts) {
@@ -218,7 +224,7 @@ export function preparerNarration(o: {
     } as Moment);
   }
   // les plus importants d'abord, sans chevauchement
-  const gardes: Moment[] = [{ seconde: 0, duree: 6, genre: "intro", bulle: "", sousTitre: sousTitre("intro", { zone, niveau }) }];
+  const gardes: Moment[] = [{ seconde: 0, duree: 6, genre: "intro", bulle: "", sousTitre: sousTitre("intro", { zone, niveau }, perso.serie) }];
   const libre = (m: Moment) => gardes.every((x) => m.seconde >= x.seconde + x.duree + ECART_MOMENTS || m.seconde + m.duree + ECART_MOMENTS <= x.seconde);
   for (const m of [...candidats].sort((a, b) => PRIORITE[a.genre] - PRIORITE[b.genre] || a.seconde - b.seconde)) {
     if (!libre(m)) continue;
@@ -230,7 +236,7 @@ export function preparerNarration(o: {
     const v = (m as Moment & { _valeurs?: Evenement["valeurs"] })._valeurs ?? { zone, niveau };
     if (m.genre === "mort") morts++;
     // palier de niveau, choix d'une capacité, mort répétée : leurs propres répliques
-    const { cle, liste } = listeRepliques(m.genre, { niveau: v.niveau, demons: Boolean(v.demons), morts });
+    const { cle, liste } = listeRepliques(m.genre, { niveau: v.niveau, demons: Boolean(v.demons), morts }, perso.repliques);
     return { seconde: m.seconde, duree: m.duree, genre: m.genre, bulle: remplir(piocher(cle, liste), v), sousTitre: m.sousTitre };
   });
 
@@ -242,6 +248,7 @@ export function preparerNarration(o: {
     introSecondes: o.miniature ? (o.introSecondes ?? 4) : 0,
     dureeVideo: Math.round(o.dureeVideo * 10) / 10,
     personnage,
+    ...(perso.id !== "jobwow" ? { profil: perso.id } : {}),
     moments,
     clips: choisirClips(moments, o.dureeVideo),
   };
@@ -268,6 +275,7 @@ export function verifierNarration(n: unknown): string[] {
   if (!x || typeof x !== "object") return ["Le fichier n'est pas une narration."];
   if (x.format !== 1) e.push("Format inconnu (attendu : 1).");
   if (!x.video || typeof x.video !== "string") e.push("Chemin de la vidéo manquant.");
+  if (x.profil !== undefined && !(typeof x.profil === "string" && x.profil in PERSONNAGES)) e.push(`Personnage inconnu : « ${String(x.profil)} » (au choix : ${Object.keys(PERSONNAGES).join(", ")}).`);
   if (!Array.isArray(x.moments)) e.push("Liste des moments manquante.");
   for (const [i, m] of (x.moments ?? []).entries()) {
     if (!(GENRES_MOMENT as readonly string[]).includes(m.genre)) e.push(`Moment ${i + 1} : genre inconnu « ${m.genre} ».`);
@@ -303,7 +311,13 @@ export interface PlanRendu {
   outro?: { fichier: string; secondes: number; fondu: number } | null;
   audio: boolean;                     // la vidéo a une piste son
   dureeJeu: number;                   // durée de la partie de jeu rendue
-  medaillons: { normal: string; mort: string; niveau: string; x: number; y: number; hauteur: number };
+  /** Médaillon permanent (Jobwow) ; null pour un personnage qui n'apparaît qu'aux moments forts. */
+  medaillons: { normal: string; mort: string; niveau: string; x: number; y: number; hauteur: number } | null;
+  /**
+   * Personnage qui surgit à chaque moment (Jobwow TheSham) : buste détouré, monté du bas de l'image en 0,3 s,
+   * redescendu en 0,3 s à la fin du moment ; posé sous la bulle façon bande dessinée.
+   */
+  apparitions?: { x: number; y: number; hauteur: number; variantes: { fichier: string; intervalles: [number, number][] }[] } | null;
   etats: { mort: [number, number][]; niveau: [number, number][]; parle: [number, number][] };
   calques: Calque[];                  // bulles et sous-titres, aux heures de la partie de jeu
   /** Voix des bulles, aux heures de la partie de jeu ; le son du jeu baisse pendant qu'elles parlent. */
@@ -317,6 +331,30 @@ export const VOLUME_VOIX = 1.6;
 /** La voix d'un moment, si elle a été faite pour le texte actuel de la bulle (sinon elle est périmée). */
 export function voixAJour(m: Moment): boolean {
   return Boolean(m.voix && m.bulle.trim() && m.voixTexte === m.bulle);
+}
+
+/** Durée de la montée (et de la descente) du personnage qui surgit aux moments forts. */
+export const APPARITION = 0.3;
+
+/**
+ * Intervalles d'apparition d'un personnage « evenements » : les moments à bulle, deux moments à moins de 1,5 s
+ * l'un de l'autre réunis (le buste reste à l'écran au lieu de redescendre aussitôt), chaque intervalle d'au moins
+ * deux montées. Rangés par variante : « mort » pendant une mort, « niveau » pendant un niveau, sinon « normal ».
+ */
+export function intervallesApparition(moments: Pick<Moment, "seconde" | "duree" | "genre" | "bulle">[], dureeJeu: number):
+  Record<"normal" | "mort" | "niveau", [number, number][]> {
+  const out: Record<"normal" | "mort" | "niveau", [number, number][]> = { normal: [], mort: [], niveau: [] };
+  let dernier: { v: "normal" | "mort" | "niveau"; i: [number, number] } | null = null;
+  for (const m of [...moments].filter((x) => x.bulle.trim()).sort((a, b) => a.seconde - b.seconde)) {
+    const v = m.genre === "mort" ? "mort" : m.genre === "niveau" ? "niveau" : "normal";
+    const a = Math.max(0, m.seconde), b = Math.min(dureeJeu, Math.max(m.seconde + m.duree, m.seconde + 2 * APPARITION + 0.2));
+    if (b <= a) continue;
+    if (dernier && dernier.v === v && a - dernier.i[1] < 1.5) { dernier.i[1] = Math.max(dernier.i[1], b); continue; }
+    const i: [number, number] = [a, b];
+    out[v].push(i);
+    dernier = { v, i };
+  }
+  return out;
 }
 
 const n2 = (v: number) => (Math.round(v * 100) / 100).toString();
@@ -377,12 +415,24 @@ export function grapheRendu(p: PlanRendu): { entrees: string[][]; graphe: string
   }
   // médaillons : normal hors image de départ, puis gris (mort) et doré (niveau) par-dessus
   const m = p.medaillons;
-  const rebond = `${m.y}-if(gt(${intervalles(p.etats.parle, decal)},0),8*abs(sin(7*t)),0)`;
-  const calques: { fichier: string; x: string; y: string; quand: string }[] = [
-    { fichier: m.normal, x: String(m.x), y: rebond, quand: `gte(t,${n2(decal)})` },
-  ];
-  if (p.etats.mort.length) calques.push({ fichier: m.mort, x: String(m.x), y: rebond, quand: intervalles(p.etats.mort, decal) });
-  if (p.etats.niveau.length) calques.push({ fichier: m.niveau, x: String(m.x), y: rebond, quand: intervalles(p.etats.niveau, decal) });
+  const calques: { fichier: string; x: string; y: string; quand: string }[] = [];
+  if (m) {
+    const rebond = `${m.y}-if(gt(${intervalles(p.etats.parle, decal)},0),8*abs(sin(7*t)),0)`;
+    calques.push({ fichier: m.normal, x: String(m.x), y: rebond, quand: `gte(t,${n2(decal)})` });
+    if (p.etats.mort.length) calques.push({ fichier: m.mort, x: String(m.x), y: rebond, quand: intervalles(p.etats.mort, decal) });
+    if (p.etats.niveau.length) calques.push({ fichier: m.niveau, x: String(m.x), y: rebond, quand: intervalles(p.etats.niveau, decal) });
+  }
+  const ap = p.apparitions;
+  // une entrée par variante (normale, grise à la mort, dorée au niveau) : le buste monte du bas en 0,3 s au début de
+  // chaque moment et redescend en 0,3 s à la fin
+  for (const va of ap?.variantes ?? []) {
+    if (!va.intervalles.length) continue;
+    const glisse = va.intervalles.map(([a, b]) => {
+      const d = n2(a + decal), f = n2(b + decal);
+      return `between(t,${d},${f})*${ap!.hauteur}*(max(0,1-(t-${d})/${APPARITION})+max(0,1-(${f}-t)/${APPARITION}))`;
+    }).join("+");
+    calques.push({ fichier: va.fichier, x: String(ap!.x), y: `${ap!.y}+${glisse}`, quand: intervalles(va.intervalles, decal) });
+  }
   for (const c of p.calques) calques.push({ fichier: c.fichier, x: c.x, y: c.y, quand: `between(t,${n2(c.debut + decal)},${n2(c.fin + decal)})` });
   const finV = p.outro ? "[vc]" : "[vf]", finA = p.outro ? "[ac]" : "[af]";
   calques.forEach((c, i) => {
@@ -418,7 +468,7 @@ export function chapitresNarration(n: Pick<Narration, "moments" | "introSecondes
   const decalage = n.introSecondes > 0 ? n.introSecondes : 0;
   const moments = [...n.moments].sort((a, b) => a.seconde - b.seconde);
   const intro = moments.find((m) => m.genre === "intro");
-  const parties = (intro?.sousTitre ?? "").split(" · ").map((x) => x.trim()).filter((x) => x && !/^journal de jobwow$/i.test(x));
+  const parties = (intro?.sousTitre ?? "").split(" · ").map((x) => x.trim()).filter((x) => x && !/^journal de /i.test(x));
   const zoneDepart = parties.find((x) => !/^niveau/i.test(x));
   const niveauDepart = Number((parties.find((x) => /^niveau/i.test(x)) ?? "").replace(/\D/g, "")) || null;
   const sansPoint = (t: string) => t.replace(/\s*[.:]\s*$/, "").trim();
