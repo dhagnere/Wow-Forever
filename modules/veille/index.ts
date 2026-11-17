@@ -32,7 +32,7 @@ export { DOSSIERS } from "@/config/dossiers";
 export { selectionVariee } from "./collecte/themes";
 export { derniereRevue, etatRedaction, preparerRedaction, redigerSujets, MAX_PAR_LANCEMENT } from "./passage";
 export { urlArticle, messageFacebook, requeteFacebook, urlMedia, imagePostFacebook } from "./facebook/relais";
-export { texteReseau, longueurX } from "./reseaux/textes";
+export { texteReseau, longueurX, texteVideoCourte, type VideoCourte } from "./reseaux/textes";
 export { videoReel, ErreurVideo, DUREE_REEL_S } from "./reels/video";
 export { obtenirVideo, lireVideoStockee, etatVideo, demanderVideo } from "./reels/stockage";
 export type { EtatVideo } from "./reels/stockage";

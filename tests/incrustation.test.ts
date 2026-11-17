@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { REPLIQUES, REPLIQUES_CAPACITE, REPLIQUES_MORT_REPETEE, REPLIQUES_PALIERS, GENRES_MOMENT, listeRepliques, ordreMelange, replique } from "@/content/repliques-jobwow";
 import { PERSONNAGES, personnageDuJeu, personnageVideo } from "@/content/personnages";
-import { APPARITION, chapitresNarration, choisirClips, evenementsSonde, grapheRendu, intervallesApparition, preparerNarration, typographie, verifierNarration, voixAJour, type Moment } from "@/lib/incrustation";
+import { APPARITION, chapitresNarration, choisirClips, evenementsSonde, grapheRendu, intervallesApparition, preparerNarration, textesCourts, typographie, verifierNarration, voixAJour, type Moment } from "@/lib/incrustation";
 import { descriptionVideo, heureLocale, lireSauvegardeSonde, positionDans, titreVideo, type Seance } from "@/lib/videoCarnet";
 
 // Jobwow incrusté dans les vidéos (npm run carnet:incrustation) : narration tirée des repères de la sonde, graphe ffmpeg.
@@ -267,5 +267,27 @@ describe("Personnages des vidéos (Jobwow, Jobwow TheSham)", () => {
     expect(d).toContain("Le Journal de Jobwow TheSham, chaman orc");
     expect(d).toContain("#JobwowTheSham");
     expect(d).toContain("« Le Journal de Jobwow TheSham · WoW Forever 1 à 60 »");
+  });
+});
+
+describe("Shorts et Reels des clips verticaux", () => {
+  it("donne à chaque clip son Short et son Reel, au nom du personnage de la vidéo", () => {
+    const n = {
+      format: 1, video: "v.mp4", titre: "t", miniature: null, introSecondes: 0, dureeVideo: 120, personnage: null, profil: "thesham",
+      moments: [
+        { seconde: 0, duree: 6, genre: "intro", bulle: "Lok'tar !", sousTitre: "" },
+        { seconde: 20, duree: 5, genre: "quete", bulle: "Quête rendue.", sousTitre: "" },
+        { seconde: 30, duree: 5, genre: "niveau", bulle: "Niveau 6 ! Les éléments grondent.", sousTitre: "Niveau 6 atteint" },
+      ],
+      clips: [{ debut: 18, duree: 30, titre: "Niveau 6 atteint" }],
+    } as unknown as Parameters<typeof textesCourts>[0];
+    const t = textesCourts(n, "journal-jobwow_2026-11-17_p1", "Journal de Jobwow TheSham · 17 novembre 2026");
+    expect(t.personnage).toBe("Jobwow TheSham");
+    expect(t.clips[0].fichier).toBe("journal-jobwow_2026-11-17_p1.clip-1.mp4");
+    expect(t.clips[0].short.titre).toBe("Niveau 6 atteint · Jobwow TheSham #Shorts");
+    expect(t.clips[0].short.description).toContain("« Niveau 6 ! Les éléments grondent. »"); // le niveau passe avant la quête
+    expect(t.clips[0].reel).toContain("#JobwowTheSham #Reels");
+    // un personnage à venir n'a rien à déclarer de plus : Jobwow par défaut
+    expect(textesCourts({ ...n, profil: undefined }, "b", "e").clips[0].short.titre).toBe("Niveau 6 atteint · Jobwow #Shorts");
   });
 });

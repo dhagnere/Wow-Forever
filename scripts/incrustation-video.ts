@@ -40,7 +40,7 @@ import sharp, { type OverlayOptions } from "sharp";
 import { COULEUR_GENRE } from "@/content/repliques-jobwow";
 import { PERSONNAGES, personnageVideo, type PersonnageVideo } from "@/content/personnages";
 import {
-  chapitresNarration, evenementsSonde, grapheRendu, intervallesApparition, preparerNarration, typographie, verifierNarration, voixAJour,
+  chapitresNarration, evenementsSonde, grapheRendu, intervallesApparition, preparerNarration, textesCourts, typographie, verifierNarration, voixAJour,
   type Calque, type Evenement, type Moment, type Narration,
 } from "@/lib/incrustation";
 import { chapitres, descriptionVideo, heureLocale, horodatage, lireSauvegardeSonde, positionDans, reperesRouteProbe, seances, SONDES, titreVideo, DOSSIER_VIDEOS, type Clip, type Repere, type Seance } from "@/lib/videoCarnet";
@@ -730,7 +730,10 @@ async function main() {
     const parNarr = n ? chapitresNarration(n) : null;
     const chap = parNarr && parNarr.valides ? parNarr : chapitres(seance, reperes);
     const perso = personnageVideo(n?.profil);
-    writeFileSync(`${base}.youtube.txt`, [`TITRE :`, titreVideo(seance, chap, partie?.numero, perso), "", "DESCRIPTION :", descriptionVideo(seance, chap, site, undefined, partie, perso)].join("\n"), "utf8");
+    const titre = titreVideo(seance, chap, partie?.numero, perso);
+    writeFileSync(`${base}.youtube.txt`, [`TITRE :`, titre, "", "DESCRIPTION :", descriptionVideo(seance, chap, site, undefined, partie, perso)].join("\n"), "utf8");
+    // Shorts YouTube et Reels Facebook des clips verticaux, pour le personnage de la vidéo (lus par l'Atelier)
+    if (n?.clips.length) writeFileSync(`${base}.reseaux.json`, JSON.stringify(textesCourts(n, path.basename(base), titre), null, 2), "utf8");
   };
   // toutes les narrations validées rangées d'abord : la carte de fin d'une partie montre la miniature de la suivante
   if (!parNarration) for (const t of travaux) reprendreValidee(t.fichierN ?? `${sansExt(t.video)}.narration.json`, t.sources ?? null);

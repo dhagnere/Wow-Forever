@@ -9,6 +9,7 @@
  */
 import { COULEUR_GENRE, GENRES_MOMENT, listeRepliques, ordreMelange, remplir, type GenreMoment } from "@/content/repliques-jobwow";
 import { PERSONNAGES, personnageDuJeu, personnageVideo } from "@/content/personnages";
+import { texteVideoCourte } from "@/modules/veille";
 import { CARTES_JEU } from "@/content/cartes-jeu";
 import { heureLocale, niveauAtteint, type ValeurLua } from "@/lib/videoCarnet";
 import { lieuParNom } from "@/lib/cartes";
@@ -266,6 +267,33 @@ export function choisirClips(moments: Moment[], dureeVideo: number, nombre = 3):
     out.push({ debut: Math.round(debut * 10) / 10, duree: Math.min(DUREE_CLIP, dureeVideo), titre: m.sousTitre.replace(/[.:].*$/, "").trim() });
   }
   return out.sort((a, b) => a.debut - b.debut);
+}
+
+/** Textes des Shorts YouTube et des Reels Facebook d'une vidéo : un par clip vertical (`<base>.clip-<n>.mp4`). */
+export interface TextesCourts {
+  personnage: string;
+  episode: string;
+  clips: { fichier: string; titre: string; debut: number; short: { titre: string; description: string }; reel: string }[];
+}
+
+/**
+ * Shorts et Reels de chaque clip, pour le personnage de la narration (tout personnage de content/personnages.ts, à venir
+ * compris) : l'accroche est la réplique du moment fort du clip, l'épisode complet est cité, la phrase d'appel est celle
+ * de tous les posts (texteVideoCourte).
+ */
+export function textesCourts(n: Narration, base: string, episode: string): TextesCourts {
+  const perso = personnageVideo(n.profil);
+  return {
+    personnage: perso.nom,
+    episode,
+    clips: n.clips.map((c, i) => {
+      const dedans = n.moments.filter((m) => m.bulle.trim() && m.genre !== "intro" && m.seconde >= c.debut && m.seconde < c.debut + c.duree)
+        .sort((a, b) => (PRIORITE[a.genre] ?? 9) - (PRIORITE[b.genre] ?? 9) || a.seconde - b.seconde);
+      const v = { titre: c.titre || "Moment fort", accroche: dedans[0]?.bulle ?? "", episode, nom: perso.nom, motDiese: perso.motDiese };
+      const s = texteVideoCourte("short", v);
+      return { fichier: `${base}.clip-${i + 1}.mp4`, titre: v.titre, debut: c.debut, short: { titre: s.titre ?? v.titre, description: s.texte }, reel: texteVideoCourte("reel", v).texte };
+    }),
+  };
 }
 
 /** Erreurs d'une narration relue (fichier modifié à la main ou dans l'atelier), en français ; [] si elle est bonne. */

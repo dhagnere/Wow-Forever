@@ -59,3 +59,30 @@ export function texteReseau(reseau: Reseau, a: Contenu): string {
   const texte = [accroche, presentation, "Article complet sur le site (lien dans la bio).", appel, diese].filter(Boolean).join("\n\n");
   return couper(texte, RESEAUX[reseau].limite);
 }
+
+/** Clip vertical d'une vidéo du Journal, publié en Short YouTube ou en Reel Facebook (depuis le PC de Jobwow). */
+export interface VideoCourte {
+  titre: string;      // moment du clip (« Niveau 6 atteint »)
+  accroche: string;   // réplique du personnage dans le clip, en guise d'accroche
+  episode: string;    // titre YouTube de l'épisode complet
+  nom: string;        // personnage des vidéos (« Jobwow », « Jobwow TheSham »…)
+  motDiese: string;   // mot-dièse de sa série
+}
+
+/**
+ * Texte d'un Short YouTube (titre et description) ou d'un Reel Facebook (légende). Même phrase d'appel que tous les
+ * posts ; le Reel de la Page suit la règle de Meta One (sans nom de domaine tant que FACEBOOK_LIENS n'est pas à « oui »).
+ * Aucun lien vers une source : le renvoi mène à la chaîne et au site.
+ */
+export function texteVideoCourte(format: "short" | "reel", v: VideoCourte): { titre: string | null; texte: string } {
+  const accroche = v.accroche.trim() ? `« ${v.accroche.trim()} »` : "";
+  const extrait = `Extrait de l'épisode « ${v.episode} », en entier sur la chaîne YouTube de la Taverne Éternelle.`;
+  if (format === "short") {
+    const diese = [...MOTS_DIESE, v.motDiese, "#Shorts"].join(" ");
+    const titre = `${couper(`${v.titre} · ${v.nom}`, 100 - " #Shorts".length)} #Shorts`;
+    return { titre, texte: couper([accroche, extrait, phraseAppel(), diese].filter(Boolean).join("\n\n"), 5000) };
+  }
+  const diese = [...MOTS_DIESE, v.motDiese, "#Reels"].join(" ");
+  const appel = pageFacebookAvecLien() ? phraseAppel() : phraseAppel(false);
+  return { titre: null, texte: couper([`${v.titre} · ${v.nom} 🎬`, accroche, extrait, appel, diese].filter(Boolean).join("\n\n"), RESEAUX.reel.limite) };
+}
