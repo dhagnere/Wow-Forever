@@ -283,12 +283,18 @@ export const REPLIQUES_MORT_REPETEE: string[] = [
 
 export interface ContexteReplique { niveau?: string | number; demons?: boolean; morts?: number }
 
+/** Jeu de répliques d'un personnage (content/personnages.ts) ; Jobwow par défaut. */
+export interface JeuDeRepliques {
+  parGenre: Record<GenreMoment, string[]>; paliers: Record<number, string[]>; capacite: string[]; mortRepetee: string[];
+}
+
 /** Liste à piocher pour un moment : palier de niveau, choix de capacité, mort répétée, sinon celle du genre. */
-export function listeRepliques(genre: GenreMoment, c: ContexteReplique = {}): { cle: string; liste: string[] } {
-  if (genre === "entraineur" && c.demons) return { cle: "capacite", liste: REPLIQUES_CAPACITE };
-  if (genre === "niveau" && REPLIQUES_PALIERS[Number(c.niveau)]) return { cle: `palier-${Number(c.niveau)}`, liste: REPLIQUES_PALIERS[Number(c.niveau)] };
-  if (genre === "mort" && (c.morts ?? 1) >= 2) return { cle: "mort-repetee", liste: REPLIQUES_MORT_REPETEE };
-  return { cle: genre, liste: REPLIQUES[genre] };
+export function listeRepliques(genre: GenreMoment, c: ContexteReplique = {}, jeu?: JeuDeRepliques): { cle: string; liste: string[] } {
+  const j = jeu ?? { parGenre: REPLIQUES, paliers: REPLIQUES_PALIERS, capacite: REPLIQUES_CAPACITE, mortRepetee: REPLIQUES_MORT_REPETEE };
+  if (genre === "entraineur" && c.demons) return { cle: "capacite", liste: j.capacite };
+  if (genre === "niveau" && j.paliers[Number(c.niveau)]) return { cle: `palier-${Number(c.niveau)}`, liste: j.paliers[Number(c.niveau)] };
+  if (genre === "mort" && (c.morts ?? 1) >= 2) return { cle: "mort-repetee", liste: j.mortRepetee };
+  return { cle: genre, liste: j.parGenre[genre] };
 }
 
 /** Remplace {zone}, {niveau}, {nom}. */

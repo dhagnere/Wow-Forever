@@ -133,6 +133,25 @@ l'environnement `.voix/` (non versionné), y installe chatterbox-tts, PyTorch po
 et télécharge le modèle. `carnet:voix` (`scripts/voix.ts`) lance `voix_chatterbox.py` avec ce Python. Sans carte NVIDIA, la voix se calcule au
 processeur : plus lent, sans limite. Description YouTube : mentionner la voix de synthèse.
 
+**Second personnage : Jobwow TheSham** (demandé le 17/11/2026, en prévision d'un changement de personnage). Les
+personnages des vidéos sont dans `content/personnages.ts` : nom, série (titres YouTube, sous-titre d'ouverture,
+description, mot-dièse, playlist), avatar, répliques et façon d'apparaître. Jobwow, le tavernier, garde son médaillon
+permanent. TheSham, chaman orc (sa classe peut être dite, à la différence de Jobwow), n'apparaît qu'aux moments forts :
+son buste détouré (`visuels/avatars/thesham.png`, tiré de `visuels/thesham-capture.webp`) monte du bas de l'image en
+0,3 s, parle dans une bulle façon bande dessinée (fond blanc, gros trait noir, ombre franche de la couleur du moment,
+queue vers sa bouche, cri sur un cartouche penché : « NIVEAU ! », « ARGH ! »…), puis redescend ; gris à la mort, auréolé
+d'or au niveau. Deux moments à moins de 1,5 s l'un de l'autre le gardent à l'écran (`intervallesApparition`). En
+vertical, il occupe le bas de l'image et les sous-titres passent en haut. Polices de la bulle livrées avec le dépôt
+(Comic Neue Bold et Bangers, licence OFL, `visuels/polices/`), pour un rendu identique sur tous les PC. Répliques dans
+`content/repliques-thesham.ts`.
+
+Choix du personnage : `npm run carnet -- --personnage thesham` (ou `thesham` seul si PowerShell retire le `--`) pour
+les narrations à préparer ; d'office quand le nom du personnage joué, noté par la sonde, figure dans `nomsEnJeu` de son
+profil ; sinon Jobwow. La narration le garde (`profil`), la carte de fin et le texte YouTube le suivent. Dans l'Atelier,
+le menu « Personnage » change d'avis après coup : les bulles sont réécrites avec les répliques du nouveau personnage
+(une bulle vidée reste vide) et revenir au précédent rend les siennes. La voix (`carnet:voix`) reste celle de Jobwow
+tant qu'aucune référence propre à TheSham n'est choisie.
+
 Répliques dans `content/repliques-jobwow.ts` (aucune classe citée : celle de Jobwow n'est jamais précisée), narration et
 graphe ffmpeg dans `lib/incrustation.ts`, images (sharp) et encodage dans `scripts/incrustation-video.ts`, contrôles dans
 `tests/incrustation.test.ts`. L'atelier embarque une copie des répliques : la republier quand la liste change.

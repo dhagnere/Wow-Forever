@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { REPLIQUES, REPLIQUES_CAPACITE, REPLIQUES_MORT_REPETEE, REPLIQUES_PALIERS, GENRES_MOMENT, listeRepliques, ordreMelange, replique } from "@/content/repliques-jobwow";
-import { chapitresNarration, choisirClips, evenementsSonde, grapheRendu, preparerNarration, typographie, verifierNarration, voixAJour, type Moment } from "@/lib/incrustation";
-import { heureLocale, lireSauvegardeSonde, positionDans, type Seance } from "@/lib/videoCarnet";
+import { PERSONNAGES, personnageDuJeu, personnageVideo } from "@/content/personnages";
+import { APPARITION, chapitresNarration, choisirClips, evenementsSonde, grapheRendu, intervallesApparition, preparerNarration, typographie, verifierNarration, voixAJour, type Moment } from "@/lib/incrustation";
+import { descriptionVideo, heureLocale, lireSauvegardeSonde, positionDans, titreVideo, type Seance } from "@/lib/videoCarnet";
 
 // Jobwow incrusté dans les vidéos (npm run carnet:incrustation) : narration tirée des repères de la sonde, graphe ffmpeg.
 
@@ -193,5 +194,74 @@ describe("Voix des bulles", () => {
     expect(c.valides).toBe(true);
     expect(c.zones).toEqual(["Clairières de Tirisfal", "Durotar", "Orgrimmar"]); // la dernière, trop près de la fin, n'a pas de chapitre mais compte
     expect(c.niveaux).toEqual([5, 7]);
+  });
+});
+describe("Personnages des vidéos (Jobwow, Jobwow TheSham)", () => {
+  const evts = evenementsSonde(lireSauvegardeSonde(SAUVEGARDE));
+
+  it("TheSham a ses propres répliques pour chaque moment, courtes, sans guide commercial", () => {
+    const j = PERSONNAGES.thesham.repliques;
+    for (const g of GENRES_MOMENT) {
+      expect(j.parGenre[g].length).toBeGreaterThanOrEqual(12);
+      expect(PERSONNAGES.thesham.onomatopees?.[g]).toBeTruthy();
+    }
+    for (const liste of [...Object.values(j.parGenre), ...Object.values(j.paliers), j.capacite, j.mortRepetee]) {
+      expect(new Set(liste).size).toBe(liste.length);
+      for (const r of liste) {
+        expect(r.length).toBeLessThanOrEqual(95);
+        expect(r).not.toMatch(/zygor|wowhead/i);
+        expect(REPLIQUES.niveau).not.toContain(r);
+      }
+    }
+    for (const r of j.parGenre.exploit) expect(r).toContain("{nom}");
+    expect(listeRepliques("niveau", { niveau: 40 }, j).liste).toBe(j.paliers[40]);
+  });
+
+  it("choisit le personnage : demandé, sinon d'après le nom joué, sinon Jobwow", () => {
+    expect(personnageVideo("thesham").nom).toBe("Jobwow TheSham");
+    expect(personnageVideo("inconnu").id).toBe("jobwow");
+    expect(personnageDuJeu("Jobwow-Forever")?.id).toBe("jobwow");
+    expect(personnageDuJeu("Quelquun-Forever")).toBeNull();
+  });
+
+  it("prépare une narration de TheSham : sa série dans l'intro, ses répliques, son profil noté", () => {
+    const n = preparerNarration({ video: "essai.mp4", debut: DEBUT, dureeVideo: 75, evenements: evts, miniature: null, titre: "Essai", profil: "thesham" });
+    expect(n.profil).toBe("thesham");
+    expect(verifierNarration(n)).toEqual([]);
+    expect(verifierNarration({ ...n, profil: "inconnu" })[0]).toContain("Personnage inconnu");
+    expect(n.moments[0].sousTitre).toBe("Journal de Jobwow TheSham · Clairières de Tirisfal · niveau 3");
+    const j = PERSONNAGES.thesham.repliques;
+    expect(j.capacite).toContain(n.moments.find((m) => m.genre === "entraineur")?.bulle);
+    expect(n.moments.find((m) => m.genre === "exploit")?.bulle).toContain("Capitaine Perrine");
+    // Jobwow ne note pas de profil (narrations d'avant inchangées), et ses chapitres ignorent le titre de série
+    const jw = preparerNarration({ video: "essai.mp4", debut: DEBUT, dureeVideo: 75, evenements: evts, miniature: null, titre: "Essai" });
+    expect(jw.profil).toBeUndefined();
+    expect(chapitresNarration(n).liste[0].titre).toBe("Début · Clairières de Tirisfal · niveau 3");
+  });
+
+  it("fait surgir TheSham aux seuls moments à bulle, deux moments rapprochés réunis", () => {
+    const m = (seconde: number, genre: Moment["genre"], bulle = "Lok'tar !") => ({ seconde, duree: 5, genre, bulle });
+    const iv = intervallesApparition([m(0, "intro"), m(6, "zone"), m(20, "niveau"), m(30, "quete", ""), m(40, "mort")], 75);
+    expect(iv).toEqual({ normal: [[0, 11]], niveau: [[20, 25]], mort: [[40, 45]] });
+    const { entrees, graphe } = grapheRendu({
+      largeur: 1920, hauteur: 1080, audio: true, dureeJeu: 75, intro: { fichier: "mini.jpg", secondes: 4 },
+      medaillons: null,
+      apparitions: { x: 0, y: 600, hauteur: 480, variantes: [{ fichier: "n.png", intervalles: iv.normal }, { fichier: "m.png", intervalles: iv.mort }, { fichier: "o.png", intervalles: iv.niveau }] },
+      etats: { parle: [], mort: [], niveau: [] }, calques: [],
+    });
+    expect(entrees.flat()).toEqual(expect.arrayContaining(["n.png", "m.png", "o.png"]));
+    expect(graphe).toContain("enable='between(t,4,15)'");                         // décalé de l'image de départ
+    expect(graphe).toContain(`y='600+between(t,4,15)*480*(max(0,1-(t-4)/${APPARITION})`); // monte du bas
+    expect(graphe).not.toContain("gte(t,4)");                                   // aucun médaillon permanent
+  });
+
+  it("titre et décrit les vidéos de TheSham sous sa série", () => {
+    const s = { clips: [], debut: DEBUT, fin: DEBUT + 60000, duree: 60 } as unknown as Seance;
+    const perso = personnageVideo("thesham");
+    expect(titreVideo(s, { zones: ["Durotar"], niveaux: [6, 7] }, undefined, perso)).toMatch(/^Journal de Jobwow TheSham · 13 novembre 2026 · Durotar · niveaux 6 à 7$/);
+    const d = descriptionVideo(s, { liste: [], valides: false, zones: ["Durotar"] }, "https://x", {}, { numero: 1, total: 2 }, perso);
+    expect(d).toContain("Le Journal de Jobwow TheSham, chaman orc");
+    expect(d).toContain("#JobwowTheSham");
+    expect(d).toContain("« Le Journal de Jobwow TheSham · WoW Forever 1 à 60 »");
   });
 });
