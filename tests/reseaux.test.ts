@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import ffmpeg from "@ffmpeg-installer/ffmpeg";
 import { phraseAppel } from "@/config/reseaux";
-import { longueurX, texteReseau } from "@/modules/veille/reseaux/textes";
+import { longueurX, texteReseau, texteVideoCourte } from "@/modules/veille/reseaux/textes";
 import { videoDepuisImage } from "@/modules/veille/reels/video";
 import { publierReel } from "@/modules/veille/reels/publication";
 
@@ -92,5 +92,31 @@ describe("vidéo du Reel : mémoire bornée", async () => {
     expect(motifEchec({ signal: "SIGKILL", message: "Command failed" }, "")).toMatch(/mémoire/);
     expect(motifEchec({ killed: true, signal: "SIGTERM", message: "Command failed" }, "")).toMatch(/délai/);
     expect(motifEchec({ code: 1, message: "Command failed: …" }, "Invalid argument")).toBe("ffmpeg : Invalid argument (code 1)");
+  });
+});
+
+describe("Shorts YouTube et Reels Facebook des vidéos du Journal", () => {
+  afterEach(() => vi.unstubAllEnvs());
+  const v = { titre: "Niveau 6 atteint", accroche: "Les éléments grondent, ils m'ont entendu.", episode: "Journal de Jobwow TheSham · 13 novembre 2026 · Durotar", nom: "Jobwow TheSham", motDiese: "#JobwowTheSham" };
+
+  it("titre le Short avec #Shorts, 100 caractères au plus, et garde la phrase d'appel unique", () => {
+    const s = texteVideoCourte("short", v);
+    expect(s.titre).toBe("Niveau 6 atteint · Jobwow TheSham #Shorts");
+    expect(texteVideoCourte("short", { ...v, titre: "x".repeat(150) }).titre!.length).toBeLessThanOrEqual(100);
+    expect(texteVideoCourte("short", { ...v, titre: "x".repeat(150) }).titre).toMatch(/ #Shorts$/);
+    expect(s.texte).toContain("« Les éléments grondent, ils m'ont entendu. »");
+    expect(s.texte).toContain(phraseAppel());
+    expect(s.texte).toContain("#WoWForever #WorldofWarcraft #JobwowTheSham #Shorts");
+    expect(s.texte).not.toMatch(/https?:\/\//);
+  });
+
+  it("légende le Reel de la Page sans nom de domaine (Meta One), sauf FACEBOOK_LIENS=oui", () => {
+    const r = texteVideoCourte("reel", v);
+    expect(r.titre).toBeNull();
+    expect(r.texte).toContain(phraseAppel(false));
+    expect(r.texte).not.toContain("taverne-eternelle.fr");
+    expect(r.texte).toContain("#Reels");
+    vi.stubEnv("FACEBOOK_LIENS", "oui");
+    expect(texteVideoCourte("reel", v).texte).toContain(phraseAppel());
   });
 });

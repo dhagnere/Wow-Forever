@@ -150,7 +150,19 @@ les narrations à préparer ; d'office quand le nom du personnage joué, noté p
 profil (casse, espaces et accents ignorés : « Jobwow TheSham » reconnaît « Jobwowthesham » en jeu) ; sinon Jobwow. La narration le garde (`profil`), la carte de fin et le texte YouTube le suivent. Dans l'Atelier,
 le bloc « Personnage de la vidéo », en tête de page (deux cartes, Jobwow et Jobwow TheSham, avec les réglages de chacun), change d'avis après coup : les bulles sont réécrites avec les répliques du nouveau personnage
 (une bulle vidée reste vide) et revenir au précédent rend les siennes. La voix (`carnet:voix`) reste celle de Jobwow
-tant qu'aucune référence propre à TheSham n'est choisie.
+tant qu'aucune référence propre à TheSham n'est choisie. Les commandes affichées par l'Atelier suivent le personnage
+choisi (`npm run carnet -- --personnage thesham` pour TheSham).
+
+**Shorts YouTube et Reels Facebook** (depuis le 18/11/2026, pour tous les personnages, ceux à venir compris) : à chaque
+passage, `npm run carnet` écrit `<base>.reseaux.json` à côté du `.youtube.txt`, un Short et un Reel par clip vertical
+(`<base>.clip-<n>.mp4`), au nom du personnage de la vidéo (`textesCourts`, `lib/incrustation.ts`). Short : titre
+« <moment> · <personnage> #Shorts » (100 caractères au plus), description avec la réplique du moment fort du clip en
+accroche, l'épisode complet cité, la phrase d'appel unique et les mots-dièse de la série. Reel de la Page Facebook :
+même contenu, sans nom de domaine tant que `FACEBOOK_LIENS` n'est pas à « oui » (Meta One). Les textes passent par
+`texteVideoCourte` (`modules/veille/reseaux/textes.ts`), comme tout texte destiné à un réseau. L'Atelier les affiche
+(bloc « Shorts YouTube et Reels Facebook », boutons Copier, cases « Short envoyé » et « Reel envoyé ») et, la vidéo
+envoyée, propose les envois qui restent. Un nouveau personnage déclaré dans `content/personnages.ts` a ses Shorts et
+Reels sans rien ajouter. L'envoi reste manuel.
 
 Répliques dans `content/repliques-jobwow.ts` (aucune classe citée : celle de Jobwow n'est jamais précisée), narration et
 graphe ffmpeg dans `lib/incrustation.ts`, images (sharp) et encodage dans `scripts/incrustation-video.ts`, contrôles dans
