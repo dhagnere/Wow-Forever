@@ -28,7 +28,7 @@ export interface PersonnageVideo {
   motDiese: string;                    // mot-dièse de la série
   avatar: string;                      // image, relative à la racine du dépôt
   apparition: "medaillon" | "evenements";
-  /** Noms du personnage en jeu (sonde, sans le royaume) qui le choisissent d'office. */
+  /** Noms du personnage en jeu (sonde, sans le royaume) qui le choisissent d'office ; casse, espaces et accents ignorés. */
   nomsEnJeu: string[];
   repliques: JeuRepliques;
   /** Bulle façon bande dessinée : cri écrit sur un cartouche au-dessus de la bulle, selon le moment. */
@@ -55,7 +55,7 @@ export const PERSONNAGES: Record<string, PersonnageVideo> = {
     motDiese: "#JobwowTheSham",
     avatar: "visuels/avatars/thesham.png",
     apparition: "evenements",
-    nomsEnJeu: [],                     // [nom du chaman en jeu à préciser] : sinon --personnage thesham
+    nomsEnJeu: ["Jobwow TheSham"],     // nom donné par Jobwow le 17/11/2026 (en jeu sans espace : « Jobwowthesham »)
     repliques: {
       parGenre: REPLIQUES_THESHAM, paliers: REPLIQUES_PALIERS_THESHAM,
       capacite: REPLIQUES_CAPACITE_THESHAM, mortRepetee: REPLIQUES_MORT_REPETEE_THESHAM,
@@ -74,8 +74,11 @@ export const PERSONNAGE_PAR_DEFAUT = "jobwow";
 export const personnageVideo = (id?: string | null): PersonnageVideo => PERSONNAGES[id ?? ""] ?? PERSONNAGES[PERSONNAGE_PAR_DEFAUT];
 
 /** Le personnage d'après le nom joué noté par la sonde (« Nom-Royaume ») ; null si aucun ne le revendique. */
+// WoW n'accepte ni espace ni tiret dans un nom : « Jobwow TheSham » se lit « Jobwowthesham » en jeu
+const simplifier = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\s'’_]/g, "").toLowerCase();
+
 export function personnageDuJeu(nomEnJeu?: string | null): PersonnageVideo | null {
-  const nom = (nomEnJeu ?? "").split("-")[0].trim().toLowerCase();
+  const nom = simplifier((nomEnJeu ?? "").split("-")[0]);
   if (!nom) return null;
-  return Object.values(PERSONNAGES).find((p) => p.nomsEnJeu.some((x) => x.toLowerCase() === nom)) ?? null;
+  return Object.values(PERSONNAGES).find((p) => p.nomsEnJeu.some((x) => simplifier(x) === nom)) ?? null;
 }
