@@ -162,7 +162,7 @@ function graine(texte: string): number {
 }
 
 /** Le personnage joué pendant la vidéo : celui qui a le plus d'événements dans son intervalle. */
-function personnageJoue(evts: Evenement[], debut: number, fin: number): string | null {
+export function personnageJoue(evts: Evenement[], debut: number, fin: number): string | null {
   const n = new Map<string, number>();
   for (const e of evts) if (e.heure >= debut && e.heure <= fin) n.set(e.personnage, (n.get(e.personnage) ?? 0) + 1);
   return [...n.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
