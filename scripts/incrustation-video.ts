@@ -5,7 +5,8 @@
  *     [--miniature <image>] [--sonde <EternalProbe.lua>] [--preparer] [--sans-clips] [--sortie <dossier>] [--ecart 30] [--par-fichier]
  *
  * Un dossier (celui de Warcraft Recorder) : les vidéos sont rangées par séance comme pour carnet:video (plus de 30 minutes
- * d'écart, nouvelle séance) et assemblées sans réencodage dans « Journal de Jobwow » (ou --sortie) ; --par-fichier garde
+ * d'écart, nouvelle séance) et assemblées sans réencodage dans le dossier du personnage (« Journal de Jobwow »,
+ * « Journal de Jobwow TheSham »… : lib/rangement.ts ; ou --sortie) ; --par-fichier garde
  * une vidéo par fichier. Un fichier seul donne une vidéo. Pour chaque vidéo (ou séance assemblée) :
  * 1. la narration (`<vidéo>.narration.json`) est préparée si elle n'existe pas encore : intro, moments forts tirés des
  *    repères de la sonde (niveau, élite, mort, zone, grimoire, entraîneur, trajet, quête rendue), répliques de Jobwow,
@@ -38,7 +39,8 @@ import path from "node:path";
 import ffmpeg from "@ffmpeg-installer/ffmpeg";
 import sharp, { type OverlayOptions } from "sharp";
 import { COULEUR_GENRE } from "@/content/repliques-jobwow";
-import { PERSONNAGES, personnageVideo, type PersonnageVideo } from "@/content/personnages";
+import { PERSONNAGES, personnageDuNom, personnageVideo, type PersonnageVideo } from "@/content/personnages";
+import { fichiersDeJournee, nomJournee, personnageDesNarrations, personnagesDesEnregistrements, reclasserJournee, tousLesPersonnages } from "@/lib/rangement";
 import {
   chapitresNarration, evenementsSonde, grapheRendu, intervallesApparition, preparerNarration, textesCourts, typographie, verifierNarration, voixAJour,
   type Calque, type Evenement, type Moment, type Narration,
@@ -662,30 +664,59 @@ async function main() {
 
   // vidéos à traiter : une narration, un fichier, ou un dossier rangé par séances (une longue soirée : une par partie)
   type InfoPartie = { numero: number; total: number; journee: string; debut: number; duree: number; reprise?: Narration | null };
-  const travaux: { video: string; seance: Seance | null; fichierN?: string; sources?: string[]; partie?: InfoPartie }[] = [];
+  const travaux: { video: string; seance: Seance | null; fichierN?: string; sources?: string[]; partie?: InfoPartie; perso?: PersonnageVideo }[] = [];
   const parNarration = cible.endsWith(".narration.json");
   const bilan: string[] = [];
   if (parNarration) {
     const n = JSON.parse(readFileSync(cible, "utf8")) as Narration;
     travaux.push({ video: path.resolve(path.dirname(cible), n.video), seance: null, fichierN: cible });
   } else if (statSync(cible).isDirectory()) {
-    const sortieDossier = option("sortie") ?? path.join(cible, "Journal de Jobwow");
+    // rangement par personnage (18/11/2026) : son dossier dans D:\WOW et ses noms de fichiers (content/personnages.ts)
+    const dossierDe = (p: PersonnageVideo) => option("sortie") ?? path.join(cible, p.dossier);
+    const rendus = Object.keys(PERSONNAGES).join("|");
     const fichiers = readdirSync(cible).sort()
-      .filter((nom) => EXTENSIONS.has(path.extname(nom).toLowerCase()) && !/\.(jobwow|clip-\d+)\.mp4$/i.test(nom))
+      .filter((nom) => EXTENSIONS.has(path.extname(nom).toLowerCase()) && !new RegExp(`\\.(${rendus}|clip-\\d+)\\.mp4$`, "i").test(nom))
       .map((nom) => path.join(cible, nom));
     const clips: Clip[] = [];
     for (const f of fichiers) { const { duree } = await infos(f); clips.push({ fichier: f, debut: debutDe(f, duree), duree }); }
-    // une vidéo par journée (ou par séance avec --ecart, ou par fichier avec --par-fichier)
-    const groupes = drapeau("par-fichier") ? clips.map((c) => ({ clips: [c], debut: c.debut, fin: c.debut + c.duree * 1000, duree: c.duree }))
-      : option("ecart") ? seances(clips, Number(option("ecart"))) : parJour(clips);
-    const parJourVu = new Map<string, number>();
-    for (const s of groupes) {
-      mkdirSync(sortieDossier, { recursive: true });
+    // personnage de chaque enregistrement : demandé, sinon vu en jeu par la sonde, sinon celui du plus proche du même jour
+    const forcer = personnageDemande();
+    if (!forcer) chargerSonde();
+    const persos = personnagesDesEnregistrements(clips, (evenements as Evenement[] | null) ?? [], forcer);
+    // une vidéo par journée et par personnage (ou par séance avec --ecart, ou par fichier avec --par-fichier)
+    const groupes: { s: Seance; p: PersonnageVideo }[] = [];
+    for (const p of tousLesPersonnages()) {
+      const siens = clips.filter((_, i) => persos[i].id === p.id);
+      if (!siens.length) continue;
+      const gs = drapeau("par-fichier") ? siens.map((c) => ({ clips: [c], debut: c.debut, fin: c.debut + c.duree * 1000, duree: c.duree }))
+        : option("ecart") ? seances(siens, Number(option("ecart"))) : parJour(siens);
+      for (const s of gs) groupes.push({ s, p });
+    }
+    groupes.sort((a, b) => a.s.debut - b.s.debut);
+    for (const { s, p: vu } of groupes) {
       const d = new Date(s.debut).toISOString();
       const jour = d.slice(0, 10);
-      parJourVu.set(jour, (parJourVu.get(jour) ?? 0) + 1);
-      const plusieurs = groupes.filter((g) => new Date(g.debut).toISOString().slice(0, 10) === jour).length > 1;
-      const nom = plusieurs ? `journal-jobwow_${jour}_${d.slice(11, 16).replace(":", "h")}` : `journal-jobwow_${jour}`;
+      const plusieurs = groupes.filter((g) => g.p.id === vu.id && new Date(g.s.debut).toISOString().slice(0, 10) === jour).length > 1;
+      const cle = plusieurs ? `${jour}_${d.slice(11, 16).replace(":", "h")}` : jour;
+      // journée déjà préparée : elle garde le personnage de sa narration (peut-être changé dans l'Atelier) et ses
+      // fichiers sont rangés chez lui ; une narration qui dit un autre personnage que son dossier y est déplacée
+      let p = vu;
+      const deja = tousLesPersonnages().map((q) => ({ q, f: fichiersDeJournee(dossierDe(q), nomJournee(q, cle)) })).filter((x) => x.f.length);
+      // (une journée jouée avec deux personnages garde un dossier chacun)
+      const autresDuJour = groupes.filter((g) => g.s !== s && new Date(g.s.debut).toISOString().slice(0, 10) === jour).map((g) => g.p.id);
+      const ici = deja.find((x) => x.q.id === vu.id) ?? deja.find((x) => !autresDuJour.includes(x.q.id));
+      if (ici) {
+        const telecharges = existsSync(DOSSIER_TELECHARGEMENTS) ? fichiersDeJournee(DOSSIER_TELECHARGEMENTS, nomJournee(ici.q, cle)).map((f) => path.join(DOSSIER_TELECHARGEMENTS, f)) : [];
+        const dit = personnageDesNarrations([...ici.f.map((f) => path.join(dossierDe(ici.q), f)), ...telecharges]) ?? ici.q;
+        p = dit;
+        if (dit.id !== ici.q.id) {
+          console.log(`${nomJournee(ici.q, cle)} : narration de ${dit.nom}, journée rangée dans « ${dit.dossier} » sous le nom ${nomJournee(dit, cle)}.`);
+          for (const l of reclasserJournee({ cle, de: ici.q, vers: dit, dossierDe: dossierDe(ici.q), dossierVers: dossierDe(dit), telechargements: DOSSIER_TELECHARGEMENTS })) console.log(`  ${l}`);
+        }
+      }
+      const sortieDossier = dossierDe(p);
+      mkdirSync(sortieDossier, { recursive: true });
+      const nom = nomJournee(p, cle);
       const sources = s.clips.map((c) => `${path.basename(c.fichier)}|${c.duree.toFixed(1)}`);
       const fichierN = path.join(sortieDossier, `${nom}.narration.json`);
       let change = false;
@@ -715,10 +746,10 @@ async function main() {
           renameSync(fichierN, fichierN.replace(/\.narration\.json$/, ".narration.avant.json"));
           console.log(`${nom} : narration d'un seul tenant mise de côté (.narration.avant.json), la soirée est découpée en parties.`);
         }
-        for (const p of await partiesDeLaJournee(nom, video, s, sources, sortieDossier)) travaux.push(p);
+        for (const t of await partiesDeLaJournee(nom, video, s, sources, sortieDossier)) travaux.push({ ...t, perso: p });
         continue;
       }
-      travaux.push({ video, seance: s, fichierN, sources });
+      travaux.push({ video, seance: s, fichierN, sources, perso: p });
     }
   } else travaux.push({ video: cible, seance: null });
   if (!travaux.length) { console.error(`Aucune vidéo trouvée dans ${cible}.`); process.exit(1); }
@@ -737,7 +768,7 @@ async function main() {
   };
   // toutes les narrations validées rangées d'abord : la carte de fin d'une partie montre la miniature de la suivante
   if (!parNarration) for (const t of travaux) reprendreValidee(t.fichierN ?? `${sansExt(t.video)}.narration.json`, t.sources ?? null);
-  for (const { video, seance: seanceConnue, fichierN: donne, sources, partie } of travaux) {
+  for (const { video, seance: seanceConnue, fichierN: donne, sources, partie, perso: persoRange } of travaux) {
     const fichierN = donne ?? `${sansExt(video)}.narration.json`;
     const base = sansExt(fichierN).replace(/\.narration$/, "");
     const nomCourt = path.basename(base);
@@ -774,7 +805,8 @@ async function main() {
         miniature: option("miniature") ?? (partie ? null : miniatureVoisine(video) ?? (seance.clips.length > 1 ? miniatureVoisine(seance.clips[0].fichier) : null)),
         titre: titreVideo(seance, chap, partie?.numero),
         graine: partie ? `${path.basename(video)}#partie-${partie.numero}` : undefined,
-        profil: personnageDemande(),
+        // le personnage du rangement (dossier, noms) ; une vidéo seule : celui de son nom, sinon demandé ou vu en jeu
+        profil: persoRange?.id ?? personnageDuNom(video)?.id ?? personnageDemande(),
       });
       // titre de la série du personnage (Journal de Jobwow, Journal de Jobwow TheSham…)
       n.titre = titreVideo(seance, chap, partie?.numero, personnageVideo(n.profil));
@@ -804,7 +836,8 @@ async function main() {
     }
     const etiquette = partie ? `${nomCourt} (partie ${partie.numero} sur ${partie.total}, ${horodatage(partie.duree)})` : nomCourt;
     if (drapeau("preparer")) { bilan.push(`${etiquette} : narration prête, à relire et valider dans l'Atelier.`); continue; }
-    const sortie = `${base}.jobwow.mp4`;
+    // rendu au nom du personnage : « .jobwow.mp4 », « .thesham.mp4 »…
+    const sortie = `${base}.${personnageVideo(n.profil).id}.mp4`;
     if (!parNarration && !n.valide) { bilan.push(`${etiquette} : à relire et valider dans l'Atelier (ouvre le dossier D:\\WOW), puis relance npm run carnet.`); continue; }
     if (!parNarration && existsSync(sortie) && statSync(sortie).mtimeMs > statSync(fichierN).mtimeMs) {
       // un rendu d'une autre durée que prévu (partie rendue sur toute la soirée, par exemple) est refait

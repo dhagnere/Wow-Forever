@@ -28,6 +28,9 @@ export interface PersonnageVideo {
   motDiese: string;                    // mot-dièse de la série
   avatar: string;                      // image, relative à la racine du dépôt
   apparition: "medaillon" | "evenements";
+  /** Rangement (demandé le 18/11/2026) : sous-dossier de D:\WOW et début de tous ses noms de fichiers ; rendu `<base>.<id>.mp4`. */
+  dossier: string;
+  prefixe: string;
   /** Noms du personnage en jeu (sonde, sans le royaume) qui le choisissent d'office ; casse, espaces et accents ignorés. */
   nomsEnJeu: string[];
   repliques: JeuRepliques;
@@ -44,6 +47,8 @@ export const PERSONNAGES: Record<string, PersonnageVideo> = {
     motDiese: "#JournalDeJobwow",
     avatar: "public/images/jobwow-512.png",
     apparition: "medaillon",
+    dossier: "Journal de Jobwow",
+    prefixe: "journal-jobwow",
     nomsEnJeu: ["Jobwow"],
     repliques: { parGenre: REPLIQUES, paliers: REPLIQUES_PALIERS, capacite: REPLIQUES_CAPACITE, mortRepetee: REPLIQUES_MORT_REPETEE },
   },
@@ -55,6 +60,8 @@ export const PERSONNAGES: Record<string, PersonnageVideo> = {
     motDiese: "#JobwowTheSham",
     avatar: "visuels/avatars/thesham.png",
     apparition: "evenements",
+    dossier: "Journal de Jobwow TheSham",
+    prefixe: "journal-thesham",
     nomsEnJeu: ["Jobwow TheSham"],     // nom donné par Jobwow le 17/11/2026 (en jeu sans espace : « Jobwowthesham »)
     repliques: {
       parGenre: REPLIQUES_THESHAM, paliers: REPLIQUES_PALIERS_THESHAM,
@@ -81,4 +88,11 @@ export function personnageDuJeu(nomEnJeu?: string | null): PersonnageVideo | nul
   const nom = simplifier((nomEnJeu ?? "").split("-")[0]);
   if (!nom) return null;
   return Object.values(PERSONNAGES).find((p) => p.nomsEnJeu.some((x) => simplifier(x) === nom)) ?? null;
+}
+
+/** Le personnage d'un fichier d'après le début de son nom (« journal-thesham_2026-11-18_p2.narration.json ») ; null sinon. */
+export function personnageDuNom(nom: string): PersonnageVideo | null {
+  const b = nom.replace(/^.*[\\/]/, "").toLowerCase();
+  return Object.values(PERSONNAGES).sort((a, z) => z.prefixe.length - a.prefixe.length)
+    .find((p) => b.startsWith(`${p.prefixe.toLowerCase()}_`)) ?? null;
 }

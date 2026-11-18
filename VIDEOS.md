@@ -153,6 +153,24 @@ le bloc « Personnage de la vidéo », en tête de page (deux cartes, Jobwow et 
 tant qu'aucune référence propre à TheSham n'est choisie. Les commandes affichées par l'Atelier suivent le personnage
 choisi (`npm run carnet -- --personnage thesham` pour TheSham).
 
+**Rangement par personnage** (demandé le 18/11/2026) : chaque personnage a son dossier dans D:\WOW et ses noms de
+fichiers (`dossier`, `prefixe` de `content/personnages.ts`, `lib/rangement.ts`) :
+
+| Personnage | Dossier | Fichiers | Rendu |
+|---|---|---|---|
+| Jobwow | `D:\WOW\Journal de Jobwow` | `journal-jobwow_<date>…` | `.jobwow.mp4` |
+| Jobwow TheSham | `D:\WOW\Journal de Jobwow TheSham` | `journal-thesham_<date>…` | `.thesham.mp4` |
+
+Chaque enregistrement de Warcraft Recorder va au personnage vu en jeu par la sonde pendant l'enregistrement (sinon à
+celui de l'enregistrement le plus proche du même jour, sinon à Jobwow) ; une soirée jouée avec deux personnages donne
+une journée dans chaque dossier. `--personnage` impose le personnage des journées pas encore préparées, jamais d'une
+journée déjà rangée. Une journée déjà préparée garde le personnage de sa narration : si la narration (changée dans
+l'Atelier, validée) dit un autre personnage que son dossier, `npm run carnet` déplace toute la journée chez lui
+(fichiers renommés, copies des Téléchargements comprises, chemins, série et personnage mis à jour, relecture gardée ;
+une partie pas encore relue est préparée de nouveau avec ses répliques : `reclasserJournee`). Les journées rangées
+avant le 18/11 restent dans « Journal de Jobwow » tant que leur narration dit Jobwow. Un nouveau personnage déclaré dans
+`content/personnages.ts` a son dossier et ses noms d'office (sa carte de l'Atelier, avec son rangement, est à ajouter).
+
 **Shorts YouTube et Reels Facebook** (depuis le 18/11/2026, pour tous les personnages, ceux à venir compris) : à chaque
 passage, `npm run carnet` écrit `<base>.reseaux.json` à côté du `.youtube.txt`, un Short et un Reel par clip vertical
 (`<base>.clip-<n>.mp4`), au nom du personnage de la vidéo (`textesCourts`, `lib/incrustation.ts`). Short : titre
