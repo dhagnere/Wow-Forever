@@ -1,9 +1,9 @@
 {
  "version": {
   "source": "CMaNGOS classic-db (GPL v3), AzerothCore (GPL v2) : rencontres, entrées et noms français",
-  "quetes": "Azeroth d'origine, présence dans Forever à vérifier"
+  "quetes": "filtrées sur les fichiers de Forever"
  },
- "quetesVerifiees": false,
+ "quetesVerifiees": true,
  "donjons": {
   "gouffre-de-ragefeu": {
    "carte": 389,
@@ -4160,14 +4160,6 @@
    ],
    "quetes": [
     {
-     "id": 4295,
-     "fr": "La bière de Rochenoeud",
-     "en": "Rocknot's Ale",
-     "nv": 1,
-     "min": 1,
-     "camp": 0
-    },
-    {
      "id": 3801,
      "fr": "Héritage Sombrefer",
      "en": "Dark Iron Legacy",
@@ -6504,14 +6496,6 @@
      "camp": 0
     },
     {
-     "id": 1193,
-     "fr": "Un piège cassé",
-     "en": "A Broken Trap",
-     "nv": 60,
-     "min": 56,
-     "camp": 0
-    },
-    {
      "id": 1318,
      "fr": "Affaires inachevées chez les Gordok",
      "en": "Unfinished Gordok Business",
@@ -6521,14 +6505,6 @@
     },
     {
      "id": 5518,
-     "fr": "La tenue d'ogre gordok",
-     "en": "The Gordok Ogre Suit",
-     "nv": 60,
-     "min": 56,
-     "camp": 0
-    },
-    {
-     "id": 5519,
      "fr": "La tenue d'ogre gordok",
      "en": "The Gordok Ogre Suit",
      "nv": 60,
@@ -6547,14 +6523,6 @@
      "id": 5528,
      "fr": "La dégustation gordok",
      "en": "The Gordok Taste Test",
-     "nv": 60,
-     "min": 57,
-     "camp": 0
-    },
-    {
-     "id": 7429,
-     "fr": "Libérez Noué !",
-     "en": "Free Knot!",
      "nv": 60,
      "min": 57,
      "camp": 0
@@ -6598,30 +6566,6 @@
      "nv": 60,
      "min": 54,
      "camp": 1
-    },
-    {
-     "id": 7483,
-     "fr": "Libram de rapidité",
-     "en": "Libram of Rapidity",
-     "nv": 60,
-     "min": 58,
-     "camp": 0
-    },
-    {
-     "id": 7484,
-     "fr": "Libram de focalisation",
-     "en": "Libram of Focus",
-     "nv": 60,
-     "min": 58,
-     "camp": 0
-    },
-    {
-     "id": 7485,
-     "fr": "Libram de protection",
-     "en": "Libram of Protection",
-     "nv": 60,
-     "min": 58,
-     "camp": 0
     },
     {
      "id": 7498,
@@ -7873,14 +7817,6 @@
      "camp": 0
     },
     {
-     "id": 5582,
-     "fr": "L'écaille de dragon luisante",
-     "en": "Healthy Dragon Scale",
-     "nv": 58,
-     "min": 55,
-     "camp": 0
-    },
-    {
      "id": 4771,
      "fr": "Le gambit de l'aube",
      "en": "Dawn's Gambit",
@@ -8587,14 +8523,6 @@
     }
    ],
    "quetes": [
-    {
-     "id": 5122,
-     "fr": "Le médaillon de foi",
-     "en": "The Medallion of Faith",
-     "nv": 60,
-     "min": 55,
-     "camp": 0
-    },
     {
      "id": 5125,
      "fr": "La rétribution d'Aurius",
