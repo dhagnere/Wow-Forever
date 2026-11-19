@@ -60,7 +60,7 @@ export default function DungeonList() {
                   <thead><tr><th scope="col">Dungeon</th><th scope="col">Levels</th><th scope="col">Zone</th><th scope="col">Continent</th></tr></thead>
                   <tbody>
                     {DONJONS_ORIGINE.map((d) => (
-                      <tr key={d.nom}><td style={{ fontWeight: 600 }}><span className="lien-icone"><Vignette nom={d.nom} />{nom(d.nom)}</span></td><td>{d.min}–{d.max}</td><td>{zone(d.zone)}</td><td className="doux">{CONTINENTS_EN[d.continent] ?? d.continent}</td></tr>
+                      <tr key={d.nom}><td style={{ fontWeight: 600 }}><span className="lien-icone"><Vignette nom={d.nom} /><Link href={pageDonjonEn(d.slug)}>{nom(d.nom)}</Link></span></td><td>{d.min}–{d.max}</td><td>{zone(d.zone)}</td><td className="doux">{CONTINENTS_EN[d.continent] ?? d.continent}</td></tr>
                     ))}
                   </tbody>
                 </table>

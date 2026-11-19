@@ -67,9 +67,9 @@ export default function LegalNotice() {
             <a href="https://wago.tools" rel="noopener noreferrer">wago.tools</a>. They remain the property of Blizzard Entertainment.
           </p>
           <p>
-            “Where to find it” (monsters, drop chances, vendors, chests, quests and locations), class quests and the 1-60 leveling guide: original
+            “Where to find it” (monsters, drop chances, vendors, chests, quests and locations), dungeon pages (bosses, loot, entrances and quests), class quests and the 1-60 leveling guide: original
             Azeroth data from the free community databases <a href="https://github.com/cmangos/classic-db" rel="noopener noreferrer">CMaNGOS classic-db</a>{" "}
-            (GPL v3 licence) and <a href="https://github.com/azerothcore/azerothcore-wotlk" rel="noopener noreferrer">AzerothCore</a> for French names
+            (GPL v3 licence) and <a href="https://github.com/azerothcore/azerothcore-wotlk" rel="noopener noreferrer">AzerothCore</a> for French names, dungeon encounters and entrances
             (GPL v2 licence). They may differ in WoW Forever. Quests added by Forever come from in-game records made by{" "}
             <a href="https://github.com/Questie/QuestieDB" rel="noopener noreferrer">Questie (QuestieDB)</a> players, under the GPL v3 licence.
             Quest guides only reuse titles, names and positions; objectives are summarised by the

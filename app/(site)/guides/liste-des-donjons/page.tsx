@@ -59,7 +59,7 @@ export default function ListeDesDonjons() {
                   <thead><tr><th scope="col">Donjon</th><th scope="col">Niveaux</th><th scope="col">Zone</th><th scope="col">Continent</th></tr></thead>
                   <tbody>
                     {DONJONS_ORIGINE.map((d) => (
-                      <tr key={d.nom}><td style={{ fontWeight: 600 }}><span className="lien-icone"><Vignette nom={d.nom} />{d.nom}</span></td><td>{d.min}–{d.max}</td><td>{lieuParNom(d.zone) ? <Link href={pageLieu(lieuParNom(d.zone)!)}>{d.zone}</Link> : d.zone}</td><td className="doux">{d.continent}</td></tr>
+                      <tr key={d.nom}><td style={{ fontWeight: 600 }}><span className="lien-icone"><Vignette nom={d.nom} /><Link href={`/donjons/${d.slug}/`}>{d.nom}</Link></span></td><td>{d.min}–{d.max}</td><td>{lieuParNom(d.zone) ? <Link href={pageLieu(lieuParNom(d.zone)!)}>{d.zone}</Link> : d.zone}</td><td className="doux">{d.continent}</td></tr>
                     ))}
                   </tbody>
                 </table>

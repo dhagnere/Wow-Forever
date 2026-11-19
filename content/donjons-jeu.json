@@ -1,0 +1,8721 @@
+{
+ "version": {
+  "source": "CMaNGOS classic-db (GPL v3), AzerothCore (GPL v2) : rencontres, entrées et noms français",
+  "quetes": "Azeroth d'origine, présence dans Forever à vérifier"
+ },
+ "quetesVerifiees": false,
+ "donjons": {
+  "gouffre-de-ragefeu": {
+   "carte": 389,
+   "niveaux": [
+    13,
+    16
+   ],
+   "entrees": [
+    {
+     "zone": "orgrimmar",
+     "x": 53.2,
+     "y": 48.7
+    }
+   ],
+   "boss": [
+    {
+     "id": 11517,
+     "n": "Lorgnesilex",
+     "en": "Oggleflint",
+     "nv": [
+      16,
+      16
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 1210,
+       "p": 1.9
+      }
+     ]
+    },
+    {
+     "id": 11520,
+     "n": "Taragaman l'Affameur",
+     "en": "Taragaman the Hungerer",
+     "nv": [
+      16,
+      16
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 14148,
+       "p": 40
+      },
+      {
+       "i": 14149,
+       "p": 40
+      },
+      {
+       "i": 14145,
+       "p": 20
+      },
+      {
+       "i": 14540,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 11518,
+     "n": "Jergosh l'Invocateur",
+     "en": "Jergosh the Invoker",
+     "nv": [
+      16,
+      16
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 14147,
+       "p": 40
+      },
+      {
+       "i": 14150,
+       "p": 40
+      },
+      {
+       "i": 14151,
+       "p": 20
+      }
+     ]
+    },
+    {
+     "id": 11519,
+     "n": "Bazzalan",
+     "en": "Bazzalan",
+     "nv": [
+      16,
+      16
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 1210,
+       "p": 2.2
+      }
+     ]
+    }
+   ],
+   "rares": [],
+   "quetes": [
+    {
+     "id": 5723,
+     "fr": "Tester la force de l'ennemi",
+     "en": "Testing an Enemy's Strength",
+     "nv": 15,
+     "min": 9,
+     "camp": 2
+    },
+    {
+     "id": 5722,
+     "fr": "À la recherche de la sacoche perdue",
+     "en": "Searching for the Lost Satchel",
+     "nv": 16,
+     "min": 9,
+     "camp": 2
+    },
+    {
+     "id": 5724,
+     "fr": "Rapporter la sacoche perdue",
+     "en": "Returning the Lost Satchel",
+     "nv": 16,
+     "min": 9,
+     "camp": 2
+    },
+    {
+     "id": 5725,
+     "fr": "Le pouvoir de détruire...",
+     "en": "The Power to Destroy...",
+     "nv": 16,
+     "min": 9,
+     "camp": 2
+    },
+    {
+     "id": 5728,
+     "fr": "Ennemis cachés",
+     "en": "Hidden Enemies",
+     "nv": 16,
+     "min": 9,
+     "camp": 2
+    },
+    {
+     "id": 5761,
+     "fr": "Tuer la bête",
+     "en": "Slaying the Beast",
+     "nv": 16,
+     "min": 9,
+     "camp": 2
+    }
+   ]
+  },
+  "mortemines": {
+   "carte": 36,
+   "niveaux": [
+    16,
+    21
+   ],
+   "entrees": [
+    {
+     "zone": "marche-de-l-ouest",
+     "x": 38,
+     "y": 77.5
+    }
+   ],
+   "boss": [
+    {
+     "id": 644,
+     "n": "Rhahk'Zor",
+     "en": "Rhahk'Zor",
+     "nv": [
+      19,
+      19
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 872,
+       "p": 5
+      }
+     ]
+    },
+    {
+     "id": 1763,
+     "n": "Gilnid",
+     "en": "Gilnid",
+     "nv": [
+      20,
+      20
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 1156,
+       "p": 45
+      },
+      {
+       "i": 5199,
+       "p": 55
+      }
+     ]
+    },
+    {
+     "id": 646,
+     "n": "M. Châtiment",
+     "en": "Mr. Smite",
+     "nv": [
+      20,
+      20
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 7230,
+       "p": 20
+      },
+      {
+       "i": 5192,
+       "p": 40
+      },
+      {
+       "i": 5196,
+       "p": 40
+      }
+     ]
+    },
+    {
+     "id": 645,
+     "n": "Macaron",
+     "en": "Cookie",
+     "nv": [
+      20,
+      20
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 5198,
+       "p": 35
+      },
+      {
+       "i": 5197,
+       "p": 65
+      },
+      {
+       "i": 11982,
+       "p": 6
+      }
+     ]
+    },
+    {
+     "id": 647,
+     "n": "Capitaine Vertepeau",
+     "en": "Captain Greenskin",
+     "nv": [
+      20,
+      20
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 5201,
+       "p": 40
+      },
+      {
+       "i": 5200,
+       "p": 30
+      },
+      {
+       "i": 10403,
+       "p": 30
+      }
+     ]
+    },
+    {
+     "id": 639,
+     "n": "Edwin VanCleef",
+     "en": "Edwin VanCleef",
+     "nv": [
+      21,
+      21
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 5193,
+       "p": 30
+      },
+      {
+       "i": 5202,
+       "p": 30
+      },
+      {
+       "i": 5191,
+       "p": 20
+      },
+      {
+       "i": 10399,
+       "p": 20
+      },
+      {
+       "i": 3637,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "rares": [
+    {
+     "id": 3586,
+     "n": "Mineur Johnson",
+     "en": "Miner Johnson",
+     "nv": [
+      19,
+      19
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 5443,
+       "p": 50
+      },
+      {
+       "i": 5444,
+       "p": 50
+      }
+     ]
+    }
+   ],
+   "quetes": [
+    {
+     "id": 214,
+     "fr": "Les masques rouges en soie",
+     "en": "Red Silk Bandanas",
+     "nv": 17,
+     "min": 14,
+     "camp": 1
+    },
+    {
+     "id": 168,
+     "fr": "À la recherche de cartes du syndicat des mineurs",
+     "en": "Collecting Memories",
+     "nv": 18,
+     "min": 14,
+     "camp": 1
+    },
+    {
+     "id": 167,
+     "fr": "Adieu mon frère…",
+     "en": "Oh Brother. . .",
+     "nv": 20,
+     "min": 15,
+     "camp": 1
+    },
+    {
+     "id": 2040,
+     "fr": "Assaut souterrain",
+     "en": "Underground Assault",
+     "nv": 20,
+     "min": 15,
+     "camp": 1
+    },
+    {
+     "id": 166,
+     "fr": "La Confrérie défias",
+     "en": "The Defias Brotherhood",
+     "nv": 22,
+     "min": 14,
+     "camp": 1
+    },
+    {
+     "id": 1654,
+     "fr": "Le test de droiture",
+     "en": "The Test of Righteousness",
+     "nv": 22,
+     "min": 20,
+     "camp": 1
+    }
+   ]
+  },
+  "cavernes-des-lamentations": {
+   "carte": 43,
+   "niveaux": [
+    17,
+    25
+   ],
+   "entrees": [
+    {
+     "zone": "les-tarides",
+     "x": 47.7,
+     "y": 35
+    }
+   ],
+   "boss": [
+    {
+     "id": 3669,
+     "n": "Seigneur Cobrahn",
+     "en": "Lord Cobrahn",
+     "nv": [
+      20,
+      20
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6460,
+       "p": 20
+      },
+      {
+       "i": 10410,
+       "p": 20
+      },
+      {
+       "i": 6465,
+       "p": 60
+      },
+      {
+       "i": 9738,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 3653,
+     "n": "Kresh",
+     "en": "Kresh",
+     "nv": [
+      20,
+      20
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 13245,
+       "p": 10
+      },
+      {
+       "i": 6443,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 3670,
+     "n": "Seigneur Pythas",
+     "en": "Lord Pythas",
+     "nv": [
+      21,
+      21
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6472,
+       "p": 40
+      },
+      {
+       "i": 6473,
+       "p": 60
+      },
+      {
+       "i": 9740,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 3674,
+     "n": "Skum",
+     "en": "Skum",
+     "nv": [
+      21,
+      21
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6449,
+       "p": 50
+      },
+      {
+       "i": 6448,
+       "p": 50
+      },
+      {
+       "i": 6443,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 3673,
+     "n": "Seigneur Serpentis",
+     "en": "Lord Serpentis",
+     "nv": [
+      21,
+      21
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6469,
+       "p": 25
+      },
+      {
+       "i": 5970,
+       "p": 25
+      },
+      {
+       "i": 6459,
+       "p": 25
+      },
+      {
+       "i": 10411,
+       "p": 25
+      },
+      {
+       "i": 9741,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 5775,
+     "n": "Verdan l'Immortel",
+     "en": "Verdan the Everliving",
+     "nv": [
+      21,
+      21
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6630,
+       "p": 40
+      },
+      {
+       "i": 6631,
+       "p": 40
+      },
+      {
+       "i": 6629,
+       "p": 20
+      },
+      {
+       "i": 6443,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "rares": [
+    {
+     "id": 5912,
+     "n": "Dragon féerique déviant",
+     "en": "Deviate Faerie Dragon",
+     "nv": [
+      20,
+      20
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 5243,
+       "p": 50
+      },
+      {
+       "i": 6632,
+       "p": 50
+      },
+      {
+       "i": 6443,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "quetes": [
+    {
+     "id": 1489,
+     "fr": "Hamuul Totem-runique",
+     "en": "Hamuul Runetotem",
+     "nv": 16,
+     "min": 12,
+     "camp": 2
+    },
+    {
+     "id": 1490,
+     "fr": "Nara Crin-sauvage",
+     "en": "Nara Wildmane",
+     "nv": 16,
+     "min": 12,
+     "camp": 2
+    },
+    {
+     "id": 1486,
+     "fr": "Les peaux de déviants",
+     "en": "Deviate Hides",
+     "nv": 17,
+     "min": 13,
+     "camp": 0
+    },
+    {
+     "id": 959,
+     "fr": "Fuite de porto aux docks",
+     "en": "Trouble at the Docks",
+     "nv": 18,
+     "min": 14,
+     "camp": 0
+    },
+    {
+     "id": 962,
+     "fr": "Fleur de serpent",
+     "en": "Serpentbloom",
+     "nv": 18,
+     "min": 14,
+     "camp": 2
+    },
+    {
+     "id": 1491,
+     "fr": "Les potions d'intelligence",
+     "en": "Smart Drinks",
+     "nv": 18,
+     "min": 13,
+     "camp": 0
+    },
+    {
+     "id": 1487,
+     "fr": "L'éradication des déviants",
+     "en": "Deviate Eradication",
+     "nv": 21,
+     "min": 15,
+     "camp": 0
+    },
+    {
+     "id": 914,
+     "fr": "Les druides du Croc",
+     "en": "Leaders of the Fang",
+     "nv": 22,
+     "min": 11,
+     "camp": 2
+    },
+    {
+     "id": 6981,
+     "fr": "L'Éclat luminescent",
+     "en": "The Glowing Shard",
+     "nv": 26,
+     "min": 15,
+     "camp": 0
+    }
+   ]
+  },
+  "donjon-d-ombrecroc": {
+   "carte": 33,
+   "niveaux": [
+    18,
+    26
+   ],
+   "entrees": [
+    {
+     "zone": "foret-des-pins-argentes",
+     "x": 44.6,
+     "y": 67.7
+    }
+   ],
+   "boss": [
+    {
+     "id": 3914,
+     "n": "Rethiltripe",
+     "en": "Rethilgore",
+     "nv": [
+      20,
+      20
+     ],
+     "r": 1,
+     "butin": []
+    },
+    {
+     "id": 3886,
+     "n": "Tranchegriffe le Boucher",
+     "en": "Razorclaw the Butcher",
+     "nv": [
+      22,
+      22
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 1292,
+       "p": 10
+      },
+      {
+       "i": 6226,
+       "p": 45
+      },
+      {
+       "i": 6633,
+       "p": 45
+      }
+     ]
+    },
+    {
+     "id": 3887,
+     "n": "Baron d'Argelaine",
+     "en": "Baron Silverlaine",
+     "nv": [
+      24,
+      24
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6321,
+       "p": 30
+      },
+      {
+       "i": 6323,
+       "p": 70
+      }
+     ]
+    },
+    {
+     "id": 4278,
+     "n": "Commandant Printeval",
+     "en": "Commander Springvale",
+     "nv": [
+      24,
+      24
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6320,
+       "p": 50
+      },
+      {
+       "i": 3191,
+       "p": 50
+      }
+     ]
+    },
+    {
+     "id": 4279,
+     "n": "Odo l'Aveugle",
+     "en": "Odo the Blindwatcher",
+     "nv": [
+      24,
+      24
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6318,
+       "p": 40
+      },
+      {
+       "i": 6319,
+       "p": 60
+      }
+     ]
+    },
+    {
+     "id": 4274,
+     "n": "Fenrus le Dévoreur",
+     "en": "Fenrus the Devourer",
+     "nv": [
+      25,
+      25
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6340,
+       "p": 70
+      },
+      {
+       "i": 3230,
+       "p": 30
+      }
+     ]
+    },
+    {
+     "id": 3927,
+     "n": "Maître-loup Nandos",
+     "en": "Wolf Master Nandos",
+     "nv": [
+      25,
+      25
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 3748,
+       "p": 60
+      },
+      {
+       "i": 6314,
+       "p": 40
+      }
+     ]
+    },
+    {
+     "id": 4275,
+     "n": "Archimage Arugal",
+     "en": "Archmage Arugal",
+     "nv": [
+      26,
+      26
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6324,
+       "p": 40
+      },
+      {
+       "i": 6392,
+       "p": 40
+      },
+      {
+       "i": 6220,
+       "p": 20
+      },
+      {
+       "i": 5442,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "rares": [
+    {
+     "id": 3872,
+     "n": "Capitaine Ligemort",
+     "en": "Deathsworn Captain",
+     "nv": [
+      25,
+      25
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 6642,
+       "p": 40
+      },
+      {
+       "i": 6641,
+       "p": 60
+      }
+     ]
+    }
+   ],
+   "quetes": [
+    {
+     "id": 1098,
+     "fr": "Des nécrotraqueurs à Ombrecroc",
+     "en": "Deathstalkers in Shadowfang",
+     "nv": 25,
+     "min": 18,
+     "camp": 2
+    },
+    {
+     "id": 1740,
+     "fr": "L'Orbe de Soran'ruk",
+     "en": "The Orb of Soran'ruk",
+     "nv": 25,
+     "min": 20,
+     "camp": 0
+    },
+    {
+     "id": 1013,
+     "fr": "Le Livre d'Ur",
+     "en": "The Book of Ur",
+     "nv": 26,
+     "min": 16,
+     "camp": 2
+    },
+    {
+     "id": 1014,
+     "fr": "Arugal doit mourir",
+     "en": "Arugal Must Die",
+     "nv": 27,
+     "min": 18,
+     "camp": 2
+    }
+   ]
+  },
+  "profondeurs-de-brassenoire": {
+   "carte": 48,
+   "niveaux": [
+    20,
+    28
+   ],
+   "entrees": [
+    {
+     "zone": "orneval",
+     "x": 16.4,
+     "y": 10.9
+    }
+   ],
+   "boss": [
+    {
+     "id": 4887,
+     "n": "Ghamoo-ra",
+     "en": "Ghamoo-ra",
+     "nv": [
+      25,
+      25
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6907,
+       "p": 40
+      },
+      {
+       "i": 6908,
+       "p": 60
+      }
+     ]
+    },
+    {
+     "id": 4831,
+     "n": "Dame Sarevess",
+     "en": "Lady Sarevess",
+     "nv": [
+      25,
+      25
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 888,
+       "p": 40
+      },
+      {
+       "i": 11121,
+       "p": 40
+      },
+      {
+       "i": 3078,
+       "p": 20
+      },
+      {
+       "i": 5952,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 6243,
+     "n": "Gelihast",
+     "en": "Gelihast",
+     "nv": [
+      26,
+      26
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6906,
+       "p": 50
+      },
+      {
+       "i": 6905,
+       "p": 50
+      }
+     ]
+    },
+    {
+     "id": 12902,
+     "n": "Lorgus Jett",
+     "en": "Lorgus Jett",
+     "nv": [
+      26,
+      26
+     ],
+     "r": 1,
+     "butin": []
+    },
+    {
+     "id": 4830,
+     "n": "Vieux Serra'kis",
+     "en": "Old Serra'kis",
+     "nv": [
+      26,
+      26
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6901,
+       "p": 40
+      },
+      {
+       "i": 6904,
+       "p": 30
+      },
+      {
+       "i": 6902,
+       "p": 30
+      }
+     ]
+    },
+    {
+     "id": 4832,
+     "n": "Seigneur du crépuscule Kelris",
+     "en": "Twilight Lord Kelris",
+     "nv": [
+      27,
+      27
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 1155,
+       "p": 60
+      },
+      {
+       "i": 6903,
+       "p": 40
+      },
+      {
+       "i": 5881,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 4829,
+     "n": "Aku’mai",
+     "en": "Aku'mai",
+     "nv": [
+      28,
+      28
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6910,
+       "p": 40
+      },
+      {
+       "i": 6911,
+       "p": 40
+      },
+      {
+       "i": 6909,
+       "p": 20
+      }
+     ]
+    }
+   ],
+   "rares": [],
+   "quetes": [
+    {
+     "id": 6562,
+     "fr": "Problèmes dans les profondeurs",
+     "en": "Trouble in the Deeps",
+     "nv": 22,
+     "min": 17,
+     "camp": 2
+    },
+    {
+     "id": 6563,
+     "fr": "L'essence d'Aku'Mai",
+     "en": "The Essence of Aku'Mai",
+     "nv": 22,
+     "min": 17,
+     "camp": 2
+    },
+    {
+     "id": 6564,
+     "fr": "Allégeance aux Dieux très anciens",
+     "en": "Allegiance to the Old Gods",
+     "nv": 22,
+     "min": 17,
+     "camp": 2
+    },
+    {
+     "id": 971,
+     "fr": "La connaissance des profondeurs",
+     "en": "Knowledge in the Deeps",
+     "nv": 23,
+     "min": 10,
+     "camp": 1
+    },
+    {
+     "id": 1198,
+     "fr": "À la recherche de Thaelrid",
+     "en": "In Search of Thaelrid",
+     "nv": 24,
+     "min": 18,
+     "camp": 1
+    },
+    {
+     "id": 1275,
+     "fr": "Recherches sur la corruption",
+     "en": "Researching the Corruption",
+     "nv": 24,
+     "min": 18,
+     "camp": 1
+    },
+    {
+     "id": 1199,
+     "fr": "Le crépuscule descend",
+     "en": "Twilight Falls",
+     "nv": 25,
+     "min": 20,
+     "camp": 1
+    },
+    {
+     "id": 1740,
+     "fr": "L'Orbe de Soran'ruk",
+     "en": "The Orb of Soran'ruk",
+     "nv": 25,
+     "min": 20,
+     "camp": 0
+    },
+    {
+     "id": 6565,
+     "fr": "Allégeance aux Dieux très anciens",
+     "en": "Allegiance to the Old Gods",
+     "nv": 26,
+     "min": 17,
+     "camp": 2
+    },
+    {
+     "id": 1200,
+     "fr": "L'infamie de Brassenoire",
+     "en": "Blackfathom Villainy",
+     "nv": 27,
+     "min": 18,
+     "camp": 1
+    },
+    {
+     "id": 6561,
+     "fr": "L'infamie de Brassenoire",
+     "en": "Blackfathom Villainy",
+     "nv": 27,
+     "min": 18,
+     "camp": 2
+    },
+    {
+     "id": 6921,
+     "fr": "Parmi les ruines",
+     "en": "Amongst the Ruins",
+     "nv": 27,
+     "min": 21,
+     "camp": 2
+    }
+   ]
+  },
+  "prison": {
+   "carte": 34,
+   "niveaux": [
+    24,
+    29
+   ],
+   "entrees": [
+    {
+     "zone": "hurlevent",
+     "x": 50.3,
+     "y": 66.1
+    }
+   ],
+   "boss": [
+    {
+     "id": 1696,
+     "n": "Targorr le Terrifiant",
+     "en": "Targorr the Dread",
+     "nv": [
+      24,
+      24
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 3630,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 1666,
+     "n": "Kam Furie-du-fond",
+     "en": "Kam Deepfury",
+     "nv": [
+      27,
+      27
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 2280,
+       "p": 1.2
+      },
+      {
+       "i": 3640,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 1717,
+     "n": "Hamhock",
+     "en": "Hamhock",
+     "nv": [
+      28,
+      28
+     ],
+     "r": 1,
+     "butin": []
+    },
+    {
+     "id": 1716,
+     "n": "Bazil Thredd",
+     "en": "Bazil Thredd",
+     "nv": [
+      29,
+      29
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 2926,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 2909,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 1663,
+     "n": "Dextren Ward",
+     "en": "Dextren Ward",
+     "nv": [
+      26,
+      26
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 3628,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 2909,
+       "p": 40,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "rares": [
+    {
+     "id": 1720,
+     "n": "Bruegal Poing-de-fer",
+     "en": "Bruegal Ironknuckle",
+     "nv": [
+      26,
+      26
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 2941,
+       "p": 33.3
+      },
+      {
+       "i": 2942,
+       "p": 33.3
+      },
+      {
+       "i": 3228,
+       "p": 33.3
+      },
+      {
+       "i": 2909,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "quetes": [
+    {
+     "id": 386,
+     "fr": "Ce qui se passait ailleurs…",
+     "en": "What Comes Around...",
+     "nv": 25,
+     "min": 22,
+     "camp": 1
+    },
+    {
+     "id": 377,
+     "fr": "Crime et Châtiments",
+     "en": "Crime and Punishment",
+     "nv": 26,
+     "min": 22,
+     "camp": 1
+    },
+    {
+     "id": 387,
+     "fr": "Écraser la rébellion",
+     "en": "Quell The Uprising",
+     "nv": 26,
+     "min": 22,
+     "camp": 1
+    },
+    {
+     "id": 388,
+     "fr": "La couleur du Sang",
+     "en": "The Color of Blood",
+     "nv": 26,
+     "min": 22,
+     "camp": 1
+    },
+    {
+     "id": 378,
+     "fr": "Fureur dans les Profondeurs",
+     "en": "The Fury Runs Deep",
+     "nv": 27,
+     "min": 22,
+     "camp": 1
+    },
+    {
+     "id": 391,
+     "fr": "Les Emeutes de la Prison",
+     "en": "The Stockade Riots",
+     "nv": 29,
+     "min": 16,
+     "camp": 1
+    }
+   ]
+  },
+  "gnomeregan": {
+   "carte": 90,
+   "niveaux": [
+    20,
+    34
+   ],
+   "entrees": [
+    {
+     "zone": "dun-morogh",
+     "x": 17.5,
+     "y": 39.1
+    },
+    {
+     "zone": "dun-morogh",
+     "x": 20.6,
+     "y": 29.9
+    }
+   ],
+   "boss": [
+    {
+     "id": 7079,
+     "n": "Retombée visqueuse",
+     "en": "Viscous Fallout",
+     "nv": [
+      30,
+      30
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 9454,
+       "p": 55
+      },
+      {
+       "i": 9453,
+       "p": 25
+      },
+      {
+       "i": 9452,
+       "p": 20
+      }
+     ]
+    },
+    {
+     "id": 6235,
+     "n": "Electrocuteur 6000",
+     "en": "Electrocutioner 6000",
+     "nv": [
+      32,
+      32
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 9447,
+       "p": 40
+      },
+      {
+       "i": 9446,
+       "p": 20
+      },
+      {
+       "i": 9448,
+       "p": 40
+      },
+      {
+       "i": 9327,
+       "p": 1
+      },
+      {
+       "i": 9309,
+       "p": 5,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 6229,
+     "n": "Faucheur de foule 9-60",
+     "en": "Crowd Pummeler 9-60",
+     "nv": [
+      32,
+      32
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 9449,
+       "p": 40
+      },
+      {
+       "i": 9450,
+       "p": 60
+      },
+      {
+       "i": 11827,
+       "p": 2
+      },
+      {
+       "i": 9327,
+       "p": 1
+      },
+      {
+       "i": 9309,
+       "p": 5,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 7800,
+     "n": "Mekgénieur Thermojoncteur",
+     "en": "Mekgineer Thermaplugg",
+     "nv": [
+      34,
+      34
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 9461,
+       "p": 30
+      },
+      {
+       "i": 9458,
+       "p": 30
+      },
+      {
+       "i": 9459,
+       "p": 25
+      },
+      {
+       "i": 9492,
+       "p": 15
+      },
+      {
+       "i": 4415,
+       "p": 2
+      },
+      {
+       "i": 11828,
+       "p": 15
+      },
+      {
+       "i": 4413,
+       "p": 2
+      },
+      {
+       "i": 4411,
+       "p": 2
+      },
+      {
+       "i": 9327,
+       "p": 1
+      },
+      {
+       "i": 9299,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 9309,
+       "p": 5,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "rares": [
+    {
+     "id": 6228,
+     "n": "Ambassadeur Sombrefer",
+     "en": "Dark Iron Ambassador",
+     "nv": [
+      33,
+      33
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 9457,
+       "p": 33.3
+      },
+      {
+       "i": 9456,
+       "p": 33.3
+      },
+      {
+       "i": 9455,
+       "p": 33.3
+      }
+     ]
+    }
+   ],
+   "quetes": [
+    {
+     "id": 2841,
+     "fr": "Guerre des plates-formes",
+     "en": "Rig Wars",
+     "nv": 35,
+     "min": 25,
+     "camp": 2
+    },
+    {
+     "id": 2929,
+     "fr": "La grande trahison",
+     "en": "The Grand Betrayal",
+     "nv": 35,
+     "min": 25,
+     "camp": 1
+    }
+   ]
+  },
+  "kraal-de-tranchebauge": {
+   "carte": 47,
+   "niveaux": [
+    15,
+    33
+   ],
+   "entrees": [
+    {
+     "zone": "les-tarides",
+     "x": 42.2,
+     "y": 89.8
+    }
+   ],
+   "boss": [
+    {
+     "id": 6168,
+     "n": "Roogug",
+     "en": "Roogug",
+     "nv": [
+      28,
+      28
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6841,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 5825,
+       "p": 10,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 4424,
+     "n": "Aggem Malépine",
+     "en": "Aggem Thorncurse",
+     "nv": [
+      30,
+      30
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 5825,
+       "p": 10,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 4428,
+     "n": "Nécrorateur Jargba",
+     "en": "Death Speaker Jargba",
+     "nv": [
+      30,
+      30
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 2816,
+       "p": 20
+      },
+      {
+       "i": 6682,
+       "p": 40
+      },
+      {
+       "i": 6685,
+       "p": 40
+      },
+      {
+       "i": 5825,
+       "p": 10,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 4420,
+     "n": "Seigneur Brusquebroche",
+     "en": "Overlord Ramtusk",
+     "nv": [
+      32,
+      32
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6687,
+       "p": 40
+      },
+      {
+       "i": 6686,
+       "p": 60
+      },
+      {
+       "i": 5825,
+       "p": 10,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 4421,
+     "n": "Charlga Trancheflanc",
+     "en": "Charlga Razorflank",
+     "nv": [
+      33,
+      33
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6693,
+       "p": 40
+      },
+      {
+       "i": 6694,
+       "p": 40
+      },
+      {
+       "i": 6692,
+       "p": 20
+      },
+      {
+       "i": 5792,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 5793,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 5825,
+       "p": 10,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 4422,
+     "n": "Agathelos le Déchaîné",
+     "en": "Agathelos the Raging",
+     "nv": [
+      33,
+      33
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 6691,
+       "p": 40
+      },
+      {
+       "i": 6690,
+       "p": 60
+      }
+     ]
+    }
+   ],
+   "rares": [
+    {
+     "id": 4425,
+     "n": "Chasseur aveugle",
+     "en": "Blind Hunter",
+     "nv": [
+      32,
+      32
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 6695,
+       "p": 33.3
+      },
+      {
+       "i": 6696,
+       "p": 33.3
+      },
+      {
+       "i": 6697,
+       "p": 33.3
+      }
+     ]
+    },
+    {
+     "id": 4438,
+     "n": "Lanceur de Tranchebauge",
+     "en": "Razorfen Spearhide",
+     "nv": [
+      29,
+      30
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 6679,
+       "p": 79.6
+      },
+      {
+       "i": 5825,
+       "p": 10,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 4842,
+     "n": "Implorateur de la terre Halmgar",
+     "en": "Earthcaller Halmgar",
+     "nv": [
+      32,
+      32
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 6689,
+       "p": 50
+      },
+      {
+       "i": 6688,
+       "p": 50
+      },
+      {
+       "i": 5825,
+       "p": 10,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "quetes": [
+    {
+     "id": 1701,
+     "fr": "Une cotte de mailles en acier trempé",
+     "en": "Fire Hardened Mail",
+     "nv": 28,
+     "min": 20,
+     "camp": 1
+    },
+    {
+     "id": 1142,
+     "fr": "Le déclin et la mort",
+     "en": "Mortality Wanes",
+     "nv": 30,
+     "min": 25,
+     "camp": 1
+    },
+    {
+     "id": 1838,
+     "fr": "Armure de brutalité",
+     "en": "Brutal Armor",
+     "nv": 30,
+     "min": 20,
+     "camp": 2
+    },
+    {
+     "id": 1109,
+     "fr": "Corvée de guano",
+     "en": "Going, Going, Guano!",
+     "nv": 33,
+     "min": 30,
+     "camp": 2
+    },
+    {
+     "id": 1101,
+     "fr": "La mégère du Kraal",
+     "en": "The Crone of the Kraul",
+     "nv": 34,
+     "min": 29,
+     "camp": 1
+    },
+    {
+     "id": 1102,
+     "fr": "Un destin funeste",
+     "en": "A Vengeful Fate",
+     "nv": 34,
+     "min": 29,
+     "camp": 2
+    }
+   ]
+  },
+  "monastere-ecarlate": {
+   "carte": 189,
+   "niveaux": [
+    8,
+    42
+   ],
+   "entrees": [
+    {
+     "zone": "clairieres-de-tirisfal",
+     "x": 84.8,
+     "y": 30.3
+    },
+    {
+     "zone": "clairieres-de-tirisfal",
+     "x": 85.7,
+     "y": 31.8
+    }
+   ],
+   "boss": [
+    {
+     "id": 3983,
+     "n": "Interrogateur Vislar",
+     "en": "Interrogator Vishas",
+     "nv": [
+      32,
+      32
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 7682,
+       "p": 10
+      },
+      {
+       "i": 5805,
+       "p": 2,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 4543,
+     "n": "Mage de sang Thalnos",
+     "en": "Bloodmage Thalnos",
+     "nv": [
+      34,
+      34
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 7685,
+       "p": 50
+      },
+      {
+       "i": 7684,
+       "p": 50
+      }
+     ]
+    },
+    {
+     "id": 3974,
+     "n": "Maître-chien Loksey",
+     "en": "Houndmaster Loksey",
+     "nv": [
+      34,
+      34
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 7710,
+       "p": 10
+      },
+      {
+       "i": 7756,
+       "p": 60
+      },
+      {
+       "i": 3456,
+       "p": 30
+      },
+      {
+       "i": 5805,
+       "p": 2,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 6487,
+     "n": "Arcaniste Doan",
+     "en": "Arcanist Doan",
+     "nv": [
+      37,
+      37
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 7713,
+       "p": 25
+      },
+      {
+       "i": 7714,
+       "p": 25
+      },
+      {
+       "i": 7711,
+       "p": 25
+      },
+      {
+       "i": 7712,
+       "p": 25
+      },
+      {
+       "i": 5805,
+       "p": 2,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 3975,
+     "n": "Hérode",
+     "en": "Herod",
+     "nv": [
+      40,
+      40
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 7718,
+       "p": 35
+      },
+      {
+       "i": 7719,
+       "p": 35
+      },
+      {
+       "i": 10330,
+       "p": 15
+      },
+      {
+       "i": 7717,
+       "p": 15
+      },
+      {
+       "i": 5805,
+       "p": 2,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 4542,
+     "n": "Grand Inquisiteur Fairbanks",
+     "en": "High Inquisitor Fairbanks",
+     "nv": [
+      40,
+      40
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 19507,
+       "p": 33.3
+      },
+      {
+       "i": 19508,
+       "p": 33.3
+      },
+      {
+       "i": 19509,
+       "p": 33.3
+      }
+     ]
+    },
+    {
+     "id": 3977,
+     "n": "Grande inquisitrice Blanchetête",
+     "en": "High Inquisitor Whitemane",
+     "nv": [
+      42,
+      42
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 7720,
+       "p": 40
+      },
+      {
+       "i": 7722,
+       "p": 40
+      },
+      {
+       "i": 7721,
+       "p": 20
+      },
+      {
+       "i": 5805,
+       "p": 2,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "rares": [],
+   "quetes": [
+    {
+     "id": 1051,
+     "fr": "La vengeance de Vorrel",
+     "en": "Vorrel's Revenge",
+     "nv": 33,
+     "min": 25,
+     "camp": 2
+    },
+    {
+     "id": 1113,
+     "fr": "Des cœurs zélés",
+     "en": "Hearts of Zeal",
+     "nv": 33,
+     "min": 30,
+     "camp": 2
+    },
+    {
+     "id": 1160,
+     "fr": "L'épreuve de la Connaissance",
+     "en": "Test of Lore",
+     "nv": 36,
+     "min": 25,
+     "camp": 2
+    },
+    {
+     "id": 1049,
+     "fr": "Compendium des Déchus",
+     "en": "Compendium of the Fallen",
+     "nv": 38,
+     "min": 28,
+     "camp": 2
+    },
+    {
+     "id": 1050,
+     "fr": "Mythologie des titans",
+     "en": "Mythology of the Titans",
+     "nv": 38,
+     "min": 28,
+     "camp": 1
+    },
+    {
+     "id": 1053,
+     "fr": "Au nom de la Lumière",
+     "en": "In the Name of the Light",
+     "nv": 40,
+     "min": 34,
+     "camp": 1
+    },
+    {
+     "id": 1048,
+     "fr": "Au monastère Écarlate",
+     "en": "Into The Scarlet Monastery",
+     "nv": 42,
+     "min": 33,
+     "camp": 2
+    }
+   ]
+  },
+  "souilles-de-tranchebauge": {
+   "carte": 129,
+   "niveaux": [
+    30,
+    41
+   ],
+   "entrees": [
+    {
+     "zone": "les-tarides",
+     "x": 50.9,
+     "y": 92.9
+    }
+   ],
+   "boss": [
+    {
+     "id": 7357,
+     "n": "Mordresh Oeil-de-feu",
+     "en": "Mordresh Fire Eye",
+     "nv": [
+      39,
+      39
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 10769,
+       "p": 33.3
+      },
+      {
+       "i": 10770,
+       "p": 33.3
+      },
+      {
+       "i": 10771,
+       "p": 33.3
+      }
+     ]
+    },
+    {
+     "id": 8567,
+     "n": "Glouton",
+     "en": "Glutton",
+     "nv": [
+      40,
+      40
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 10774,
+       "p": 50
+      },
+      {
+       "i": 10772,
+       "p": 50
+      }
+     ]
+    },
+    {
+     "id": 7358,
+     "n": "Amnennar le Porte-froid",
+     "en": "Amnennar the Coldbringer",
+     "nv": [
+      41,
+      41
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 10761,
+       "p": 20
+      },
+      {
+       "i": 10762,
+       "p": 20
+      },
+      {
+       "i": 10763,
+       "p": 20
+      },
+      {
+       "i": 10764,
+       "p": 20
+      },
+      {
+       "i": 10765,
+       "p": 20
+      },
+      {
+       "i": 10420,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "rares": [],
+   "quetes": [
+    {
+     "id": 6626,
+     "fr": "L'hôte du mal",
+     "en": "A Host of Evil",
+     "nv": 35,
+     "min": 28,
+     "camp": 0
+    },
+    {
+     "id": 6521,
+     "fr": "Une alliance impie",
+     "en": "An Unholy Alliance",
+     "nv": 36,
+     "min": 28,
+     "camp": 2
+    },
+    {
+     "id": 6522,
+     "fr": "Une alliance impie",
+     "en": "An Unholy Alliance",
+     "nv": 36,
+     "min": 28,
+     "camp": 2
+    },
+    {
+     "id": 3523,
+     "fr": "Le Fléau des Souilles",
+     "en": "Scourge of the Downs",
+     "nv": 37,
+     "min": 32,
+     "camp": 0
+    },
+    {
+     "id": 3525,
+     "fr": "L'extinction de l'idole",
+     "en": "Extinguishing the Idol",
+     "nv": 37,
+     "min": 32,
+     "camp": 0
+    },
+    {
+     "id": 3341,
+     "fr": "L'anéantissement",
+     "en": "Bring the End",
+     "nv": 42,
+     "min": 37,
+     "camp": 2
+    },
+    {
+     "id": 3636,
+     "fr": "Apportez la Lumière",
+     "en": "Bring the Light",
+     "nv": 42,
+     "min": 39,
+     "camp": 1
+    }
+   ]
+  },
+  "uldaman": {
+   "carte": 70,
+   "niveaux": [
+    35,
+    60
+   ],
+   "entrees": [
+    {
+     "zone": "terres-ingrates",
+     "x": 35.2,
+     "y": 9.9
+    },
+    {
+     "zone": "terres-ingrates",
+     "x": 67.7,
+     "y": 43.2
+    }
+   ],
+   "boss": [
+    {
+     "id": 6910,
+     "n": "Revelosh",
+     "en": "Revelosh",
+     "nv": [
+      40,
+      40
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 9387,
+       "p": 25
+      },
+      {
+       "i": 9388,
+       "p": 25
+      },
+      {
+       "i": 9389,
+       "p": 25
+      },
+      {
+       "i": 9390,
+       "p": 25
+      }
+     ]
+    },
+    {
+     "id": 6906,
+     "n": "Baelog",
+     "en": "Baelog",
+     "nv": [
+      41,
+      41
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 9401,
+       "p": 10
+      },
+      {
+       "i": 9399,
+       "p": 100
+      }
+     ]
+    },
+    {
+     "id": 7206,
+     "n": "Ancien gardien des pierres",
+     "en": "Ancient Stone Keeper",
+     "nv": [
+      44,
+      44
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 9410,
+       "p": 50
+      },
+      {
+       "i": 9411,
+       "p": 50
+      }
+     ]
+    },
+    {
+     "id": 7291,
+     "n": "Galgann Martel-de-feu",
+     "en": "Galgann Firehammer",
+     "nv": [
+      45,
+      45
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 9412,
+       "p": 20
+      },
+      {
+       "i": 11310,
+       "p": 20
+      },
+      {
+       "i": 11311,
+       "p": 40
+      },
+      {
+       "i": 9419,
+       "p": 20
+      }
+     ]
+    },
+    {
+     "id": 4854,
+     "n": "Grimelok",
+     "en": "Grimlok",
+     "nv": [
+      45,
+      45
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 9415,
+       "p": 40
+      },
+      {
+       "i": 9416,
+       "p": 20
+      },
+      {
+       "i": 9414,
+       "p": 40
+      },
+      {
+       "i": 7670,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 2748,
+     "n": "Archaedas",
+     "en": "Archaedas",
+     "nv": [
+      47,
+      47
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 11118,
+       "p": 60
+      },
+      {
+       "i": 9413,
+       "p": 20
+      },
+      {
+       "i": 9418,
+       "p": 20
+      },
+      {
+       "i": 7672,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "rares": [],
+   "quetes": [
+    {
+     "id": 1956,
+     "fr": "L'énergie d'Uldaman",
+     "en": "Power in Uldaman",
+     "nv": 40,
+     "min": 35,
+     "camp": 0
+    },
+    {
+     "id": 2201,
+     "fr": "Trouver les gemmes",
+     "en": "Find the Gems",
+     "nv": 43,
+     "min": 40,
+     "camp": 1
+    },
+    {
+     "id": 2204,
+     "fr": "Réparer le collier",
+     "en": "Restoring the Necklace",
+     "nv": 44,
+     "min": 37,
+     "camp": 1
+    },
+    {
+     "id": 2339,
+     "fr": "Trouver les gemmes et la source d'énergie",
+     "en": "Find the Gems and Power Source",
+     "nv": 44,
+     "min": 37,
+     "camp": 2
+    }
+   ]
+  },
+  "zul-farrak": {
+   "carte": 209,
+   "niveaux": [
+    30,
+    60
+   ],
+   "entrees": [
+    {
+     "zone": "tanaris",
+     "x": 38.7,
+     "y": 19.5
+    }
+   ],
+   "boss": [
+    {
+     "id": 7795,
+     "n": "Hydromancienne Velratha",
+     "en": "Hydromancer Velratha",
+     "nv": [
+      46,
+      46
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 8623,
+       "p": 1
+      },
+      {
+       "i": 10661,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 9234,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 8127,
+     "n": "Antu'sul",
+     "en": "Antu'sul",
+     "nv": [
+      48,
+      48
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 9640,
+       "p": 35
+      },
+      {
+       "i": 9641,
+       "p": 35
+      },
+      {
+       "i": 9639,
+       "p": 20
+      },
+      {
+       "i": 9379,
+       "p": 10
+      },
+      {
+       "i": 9243,
+       "p": 2
+      },
+      {
+       "i": 9523,
+       "p": 55,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 7272,
+     "n": "Theka le Martyr",
+     "en": "Theka the Martyr",
+     "nv": [
+      45,
+      46
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 8623,
+       "p": 1
+      },
+      {
+       "i": 10660,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 9523,
+       "p": 55,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 7271,
+     "n": "Féticheur Zum'rah",
+     "en": "Witch Doctor Zum'rah",
+     "nv": [
+      46,
+      46
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18083,
+       "p": 40
+      },
+      {
+       "i": 18082,
+       "p": 20
+      },
+      {
+       "i": 9243,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 7267,
+     "n": "Chef Ukorz Scalpessable",
+     "en": "Chief Ukorz Sandscalp",
+     "nv": [
+      48,
+      48
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 9476,
+       "p": 30
+      },
+      {
+       "i": 9477,
+       "p": 20
+      },
+      {
+       "i": 9478,
+       "p": 20
+      },
+      {
+       "i": 9479,
+       "p": 20
+      },
+      {
+       "i": 11086,
+       "p": 10
+      },
+      {
+       "i": 9243,
+       "p": 2
+      },
+      {
+       "i": 9523,
+       "p": 55,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "rares": [
+    {
+     "id": 10080,
+     "n": "Sandarr Ravadune",
+     "en": "Sandarr Dunereaver",
+     "nv": [
+      45,
+      45
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 9243,
+       "p": 2.1
+      },
+      {
+       "i": 8623,
+       "p": 1
+      },
+      {
+       "i": 9523,
+       "p": 55,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 10081,
+     "n": "Ame en peine poudreuse",
+     "en": "Dustwraith",
+     "nv": [
+      45,
+      45
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 12471,
+       "p": 18.6
+      },
+      {
+       "i": 8623,
+       "p": 1
+      },
+      {
+       "i": 9523,
+       "p": 55,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 10082,
+     "n": "Zerillis",
+     "en": "Zerillis",
+     "nv": [
+      45,
+      45
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 12470,
+       "p": 18.7
+      },
+      {
+       "i": 8623,
+       "p": 1
+      },
+      {
+       "i": 9523,
+       "p": 55,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "quetes": [
+    {
+     "id": 2865,
+     "fr": "Les carapaces de scarabées",
+     "en": "Scarab Shells",
+     "nv": 45,
+     "min": 40,
+     "camp": 0
+    },
+    {
+     "id": 3042,
+     "fr": "Agent durcissant troll",
+     "en": "Troll Temper",
+     "nv": 45,
+     "min": 40,
+     "camp": 0
+    },
+    {
+     "id": 2846,
+     "fr": "La tiare des abysses",
+     "en": "Tiara of the Deep",
+     "nv": 46,
+     "min": 40,
+     "camp": 0
+    },
+    {
+     "id": 2768,
+     "fr": "Le bâtonnet divino-matic",
+     "en": "Divino-matic Rod",
+     "nv": 47,
+     "min": 40,
+     "camp": 0
+    },
+    {
+     "id": 3527,
+     "fr": "La prophétie de Mosh'aru",
+     "en": "The Prophecy of Mosh'aru",
+     "nv": 47,
+     "min": 40,
+     "camp": 0
+    }
+   ]
+  },
+  "maraudon": {
+   "carte": 349,
+   "niveaux": [
+    42,
+    60
+   ],
+   "entrees": [
+    {
+     "zone": "desolace",
+     "x": 35.9,
+     "y": 64.6
+    },
+    {
+     "zone": "desolace",
+     "x": 30.5,
+     "y": 54.5
+    }
+   ],
+   "boss": [
+    {
+     "id": 13282,
+     "n": "Noxcion",
+     "en": "Noxxion",
+     "nv": [
+      48,
+      48
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 17744,
+       "p": 40
+      },
+      {
+       "i": 17746,
+       "p": 40
+      },
+      {
+       "i": 17745,
+       "p": 20
+      },
+      {
+       "i": 17702,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 17684,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 12258,
+     "n": "Tranchefouet",
+     "en": "Razorlash",
+     "nv": [
+      48,
+      48
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 17748,
+       "p": 25
+      },
+      {
+       "i": 17749,
+       "p": 25
+      },
+      {
+       "i": 17750,
+       "p": 25
+      },
+      {
+       "i": 17751,
+       "p": 25
+      },
+      {
+       "i": 17684,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 12236,
+     "n": "Seigneur Vylelangue",
+     "en": "Lord Vyletongue",
+     "nv": [
+      47,
+      47
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 17752,
+       "p": 33.3
+      },
+      {
+       "i": 17754,
+       "p": 33.3
+      },
+      {
+       "i": 17755,
+       "p": 33.3
+      },
+      {
+       "i": 17703,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 17684,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 12225,
+     "n": "Celebras le Maudit",
+     "en": "Celebras the Cursed",
+     "nv": [
+      49,
+      49
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 17738,
+       "p": 33.3
+      },
+      {
+       "i": 17739,
+       "p": 33.3
+      },
+      {
+       "i": 17740,
+       "p": 33.3
+      },
+      {
+       "i": 17684,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 12203,
+     "n": "Glissement de terrain",
+     "en": "Landslide",
+     "nv": [
+      50,
+      50
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 17734,
+       "p": 25
+      },
+      {
+       "i": 17736,
+       "p": 25
+      },
+      {
+       "i": 17737,
+       "p": 25
+      },
+      {
+       "i": 17943,
+       "p": 25
+      },
+      {
+       "i": 17684,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 13601,
+     "n": "Bricoleur Kadenaz",
+     "en": "Tinkerer Gizlock",
+     "nv": [
+      50,
+      50
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 17717,
+       "p": 33.3
+      },
+      {
+       "i": 17718,
+       "p": 33.3
+      },
+      {
+       "i": 17719,
+       "p": 33.3
+      },
+      {
+       "i": 17684,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 13596,
+     "n": "Grippe-charogne",
+     "en": "Rotgrip",
+     "nv": [
+      50,
+      50
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 17728,
+       "p": 40
+      },
+      {
+       "i": 17732,
+       "p": 40
+      },
+      {
+       "i": 17730,
+       "p": 20
+      },
+      {
+       "i": 17684,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 12201,
+     "n": "Princesse Theradras",
+     "en": "Princess Theradras",
+     "nv": [
+      51,
+      51
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 17713,
+       "p": 25
+      },
+      {
+       "i": 17714,
+       "p": 25
+      },
+      {
+       "i": 17766,
+       "p": 20
+      },
+      {
+       "i": 17715,
+       "p": 20
+      },
+      {
+       "i": 17711,
+       "p": 20
+      },
+      {
+       "i": 17710,
+       "p": 20
+      },
+      {
+       "i": 17707,
+       "p": 20
+      },
+      {
+       "i": 17684,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "rares": [
+    {
+     "id": 12237,
+     "n": "Meshlok le Moissonneur",
+     "en": "Meshlok the Harvester",
+     "nv": [
+      48,
+      48
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 17741,
+       "p": 33.3
+      },
+      {
+       "i": 17742,
+       "p": 33.3
+      },
+      {
+       "i": 17767,
+       "p": 33.3
+      },
+      {
+       "i": 17684,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "quetes": [
+    {
+     "id": 7068,
+     "fr": "Fragments d'Ombréclat",
+     "en": "Shadowshard Fragments",
+     "nv": 42,
+     "min": 38,
+     "camp": 2
+    },
+    {
+     "id": 7070,
+     "fr": "Fragments d'Ombréclat",
+     "en": "Shadowshard Fragments",
+     "nv": 42,
+     "min": 38,
+     "camp": 1
+    },
+    {
+     "id": 7028,
+     "fr": "Forces maléfiques retorses",
+     "en": "Twisted Evils",
+     "nv": 47,
+     "min": 41,
+     "camp": 0
+    },
+    {
+     "id": 7029,
+     "fr": "La corruption de Vylelangue",
+     "en": "Vyletongue Corruption",
+     "nv": 47,
+     "min": 41,
+     "camp": 2
+    },
+    {
+     "id": 7041,
+     "fr": "La corruption de Vylelangue",
+     "en": "Vyletongue Corruption",
+     "nv": 47,
+     "min": 41,
+     "camp": 1
+    },
+    {
+     "id": 7067,
+     "fr": "Les instructions du Paria",
+     "en": "The Pariah's Instructions",
+     "nv": 48,
+     "min": 39,
+     "camp": 0
+    },
+    {
+     "id": 7044,
+     "fr": "Légendes de Maraudon",
+     "en": "Legends of Maraudon",
+     "nv": 49,
+     "min": 41,
+     "camp": 0
+    },
+    {
+     "id": 7046,
+     "fr": "Le sceptre de Celebras",
+     "en": "The Scepter of Celebras",
+     "nv": 49,
+     "min": 41,
+     "camp": 0
+    },
+    {
+     "id": 7064,
+     "fr": "Corruption de la terre et de la graine",
+     "en": "Corruption of Earth and Seed",
+     "nv": 51,
+     "min": 45,
+     "camp": 2
+    },
+    {
+     "id": 7065,
+     "fr": "Corruption de la terre et de la Graine",
+     "en": "Corruption of Earth and Seed",
+     "nv": 51,
+     "min": 45,
+     "camp": 1
+    },
+    {
+     "id": 7066,
+     "fr": "La graine de la vie",
+     "en": "Seed of Life",
+     "nv": 51,
+     "min": 45,
+     "camp": 0
+    }
+   ]
+  },
+  "temple-englouti": {
+   "carte": 109,
+   "niveaux": [
+    40,
+    60
+   ],
+   "entrees": [
+    {
+     "zone": "marais-des-chagrins",
+     "x": 77.4,
+     "y": 35.4
+    }
+   ],
+   "boss": [
+    {
+     "id": 5710,
+     "n": "Jammal'an le prophète",
+     "en": "Jammal'an the Prophet",
+     "nv": [
+      54,
+      54
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 10808,
+       "p": 33.3
+      },
+      {
+       "i": 10806,
+       "p": 33.3
+      },
+      {
+       "i": 10807,
+       "p": 33.3
+      },
+      {
+       "i": 6212,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 6181,
+       "p": 40,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 5719,
+     "n": "Morphaz",
+     "en": "Morphaz",
+     "nv": [
+      52,
+      52
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 10795,
+       "p": 6.3
+      },
+      {
+       "i": 10796,
+       "p": 6.3
+      },
+      {
+       "i": 10797,
+       "p": 6.3
+      },
+      {
+       "i": 12243,
+       "p": 6.3
+      },
+      {
+       "i": 12463,
+       "p": 6.3
+      },
+      {
+       "i": 12464,
+       "p": 6.3
+      },
+      {
+       "i": 12465,
+       "p": 6.3
+      },
+      {
+       "i": 12466,
+       "p": 6.3
+      },
+      {
+       "i": 20022,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 20025,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 20019,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 20085,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 5722,
+     "n": "Hazzas",
+     "en": "Hazzas",
+     "nv": [
+      53,
+      53
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 10795,
+       "p": 6.3
+      },
+      {
+       "i": 10796,
+       "p": 6.3
+      },
+      {
+       "i": 10797,
+       "p": 6.3
+      },
+      {
+       "i": 12243,
+       "p": 6.3
+      },
+      {
+       "i": 12463,
+       "p": 6.3
+      },
+      {
+       "i": 12464,
+       "p": 6.3
+      },
+      {
+       "i": 12465,
+       "p": 6.3
+      },
+      {
+       "i": 12466,
+       "p": 6.3
+      }
+     ]
+    },
+    {
+     "id": 5709,
+     "n": "Ombre d'Eranikus",
+     "en": "Shade of Eranikus",
+     "nv": [
+      55,
+      55
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 10833,
+       "p": 40
+      },
+      {
+       "i": 10829,
+       "p": 40
+      },
+      {
+       "i": 10836,
+       "p": 39.8
+      },
+      {
+       "i": 10835,
+       "p": 39.8
+      },
+      {
+       "i": 10837,
+       "p": 20
+      },
+      {
+       "i": 10828,
+       "p": 20
+      },
+      {
+       "i": 10454,
+       "p": 100
+      }
+     ]
+    }
+   ],
+   "rares": [],
+   "quetes": [
+    {
+     "id": 1445,
+     "fr": "Le temple d'Atal'Hakkar",
+     "en": "The Temple of Atal'Hakkar",
+     "nv": 50,
+     "min": 38,
+     "camp": 2
+    },
+    {
+     "id": 1475,
+     "fr": "Dans le temple d'Atal'Hakkar",
+     "en": "Into The Temple of Atal'Hakkar",
+     "nv": 50,
+     "min": 41,
+     "camp": 1
+    },
+    {
+     "id": 3380,
+     "fr": "Le Temple englouti",
+     "en": "The Sunken Temple",
+     "nv": 51,
+     "min": 46,
+     "camp": 2
+    },
+    {
+     "id": 3446,
+     "fr": "Dans les profondeurs",
+     "en": "Into the Depths",
+     "nv": 51,
+     "min": 46,
+     "camp": 0
+    },
+    {
+     "id": 3447,
+     "fr": "Le secret du cercle",
+     "en": "Secret of the Circle",
+     "nv": 51,
+     "min": 46,
+     "camp": 0
+    },
+    {
+     "id": 4146,
+     "fr": "Carburant de baguette",
+     "en": "Zapper Fuel",
+     "nv": 52,
+     "min": 47,
+     "camp": 2
+    },
+    {
+     "id": 8232,
+     "fr": "Le drake vert",
+     "en": "The Green Drake",
+     "nv": 52,
+     "min": 50,
+     "camp": 0
+    },
+    {
+     "id": 8236,
+     "fr": "La clé d’azur",
+     "en": "The Azure Key",
+     "nv": 52,
+     "min": 50,
+     "camp": 0
+    },
+    {
+     "id": 8253,
+     "fr": "Détruire Morphaz",
+     "en": "Destroy Morphaz",
+     "nv": 52,
+     "min": 50,
+     "camp": 0
+    },
+    {
+     "id": 8257,
+     "fr": "Le sang de Morphaz",
+     "en": "Blood of Morphaz",
+     "nv": 52,
+     "min": 50,
+     "camp": 0
+    },
+    {
+     "id": 1446,
+     "fr": "Jammal'an le Prophète",
+     "en": "Jammal'an the Prophet",
+     "nv": 53,
+     "min": 38,
+     "camp": 0
+    },
+    {
+     "id": 3528,
+     "fr": "Le dieu Hakkar",
+     "en": "The God Hakkar",
+     "nv": 53,
+     "min": 40,
+     "camp": 0
+    },
+    {
+     "id": 3373,
+     "fr": "L'Essence d'Eranikus",
+     "en": "The Essence of Eranikus",
+     "nv": 55,
+     "min": 48,
+     "camp": 0
+    },
+    {
+     "id": 8733,
+     "fr": "Eranikus, le tyran du Rêve",
+     "en": "Eranikus, Tyrant of the Dream",
+     "nv": 60,
+     "min": 60,
+     "camp": 0
+    }
+   ]
+  },
+  "profondeurs-de-rochenoire": {
+   "carte": 230,
+   "niveaux": [
+    48,
+    60
+   ],
+   "entrees": [
+    {
+     "zone": "gorge-des-vents-brulants",
+     "x": 27.6,
+     "y": 72.4
+    }
+   ],
+   "boss": [
+    {
+     "id": 9018,
+     "n": "Grande Interrogatrice Gerstahn",
+     "en": "High Interrogator Gerstahn",
+     "nv": [
+      52,
+      52
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 11624,
+       "p": 25
+      },
+      {
+       "i": 11625,
+       "p": 25
+      },
+      {
+       "i": 11626,
+       "p": 25
+      },
+      {
+       "i": 22240,
+       "p": 25
+      }
+     ]
+    },
+    {
+     "id": 9025,
+     "n": "Seigneur Roccor",
+     "en": "Lord Roccor",
+     "nv": [
+      51,
+      51
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 11631,
+       "p": 25
+      },
+      {
+       "i": 11632,
+       "p": 25
+      },
+      {
+       "i": 22234,
+       "p": 25
+      },
+      {
+       "i": 22397,
+       "p": 25
+      },
+      {
+       "i": 11630,
+       "p": 16
+      },
+      {
+       "i": 11813,
+       "p": 15
+      },
+      {
+       "i": 11129,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 9319,
+     "n": "Maître-chien Grebmar",
+     "en": "Houndmaster Grebmar",
+     "nv": [
+      52,
+      52
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 11623,
+       "p": 35
+      },
+      {
+       "i": 11627,
+       "p": 35
+      },
+      {
+       "i": 11628,
+       "p": 15
+      },
+      {
+       "i": 11629,
+       "p": 15
+      }
+     ]
+    },
+    {
+     "id": 9024,
+     "n": "Pyromancien Blé-du-savoir",
+     "en": "Pyromancer Loregrain",
+     "nv": [
+      52,
+      52
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 11747,
+       "p": 26.7
+      },
+      {
+       "i": 11748,
+       "p": 26.7
+      },
+      {
+       "i": 11749,
+       "p": 26.7
+      },
+      {
+       "i": 11750,
+       "p": 20
+      },
+      {
+       "i": 11207,
+       "p": 40
+      }
+     ]
+    },
+    {
+     "id": 9017,
+     "n": "Seigneur Incendius",
+     "en": "Lord Incendius",
+     "nv": [
+      55,
+      55
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 11764,
+       "p": 25
+      },
+      {
+       "i": 11765,
+       "p": 25
+      },
+      {
+       "i": 11766,
+       "p": 25
+      },
+      {
+       "i": 11767,
+       "p": 25
+      },
+      {
+       "i": 19268,
+       "p": 2
+      },
+      {
+       "i": 11126,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 21987,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 11129,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 9041,
+     "n": "Gardien Stilgiss",
+     "en": "Warder Stilgiss",
+     "nv": [
+      56,
+      56
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 11782,
+       "p": 25
+      },
+      {
+       "i": 11783,
+       "p": 25
+      },
+      {
+       "i": 11784,
+       "p": 25
+      },
+      {
+       "i": 22241,
+       "p": 25
+      }
+     ]
+    },
+    {
+     "id": 9056,
+     "n": "Fineous Sombrevire",
+     "en": "Fineous Darkvire",
+     "nv": [
+      54,
+      54
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 11839,
+       "p": 25
+      },
+      {
+       "i": 11841,
+       "p": 25
+      },
+      {
+       "i": 11842,
+       "p": 25
+      },
+      {
+       "i": 22223,
+       "p": 25
+      },
+      {
+       "i": 10999,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 11468,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 9016,
+     "n": "Bael'Gar",
+     "en": "Bael'Gar",
+     "nv": [
+      54,
+      54
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 11802,
+       "p": 32
+      },
+      {
+       "i": 11803,
+       "p": 32
+      },
+      {
+       "i": 11805,
+       "p": 18
+      },
+      {
+       "i": 11807,
+       "p": 18
+      }
+     ]
+    },
+    {
+     "id": 9033,
+     "n": "Général Forgehargne",
+     "en": "General Angerforge",
+     "nv": [
+      57,
+      57
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 11810,
+       "p": 20
+      },
+      {
+       "i": 11816,
+       "p": 20
+      },
+      {
+       "i": 11817,
+       "p": 20
+      },
+      {
+       "i": 11820,
+       "p": 20
+      },
+      {
+       "i": 11821,
+       "p": 20
+      },
+      {
+       "i": 11464,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 11468,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 8983,
+     "n": "Seigneur golem Argelmach",
+     "en": "Golem Lord Argelmach",
+     "nv": [
+      57,
+      57
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 11669,
+       "p": 30.7
+      },
+      {
+       "i": 11822,
+       "p": 30.7
+      },
+      {
+       "i": 11823,
+       "p": 30.7
+      },
+      {
+       "i": 11819,
+       "p": 8
+      },
+      {
+       "i": 11268,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 11465,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 11468,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 9502,
+     "n": "Phalange",
+     "en": "Phalanx",
+     "nv": [
+      55,
+      55
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 11744,
+       "p": 33.3
+      },
+      {
+       "i": 11745,
+       "p": 33.3
+      },
+      {
+       "i": 22212,
+       "p": 33.3
+      }
+     ]
+    },
+    {
+     "id": 9543,
+     "n": "Ribbly Fermevanne",
+     "en": "Ribbly Screwspigot",
+     "nv": [
+      53,
+      53
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 11612,
+       "p": 34
+      },
+      {
+       "i": 11742,
+       "p": 34
+      },
+      {
+       "i": 2662,
+       "p": 16
+      },
+      {
+       "i": 2663,
+       "p": 16
+      },
+      {
+       "i": 11313,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 9499,
+     "n": "Lanfiche Brouillecircuit",
+     "en": "Plugger Spazzring",
+     "nv": [
+      55,
+      55
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 12791,
+       "p": 33.3
+      },
+      {
+       "i": 12793,
+       "p": 33.3
+      },
+      {
+       "i": 18653,
+       "p": 33.3
+      }
+     ]
+    },
+    {
+     "id": 9156,
+     "n": "Ambassadeur Cinglefouet",
+     "en": "Ambassador Flamelash",
+     "nv": [
+      57,
+      57
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 11808,
+       "p": 1
+      },
+      {
+       "i": 11812,
+       "p": 31
+      },
+      {
+       "i": 11814,
+       "p": 31
+      },
+      {
+       "i": 11809,
+       "p": 20
+      },
+      {
+       "i": 11832,
+       "p": 17
+      },
+      {
+       "i": 11129,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 9035,
+     "n": "Colé'rel",
+     "en": "Anger'rel",
+     "nv": [
+      55,
+      55
+     ],
+     "r": 1,
+     "butin": []
+    },
+    {
+     "id": 9938,
+     "n": "Magmus",
+     "en": "Magmus",
+     "nv": [
+      57,
+      57
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 11746,
+       "p": 20
+      },
+      {
+       "i": 11935,
+       "p": 20
+      },
+      {
+       "i": 22208,
+       "p": 20
+      },
+      {
+       "i": 22395,
+       "p": 20
+      },
+      {
+       "i": 22400,
+       "p": 20
+      }
+     ]
+    },
+    {
+     "id": 9019,
+     "n": "Empereur Dagran Thaurissan",
+     "en": "Emperor Dagran Thaurissan",
+     "nv": [
+      59,
+      59
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 11684,
+       "p": 1
+      },
+      {
+       "i": 11924,
+       "p": 20
+      },
+      {
+       "i": 11928,
+       "p": 20
+      },
+      {
+       "i": 11932,
+       "p": 20
+      },
+      {
+       "i": 11934,
+       "p": 20
+      },
+      {
+       "i": 22207,
+       "p": 20
+      },
+      {
+       "i": 11815,
+       "p": 19.8
+      },
+      {
+       "i": 11930,
+       "p": 19.8
+      },
+      {
+       "i": 11931,
+       "p": 19.8
+      },
+      {
+       "i": 11933,
+       "p": 19.8
+      },
+      {
+       "i": 22204,
+       "p": 19.8
+      },
+      {
+       "i": 21524,
+       "p": 100
+      },
+      {
+       "i": 11468,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "rares": [
+    {
+     "id": 8923,
+     "n": "Panzor l'Invincible",
+     "en": "Panzor the Invincible",
+     "nv": [
+      57,
+      57
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 11785,
+       "p": 25
+      },
+      {
+       "i": 11786,
+       "p": 25
+      },
+      {
+       "i": 11787,
+       "p": 25
+      },
+      {
+       "i": 22245,
+       "p": 25
+      },
+      {
+       "i": 11129,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 9042,
+     "n": "Verek",
+     "en": "Verek",
+     "nv": [
+      55,
+      55
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 22242,
+       "p": 13
+      },
+      {
+       "i": 11755,
+       "p": 12
+      }
+     ]
+    }
+   ],
+   "quetes": [
+    {
+     "id": 4295,
+     "fr": "La bière de Rochenoeud",
+     "en": "Rocknot's Ale",
+     "nv": 1,
+     "min": 1,
+     "camp": 0
+    },
+    {
+     "id": 3801,
+     "fr": "Héritage Sombrefer",
+     "en": "Dark Iron Legacy",
+     "nv": 52,
+     "min": 48,
+     "camp": 0
+    },
+    {
+     "id": 3802,
+     "fr": "Héritage Sombrefer",
+     "en": "Dark Iron Legacy",
+     "nv": 52,
+     "min": 48,
+     "camp": 0
+    },
+    {
+     "id": 3981,
+     "fr": "Le commandant Gor'shak",
+     "en": "Commander Gor'shak",
+     "nv": 52,
+     "min": 48,
+     "camp": 2
+    },
+    {
+     "id": 4081,
+     "fr": "TUER À VUE : nains sombrefers",
+     "en": "KILL ON SIGHT: Dark Iron Dwarves",
+     "nv": 52,
+     "min": 48,
+     "camp": 2
+    },
+    {
+     "id": 4136,
+     "fr": "Ribbly Fermevanne",
+     "en": "Ribbly Screwspigot",
+     "nv": 53,
+     "min": 48,
+     "camp": 0
+    },
+    {
+     "id": 4324,
+     "fr": "Yuka Fermevanne",
+     "en": "Yuka Screwspigot",
+     "nv": 53,
+     "min": 48,
+     "camp": 0
+    },
+    {
+     "id": 3982,
+     "fr": "Que se passe-t-il ?",
+     "en": "What Is Going On?",
+     "nv": 54,
+     "min": 48,
+     "camp": 2
+    },
+    {
+     "id": 4001,
+     "fr": "Que se passe-t-il ?",
+     "en": "What Is Going On?",
+     "nv": 54,
+     "min": 48,
+     "camp": 2
+    },
+    {
+     "id": 4002,
+     "fr": "Les royaumes de l'Est",
+     "en": "The Eastern Kingdom",
+     "nv": 54,
+     "min": 48,
+     "camp": 2
+    },
+    {
+     "id": 4082,
+     "fr": "TUER À VUE : Officiers de haut rang sombrefers",
+     "en": "KILL ON SIGHT: High Ranking Dark Iron Officials",
+     "nv": 54,
+     "min": 50,
+     "camp": 2
+    },
+    {
+     "id": 4201,
+     "fr": "Le philtre d'amour",
+     "en": "The Love Potion",
+     "nv": 54,
+     "min": 50,
+     "camp": 0
+    },
+    {
+     "id": 4241,
+     "fr": "Maréchal Windsor",
+     "en": "Marshal Windsor",
+     "nv": 54,
+     "min": 48,
+     "camp": 1
+    },
+    {
+     "id": 4242,
+     "fr": "Espoir abandonné",
+     "en": "Abandoned Hope",
+     "nv": 54,
+     "min": 48,
+     "camp": 1
+    },
+    {
+     "id": 7201,
+     "fr": "Le dernier élément",
+     "en": "The Last Element",
+     "nv": 54,
+     "min": 48,
+     "camp": 2
+    },
+    {
+     "id": 4083,
+     "fr": "Le Calice spectral",
+     "en": "The Spectral Chalice",
+     "nv": 55,
+     "min": 40,
+     "camp": 0
+    },
+    {
+     "id": 4123,
+     "fr": "Le Cœur de la montagne",
+     "en": "The Heart of the Mountain",
+     "nv": 55,
+     "min": 50,
+     "camp": 0
+    },
+    {
+     "id": 4126,
+     "fr": "Hurley Soufflenoir",
+     "en": "Hurley Blackbreath",
+     "nv": 55,
+     "min": 50,
+     "camp": 1
+    },
+    {
+     "id": 4128,
+     "fr": "Ragnar Tonnebière",
+     "en": "Ragnar Thunderbrew",
+     "nv": 55,
+     "min": 50,
+     "camp": 1
+    },
+    {
+     "id": 4133,
+     "fr": "Vivian Lagrave",
+     "en": "Vivian Lagrave",
+     "nv": 55,
+     "min": 50,
+     "camp": 2
+    },
+    {
+     "id": 4134,
+     "fr": "La recette perdue de Tonnebière",
+     "en": "Lost Thunderbrew Recipe",
+     "nv": 55,
+     "min": 50,
+     "camp": 2
+    },
+    {
+     "id": 3907,
+     "fr": "Discordance des flammes",
+     "en": "Disharmony of Fire",
+     "nv": 56,
+     "min": 48,
+     "camp": 2
+    },
+    {
+     "id": 4263,
+     "fr": "Incendius !",
+     "en": "Incendius!",
+     "nv": 56,
+     "min": 48,
+     "camp": 1
+    },
+    {
+     "id": 4286,
+     "fr": "Du beau matériel",
+     "en": "The Good Stuff",
+     "nv": 56,
+     "min": 50,
+     "camp": 1
+    },
+    {
+     "id": 4024,
+     "fr": "Un goût de flammes",
+     "en": "A Taste of Flame",
+     "nv": 58,
+     "min": 52,
+     "camp": 0
+    },
+    {
+     "id": 4063,
+     "fr": "La révolte des machines",
+     "en": "The Rise of the Machines",
+     "nv": 58,
+     "min": 52,
+     "camp": 2
+    },
+    {
+     "id": 4121,
+     "fr": "Situation précaire",
+     "en": "Precarious Predicament",
+     "nv": 58,
+     "min": 52,
+     "camp": 2
+    },
+    {
+     "id": 4122,
+     "fr": "Grark Lorkrub",
+     "en": "Grark Lorkrub",
+     "nv": 58,
+     "min": 52,
+     "camp": 2
+    },
+    {
+     "id": 4132,
+     "fr": "Opération : Mort à Forgehargne",
+     "en": "Operation: Death to Angerforge",
+     "nv": 58,
+     "min": 52,
+     "camp": 2
+    },
+    {
+     "id": 4264,
+     "fr": "Une note chiffonnée",
+     "en": "A Crumpled Up Note",
+     "nv": 58,
+     "min": 50,
+     "camp": 1
+    },
+    {
+     "id": 4282,
+     "fr": "Un espoir en lambeaux",
+     "en": "A Shred of Hope",
+     "nv": 58,
+     "min": 50,
+     "camp": 1
+    },
+    {
+     "id": 4322,
+     "fr": "Évasion !",
+     "en": "Jail Break!",
+     "nv": 58,
+     "min": 50,
+     "camp": 1
+    },
+    {
+     "id": 4003,
+     "fr": "Un sauvetage royal",
+     "en": "The Royal Rescue",
+     "nv": 59,
+     "min": 48,
+     "camp": 2
+    },
+    {
+     "id": 4341,
+     "fr": "Kharan Force-martel",
+     "en": "Kharan Mighthammer",
+     "nv": 59,
+     "min": 50,
+     "camp": 1
+    },
+    {
+     "id": 4342,
+     "fr": "Légende de Kharan",
+     "en": "Kharan's Tale",
+     "nv": 59,
+     "min": 50,
+     "camp": 1
+    },
+    {
+     "id": 4361,
+     "fr": "Le porteur des mauvaises nouvelles",
+     "en": "The Bearer of Bad News",
+     "nv": 59,
+     "min": 50,
+     "camp": 1
+    },
+    {
+     "id": 4362,
+     "fr": "Le destin du Royaume",
+     "en": "The Fate of the Kingdom",
+     "nv": 59,
+     "min": 50,
+     "camp": 1
+    },
+    {
+     "id": 4363,
+     "fr": "La surprise de la Princesse",
+     "en": "The Princess's Surprise",
+     "nv": 59,
+     "min": 50,
+     "camp": 1
+    },
+    {
+     "id": 4004,
+     "fr": "La Princesse sauvée ?",
+     "en": "The Princess Saved?",
+     "nv": 60,
+     "min": 48,
+     "camp": 2
+    },
+    {
+     "id": 7604,
+     "fr": "Un contrat contraignant",
+     "en": "A Binding Contract",
+     "nv": 60,
+     "min": 60,
+     "camp": 0
+    },
+    {
+     "id": 8961,
+     "fr": "Les trois rois des flammes",
+     "en": "Three Kings of Flame",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    },
+    {
+     "id": 9015,
+     "fr": "Le défi",
+     "en": "The Challenge",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    }
+   ]
+  },
+  "pic-de-rochenoire": {
+   "carte": 229,
+   "niveaux": [
+    52,
+    62
+   ],
+   "entrees": [
+    {
+     "zone": "gorge-des-vents-brulants",
+     "x": 41.1,
+     "y": 95.3
+    }
+   ],
+   "boss": [
+    {
+     "id": 9196,
+     "n": "Généralissime Omokk",
+     "en": "Highlord Omokk",
+     "nv": [
+      59,
+      59
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 13166,
+       "p": 16.7
+      },
+      {
+       "i": 13167,
+       "p": 16.7
+      },
+      {
+       "i": 13168,
+       "p": 16.7
+      },
+      {
+       "i": 13169,
+       "p": 16.7
+      },
+      {
+       "i": 13170,
+       "p": 16.7
+      },
+      {
+       "i": 16670,
+       "p": 16.7
+      },
+      {
+       "i": 12336,
+       "p": 13
+      },
+      {
+       "i": 16250,
+       "p": 2
+      },
+      {
+       "i": 21982,
+       "p": 40,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 9236,
+     "n": "Chasseresse des ombres Vosh'gajin",
+     "en": "Shadow Hunter Vosh'gajin",
+     "nv": [
+      58,
+      58
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 12654,
+       "p": 30
+      },
+      {
+       "i": 12626,
+       "p": 21
+      },
+      {
+       "i": 13255,
+       "p": 21
+      },
+      {
+       "i": 13257,
+       "p": 21
+      },
+      {
+       "i": 16712,
+       "p": 21
+      },
+      {
+       "i": 12651,
+       "p": 8
+      },
+      {
+       "i": 12653,
+       "p": 8
+      },
+      {
+       "i": 16250,
+       "p": 2
+      },
+      {
+       "i": 13352,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 9237,
+     "n": "Maître de guerre Voone",
+     "en": "War Master Voone",
+     "nv": [
+      59,
+      59
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 13173,
+       "p": 100
+      },
+      {
+       "i": 12582,
+       "p": 20
+      },
+      {
+       "i": 13177,
+       "p": 20
+      },
+      {
+       "i": 13179,
+       "p": 20
+      },
+      {
+       "i": 16676,
+       "p": 20
+      },
+      {
+       "i": 22231,
+       "p": 20
+      },
+      {
+       "i": 21524,
+       "p": 100
+      },
+      {
+       "i": 12335,
+       "p": 17
+      },
+      {
+       "i": 16250,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 10596,
+     "n": "Matriarche Couveuse",
+     "en": "Mother Smolderweb",
+     "nv": [
+      59,
+      59
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 13213,
+       "p": 35
+      },
+      {
+       "i": 13244,
+       "p": 35
+      },
+      {
+       "i": 13183,
+       "p": 15
+      },
+      {
+       "i": 16715,
+       "p": 15
+      },
+      {
+       "i": 16250,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 9736,
+     "n": "Intendant Zigris",
+     "en": "Quartermaster Zigris",
+     "nv": [
+      59,
+      59
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 13252,
+       "p": 16
+      },
+      {
+       "i": 13253,
+       "p": 14
+      },
+      {
+       "i": 12835,
+       "p": 10
+      },
+      {
+       "i": 16250,
+       "p": 2
+      },
+      {
+       "i": 22138,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 10220,
+     "n": "Halycon",
+     "en": "Halycon",
+     "nv": [
+      59,
+      59
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 13211,
+       "p": 28.7
+      },
+      {
+       "i": 13212,
+       "p": 28.7
+      },
+      {
+       "i": 22313,
+       "p": 28.7
+      },
+      {
+       "i": 13210,
+       "p": 14
+      },
+      {
+       "i": 16250,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 9568,
+     "n": "Seigneur Wyrmthalak",
+     "en": "Overlord Wyrmthalak",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 13143,
+       "p": 2
+      },
+      {
+       "i": 13161,
+       "p": 20
+      },
+      {
+       "i": 13162,
+       "p": 20
+      },
+      {
+       "i": 13163,
+       "p": 20
+      },
+      {
+       "i": 16679,
+       "p": 20
+      },
+      {
+       "i": 22321,
+       "p": 20
+      },
+      {
+       "i": 12337,
+       "p": 26
+      },
+      {
+       "i": 16250,
+       "p": 2
+      },
+      {
+       "i": 16786,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 9816,
+     "n": "Pyrogarde Prophète ardent",
+     "en": "Pyroguard Emberseer",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 3,
+     "butin": [
+      {
+       "i": 12905,
+       "p": 20
+      },
+      {
+       "i": 12926,
+       "p": 20
+      },
+      {
+       "i": 12927,
+       "p": 20
+      },
+      {
+       "i": 12929,
+       "p": 20
+      },
+      {
+       "i": 16672,
+       "p": 20
+      },
+      {
+       "i": 23320,
+       "p": 8
+      },
+      {
+       "i": 16250,
+       "p": 2
+      },
+      {
+       "i": 17322,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 21988,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 10430,
+     "n": "La Bête",
+     "en": "The Beast",
+     "nv": [
+      62,
+      62
+     ],
+     "r": 3,
+     "butin": [
+      {
+       "i": 12709,
+       "p": 20
+      },
+      {
+       "i": 12964,
+       "p": 20
+      },
+      {
+       "i": 12967,
+       "p": 20
+      },
+      {
+       "i": 12969,
+       "p": 20
+      },
+      {
+       "i": 16729,
+       "p": 20
+      },
+      {
+       "i": 12963,
+       "p": 20
+      },
+      {
+       "i": 12965,
+       "p": 20
+      },
+      {
+       "i": 12966,
+       "p": 20
+      },
+      {
+       "i": 12968,
+       "p": 20
+      },
+      {
+       "i": 22311,
+       "p": 20
+      },
+      {
+       "i": 24101,
+       "p": 13
+      },
+      {
+       "i": 19227,
+       "p": 5
+      },
+      {
+       "i": 16250,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 10363,
+     "n": "Général Drakkisath",
+     "en": "General Drakkisath",
+     "nv": [
+      62,
+      62
+     ],
+     "r": 3,
+     "butin": [
+      {
+       "i": 12592,
+       "p": 1
+      },
+      {
+       "i": 22253,
+       "p": 25
+      },
+      {
+       "i": 22267,
+       "p": 25
+      },
+      {
+       "i": 22268,
+       "p": 25
+      },
+      {
+       "i": 22269,
+       "p": 25
+      },
+      {
+       "i": 12602,
+       "p": 24.8
+      },
+      {
+       "i": 13098,
+       "p": 24.8
+      },
+      {
+       "i": 13141,
+       "p": 24.8
+      },
+      {
+       "i": 13142,
+       "p": 24.8
+      },
+      {
+       "i": 16666,
+       "p": 11.1
+      },
+      {
+       "i": 16674,
+       "p": 11.1
+      },
+      {
+       "i": 16688,
+       "p": 11.1
+      },
+      {
+       "i": 16690,
+       "p": 11.1
+      },
+      {
+       "i": 16700,
+       "p": 11.1
+      },
+      {
+       "i": 16706,
+       "p": 11.1
+      },
+      {
+       "i": 16721,
+       "p": 11.1
+      },
+      {
+       "i": 16726,
+       "p": 11.1
+      },
+      {
+       "i": 16730,
+       "p": 11.1
+      },
+      {
+       "i": 15730,
+       "p": 4
+      },
+      {
+       "i": 13519,
+       "p": 3
+      },
+      {
+       "i": 16250,
+       "p": 2
+      },
+      {
+       "i": 16663,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "rares": [
+    {
+     "id": 9217,
+     "n": "Seigneur magus Pierre-du-pic",
+     "en": "Spirestone Lord Magus",
+     "nv": [
+      58,
+      58
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 13261,
+       "p": 33.3
+      },
+      {
+       "i": 13282,
+       "p": 33.3
+      },
+      {
+       "i": 13283,
+       "p": 33.3
+      },
+      {
+       "i": 16250,
+       "p": 1
+      },
+      {
+       "i": 21982,
+       "p": 40,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 9218,
+     "n": "Seigneur de bataille Pierre-du-pic",
+     "en": "Spirestone Battle Lord",
+     "nv": [
+      58,
+      58
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 13285,
+       "p": 60
+      },
+      {
+       "i": 13284,
+       "p": 40
+      },
+      {
+       "i": 21982,
+       "p": 40,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 9219,
+     "n": "Boucher Pierre-du-pic",
+     "en": "Spirestone Butcher",
+     "nv": [
+      57,
+      57
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 12608,
+       "p": 50
+      },
+      {
+       "i": 13286,
+       "p": 50
+      },
+      {
+       "i": 16250,
+       "p": 2
+      },
+      {
+       "i": 21982,
+       "p": 40,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 9596,
+     "n": "Bannok Hache-sinistre",
+     "en": "Bannok Grimaxe",
+     "nv": [
+      59,
+      59
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 12621,
+       "p": 33.3
+      },
+      {
+       "i": 12634,
+       "p": 33.3
+      },
+      {
+       "i": 12637,
+       "p": 33.3
+      },
+      {
+       "i": 12838,
+       "p": 5
+      },
+      {
+       "i": 16250,
+       "p": 2
+      },
+      {
+       "i": 22138,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 9718,
+     "n": "Ghok Bounnebaffe",
+     "en": "Ghok Bashguud",
+     "nv": [
+      59,
+      59
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 13198,
+       "p": 33.3
+      },
+      {
+       "i": 13203,
+       "p": 33.3
+      },
+      {
+       "i": 13204,
+       "p": 33.3
+      },
+      {
+       "i": 16250,
+       "p": 2
+      },
+      {
+       "i": 22138,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 10376,
+     "n": "Croc cristallin",
+     "en": "Crystal Fang",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 13184,
+       "p": 33.3
+      },
+      {
+       "i": 13185,
+       "p": 33.3
+      },
+      {
+       "i": 13218,
+       "p": 33.3
+      },
+      {
+       "i": 16250,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 10509,
+     "n": "Jed Guette-runes",
+     "en": "Jed Runewatcher",
+     "nv": [
+      59,
+      59
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 12604,
+       "p": 33.3
+      },
+      {
+       "i": 12605,
+       "p": 33.3
+      },
+      {
+       "i": 12930,
+       "p": 33.3
+      },
+      {
+       "i": 16250,
+       "p": 2
+      },
+      {
+       "i": 22138,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "quetes": [
+    {
+     "id": 4788,
+     "fr": "Les dernières tablettes",
+     "en": "The Final Tablets",
+     "nv": 58,
+     "min": 40,
+     "camp": 0
+    },
+    {
+     "id": 4701,
+     "fr": "Abattez-la",
+     "en": "Put Her Down",
+     "nv": 59,
+     "min": 55,
+     "camp": 1
+    },
+    {
+     "id": 4724,
+     "fr": "La maîtresse de meute",
+     "en": "The Pack Mistress",
+     "nv": 59,
+     "min": 55,
+     "camp": 2
+    },
+    {
+     "id": 4729,
+     "fr": "Les animaux exotiques de Kibler",
+     "en": "Kibler's Exotic Pets",
+     "nv": 59,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 4862,
+     "fr": "Mauvais",
+     "en": "En-Ay-Es-Tee-Why",
+     "nv": 59,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 4981,
+     "fr": "Agent Bijou",
+     "en": "Operative Bijou",
+     "nv": 59,
+     "min": 55,
+     "camp": 2
+    },
+    {
+     "id": 4982,
+     "fr": "Les affaires de Bijou",
+     "en": "Bijou's Belongings",
+     "nv": 59,
+     "min": 55,
+     "camp": 2
+    },
+    {
+     "id": 4983,
+     "fr": "Rapport de reconnaissance de Bijou",
+     "en": "Bijou's Reconnaissance Report",
+     "nv": 59,
+     "min": 55,
+     "camp": 2
+    },
+    {
+     "id": 5001,
+     "fr": "Les affaires de Bijou",
+     "en": "Bijou's Belongings",
+     "nv": 59,
+     "min": 55,
+     "camp": 1
+    },
+    {
+     "id": 5002,
+     "fr": "Message à Maxwell",
+     "en": "Message to Maxwell",
+     "nv": 59,
+     "min": 55,
+     "camp": 1
+    },
+    {
+     "id": 4734,
+     "fr": "Un oeuf congelé",
+     "en": "Egg Freezing",
+     "nv": 60,
+     "min": 57,
+     "camp": 0
+    },
+    {
+     "id": 4735,
+     "fr": "La collecte d’œufs",
+     "en": "Egg Collection",
+     "nv": 60,
+     "min": 57,
+     "camp": 0
+    },
+    {
+     "id": 4742,
+     "fr": "Le sceau d'ascension",
+     "en": "Seal of Ascension",
+     "nv": 60,
+     "min": 57,
+     "camp": 0
+    },
+    {
+     "id": 4743,
+     "fr": "Le sceau d'ascension",
+     "en": "Seal of Ascension",
+     "nv": 60,
+     "min": 57,
+     "camp": 0
+    },
+    {
+     "id": 4764,
+     "fr": "Le fermoir de Frèteruine",
+     "en": "Doomrigger's Clasp",
+     "nv": 60,
+     "min": 57,
+     "camp": 1
+    },
+    {
+     "id": 4765,
+     "fr": "La livraison à Bellornière",
+     "en": "Delivery to Ridgewell",
+     "nv": 60,
+     "min": 57,
+     "camp": 1
+    },
+    {
+     "id": 4766,
+     "fr": "Mayara Luisaile",
+     "en": "Mayara Brightwing",
+     "nv": 60,
+     "min": 57,
+     "camp": 1
+    },
+    {
+     "id": 4768,
+     "fr": "La tablette de Sombrepierre",
+     "en": "The Darkstone Tablet",
+     "nv": 60,
+     "min": 57,
+     "camp": 2
+    },
+    {
+     "id": 4769,
+     "fr": "Vivian Lagrave et la tablette de Sombrepierre",
+     "en": "Vivian Lagrave and the Darkstone Tablet",
+     "nv": 60,
+     "min": 57,
+     "camp": 2
+    },
+    {
+     "id": 4866,
+     "fr": "Le lait matriarcal",
+     "en": "Mother's Milk",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 4867,
+     "fr": "Urok Hurleruine",
+     "en": "Urok Doomhowl",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 4903,
+     "fr": "Ordre du seigneur de guerre",
+     "en": "Warlord's Command",
+     "nv": 60,
+     "min": 55,
+     "camp": 2
+    },
+    {
+     "id": 4907,
+     "fr": "Brikolette Toutevapeur",
+     "en": "Tinkee Steamboil",
+     "nv": 60,
+     "min": 57,
+     "camp": 0
+    },
+    {
+     "id": 4974,
+     "fr": "Pour la Horde !",
+     "en": "For The Horde!",
+     "nv": 60,
+     "min": 55,
+     "camp": 2
+    },
+    {
+     "id": 5047,
+     "fr": "Finkle Einhorn, à votre service !",
+     "en": "Finkle Einhorn, At Your Service!",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 5081,
+     "fr": "Mission de Maxwell",
+     "en": "Maxwell's Mission",
+     "nv": 60,
+     "min": 55,
+     "camp": 1
+    },
+    {
+     "id": 5089,
+     "fr": "Ordres du général Drakkisath",
+     "en": "General Drakkisath's Command",
+     "nv": 60,
+     "min": 55,
+     "camp": 1
+    },
+    {
+     "id": 5102,
+     "fr": "La reddition du général Drakkisath",
+     "en": "General Drakkisath's Demise",
+     "nv": 60,
+     "min": 55,
+     "camp": 1
+    },
+    {
+     "id": 5127,
+     "fr": "La forge démoniaque",
+     "en": "The Demon Forge",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 5160,
+     "fr": "Le Protectorat de la matrone",
+     "en": "The Matron Protectorate",
+     "nv": 60,
+     "min": 57,
+     "camp": 0
+    },
+    {
+     "id": 5306,
+     "fr": "Pierre du serpent de la chasseresse des ombres",
+     "en": "Snakestone of the Shadow Huntress",
+     "nv": 60,
+     "min": 50,
+     "camp": 0
+    },
+    {
+     "id": 6502,
+     "fr": "Amulette drakefeu",
+     "en": "Drakefire Amulet",
+     "nv": 60,
+     "min": 50,
+     "camp": 1
+    },
+    {
+     "id": 6569,
+     "fr": "Illusions d'Oculus",
+     "en": "Oculus Illusions",
+     "nv": 60,
+     "min": 55,
+     "camp": 2
+    },
+    {
+     "id": 6602,
+     "fr": "Le sang du champion des dragons noirs",
+     "en": "Blood of the Black Dragon Champion",
+     "nv": 60,
+     "min": 55,
+     "camp": 2
+    },
+    {
+     "id": 6821,
+     "fr": "Œil du Prophète ardent",
+     "en": "Eye of the Emberseer",
+     "nv": 60,
+     "min": 56,
+     "camp": 0
+    },
+    {
+     "id": 7761,
+     "fr": "Les instructions de Main-noire",
+     "en": "Blackhand's Command",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 8961,
+     "fr": "Les trois rois des flammes",
+     "en": "Three Kings of Flame",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    },
+    {
+     "id": 8966,
+     "fr": "Le morceau gauche de l'amulette du seigneur Valthalak",
+     "en": "The Left Piece of Lord Valthalak's Amulet",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    },
+    {
+     "id": 8989,
+     "fr": "Le morceau droit de l'amulette du seigneur Valthalak",
+     "en": "The Right Piece of Lord Valthalak's Amulet",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    },
+    {
+     "id": 8995,
+     "fr": "Mea culpa, seigneur Valthalak",
+     "en": "Mea Culpa, Lord Valthalak",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    }
+   ]
+  },
+  "hache-tripes": {
+   "carte": 429,
+   "niveaux": [
+    5,
+    62
+   ],
+   "entrees": [
+    {
+     "zone": "feralas",
+     "x": 64.9,
+     "y": 29.4
+    },
+    {
+     "zone": "feralas",
+     "x": 67.2,
+     "y": 34.8
+    },
+    {
+     "zone": "feralas",
+     "x": 76.5,
+     "y": 35.9
+    },
+    {
+     "zone": "feralas",
+     "x": 60.3,
+     "y": 31.7
+    },
+    {
+     "zone": "feralas",
+     "x": 60.3,
+     "y": 29.7
+    },
+    {
+     "zone": "feralas",
+     "x": 62.9,
+     "y": 24.9
+    }
+   ],
+   "boss": [
+    {
+     "id": 11490,
+     "n": "Zevrim Sabot-de-ronce",
+     "en": "Zevrim Thornhoof",
+     "nv": [
+      57,
+      57
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18313,
+       "p": 20
+      },
+      {
+       "i": 18323,
+       "p": 20
+      },
+      {
+       "i": 18319,
+       "p": 20
+      },
+      {
+       "i": 18306,
+       "p": 20
+      },
+      {
+       "i": 18308,
+       "p": 20
+      },
+      {
+       "i": 18332,
+       "p": 2
+      },
+      {
+       "i": 18333,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 13280,
+     "n": "Hydrogénos",
+     "en": "Hydrospawn",
+     "nv": [
+      57,
+      57
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18317,
+       "p": 20
+      },
+      {
+       "i": 18322,
+       "p": 20
+      },
+      {
+       "i": 18324,
+       "p": 10
+      },
+      {
+       "i": 19268,
+       "p": 2
+      },
+      {
+       "i": 18305,
+       "p": 25
+      },
+      {
+       "i": 18307,
+       "p": 25
+      },
+      {
+       "i": 7080,
+       "p": 11
+      },
+      {
+       "i": 18332,
+       "p": 2
+      },
+      {
+       "i": 18333,
+       "p": 2
+      },
+      {
+       "i": 18299,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 14327,
+     "n": "Lethtendris",
+     "en": "Lethtendris",
+     "nv": [
+      57,
+      57
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18325,
+       "p": 30
+      },
+      {
+       "i": 18311,
+       "p": 10
+      },
+      {
+       "i": 18301,
+       "p": 30
+      },
+      {
+       "i": 18302,
+       "p": 30
+      },
+      {
+       "i": 18332,
+       "p": 2
+      },
+      {
+       "i": 18333,
+       "p": 2
+      },
+      {
+       "i": 18426,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 11492,
+     "n": "Alzzin le Modeleur",
+     "en": "Alzzin the Wildshaper",
+     "nv": [
+      58,
+      58
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18309,
+       "p": 20
+      },
+      {
+       "i": 18310,
+       "p": 20
+      },
+      {
+       "i": 18312,
+       "p": 20
+      },
+      {
+       "i": 18314,
+       "p": 20
+      },
+      {
+       "i": 18315,
+       "p": 20
+      },
+      {
+       "i": 18318,
+       "p": 20
+      },
+      {
+       "i": 18321,
+       "p": 20
+      },
+      {
+       "i": 18326,
+       "p": 20
+      },
+      {
+       "i": 18327,
+       "p": 20
+      },
+      {
+       "i": 18328,
+       "p": 20
+      },
+      {
+       "i": 18332,
+       "p": 2
+      },
+      {
+       "i": 18333,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 11488,
+     "n": "Illyanna Corvichêne",
+     "en": "Illyanna Ravenoak",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18383,
+       "p": 25
+      },
+      {
+       "i": 18386,
+       "p": 25
+      },
+      {
+       "i": 22206,
+       "p": 100
+      },
+      {
+       "i": 18347,
+       "p": 25
+      },
+      {
+       "i": 18349,
+       "p": 25
+      },
+      {
+       "i": 18332,
+       "p": 4
+      },
+      {
+       "i": 18333,
+       "p": 4
+      },
+      {
+       "i": 18334,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 11487,
+     "n": "Magistère Kalendris",
+     "en": "Magister Kalendris",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18374,
+       "p": 20
+      },
+      {
+       "i": 18397,
+       "p": 20
+      },
+      {
+       "i": 18371,
+       "p": 20
+      },
+      {
+       "i": 18350,
+       "p": 20
+      },
+      {
+       "i": 18351,
+       "p": 20
+      },
+      {
+       "i": 22309,
+       "p": 15
+      },
+      {
+       "i": 18332,
+       "p": 4
+      },
+      {
+       "i": 18333,
+       "p": 4
+      },
+      {
+       "i": 18334,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 11496,
+     "n": "Immol'thar",
+     "en": "Immol'thar",
+     "nv": [
+      61,
+      61
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18370,
+       "p": 20
+      },
+      {
+       "i": 18379,
+       "p": 20
+      },
+      {
+       "i": 18385,
+       "p": 20
+      },
+      {
+       "i": 18391,
+       "p": 20
+      },
+      {
+       "i": 18394,
+       "p": 20
+      },
+      {
+       "i": 18372,
+       "p": 20
+      },
+      {
+       "i": 18377,
+       "p": 20
+      },
+      {
+       "i": 18381,
+       "p": 20
+      },
+      {
+       "i": 18384,
+       "p": 20
+      },
+      {
+       "i": 18389,
+       "p": 20
+      },
+      {
+       "i": 18332,
+       "p": 4
+      },
+      {
+       "i": 18333,
+       "p": 4
+      },
+      {
+       "i": 18334,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 11489,
+     "n": "Tendris Crochebois",
+     "en": "Tendris Warpwood",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18390,
+       "p": 25
+      },
+      {
+       "i": 18393,
+       "p": 25
+      },
+      {
+       "i": 18352,
+       "p": 25
+      },
+      {
+       "i": 18353,
+       "p": 25
+      },
+      {
+       "i": 18332,
+       "p": 4
+      },
+      {
+       "i": 18333,
+       "p": 4
+      },
+      {
+       "i": 18334,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 11486,
+     "n": "Prince Tortheldrin",
+     "en": "Prince Tortheldrin",
+     "nv": [
+      60,
+      61
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18373,
+       "p": 20
+      },
+      {
+       "i": 18376,
+       "p": 20
+      },
+      {
+       "i": 18380,
+       "p": 20
+      },
+      {
+       "i": 18382,
+       "p": 20
+      },
+      {
+       "i": 18392,
+       "p": 20
+      },
+      {
+       "i": 18375,
+       "p": 20
+      },
+      {
+       "i": 18378,
+       "p": 20
+      },
+      {
+       "i": 18388,
+       "p": 20
+      },
+      {
+       "i": 18395,
+       "p": 20
+      },
+      {
+       "i": 18396,
+       "p": 20
+      },
+      {
+       "i": 21525,
+       "p": 100
+      },
+      {
+       "i": 18332,
+       "p": 4
+      },
+      {
+       "i": 18333,
+       "p": 4
+      },
+      {
+       "i": 18334,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 14326,
+     "n": "Garde Mol'dar",
+     "en": "Guard Mol'dar",
+     "nv": [
+      59,
+      59
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18493,
+       "p": 7.7
+      },
+      {
+       "i": 18494,
+       "p": 7.7
+      },
+      {
+       "i": 18496,
+       "p": 7.7
+      },
+      {
+       "i": 18497,
+       "p": 7.7
+      },
+      {
+       "i": 18498,
+       "p": 7.7
+      },
+      {
+       "i": 18250,
+       "p": 13
+      },
+      {
+       "i": 18450,
+       "p": 7.7
+      },
+      {
+       "i": 18451,
+       "p": 7.7
+      },
+      {
+       "i": 18458,
+       "p": 7.7
+      },
+      {
+       "i": 18459,
+       "p": 7.7
+      },
+      {
+       "i": 18460,
+       "p": 7.7
+      },
+      {
+       "i": 18462,
+       "p": 7.7
+      },
+      {
+       "i": 18463,
+       "p": 7.7
+      },
+      {
+       "i": 18464,
+       "p": 7.7
+      },
+      {
+       "i": 18332,
+       "p": 4
+      },
+      {
+       "i": 18333,
+       "p": 4
+      },
+      {
+       "i": 18334,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 14322,
+     "n": "Kreeg le Marteleur",
+     "en": "Stomper Kreeg",
+     "nv": [
+      59,
+      59
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18425,
+       "p": 40
+      },
+      {
+       "i": 18332,
+       "p": 4
+      },
+      {
+       "i": 18333,
+       "p": 4
+      },
+      {
+       "i": 18334,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 14321,
+     "n": "Garde Fengus",
+     "en": "Guard Fengus",
+     "nv": [
+      59,
+      59
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18250,
+       "p": 13
+      },
+      {
+       "i": 18450,
+       "p": 12.5
+      },
+      {
+       "i": 18451,
+       "p": 12.5
+      },
+      {
+       "i": 18458,
+       "p": 12.5
+      },
+      {
+       "i": 18459,
+       "p": 12.5
+      },
+      {
+       "i": 18460,
+       "p": 12.5
+      },
+      {
+       "i": 18462,
+       "p": 12.5
+      },
+      {
+       "i": 18463,
+       "p": 12.5
+      },
+      {
+       "i": 18464,
+       "p": 12.5
+      },
+      {
+       "i": 18332,
+       "p": 4
+      },
+      {
+       "i": 18333,
+       "p": 4
+      },
+      {
+       "i": 18334,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 14323,
+     "n": "Garde Slip'kik",
+     "en": "Guard Slip'kik",
+     "nv": [
+      59,
+      59
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18493,
+       "p": 7.7
+      },
+      {
+       "i": 18494,
+       "p": 7.7
+      },
+      {
+       "i": 18496,
+       "p": 7.7
+      },
+      {
+       "i": 18497,
+       "p": 7.7
+      },
+      {
+       "i": 18498,
+       "p": 7.7
+      },
+      {
+       "i": 18250,
+       "p": 13
+      },
+      {
+       "i": 18450,
+       "p": 7.7
+      },
+      {
+       "i": 18451,
+       "p": 7.7
+      },
+      {
+       "i": 18458,
+       "p": 7.7
+      },
+      {
+       "i": 18459,
+       "p": 7.7
+      },
+      {
+       "i": 18460,
+       "p": 7.7
+      },
+      {
+       "i": 18462,
+       "p": 7.7
+      },
+      {
+       "i": 18463,
+       "p": 7.7
+      },
+      {
+       "i": 18464,
+       "p": 7.7
+      },
+      {
+       "i": 18332,
+       "p": 4
+      },
+      {
+       "i": 18333,
+       "p": 4
+      },
+      {
+       "i": 18334,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 14325,
+     "n": "Capitaine Kromcrush",
+     "en": "Captain Kromcrush",
+     "nv": [
+      61,
+      61
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18502,
+       "p": 25
+      },
+      {
+       "i": 18503,
+       "p": 25
+      },
+      {
+       "i": 18505,
+       "p": 25
+      },
+      {
+       "i": 18507,
+       "p": 25
+      },
+      {
+       "i": 18250,
+       "p": 13
+      },
+      {
+       "i": 18332,
+       "p": 4
+      },
+      {
+       "i": 18333,
+       "p": 4
+      },
+      {
+       "i": 18334,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 14324,
+     "n": "Cho'Rush l'Observateur",
+     "en": "Cho'Rush the Observer",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18483,
+       "p": 25
+      },
+      {
+       "i": 18484,
+       "p": 25
+      },
+      {
+       "i": 18485,
+       "p": 25
+      },
+      {
+       "i": 18490,
+       "p": 25
+      },
+      {
+       "i": 18332,
+       "p": 4
+      },
+      {
+       "i": 18333,
+       "p": 4
+      },
+      {
+       "i": 18334,
+       "p": 2
+      }
+     ]
+    },
+    {
+     "id": 11501,
+     "n": "Roi Gordok",
+     "en": "King Gordok",
+     "nv": [
+      62,
+      62
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18520,
+       "p": 25
+      },
+      {
+       "i": 18521,
+       "p": 25
+      },
+      {
+       "i": 18522,
+       "p": 25
+      },
+      {
+       "i": 18523,
+       "p": 25
+      },
+      {
+       "i": 18524,
+       "p": 25
+      },
+      {
+       "i": 18525,
+       "p": 25
+      },
+      {
+       "i": 18526,
+       "p": 25
+      },
+      {
+       "i": 18527,
+       "p": 25
+      },
+      {
+       "i": 18780,
+       "p": 9
+      },
+      {
+       "i": 19258,
+       "p": 7
+      },
+      {
+       "i": 18332,
+       "p": 4
+      },
+      {
+       "i": 18333,
+       "p": 4
+      },
+      {
+       "i": 18334,
+       "p": 2
+      },
+      {
+       "i": 21982,
+       "p": 40,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "rares": [],
+   "quetes": [
+    {
+     "id": 7488,
+     "fr": "Le filet de Lethtendris",
+     "en": "Lethtendris's Web",
+     "nv": 57,
+     "min": 54,
+     "camp": 1
+    },
+    {
+     "id": 7489,
+     "fr": "Le filet de Lethtendris",
+     "en": "Lethtendris's Web",
+     "nv": 57,
+     "min": 54,
+     "camp": 2
+    },
+    {
+     "id": 7492,
+     "fr": "Le camp Mojache",
+     "en": "Camp Mojache",
+     "nv": 57,
+     "min": 54,
+     "camp": 2
+    },
+    {
+     "id": 7494,
+     "fr": "Le bastion de Pennelune",
+     "en": "Feathermoon Stronghold",
+     "nv": 57,
+     "min": 54,
+     "camp": 1
+    },
+    {
+     "id": 7441,
+     "fr": "Pusillin et l'Ancien Azj'Tordin",
+     "en": "Pusillin and the Elder Azj'Tordin",
+     "nv": 58,
+     "min": 54,
+     "camp": 0
+    },
+    {
+     "id": 1193,
+     "fr": "Un piège cassé",
+     "en": "A Broken Trap",
+     "nv": 60,
+     "min": 56,
+     "camp": 0
+    },
+    {
+     "id": 1318,
+     "fr": "Affaires inachevées chez les Gordok",
+     "en": "Unfinished Gordok Business",
+     "nv": 60,
+     "min": 56,
+     "camp": 0
+    },
+    {
+     "id": 5518,
+     "fr": "La tenue d'ogre gordok",
+     "en": "The Gordok Ogre Suit",
+     "nv": 60,
+     "min": 56,
+     "camp": 0
+    },
+    {
+     "id": 5519,
+     "fr": "La tenue d'ogre gordok",
+     "en": "The Gordok Ogre Suit",
+     "nv": 60,
+     "min": 56,
+     "camp": 0
+    },
+    {
+     "id": 5525,
+     "fr": "Libérez Noué !",
+     "en": "Free Knot!",
+     "nv": 60,
+     "min": 57,
+     "camp": 0
+    },
+    {
+     "id": 5528,
+     "fr": "La dégustation gordok",
+     "en": "The Gordok Taste Test",
+     "nv": 60,
+     "min": 57,
+     "camp": 0
+    },
+    {
+     "id": 7429,
+     "fr": "Libérez Noué !",
+     "en": "Free Knot!",
+     "nv": 60,
+     "min": 57,
+     "camp": 0
+    },
+    {
+     "id": 7461,
+     "fr": "Folie intérieure",
+     "en": "The Madness Within",
+     "nv": 60,
+     "min": 56,
+     "camp": 0
+    },
+    {
+     "id": 7462,
+     "fr": "Le trésor des Shen'dralar",
+     "en": "The Treasure of the Shen'dralar",
+     "nv": 60,
+     "min": 56,
+     "camp": 1
+    },
+    {
+     "id": 7463,
+     "fr": "Rafraîchissement arcanique",
+     "en": "Arcane Refreshment",
+     "nv": 60,
+     "min": 60,
+     "camp": 0
+    },
+    {
+     "id": 7481,
+     "fr": "Légendes elfiques",
+     "en": "Elven Legends",
+     "nv": 60,
+     "min": 54,
+     "camp": 2
+    },
+    {
+     "id": 7482,
+     "fr": "Légendes elfiques",
+     "en": "Elven Legends",
+     "nv": 60,
+     "min": 54,
+     "camp": 1
+    },
+    {
+     "id": 7483,
+     "fr": "Libram de rapidité",
+     "en": "Libram of Rapidity",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    },
+    {
+     "id": 7484,
+     "fr": "Libram de focalisation",
+     "en": "Libram of Focus",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    },
+    {
+     "id": 7485,
+     "fr": "Libram de protection",
+     "en": "Libram of Protection",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    },
+    {
+     "id": 7498,
+     "fr": "Garona : une étude en discrétion et en trahison",
+     "en": "Garona: A Study on Stealth and Treachery",
+     "nv": 60,
+     "min": 54,
+     "camp": 0
+    },
+    {
+     "id": 7499,
+     "fr": "Le codex de défense",
+     "en": "Codex of Defense",
+     "nv": 60,
+     "min": 54,
+     "camp": 0
+    },
+    {
+     "id": 7500,
+     "fr": "Les recettes de l’arcaniste",
+     "en": "The Arcanist's Cookbook",
+     "nv": 60,
+     "min": 54,
+     "camp": 0
+    },
+    {
+     "id": 7501,
+     "fr": "La lumière et comment l'altérer",
+     "en": "The Light and How To Swing It",
+     "nv": 60,
+     "min": 54,
+     "camp": 0
+    },
+    {
+     "id": 7502,
+     "fr": "Contrôler les ombres",
+     "en": "Harnessing Shadows",
+     "nv": 60,
+     "min": 54,
+     "camp": 0
+    },
+    {
+     "id": 7503,
+     "fr": "La plus grande race de chasseurs",
+     "en": "The Greatest Race of Hunters",
+     "nv": 60,
+     "min": 54,
+     "camp": 0
+    },
+    {
+     "id": 7504,
+     "fr": "Sainte Bolognaise : Ce que la lumière ne vous dit pas",
+     "en": "Holy Bologna: What the Light Won't Tell You",
+     "nv": 60,
+     "min": 54,
+     "camp": 0
+    },
+    {
+     "id": 7505,
+     "fr": "Le horion de givre et vous",
+     "en": "Frost Shock and You",
+     "nv": 60,
+     "min": 54,
+     "camp": 0
+    },
+    {
+     "id": 7506,
+     "fr": "Le Rêve d'Emeraude…",
+     "en": "The Emerald Dream...",
+     "nv": 60,
+     "min": 54,
+     "camp": 0
+    },
+    {
+     "id": 7507,
+     "fr": "Le guide de Dagharn",
+     "en": "Foror's Compendium",
+     "nv": 60,
+     "min": 60,
+     "camp": 0
+    },
+    {
+     "id": 7508,
+     "fr": "Forger Quel'Serrar",
+     "en": "The Forging of Quel'Serrar",
+     "nv": 60,
+     "min": 60,
+     "camp": 0
+    },
+    {
+     "id": 7581,
+     "fr": "Les ancrages de la prison",
+     "en": "The Prison's Bindings",
+     "nv": 60,
+     "min": 60,
+     "camp": 0
+    },
+    {
+     "id": 7703,
+     "fr": "Affaires inachevées chez les Gordok",
+     "en": "Unfinished Gordok Business",
+     "nv": 60,
+     "min": 56,
+     "camp": 0
+    },
+    {
+     "id": 7877,
+     "fr": "Le trésor des Shen'dralar",
+     "en": "The Treasure of the Shen'dralar",
+     "nv": 60,
+     "min": 56,
+     "camp": 2
+    },
+    {
+     "id": 8948,
+     "fr": "Le vieil ami d'Anthion",
+     "en": "Anthion's Old Friend",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    },
+    {
+     "id": 8949,
+     "fr": "La vendetta de Falrin",
+     "en": "Falrin's Vendetta",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    },
+    {
+     "id": 8950,
+     "fr": "L'enchantement du provocateur",
+     "en": "The Instigator's Enchantment",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    },
+    {
+     "id": 8967,
+     "fr": "Le morceau gauche de l'amulette du seigneur Valthalak",
+     "en": "The Left Piece of Lord Valthalak's Amulet",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    },
+    {
+     "id": 8990,
+     "fr": "Le morceau droit de l'amulette du seigneur Valthalak",
+     "en": "The Right Piece of Lord Valthalak's Amulet",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    }
+   ]
+  },
+  "scholomance": {
+   "carte": 289,
+   "niveaux": [
+    57,
+    62
+   ],
+   "entrees": [
+    {
+     "zone": "maleterres-de-l-ouest",
+     "x": 69,
+     "y": 72.7
+    }
+   ],
+   "boss": [
+    {
+     "id": 10503,
+     "n": "Jandice Barov",
+     "en": "Jandice Barov",
+     "nv": [
+      61,
+      61
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 16701,
+       "p": 17
+      },
+      {
+       "i": 14541,
+       "p": 11.9
+      },
+      {
+       "i": 14545,
+       "p": 11.9
+      },
+      {
+       "i": 14548,
+       "p": 11.9
+      },
+      {
+       "i": 18689,
+       "p": 11.9
+      },
+      {
+       "i": 18690,
+       "p": 11.9
+      },
+      {
+       "i": 22394,
+       "p": 11.9
+      },
+      {
+       "i": 14543,
+       "p": 11.9
+      },
+      {
+       "i": 18335,
+       "p": 1
+      },
+      {
+       "i": 12843,
+       "p": 100
+      },
+      {
+       "i": 12808,
+       "p": 2.2
+      },
+      {
+       "i": 13725,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 11622,
+     "n": "Cliquettripes",
+     "en": "Rattlegore",
+     "nv": [
+      61,
+      61
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18782,
+       "p": 40
+      },
+      {
+       "i": 16711,
+       "p": 16
+      },
+      {
+       "i": 14528,
+       "p": 14
+      },
+      {
+       "i": 14531,
+       "p": 14
+      },
+      {
+       "i": 14537,
+       "p": 14
+      },
+      {
+       "i": 14538,
+       "p": 14
+      },
+      {
+       "i": 14539,
+       "p": 14
+      },
+      {
+       "i": 18686,
+       "p": 14
+      },
+      {
+       "i": 18335,
+       "p": 1
+      },
+      {
+       "i": 12808,
+       "p": 2.1
+      }
+     ]
+    },
+    {
+     "id": 10433,
+     "n": "Marduk Noirétang",
+     "en": "Marduk Blackpool",
+     "nv": [
+      58,
+      58
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 18692,
+       "p": 7
+      },
+      {
+       "i": 14576,
+       "p": 7
+      },
+      {
+       "i": 12843,
+       "p": 100
+      }
+     ]
+    },
+    {
+     "id": 10432,
+     "n": "Vectus",
+     "en": "Vectus",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 14577,
+       "p": 7
+      },
+      {
+       "i": 18691,
+       "p": 7
+      },
+      {
+       "i": 12843,
+       "p": 100
+      }
+     ]
+    },
+    {
+     "id": 10508,
+     "n": "Ras Murmegivre",
+     "en": "Ras Frostwhisper",
+     "nv": [
+      62,
+      62
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 13314,
+       "p": 2
+      },
+      {
+       "i": 18694,
+       "p": 16.7
+      },
+      {
+       "i": 14487,
+       "p": 16.7
+      },
+      {
+       "i": 18696,
+       "p": 16.7
+      },
+      {
+       "i": 18695,
+       "p": 16.7
+      },
+      {
+       "i": 18693,
+       "p": 16.7
+      },
+      {
+       "i": 14502,
+       "p": 16.7
+      },
+      {
+       "i": 14503,
+       "p": 16.7
+      },
+      {
+       "i": 14522,
+       "p": 16.7
+      },
+      {
+       "i": 13952,
+       "p": 16.7
+      },
+      {
+       "i": 14340,
+       "p": 16.7
+      },
+      {
+       "i": 14525,
+       "p": 16.7
+      },
+      {
+       "i": 16689,
+       "p": 16.7
+      },
+      {
+       "i": 12843,
+       "p": 100
+      },
+      {
+       "i": 13521,
+       "p": 4
+      },
+      {
+       "i": 12808,
+       "p": 2.4
+      },
+      {
+       "i": 13626,
+       "p": 100,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 10505,
+     "n": "Instructrice Malicia",
+     "en": "Instructor Malicia",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 16710,
+       "p": 5
+      },
+      {
+       "i": 14611,
+       "p": 1.1
+      },
+      {
+       "i": 14612,
+       "p": 1.1
+      },
+      {
+       "i": 14614,
+       "p": 1.1
+      },
+      {
+       "i": 14615,
+       "p": 1.1
+      },
+      {
+       "i": 14616,
+       "p": 1.1
+      },
+      {
+       "i": 14620,
+       "p": 1.1
+      },
+      {
+       "i": 14621,
+       "p": 1.1
+      },
+      {
+       "i": 14622,
+       "p": 1.1
+      },
+      {
+       "i": 14623,
+       "p": 1.1
+      },
+      {
+       "i": 14624,
+       "p": 1.1
+      },
+      {
+       "i": 14626,
+       "p": 1.1
+      },
+      {
+       "i": 14629,
+       "p": 1.1
+      },
+      {
+       "i": 14631,
+       "p": 1.1
+      },
+      {
+       "i": 14632,
+       "p": 1.1
+      },
+      {
+       "i": 14633,
+       "p": 1.1
+      },
+      {
+       "i": 14636,
+       "p": 1.1
+      },
+      {
+       "i": 14637,
+       "p": 1.1
+      },
+      {
+       "i": 14638,
+       "p": 1.1
+      },
+      {
+       "i": 14640,
+       "p": 1.1
+      },
+      {
+       "i": 14641,
+       "p": 1.1
+      },
+      {
+       "i": 18680,
+       "p": 1.1
+      },
+      {
+       "i": 18681,
+       "p": 1.1
+      },
+      {
+       "i": 18682,
+       "p": 1.1
+      },
+      {
+       "i": 18683,
+       "p": 1.1
+      },
+      {
+       "i": 18684,
+       "p": 1.1
+      },
+      {
+       "i": 23200,
+       "p": 1.1
+      },
+      {
+       "i": 23201,
+       "p": 1.1
+      },
+      {
+       "i": 18335,
+       "p": 1
+      },
+      {
+       "i": 12843,
+       "p": 100
+      },
+      {
+       "i": 20520,
+       "p": 44
+      },
+      {
+       "i": 12753,
+       "p": 17
+      }
+     ]
+    },
+    {
+     "id": 11261,
+     "n": "Docteur Theolen Krastinov",
+     "en": "Doctor Theolen Krastinov",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 16684,
+       "p": 14
+      },
+      {
+       "i": 14611,
+       "p": 1.1
+      },
+      {
+       "i": 14612,
+       "p": 1.1
+      },
+      {
+       "i": 14614,
+       "p": 1.1
+      },
+      {
+       "i": 14615,
+       "p": 1.1
+      },
+      {
+       "i": 14616,
+       "p": 1.1
+      },
+      {
+       "i": 14620,
+       "p": 1.1
+      },
+      {
+       "i": 14621,
+       "p": 1.1
+      },
+      {
+       "i": 14622,
+       "p": 1.1
+      },
+      {
+       "i": 14623,
+       "p": 1.1
+      },
+      {
+       "i": 14624,
+       "p": 1.1
+      },
+      {
+       "i": 14626,
+       "p": 1.1
+      },
+      {
+       "i": 14629,
+       "p": 1.1
+      },
+      {
+       "i": 14631,
+       "p": 1.1
+      },
+      {
+       "i": 14632,
+       "p": 1.1
+      },
+      {
+       "i": 14633,
+       "p": 1.1
+      },
+      {
+       "i": 14636,
+       "p": 1.1
+      },
+      {
+       "i": 14637,
+       "p": 1.1
+      },
+      {
+       "i": 14638,
+       "p": 1.1
+      },
+      {
+       "i": 14640,
+       "p": 1.1
+      },
+      {
+       "i": 14641,
+       "p": 1.1
+      },
+      {
+       "i": 18680,
+       "p": 1.1
+      },
+      {
+       "i": 18681,
+       "p": 1.1
+      },
+      {
+       "i": 18682,
+       "p": 1.1
+      },
+      {
+       "i": 18683,
+       "p": 1.1
+      },
+      {
+       "i": 18684,
+       "p": 1.1
+      },
+      {
+       "i": 23200,
+       "p": 1.1
+      },
+      {
+       "i": 23201,
+       "p": 1.1
+      },
+      {
+       "i": 18335,
+       "p": 1
+      },
+      {
+       "i": 12843,
+       "p": 100
+      }
+     ]
+    },
+    {
+     "id": 10901,
+     "n": "Gardien du savoir Polkelt",
+     "en": "Lorekeeper Polkelt",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 16705,
+       "p": 17
+      },
+      {
+       "i": 14611,
+       "p": 1.1
+      },
+      {
+       "i": 14612,
+       "p": 1.1
+      },
+      {
+       "i": 14614,
+       "p": 1.1
+      },
+      {
+       "i": 14615,
+       "p": 1.1
+      },
+      {
+       "i": 14616,
+       "p": 1.1
+      },
+      {
+       "i": 14620,
+       "p": 1.1
+      },
+      {
+       "i": 14621,
+       "p": 1.1
+      },
+      {
+       "i": 14622,
+       "p": 1.1
+      },
+      {
+       "i": 14623,
+       "p": 1.1
+      },
+      {
+       "i": 14624,
+       "p": 1.1
+      },
+      {
+       "i": 14626,
+       "p": 1.1
+      },
+      {
+       "i": 14629,
+       "p": 1.1
+      },
+      {
+       "i": 14631,
+       "p": 1.1
+      },
+      {
+       "i": 14632,
+       "p": 1.1
+      },
+      {
+       "i": 14633,
+       "p": 1.1
+      },
+      {
+       "i": 14636,
+       "p": 1.1
+      },
+      {
+       "i": 14637,
+       "p": 1.1
+      },
+      {
+       "i": 14638,
+       "p": 1.1
+      },
+      {
+       "i": 14640,
+       "p": 1.1
+      },
+      {
+       "i": 14641,
+       "p": 1.1
+      },
+      {
+       "i": 18680,
+       "p": 1.1
+      },
+      {
+       "i": 18681,
+       "p": 1.1
+      },
+      {
+       "i": 18682,
+       "p": 1.1
+      },
+      {
+       "i": 18683,
+       "p": 1.1
+      },
+      {
+       "i": 18684,
+       "p": 1.1
+      },
+      {
+       "i": 23200,
+       "p": 1.1
+      },
+      {
+       "i": 23201,
+       "p": 1.1
+      },
+      {
+       "i": 18335,
+       "p": 1
+      },
+      {
+       "i": 22206,
+       "p": 100
+      },
+      {
+       "i": 20520,
+       "p": 44
+      },
+      {
+       "i": 12753,
+       "p": 17
+      },
+      {
+       "i": 12808,
+       "p": 1.7
+      }
+     ]
+    },
+    {
+     "id": 10507,
+     "n": "Le Voracien",
+     "en": "The Ravenian",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 16716,
+       "p": 4
+      },
+      {
+       "i": 14611,
+       "p": 1.1
+      },
+      {
+       "i": 14612,
+       "p": 1.1
+      },
+      {
+       "i": 14614,
+       "p": 1.1
+      },
+      {
+       "i": 14615,
+       "p": 1.1
+      },
+      {
+       "i": 14616,
+       "p": 1.1
+      },
+      {
+       "i": 14620,
+       "p": 1.1
+      },
+      {
+       "i": 14621,
+       "p": 1.1
+      },
+      {
+       "i": 14622,
+       "p": 1.1
+      },
+      {
+       "i": 14623,
+       "p": 1.1
+      },
+      {
+       "i": 14624,
+       "p": 1.1
+      },
+      {
+       "i": 14626,
+       "p": 1.1
+      },
+      {
+       "i": 14629,
+       "p": 1.1
+      },
+      {
+       "i": 14631,
+       "p": 1.1
+      },
+      {
+       "i": 14632,
+       "p": 1.1
+      },
+      {
+       "i": 14633,
+       "p": 1.1
+      },
+      {
+       "i": 14636,
+       "p": 1.1
+      },
+      {
+       "i": 14637,
+       "p": 1.1
+      },
+      {
+       "i": 14638,
+       "p": 1.1
+      },
+      {
+       "i": 14640,
+       "p": 1.1
+      },
+      {
+       "i": 14641,
+       "p": 1.1
+      },
+      {
+       "i": 18680,
+       "p": 1.1
+      },
+      {
+       "i": 18681,
+       "p": 1.1
+      },
+      {
+       "i": 18682,
+       "p": 1.1
+      },
+      {
+       "i": 18683,
+       "p": 1.1
+      },
+      {
+       "i": 18684,
+       "p": 1.1
+      },
+      {
+       "i": 23200,
+       "p": 1.1
+      },
+      {
+       "i": 23201,
+       "p": 1.1
+      },
+      {
+       "i": 18335,
+       "p": 1
+      },
+      {
+       "i": 12843,
+       "p": 100
+      },
+      {
+       "i": 20520,
+       "p": 44
+      },
+      {
+       "i": 12753,
+       "p": 17
+      },
+      {
+       "i": 12808,
+       "p": 2.4
+      }
+     ]
+    },
+    {
+     "id": 10504,
+     "n": "Seigneur Alexei Barov",
+     "en": "Lord Alexei Barov",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 16722,
+       "p": 5
+      },
+      {
+       "i": 14611,
+       "p": 3.7
+      },
+      {
+       "i": 14612,
+       "p": 3.7
+      },
+      {
+       "i": 14614,
+       "p": 3.7
+      },
+      {
+       "i": 14615,
+       "p": 3.7
+      },
+      {
+       "i": 14616,
+       "p": 3.7
+      },
+      {
+       "i": 14620,
+       "p": 3.7
+      },
+      {
+       "i": 14621,
+       "p": 3.7
+      },
+      {
+       "i": 14622,
+       "p": 3.7
+      },
+      {
+       "i": 14623,
+       "p": 3.7
+      },
+      {
+       "i": 14624,
+       "p": 3.7
+      },
+      {
+       "i": 14626,
+       "p": 3.7
+      },
+      {
+       "i": 14629,
+       "p": 3.7
+      },
+      {
+       "i": 14631,
+       "p": 3.7
+      },
+      {
+       "i": 14632,
+       "p": 3.7
+      },
+      {
+       "i": 14633,
+       "p": 3.7
+      },
+      {
+       "i": 14636,
+       "p": 3.7
+      },
+      {
+       "i": 14637,
+       "p": 3.7
+      },
+      {
+       "i": 14638,
+       "p": 3.7
+      },
+      {
+       "i": 14640,
+       "p": 3.7
+      },
+      {
+       "i": 14641,
+       "p": 3.7
+      },
+      {
+       "i": 18680,
+       "p": 3.7
+      },
+      {
+       "i": 18681,
+       "p": 3.7
+      },
+      {
+       "i": 18682,
+       "p": 3.7
+      },
+      {
+       "i": 18683,
+       "p": 3.7
+      },
+      {
+       "i": 18684,
+       "p": 3.7
+      },
+      {
+       "i": 23200,
+       "p": 3.7
+      },
+      {
+       "i": 23201,
+       "p": 3.7
+      },
+      {
+       "i": 12843,
+       "p": 100
+      }
+     ]
+    },
+    {
+     "id": 10502,
+     "n": "Dame Illucia Barov",
+     "en": "Lady Illucia Barov",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 14611,
+       "p": 1.1
+      },
+      {
+       "i": 14612,
+       "p": 1.1
+      },
+      {
+       "i": 14614,
+       "p": 1.1
+      },
+      {
+       "i": 14615,
+       "p": 1.1
+      },
+      {
+       "i": 14616,
+       "p": 1.1
+      },
+      {
+       "i": 14620,
+       "p": 1.1
+      },
+      {
+       "i": 14621,
+       "p": 1.1
+      },
+      {
+       "i": 14622,
+       "p": 1.1
+      },
+      {
+       "i": 14623,
+       "p": 1.1
+      },
+      {
+       "i": 14624,
+       "p": 1.1
+      },
+      {
+       "i": 14626,
+       "p": 1.1
+      },
+      {
+       "i": 14629,
+       "p": 1.1
+      },
+      {
+       "i": 14631,
+       "p": 1.1
+      },
+      {
+       "i": 14632,
+       "p": 1.1
+      },
+      {
+       "i": 14633,
+       "p": 1.1
+      },
+      {
+       "i": 14636,
+       "p": 1.1
+      },
+      {
+       "i": 14637,
+       "p": 1.1
+      },
+      {
+       "i": 14638,
+       "p": 1.1
+      },
+      {
+       "i": 14640,
+       "p": 1.1
+      },
+      {
+       "i": 14641,
+       "p": 1.1
+      },
+      {
+       "i": 18680,
+       "p": 1.1
+      },
+      {
+       "i": 18681,
+       "p": 1.1
+      },
+      {
+       "i": 18682,
+       "p": 1.1
+      },
+      {
+       "i": 18683,
+       "p": 1.1
+      },
+      {
+       "i": 18684,
+       "p": 1.1
+      },
+      {
+       "i": 23200,
+       "p": 1.1
+      },
+      {
+       "i": 23201,
+       "p": 1.1
+      },
+      {
+       "i": 18335,
+       "p": 1
+      },
+      {
+       "i": 12843,
+       "p": 100
+      },
+      {
+       "i": 20520,
+       "p": 51.4
+      },
+      {
+       "i": 12753,
+       "p": 19
+      },
+      {
+       "i": 12808,
+       "p": 2
+      }
+     ]
+    }
+   ],
+   "rares": [],
+   "quetes": [
+    {
+     "id": 5529,
+     "fr": "Portée contaminée",
+     "en": "Plagued Hatchlings",
+     "nv": 58,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 5582,
+     "fr": "L'écaille de dragon luisante",
+     "en": "Healthy Dragon Scale",
+     "nv": 58,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 4771,
+     "fr": "Le gambit de l'aube",
+     "en": "Dawn's Gambit",
+     "nv": 60,
+     "min": 57,
+     "camp": 0
+    },
+    {
+     "id": 5341,
+     "fr": "Fortune de la famille Barov",
+     "en": "Barov Family Fortune",
+     "nv": 60,
+     "min": 52,
+     "camp": 2
+    },
+    {
+     "id": 5343,
+     "fr": "Fortune de la famille Barov",
+     "en": "Barov Family Fortune",
+     "nv": 60,
+     "min": 52,
+     "camp": 1
+    },
+    {
+     "id": 5382,
+     "fr": "Docteur Theolen Krastinov, le boucher",
+     "en": "Doctor Theolen Krastinov, the Butcher",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 5384,
+     "fr": "Kirtonos le héraut",
+     "en": "Kirtonos the Herald",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 5466,
+     "fr": "La Liche, Ras Murmegivre",
+     "en": "The Lich, Ras Frostwhisper",
+     "nv": 60,
+     "min": 57,
+     "camp": 0
+    },
+    {
+     "id": 5515,
+     "fr": "Sac des horreurs de Krastinov",
+     "en": "Krastinov's Bag of Horrors",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 5531,
+     "fr": "Betina Bigglezink",
+     "en": "Betina Bigglezink",
+     "nv": 60,
+     "min": 57,
+     "camp": 0
+    },
+    {
+     "id": 8969,
+     "fr": "Le morceau gauche de l'amulette du seigneur Valthalak",
+     "en": "The Left Piece of Lord Valthalak's Amulet",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    },
+    {
+     "id": 8992,
+     "fr": "Le morceau droit de l'amulette du seigneur Valthalak",
+     "en": "The Right Piece of Lord Valthalak's Amulet",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    }
+   ]
+  },
+  "stratholme": {
+   "carte": 329,
+   "niveaux": [
+    55,
+    62
+   ],
+   "entrees": [
+    {
+     "zone": "maleterres-de-l-est",
+     "x": 42,
+     "y": 15.9
+    },
+    {
+     "zone": "maleterres-de-l-est",
+     "x": 26.5,
+     "y": 10.4
+    }
+   ],
+   "boss": [
+    {
+     "id": 10516,
+     "n": "Le Condamné",
+     "en": "The Unforgiven",
+     "nv": [
+      57,
+      57
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 13404,
+       "p": 20
+      },
+      {
+       "i": 13405,
+       "p": 20
+      },
+      {
+       "i": 13408,
+       "p": 20
+      },
+      {
+       "i": 13409,
+       "p": 20
+      },
+      {
+       "i": 16717,
+       "p": 20
+      },
+      {
+       "i": 12843,
+       "p": 100
+      },
+      {
+       "i": 13174,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 10558,
+     "n": "Chanteloge Forrestin",
+     "en": "Hearthsinger Forresten",
+     "nv": [
+      57,
+      57
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 13378,
+       "p": 20
+      },
+      {
+       "i": 13379,
+       "p": 20
+      },
+      {
+       "i": 13383,
+       "p": 20
+      },
+      {
+       "i": 13384,
+       "p": 20
+      },
+      {
+       "i": 16682,
+       "p": 20
+      },
+      {
+       "i": 12843,
+       "p": 100
+      },
+      {
+       "i": 13174,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 10997,
+     "n": "Maître canonnier Willey",
+     "en": "Cannon Master Willey",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 13377,
+       "p": 100
+      },
+      {
+       "i": 13380,
+       "p": 20
+      },
+      {
+       "i": 13381,
+       "p": 20
+      },
+      {
+       "i": 13382,
+       "p": 20
+      },
+      {
+       "i": 16708,
+       "p": 20
+      },
+      {
+       "i": 18721,
+       "p": 20
+      },
+      {
+       "i": 22403,
+       "p": 20
+      },
+      {
+       "i": 22404,
+       "p": 20
+      },
+      {
+       "i": 22405,
+       "p": 20
+      },
+      {
+       "i": 22406,
+       "p": 20
+      },
+      {
+       "i": 22407,
+       "p": 20
+      },
+      {
+       "i": 12839,
+       "p": 6
+      },
+      {
+       "i": 21524,
+       "p": 100
+      }
+     ]
+    },
+    {
+     "id": 11032,
+     "n": "Malor le Zélé",
+     "en": "Malor the Zealous",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 1,
+     "butin": []
+    },
+    {
+     "id": 10811,
+     "n": "Archiviste Galford",
+     "en": "Archivist Galford",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 13386,
+       "p": 22
+      },
+      {
+       "i": 13387,
+       "p": 22
+      },
+      {
+       "i": 16692,
+       "p": 22
+      },
+      {
+       "i": 18716,
+       "p": 22
+      },
+      {
+       "i": 13385,
+       "p": 12
+      },
+      {
+       "i": 22206,
+       "p": 100
+      },
+      {
+       "i": 12811,
+       "p": 18
+      }
+     ]
+    },
+    {
+     "id": 10436,
+     "n": "Baronne Anastari",
+     "en": "Baroness Anastari",
+     "nv": [
+      59,
+      59
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 13534,
+       "p": 20
+      },
+      {
+       "i": 16704,
+       "p": 20
+      },
+      {
+       "i": 18728,
+       "p": 20
+      },
+      {
+       "i": 18729,
+       "p": 20
+      },
+      {
+       "i": 18730,
+       "p": 20
+      },
+      {
+       "i": 12843,
+       "p": 100
+      },
+      {
+       "i": 13514,
+       "p": 20
+      },
+      {
+       "i": 13535,
+       "p": 20
+      },
+      {
+       "i": 13537,
+       "p": 20
+      },
+      {
+       "i": 13538,
+       "p": 20
+      },
+      {
+       "i": 13539,
+       "p": 20
+      },
+      {
+       "i": 13174,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 10437,
+     "n": "Nerub'enkan",
+     "en": "Nerub'enkan",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 13529,
+       "p": 20
+      },
+      {
+       "i": 16675,
+       "p": 20
+      },
+      {
+       "i": 18738,
+       "p": 20
+      },
+      {
+       "i": 18739,
+       "p": 20
+      },
+      {
+       "i": 18740,
+       "p": 20
+      },
+      {
+       "i": 12843,
+       "p": 100
+      },
+      {
+       "i": 13508,
+       "p": 20
+      },
+      {
+       "i": 13530,
+       "p": 20
+      },
+      {
+       "i": 13531,
+       "p": 20
+      },
+      {
+       "i": 13532,
+       "p": 20
+      },
+      {
+       "i": 13533,
+       "p": 20
+      },
+      {
+       "i": 13174,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 10438,
+     "n": "Maleki le Blafard",
+     "en": "Maleki the Pallid",
+     "nv": [
+      61,
+      61
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 13524,
+       "p": 20
+      },
+      {
+       "i": 16691,
+       "p": 20
+      },
+      {
+       "i": 18734,
+       "p": 20
+      },
+      {
+       "i": 18735,
+       "p": 20
+      },
+      {
+       "i": 18737,
+       "p": 20
+      },
+      {
+       "i": 12833,
+       "p": 6
+      },
+      {
+       "i": 12843,
+       "p": 100
+      },
+      {
+       "i": 13509,
+       "p": 20
+      },
+      {
+       "i": 13525,
+       "p": 20
+      },
+      {
+       "i": 13526,
+       "p": 20
+      },
+      {
+       "i": 13527,
+       "p": 20
+      },
+      {
+       "i": 13528,
+       "p": 20
+      }
+     ]
+    },
+    {
+     "id": 10435,
+     "n": "Magistrat Barthilas",
+     "en": "Magistrate Barthilas",
+     "nv": [
+      58,
+      58
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 23198,
+       "p": 16.7
+      },
+      {
+       "i": 13376,
+       "p": 16.7
+      },
+      {
+       "i": 18722,
+       "p": 16.7
+      },
+      {
+       "i": 18725,
+       "p": 16.7
+      },
+      {
+       "i": 18726,
+       "p": 16.7
+      },
+      {
+       "i": 18727,
+       "p": 16.7
+      },
+      {
+       "i": 12382,
+       "p": 100
+      },
+      {
+       "i": 12843,
+       "p": 100
+      },
+      {
+       "i": 13174,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    },
+    {
+     "id": 10440,
+     "n": "Baron Vaillefendre",
+     "en": "Baron Rivendare",
+     "nv": [
+      62,
+      62
+     ],
+     "r": 1,
+     "butin": [
+      {
+       "i": 13335,
+       "p": 1
+      },
+      {
+       "i": 13505,
+       "p": 1
+      },
+      {
+       "i": 22408,
+       "p": 20
+      },
+      {
+       "i": 22409,
+       "p": 20
+      },
+      {
+       "i": 22410,
+       "p": 20
+      },
+      {
+       "i": 22411,
+       "p": 20
+      },
+      {
+       "i": 22412,
+       "p": 20
+      },
+      {
+       "i": 13340,
+       "p": 14.1
+      },
+      {
+       "i": 13344,
+       "p": 14.1
+      },
+      {
+       "i": 13345,
+       "p": 14.1
+      },
+      {
+       "i": 13346,
+       "p": 14.1
+      },
+      {
+       "i": 13349,
+       "p": 14.1
+      },
+      {
+       "i": 13361,
+       "p": 14.1
+      },
+      {
+       "i": 13368,
+       "p": 14.1
+      },
+      {
+       "i": 16668,
+       "p": 11.1
+      },
+      {
+       "i": 16678,
+       "p": 11.1
+      },
+      {
+       "i": 16687,
+       "p": 11.1
+      },
+      {
+       "i": 16694,
+       "p": 11.1
+      },
+      {
+       "i": 16699,
+       "p": 11.1
+      },
+      {
+       "i": 16709,
+       "p": 11.1
+      },
+      {
+       "i": 16719,
+       "p": 11.1
+      },
+      {
+       "i": 16728,
+       "p": 11.1
+      },
+      {
+       "i": 16732,
+       "p": 11.1
+      },
+      {
+       "i": 12843,
+       "p": 100
+      },
+      {
+       "i": 13251,
+       "p": 100,
+       "q": 1
+      },
+      {
+       "i": 13174,
+       "p": 80,
+       "q": 1
+      }
+     ]
+    }
+   ],
+   "rares": [
+    {
+     "id": 10393,
+     "n": "Krân",
+     "en": "Skul",
+     "nv": [
+      58,
+      58
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 13394,
+       "p": 33.3
+      },
+      {
+       "i": 13395,
+       "p": 33.3
+      },
+      {
+       "i": 13396,
+       "p": 33.3
+      },
+      {
+       "i": 12843,
+       "p": 100
+      }
+     ]
+    },
+    {
+     "id": 10809,
+     "n": "Echine-de-pierre",
+     "en": "Stonespine",
+     "nv": [
+      60,
+      60
+     ],
+     "r": 2,
+     "butin": [
+      {
+       "i": 13397,
+       "p": 33.3
+      },
+      {
+       "i": 13399,
+       "p": 33.3
+      },
+      {
+       "i": 13954,
+       "p": 33.3
+      },
+      {
+       "i": 12843,
+       "p": 100
+      }
+     ]
+    }
+   ],
+   "quetes": [
+    {
+     "id": 5122,
+     "fr": "Le médaillon de foi",
+     "en": "The Medallion of Faith",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 5125,
+     "fr": "La rétribution d'Aurius",
+     "en": "Aurius' Reckoning",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 5212,
+     "fr": "La chair ne ment pas",
+     "en": "The Flesh Does Not Lie",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 5213,
+     "fr": "L'agent actif",
+     "en": "The Active Agent",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 5214,
+     "fr": "Le grand Fras Siabi",
+     "en": "The Great Fras Siabi",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 5243,
+     "fr": "Les demeures du Sacré",
+     "en": "Houses of the Holy",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 5251,
+     "fr": "L'archiviste",
+     "en": "The Archivist",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 5262,
+     "fr": "La vérité vient du ciel",
+     "en": "The Truth Comes Crashing Down",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 5263,
+     "fr": "Au-dessus et au-delà",
+     "en": "Above and Beyond",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 5282,
+     "fr": "Âmes tourmentées",
+     "en": "The Restless Souls",
+     "nv": 60,
+     "min": 55,
+     "camp": 0
+    },
+    {
+     "id": 5463,
+     "fr": "Le cadeau de Menethil",
+     "en": "Menethil's Gift",
+     "nv": 60,
+     "min": 57,
+     "camp": 0
+    },
+    {
+     "id": 5848,
+     "fr": "De l'amour et de la famille",
+     "en": "Of Love and Family",
+     "nv": 60,
+     "min": 52,
+     "camp": 0
+    },
+    {
+     "id": 6163,
+     "fr": "Ramstein",
+     "en": "Ramstein",
+     "nv": 60,
+     "min": 56,
+     "camp": 2
+    },
+    {
+     "id": 8945,
+     "fr": "La supplique du mort",
+     "en": "Dead Man's Plea",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    },
+    {
+     "id": 8968,
+     "fr": "Le morceau gauche de l'amulette du seigneur Valthalak",
+     "en": "The Left Piece of Lord Valthalak's Amulet",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    },
+    {
+     "id": 8991,
+     "fr": "Le morceau droit de l'amulette du seigneur Valthalak",
+     "en": "The Right Piece of Lord Valthalak's Amulet",
+     "nv": 60,
+     "min": 58,
+     "camp": 0
+    }
+   ]
+  }
+ }
+}
