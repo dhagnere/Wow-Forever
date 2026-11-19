@@ -13,6 +13,8 @@ import ffmpeg from "@ffmpeg-installer/ffmpeg";
 import sharp from "sharp";
 import { ANALYSE_VIDEO, zoneALEchelle, type Zone } from "@/config/analyse-video";
 import { nettoyerLieu, nettoyerNom, VERSION_ANALYSE, type Analyse, type Echantillon } from "@/lib/analyseVideo";
+import { derniereVersion, tableCsv } from "@/modules/veille/objets/wago";
+import { lireCsv } from "@/modules/veille/scripts/_bases-libres";
 
 type Lecteur = { recognize: (img: Buffer) => Promise<{ data: { text: string; confidence: number } }>; setParameters: (p: Record<string, string>) => Promise<unknown>; terminate: () => Promise<unknown> };
 let lecteurs: { texte: Lecteur; chiffres: Lecteur } | null = null;
@@ -157,4 +159,31 @@ export async function analyserEnregistrement(fichier: string, cache: string, o: 
   writeFileSync(fCache, JSON.stringify(a), "utf8");
   journal(`  ${nb} images, ${lectures} lectures de texte, ${Math.round((Date.now() - t0) / 1000)} s.`);
   return a;
+}
+
+/**
+ * Noms des lieux du jeu en français (table AreaTable de Forever, lue sur wago.tools par le PC de Jobwow), pour ramener
+ * une lecture abîmée au nom exact (lib/analyseVideo.ts, lexiqueDepuisNoms). Gardés un mois dans `fichier` ; sans
+ * Internet, la liste gardée sert encore, sinon une liste vide (la soirée sert alors de lexique). Noms © Blizzard Entertainment.
+ */
+export async function lieuxDuJeu(fichier: string, journal = console.log): Promise<string[]> {
+  let garde: { t: number; noms: string[] } | null = null;
+  try { garde = JSON.parse(readFileSync(fichier, "utf8")); } catch { /* pas encore lus */ }
+  if (garde && Date.now() - garde.t < 30 * 86400000 && garde.noms?.length) return garde.noms;
+  try {
+    const aires = lireCsv(await tableCsv("AreaTable", await derniereVersion()));
+    const zephras = aires.find((a) => a.ID === "16593")?.ContinentID;
+    const noms = [...new Set(aires
+      .filter((a) => ["0", "1", zephras].includes(a.ContinentID) || a.ParentAreaID === "16593")
+      .map((a) => (a.AreaName_lang ?? "").trim())
+      .filter((n) => n.length >= 3 && !/test|unused|\bdnt\b|\bzz|\[|copy|placeholder/i.test(n)))];
+    if (noms.length < 200) throw new Error(`${noms.length} noms seulement`);
+    mkdirSync(path.dirname(fichier), { recursive: true });
+    writeFileSync(fichier, JSON.stringify({ t: Date.now(), noms }), "utf8");
+    journal(`Noms des lieux du jeu : ${noms.length} (wago.tools), gardés un mois.`);
+    return noms;
+  } catch (e) {
+    journal(`Noms des lieux du jeu indisponibles (${e instanceof Error ? e.message : e}) : ${garde?.noms?.length ? "liste gardée utilisée" : "lieux tirés des lectures de la soirée"}.`);
+    return garde?.noms ?? [];
+  }
 }
