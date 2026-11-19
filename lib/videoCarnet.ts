@@ -338,7 +338,7 @@ export function descriptionVideo(
   info: { liste: Chapitre[]; valides: boolean; zones: string[]; niveaux?: [number, number] | null },
   site: string,
   reseaux: LiensChaine = SITE,
-  partie?: { numero: number; total: number },
+  partie?: { numero: number; total: number; episode?: number },
   perso: PersonnageVideo = personnageVideo(),
 ): string {
   site = site.replace(/\/+$/, "");
@@ -348,10 +348,16 @@ export function descriptionVideo(
     `${perso.presentation}${lieux}${niveaux}.`,
     "Abonnez-vous pour suivre la montée jusqu'au 60 ; les cartes et les guides de la séance sont sur La Taverne Éternelle.",
   ];
-  if (partie && partie.total > 1) {
-    const soiree = DATE_FR.format(new Date(s.debut)).replace(/^1 /, "1er ");
+  const soiree = DATE_FR.format(new Date(s.debut)).replace(/^1 /, "1er ");
+  const playlist = `Toutes les parties sont dans la playlist « Le ${perso.serie} · WoW Forever 1 à 60 ».`;
+  if (partie?.episode) {
+    // numérotation continue de la série (19/11/2026) : partie 7, d'une soirée à l'autre
+    const ici = partie.total > 1 ? ` (${partie.numero}e morceau sur ${partie.total} de la soirée du ${soiree})` : "";
+    const avant = partie.episode > 1 ? ` La partie ${partie.episode - 1} la précède.` : "";
+    lignes.push("", `Partie ${partie.episode} du ${perso.serie}${ici}.${avant} ${playlist}`);
+  } else if (partie && partie.total > 1) {
     const autour = [partie.numero > 1 ? `la partie ${partie.numero - 1} la précède` : null, partie.numero < partie.total ? `la partie ${partie.numero + 1} la suit` : null].filter(Boolean).join(", ");
-    lignes.push("", `Partie ${partie.numero} sur ${partie.total} de la soirée du ${soiree}${autour ? ` : ${autour}` : ""}. Toutes les parties sont dans la playlist « Le ${perso.serie} · WoW Forever 1 à 60 ».`);
+    lignes.push("", `Partie ${partie.numero} sur ${partie.total} de la soirée du ${soiree}${autour ? ` : ${autour}` : ""}. ${playlist}`);
   }
   if (info.valides) lignes.push("", "Chapitres :", ...info.liste.map((c) => `${horodatage(c.seconde)} ${c.titre}`));
   lignes.push(

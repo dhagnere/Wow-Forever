@@ -34,6 +34,11 @@ export interface PersonnageVideo {
   /** Noms du personnage en jeu (sonde, sans le royaume) qui le choisissent d'office ; casse, espaces et accents ignorés. */
   nomsEnJeu: string[];
   repliques: JeuRepliques;
+  /**
+   * Voix des bulles (npm run carnet:voix) : enregistrement de référence (sinon celui de Jobwow), voix abaissée de
+   * quelques demi-tons (même durée), intensité de Chatterbox. Ce qui est donné sur la ligne de commande l'emporte.
+   */
+  voix?: { reference?: string; grave?: number; exaggeration?: number };
   /** Bulle façon bande dessinée : cri écrit sur un cartouche au-dessus de la bulle, selon le moment. */
   onomatopees?: Record<GenreMoment, string>;
 }
@@ -67,10 +72,14 @@ export const PERSONNAGES: Record<string, PersonnageVideo> = {
       parGenre: REPLIQUES_THESHAM, paliers: REPLIQUES_PALIERS_THESHAM,
       capacite: REPLIQUES_CAPACITE_THESHAM, mortRepetee: REPLIQUES_MORT_REPETEE_THESHAM,
     },
+    // voix d'orc : celle de Jobwow abaissée de trois demi-tons, plus appuyée (à valider par Jobwow à l'écoute)
+    voix: { grave: 3, exaggeration: 0.85 },
     onomatopees: {
       intro: "Jobwow TheSham !", zone: "En route !", niveau: "Niveau !", mort: "Argh !", exploit: "Boum !",
       entraineur: "Les esprits parlent !", grimoire: "Grimoire !", quete: "Quête !", trajet: "Larguez les amarres !",
       vol: "Envol !", marqueur: "Noté !",
+      hecatombe: "Encore ?!", malchance: "Aïe !", temeraire: "Lok'tar !", jackpot: "Kaching !", rafale: "Et hop !",
+      demitour: "Pouf !", attente: "Zzz…", egare: "Hein ?",
     },
   },
 };

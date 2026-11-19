@@ -19,7 +19,7 @@ import { lieuParNom } from "@/lib/cartes";
 export interface Evenement {
   heure: number;            // heure du PC (ms, heure locale sans fuseau, comme heureLocale)
   genre: Exclude<GenreMoment, "intro"> | "reprise";   // « reprise » : début d'un enregistrement (état remis à zéro)
-  valeurs: { zone?: string; niveau?: string; nom?: string; titre?: string; demons?: boolean };
+  valeurs: { zone?: string; niveau?: string; nom?: string; titre?: string; demons?: boolean; montant?: string; nombre?: string; duree?: string };
   personnage: string;
 }
 
@@ -28,12 +28,32 @@ const NOMS_CARTES = new Map(Object.values(CARTES_JEU).map((c) => [c.id, c.nom]))
 const listeDe = (v: ValeurLua | undefined): ValeurLua[] =>
   Array.isArray(v) ? v : v && typeof v === "object" ? Object.keys(v).filter((k) => /^\d+$/.test(k)).sort((a, b) => +a - +b).map((k) => (v as Record<string, ValeurLua>)[k]) : [];
 
+/** Ce qui compte comme une action du joueur (le reste — positions, cibles — n'empêche pas d'être égaré). */
+const ACTIVITE = new Set(["accept", "obj", "turnin", "loot", "recu", "level", "mort", "zone", "trainer", "livre", "exploit"]);
+const EGARE_MS = 6 * 60000;
+
+/** « 1 po 20 pa 5 pc » à partir d'un montant en pièces de cuivre. */
+export function monnaie(cuivre: number): string {
+  const po = Math.floor(cuivre / 10000), pa = Math.floor((cuivre % 10000) / 100), pc = cuivre % 100;
+  return [po ? `${po} po` : "", pa ? `${pa} pa` : "", pc ? `${pc} pc` : ""].filter(Boolean).join(" ") || "0 pc";
+}
+
+/** « 2 min 10 s », « 45 s », « 7 min ». */
+export function dureeEnClair(secondes: number): string {
+  const s = Math.round(secondes), m = Math.floor(s / 60), r = s % 60;
+  return m ? (r ? `${m} min ${String(r).padStart(2, "0")} s` : `${m} min`) : `${r} s`;
+}
+
 /** Événements d'un enregistrement, datés par les repères d'horloge (« clock ») comme les chapitres. */
 export function evenementsEnregistrement(enr: Record<string, ValeurLua>, personnage: string): Evenement[] {
   const out: Evenement[] = [];
   let ref: { t: number; heure: number } | null = null;
   let zone: string | undefined;
   let aPlacer = false;
+  // moments drôles (19/11/2026) : combinaisons d'événements, repérées au fil de l'enregistrement
+  let niveauJoueur = 0, heureNiveau = -Infinity, heureZone = -Infinity, activite: number | null = null;
+  let morts: number[] = [], rendues: number[] = [];
+  const titres = new Map<string, string>(), temeraires = new Set<string>();
   for (const brut of listeDe(enr.events)) {
     const p = String(brut).split("|");
     const t = Number(p[0]);
@@ -42,7 +62,10 @@ export function evenementsEnregistrement(enr: Record<string, ValeurLua>, personn
       const h = heureLocale(p[3] ?? "");
       if (h !== null) ref = { t, heure: h };
       // un nouvel enregistrement peut être un autre personnage ou un autre lieu : on repart de zéro
-      if (p[2] === "debut" && h !== null) { zone = undefined; aPlacer = true; out.push({ heure: h, genre: "reprise", valeurs: {}, personnage }); }
+      if (p[2] === "debut" && h !== null) {
+        zone = undefined; aPlacer = true; out.push({ heure: h, genre: "reprise", valeurs: {}, personnage });
+        morts = []; rendues = []; activite = null; heureNiveau = -Infinity; heureZone = -Infinity;
+      }
       continue;
     }
     const zoneAvant = zone;
@@ -53,16 +76,56 @@ export function evenementsEnregistrement(enr: Record<string, ValeurLua>, personn
     const heure = ref.heure + Math.round((t - ref.t) * 1000);
     const e = (genre: Evenement["genre"], valeurs: Evenement["valeurs"] = {}) =>
       out.push({ heure, genre, valeurs: { zone, ...valeurs }, personnage });
+    // égaré : six minutes sans quête, combat ni découverte, puis l'aventure reprend
+    if (ACTIVITE.has(p[1])) {
+      if (activite !== null && heure - activite >= EGARE_MS && !(p[1] === "zone" && zone === zoneAvant)) {
+        out.push({ heure: activite + 150000, genre: "egare", valeurs: { zone: zoneAvant ?? zone, duree: dureeEnClair((heure - activite) / 1000) }, personnage });
+      }
+      if (!(p[1] === "zone" && zone === zoneAvant)) activite = heure;
+    }
     switch (p[1]) {
-      case "zone": if (zone && zone !== zoneAvant) e("zone"); break;
-      case "level": if (p[2]) e("niveau", { niveau: String(niveauAtteint(p)) }); break;
+      case "accept": if (p[2]) titres.set(p[2], (p[3] ?? "").trim()); break;
+      case "qniveau": {
+        const qn = Number(p[3]), pn = Number(p[4]) || niveauJoueur;
+        if (pn) niveauJoueur = pn;
+        const titre = titres.get(p[2] ?? "");
+        if (qn && pn && qn >= pn + 3 && titre && titre !== "nil" && !temeraires.has(p[2])) { temeraires.add(p[2]); e("temeraire", { titre, niveau: String(qn) }); }
+        break;
+      }
+      case "gain": {
+        const argent = Number(p[4]) || 0;
+        if (argent >= 100 * Math.max(5, niveauJoueur)) e("jackpot", { montant: monnaie(argent) });
+        break;
+      }
+      case "foyer": if (p[2] === "utilise" && heure - heureZone < 180000) e("demitour"); break;
+    }
+    switch (p[1]) {
+      case "zone": if (zone && zone !== zoneAvant) { heureZone = heure; e("zone"); } break;
+      case "level": if (p[2]) { niveauJoueur = niveauAtteint(p); heureNiveau = heure; e("niveau", { niveau: String(niveauJoueur) }); } break;
       case "mark": if (p[2]) e("marqueur", { titre: p.slice(2).join("|").trim() }); break;
-      case "mort": e("mort", { zone: p[2] && p[2] !== "?" ? p[2] : zone }); break;
+      case "mort": {
+        const z = p[2] && p[2] !== "?" ? p[2] : zone;
+        e("mort", { zone: z });
+        // hécatombe : trois morts ou plus en un quart d'heure ; pas de chance : mort juste après un niveau
+        morts = [...morts.filter((t0) => heure - t0 < 15 * 60000), heure];
+        if (morts.length >= 3) e("hecatombe", { zone: z, nombre: String(morts.length) });
+        else if (heure - heureNiveau < 180000) e("malchance", { zone: z, niveau: String(niveauJoueur || "?") });
+        break;
+      }
       case "exploit": if (p[2]) e("exploit", { nom: p[2] }); break;
       case "trainer": if (p[2]) e("entraineur", { nom: p[2], demons: /d[ée]mon/i.test(p[8] ?? "") }); break;
       case "livre": if (p[3]) e("grimoire", { titre: p[3] }); break;
-      case "turnin": if (p[3] && p[3] !== "nil") e("quete", { titre: p[3] }); break;
-      case "trajet": if (p[2] === "debut") e("trajet", { titre: p[3] }); break;
+      case "turnin":
+        if (p[3] && p[3] !== "nil") e("quete", { titre: p[3] });
+        // rafale : quatre quêtes rendues en trois minutes (une fois par rafale)
+        rendues = [...rendues.filter((t0) => heure - t0 < 180000), heure];
+        if (rendues.length === 4) e("rafale", { nombre: "4" });
+        break;
+      case "trajet":
+        if (p[2] === "debut") e("trajet", { titre: p[3] });
+        // long trajet : une minute et demie ou plus à bord
+        if (p[2] === "arrivee" && Number(p[8]) >= 90) e("attente", { titre: p[3], duree: dureeEnClair(Number(p[8])) });
+        break;
       case "vol": if (p[2] === "depart") e("vol"); break;
     }
   }
@@ -122,6 +185,10 @@ export interface Narration {
    */
   extrait?: { debut: number; duree: number };
   partie?: { numero: number; total: number; journee: string };
+  /** Réglages choisis dans l'Atelier (fiche du personnage) : taille de l'avatar (1 = normale, de 0,7 à 1,4). */
+  reglages?: { tailleAvatar?: number };
+  /** Numéro continu de la vidéo dans la série du personnage (lib/episodes.ts) : « partie 7 », d'une soirée à l'autre. */
+  episode?: number;
   /** Personnage des vidéos (content/personnages.ts : « thesham »…) ; absent : Jobwow le tavernier. */
   profil?: string;
   /** Moments repris d'une narration déjà relue (soirée découpée après coup) : l'Atelier marque la relecture faite. */
@@ -130,7 +197,8 @@ export interface Narration {
 
 /** Priorité d'un genre quand deux moments se chevauchent (le plus petit l'emporte). */
 const PRIORITE: Record<GenreMoment, number> = {
-  intro: 0, niveau: 1, exploit: 2, mort: 3, zone: 4, grimoire: 5, entraineur: 6, trajet: 7, marqueur: 8, vol: 9, quete: 10,
+  intro: 0, niveau: 1, exploit: 2, hecatombe: 2.4, malchance: 2.6, mort: 3, jackpot: 3.5, zone: 4, grimoire: 5, temeraire: 5.5,
+  entraineur: 6, demitour: 6.5, trajet: 7, attente: 7.5, marqueur: 8, vol: 9, rafale: 9.5, quete: 10, egare: 11,
 };
 const DUREE_MOMENT = 5;
 const ECART_MOMENTS = 1;          // secondes libres entre deux bulles
@@ -151,6 +219,14 @@ export function sousTitre(genre: GenreMoment, v: Evenement["valeurs"], serie = "
     case "trajet": return `Embarquement${v.titre ? ` : ${v.titre}` : ""}.`;
     case "vol": return `Départ en vol.`;
     case "marqueur": return v.titre ?? "";
+    case "hecatombe": return `${v.nombre ?? "3"}e mort en un quart d'heure${v.zone ? ` (${v.zone})` : ""}.`;
+    case "malchance": return `Mort juste après le niveau ${v.niveau ?? "?"}.`;
+    case "temeraire": return `Quête de niveau ${v.niveau ?? "?"} acceptée : ${v.titre ?? ""}.`;
+    case "jackpot": return `Récompense : ${v.montant ?? ""}.`;
+    case "rafale": return `${v.nombre ?? "4"} quêtes rendues en trois minutes.`;
+    case "demitour": return `Pierre de foyer, à peine arrivé${v.zone ? ` (${v.zone})` : ""}.`;
+    case "attente": return `Trajet${v.titre ? ` « ${v.titre} »` : ""} : ${v.duree ?? ""}.`;
+    case "egare": return `${v.duree ?? "Six minutes"} sans quête ni combat${v.zone ? ` (${v.zone})` : ""}.`;
   }
 }
 
@@ -235,7 +311,7 @@ export function preparerNarration(o: {
   gardes.sort((a, b) => a.seconde - b.seconde);
   const moments = gardes.map((m) => {
     const v = (m as Moment & { _valeurs?: Evenement["valeurs"] })._valeurs ?? { zone, niveau };
-    if (m.genre === "mort") morts++;
+    if (m.genre === "mort" || m.genre === "hecatombe" || m.genre === "malchance") morts++;
     // palier de niveau, choix d'une capacité, mort répétée : leurs propres répliques
     const { cle, liste } = listeRepliques(m.genre, { niveau: v.niveau, demons: Boolean(v.demons), morts }, perso.repliques);
     return { seconde: m.seconde, duree: m.duree, genre: m.genre, bulle: remplir(piocher(cle, liste), v), sousTitre: m.sousTitre };
@@ -257,8 +333,10 @@ export function preparerNarration(o: {
 
 /** Clips verticaux : autour des trois moments les plus forts (niveau, élite, mort, grimoire), 30 secondes chacun. */
 export function choisirClips(moments: Moment[], dureeVideo: number, nombre = 3): ClipVertical[] {
-  const forts = moments.filter((m) => ["niveau", "exploit", "mort", "grimoire"].includes(m.genre))
-    .sort((a, b) => PRIORITE[a.genre] - PRIORITE[b.genre] || a.seconde - b.seconde);
+  // les moments drôles d'abord : ils font les meilleurs Shorts
+  const ORDRE_CLIPS: GenreMoment[] = ["hecatombe", "malchance", "jackpot", "exploit", "niveau", "demitour", "temeraire", "rafale", "mort", "grimoire", "egare", "attente"];
+  const forts = moments.filter((m) => ORDRE_CLIPS.includes(m.genre))
+    .sort((a, b) => ORDRE_CLIPS.indexOf(a.genre) - ORDRE_CLIPS.indexOf(b.genre) || a.seconde - b.seconde);
   const out: ClipVertical[] = [];
   for (const m of forts) {
     if (out.length >= nombre) break;
@@ -346,7 +424,7 @@ export interface PlanRendu {
    * redescendu en 0,3 s à la fin du moment ; posé sous la bulle façon bande dessinée.
    */
   apparitions?: { x: number; y: number; hauteur: number; variantes: { fichier: string; intervalles: [number, number][] }[] } | null;
-  etats: { mort: [number, number][]; niveau: [number, number][]; parle: [number, number][] };
+  etats: { mort: [number, number][]; niveau: [number, number][]; parle: [number, number][]; secoue?: [number, number][] };
   calques: Calque[];                  // bulles et sous-titres, aux heures de la partie de jeu
   /** Voix des bulles, aux heures de la partie de jeu ; le son du jeu baisse pendant qu'elles parlent. */
   voix?: { fichier: string; debut: number; fin: number }[];
@@ -361,6 +439,16 @@ export function voixAJour(m: Moment): boolean {
   return Boolean(m.voix && m.bulle.trim() && m.voixTexte === m.bulle);
 }
 
+/**
+ * Réactions de l'avatar (19/11/2026) : gris pendant une mort, doré pendant un succès, secoué quand ça tourne mal ou
+ * qu'il fait le fier ; valables pour le médaillon (Jobwow) comme pour le buste qui surgit (TheSham).
+ */
+export const REACTIONS: Record<"mort" | "niveau" | "secoue", GenreMoment[]> = {
+  mort: ["mort", "hecatombe", "malchance"],
+  niveau: ["niveau", "jackpot", "rafale"],
+  secoue: ["hecatombe", "malchance", "demitour", "temeraire", "egare", "exploit"],
+};
+
 /** Durée de la montée (et de la descente) du personnage qui surgit aux moments forts. */
 export const APPARITION = 0.3;
 
@@ -374,7 +462,7 @@ export function intervallesApparition(moments: Pick<Moment, "seconde" | "duree" 
   const out: Record<"normal" | "mort" | "niveau", [number, number][]> = { normal: [], mort: [], niveau: [] };
   let dernier: { v: "normal" | "mort" | "niveau"; i: [number, number] } | null = null;
   for (const m of [...moments].filter((x) => x.bulle.trim()).sort((a, b) => a.seconde - b.seconde)) {
-    const v = m.genre === "mort" ? "mort" : m.genre === "niveau" ? "niveau" : "normal";
+    const v = REACTIONS.mort.includes(m.genre) ? "mort" : REACTIONS.niveau.includes(m.genre) ? "niveau" : "normal";
     const a = Math.max(0, m.seconde), b = Math.min(dureeJeu, Math.max(m.seconde + m.duree, m.seconde + 2 * APPARITION + 0.2));
     if (b <= a) continue;
     if (dernier && dernier.v === v && a - dernier.i[1] < 1.5) { dernier.i[1] = Math.max(dernier.i[1], b); continue; }
@@ -444,11 +532,13 @@ export function grapheRendu(p: PlanRendu): { entrees: string[][]; graphe: string
   // médaillons : normal hors image de départ, puis gris (mort) et doré (niveau) par-dessus
   const m = p.medaillons;
   const calques: { fichier: string; x: string; y: string; quand: string }[] = [];
+  // secousse de l'avatar (moments où ça tourne mal) : quelques pixels de droite à gauche, vite
+  const secoue = (x: number) => (p.etats.secoue?.length ? `${x}+if(gt(${intervalles(p.etats.secoue, decal)},0),9*sin(45*t),0)` : String(x));
   if (m) {
     const rebond = `${m.y}-if(gt(${intervalles(p.etats.parle, decal)},0),8*abs(sin(7*t)),0)`;
-    calques.push({ fichier: m.normal, x: String(m.x), y: rebond, quand: `gte(t,${n2(decal)})` });
-    if (p.etats.mort.length) calques.push({ fichier: m.mort, x: String(m.x), y: rebond, quand: intervalles(p.etats.mort, decal) });
-    if (p.etats.niveau.length) calques.push({ fichier: m.niveau, x: String(m.x), y: rebond, quand: intervalles(p.etats.niveau, decal) });
+    calques.push({ fichier: m.normal, x: secoue(m.x), y: rebond, quand: `gte(t,${n2(decal)})` });
+    if (p.etats.mort.length) calques.push({ fichier: m.mort, x: secoue(m.x), y: rebond, quand: intervalles(p.etats.mort, decal) });
+    if (p.etats.niveau.length) calques.push({ fichier: m.niveau, x: secoue(m.x), y: rebond, quand: intervalles(p.etats.niveau, decal) });
   }
   const ap = p.apparitions;
   // une entrée par variante (normale, grise à la mort, dorée au niveau) : le buste monte du bas en 0,3 s au début de
@@ -459,7 +549,7 @@ export function grapheRendu(p: PlanRendu): { entrees: string[][]; graphe: string
       const d = n2(a + decal), f = n2(b + decal);
       return `between(t,${d},${f})*${ap!.hauteur}*(max(0,1-(t-${d})/${APPARITION})+max(0,1-(${f}-t)/${APPARITION}))`;
     }).join("+");
-    calques.push({ fichier: va.fichier, x: String(ap!.x), y: `${ap!.y}+${glisse}`, quand: intervalles(va.intervalles, decal) });
+    calques.push({ fichier: va.fichier, x: secoue(ap!.x), y: `${ap!.y}+${glisse}`, quand: intervalles(va.intervalles, decal) });
   }
   for (const c of p.calques) calques.push({ fichier: c.fichier, x: c.x, y: c.y, quand: `between(t,${n2(c.debut + decal)},${n2(c.fin + decal)})` });
   const finV = p.outro ? "[vc]" : "[vf]", finA = p.outro ? "[ac]" : "[af]";
