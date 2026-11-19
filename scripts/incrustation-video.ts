@@ -40,9 +40,10 @@ import ffmpeg from "@ffmpeg-installer/ffmpeg";
 import sharp, { type OverlayOptions } from "sharp";
 import { COULEUR_GENRE } from "@/content/repliques-jobwow";
 import { PERSONNAGES, personnageDuNom, personnageVideo, type PersonnageVideo } from "@/content/personnages";
+import { ecrireRegistre, episodeSuivant, episodesDuDossier, lireRegistre, numeroter, type Registre } from "@/lib/episodes";
 import { fichiersDeJournee, nomJournee, personnageDesNarrations, personnagesDesEnregistrements, reclasserJournee, tousLesPersonnages } from "@/lib/rangement";
 import {
-  chapitresNarration, evenementsSonde, grapheRendu, intervallesApparition, preparerNarration, textesCourts, typographie, verifierNarration, voixAJour,
+  chapitresNarration, evenementsSonde, grapheRendu, intervallesApparition, REACTIONS, preparerNarration, textesCourts, typographie, verifierNarration, voixAJour,
   type Calque, type Evenement, type Moment, type Narration,
 } from "@/lib/incrustation";
 import { chapitres, descriptionVideo, heureLocale, horodatage, lireSauvegardeSonde, positionDans, reperesRouteProbe, seances, SONDES, titreVideo, DOSSIER_VIDEOS, type Clip, type Repere, type Seance } from "@/lib/videoCarnet";
@@ -257,7 +258,11 @@ async function bandeau(texte: string, largeurMax: number, taille: number, sortie
  * encadrée d'or et son titre ; pour la dernière partie (ou une vidéo seule), le médaillon de Jobwow et un appel à
  * s'abonner. L'adresse du site en bas, en clair (une image ne peut pas porter de lien : il est dans la description).
  */
-async function carteFin(o: { suivante: string | null; titreSuivante: string; site: string; perso?: PersonnageVideo }, sortie: string): Promise<void> {
+async function carteFin(o: {
+  suivante: string | null; titreSuivante: string; site: string; perso?: PersonnageVideo;
+  /** Dernière vidéo : la série d'un autre personnage, à découvrir (sa dernière vidéo rendue). */
+  autre?: { miniature: string; titre: string; serie: string } | null;
+}, sortie: string): Promise<void> {
   const perso = o.perso ?? personnageVideo();
   const W = 1920, H = 1080;
   const fond = Buffer.from(`<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
@@ -281,6 +286,26 @@ async function carteFin(o: { suivante: string | null; titreSuivante: string; sit
     couches.push({ input: Buffer.from(`<svg width="${l + 2 * b}" height="${h + 2 * b}"><rect width="${l + 2 * b}" height="${h + 2 * b}" rx="24" fill="#d6a840"/></svg>`), left: x - b, top: y - b });
     couches.push({ input: image, left: x, top: y });
     await centre(o.titreSuivante, POLICE_ST, 40, "#d6a840", y + h + 34);
+  } else if (o.autre) {
+    // dernière vidéo : à gauche le personnage et l'abonnement, à droite l'autre série (19/11/2026)
+    await centre("La suite de l'aventure au prochain épisode", POLICE_BULLE, 64, "#f3e6c8", 86);
+    const aPos = async (texte: string, police: string, taille: number, couleur: string, cx: number, y: number, largeur: number) => {
+      const t = await texteImage(texte, police, taille, largeur, couleur, true);
+      couches.push({ input: t.data, left: Math.round(cx - (t.info.width ?? 0) / 2), top: y });
+      return t.info.height ?? taille;
+    };
+    const fm = path.join(path.dirname(sortie), "carte-fin-medaillon.png");
+    const m = perso.apparition === "medaillon" ? await medaillon(330, "normal", fm, perso) : await buste(perso, 420, "normal", fm);
+    couches.push({ input: fm, left: Math.round(480 - m.l / 2), top: 230 });
+    await aPos(`Abonne-toi pour suivre ${perso.nom} jusqu'au niveau 60`, POLICE_ST, 36, "#d6a840", 480, 230 + m.h + 24, 760);
+    await aPos(`Découvre aussi le ${o.autre.serie}`, POLICE_BULLE, 46, "#f3e6c8", 1420, 230, 820);
+    const l = 760, h = 428, x = 1040, y = 310, b = 7;
+    const image = await sharp(o.autre.miniature).resize(l, h, { fit: "cover" })
+      .composite([{ input: Buffer.from(`<svg width="${l}" height="${h}"><rect width="${l}" height="${h}" rx="16" fill="#fff"/></svg>`), blend: "dest-in" }])
+      .png().toBuffer();
+    couches.push({ input: Buffer.from(`<svg width="${l + 2 * b}" height="${h + 2 * b}"><rect width="${l + 2 * b}" height="${h + 2 * b}" rx="22" fill="#d6a840"/></svg>`), left: x - b, top: y - b });
+    couches.push({ input: image, left: x, top: y });
+    await aPos(o.autre.titre, POLICE_ST, 34, "#d6a840", 1420, y + h + 26, 820);
   } else {
     await centre("La suite de l'aventure au prochain épisode", POLICE_BULLE, 72, "#f3e6c8", 110);
     const fm = path.join(path.dirname(sortie), "carte-fin-medaillon.png");
@@ -292,6 +317,21 @@ async function carteFin(o: { suivante: string | null; titreSuivante: string; sit
   await sharp(fond).composite(couches).jpeg({ quality: 92 }).toFile(sortie);
 }
 
+/**
+ * La série d'un autre personnage, pour la carte de fin d'une dernière vidéo : sa vidéo rendue la plus récente
+ * (dossier voisin dans D:\WOW, registre episodes.json), avec sa miniature. Null s'il n'y en a pas encore.
+ */
+function autreSerie(perso: PersonnageVideo, dossier: string): { miniature: string; titre: string; serie: string } | null {
+  for (const q of tousLesPersonnages()) {
+    if (q.id === perso.id) continue;
+    const d = path.join(path.dirname(dossier), q.dossier);
+    const e = lireRegistre(d).episodes.filter((x) => x.base.startsWith(`${q.prefixe}_`)).sort((a, b) => b.numero - a.numero)
+      .find((x) => existsSync(path.join(d, `${x.base}.miniature.jpg`)) && existsSync(path.join(d, `${x.base}.${q.id}.mp4`)));
+    if (e) return { miniature: path.join(d, `${e.base}.miniature.jpg`), titre: `${q.serie} · partie ${e.numero}`, serie: q.serie };
+  }
+  return null;
+}
+
 const CARTE_FIN_SECONDES = 8;
 const CARTE_FIN_FONDU = 2.5;
 
@@ -300,11 +340,20 @@ const CARTE_FIN_FONDU = 2.5;
  * titre court (zones, niveaux). Sans miniature encore choisie, la carte de fin prendra une image de son début
  * (« provisoire ») et la vidéo sera refaite quand la miniature existera.
  */
-function partieSuivante(partie: { numero: number; total: number; journee: string } | undefined, dossier: string):
-  { miniature: string | null; titre: string } | null {
-  if (!partie || partie.numero >= partie.total) return null;
-  const base = path.join(dossier, nomPartie(partie.journee, partie.numero + 1));
-  let titre = `Partie ${partie.numero + 1}`;
+function partieSuivante(partie: { numero: number; total: number; journee: string } | undefined, dossier: string,
+  serie?: { registre: Registre; base: string } | null): { miniature: string | null; titre: string } | null {
+  let base: string;
+  let titre: string;
+  if (partie && partie.numero < partie.total) {
+    base = path.join(dossier, nomPartie(partie.journee, partie.numero + 1));
+    titre = `Partie ${serie ? (episodeSuivant(serie.registre, serie.base)?.numero ?? partie.numero + 1) : partie.numero + 1}`;
+  } else {
+    // dernière vidéo de la soirée : la suivante de la série (soirée d'après), seulement si sa miniature est choisie
+    const e = serie ? episodeSuivant(serie.registre, serie.base) : null;
+    if (!e || !existsSync(path.join(dossier, `${e.base}.miniature.jpg`))) return null;
+    base = path.join(dossier, e.base);
+    titre = `Partie ${e.numero}`;
+  }
   if (existsSync(`${base}.narration.json`)) {
     try {
       const ch = chapitresNarration(JSON.parse(readFileSync(`${base}.narration.json`, "utf8")) as Narration);
@@ -342,10 +391,14 @@ async function rendre(n: Narration, video: string, audio: boolean, g: Gabarit, s
     normal: path.join(travail, `med-${suf}-normal.png`), mort: path.join(travail, `med-${suf}-mort.png`), niveau: path.join(travail, `med-${suf}-niveau.png`),
   };
   // médaillon permanent (Jobwow) ou buste qui surgit aux moments forts (TheSham)
-  const bd = BD[g.H > g.W ? "vertical" : "paysage"];
-  const dim: { l: number; h: number; marge?: number } = enBD ? await buste(perso, bd.hauteur, "normal", med.normal) : await medaillon(g.diametre, "normal", med.normal, perso);
+  // taille de l'avatar réglée dans l'Atelier (fiche du personnage), de 70 % à 140 %
+  const echelle = Math.min(1.4, Math.max(0.7, Number(n.reglages?.tailleAvatar) || 1));
+  const bd0 = BD[g.H > g.W ? "vertical" : "paysage"];
+  const bd = { ...bd0, hauteur: Math.round(bd0.hauteur * echelle) };
+  const diametre = Math.round(g.diametre * echelle);
+  const dim: { l: number; h: number; marge?: number } = enBD ? await buste(perso, bd.hauteur, "normal", med.normal) : await medaillon(diametre, "normal", med.normal, perso);
   if (enBD) { await buste(perso, bd.hauteur, "mort", med.mort); await buste(perso, bd.hauteur, "niveau", med.niveau); }
-  else { await medaillon(g.diametre, "mort", med.mort, perso); await medaillon(g.diametre, "niveau", med.niveau, perso); }
+  else { await medaillon(diametre, "mort", med.mort, perso); await medaillon(diametre, "niveau", med.niveau, perso); }
   const medY = enBD ? g.H - dim.h : g.H - dim.h - g.medBas;
   const marge = dim.marge ?? 0;
   const bouche: [number, number] = [bd.x + marge + (dim.l - 2 * marge) * bd.bouche[0], medY + marge + (dim.h - marge) * bd.bouche[1]];
@@ -397,8 +450,10 @@ async function rendre(n: Narration, video: string, audio: boolean, g: Gabarit, s
     })() : null,
     etats: {
       parle: avecBulle,
-      mort: moments.filter((m) => m.genre === "mort").map((m) => [m.seconde, Math.min(dureeJeu, m.seconde + m.duree + 6)]),
-      niveau: moments.filter((m) => m.genre === "niveau").map((m) => [m.seconde, Math.min(dureeJeu, m.seconde + m.duree)]),
+      // réactions de l'avatar : gris à la mort, doré au succès, secoué quand ça tourne mal (REACTIONS)
+      mort: moments.filter((m) => REACTIONS.mort.includes(m.genre)).map((m) => [m.seconde, Math.min(dureeJeu, m.seconde + m.duree + (enBD ? 0 : 6))]),
+      niveau: moments.filter((m) => REACTIONS.niveau.includes(m.genre)).map((m) => [m.seconde, Math.min(dureeJeu, m.seconde + m.duree)]),
+      secoue: moments.filter((m) => REACTIONS.secoue.includes(m.genre)).map((m) => [m.seconde + 0.3, Math.min(dureeJeu, m.seconde + 2.3)]),
     },
     calques,
     voix,
@@ -667,6 +722,7 @@ async function main() {
   const travaux: { video: string; seance: Seance | null; fichierN?: string; sources?: string[]; partie?: InfoPartie; perso?: PersonnageVideo }[] = [];
   const parNarration = cible.endsWith(".narration.json");
   const bilan: string[] = [];
+  const recapPersos: string[] = [];
   if (parNarration) {
     const n = JSON.parse(readFileSync(cible, "utf8")) as Narration;
     travaux.push({ video: path.resolve(path.dirname(cible), n.video), seance: null, fichierN: cible });
@@ -683,6 +739,11 @@ async function main() {
     const forcer = personnageDemande();
     if (!forcer) chargerSonde();
     const persos = personnagesDesEnregistrements(clips, (evenements as Evenement[] | null) ?? [], forcer);
+    // récapitulatif par personnage, pour repérer d'un coup d'œil un enregistrement mal attribué
+    for (const p of tousLesPersonnages()) {
+      const siens = clips.filter((_, i) => persos[i].id === p.id);
+      if (siens.length) recapPersos.push(`${p.nom} : ${siens.length} enregistrement${siens.length > 1 ? "s" : ""}, ${horodatage(siens.reduce((t, c) => t + c.duree, 0))} → ${dossierDe(p)}`);
+    }
     // une vidéo par journée et par personnage (ou par séance avec --ecart, ou par fichier avec --par-fichier)
     const groupes: { s: Seance; p: PersonnageVideo }[] = [];
     for (const p of tousLesPersonnages()) {
@@ -712,6 +773,11 @@ async function main() {
         if (dit.id !== ici.q.id) {
           console.log(`${nomJournee(ici.q, cle)} : narration de ${dit.nom}, journée rangée dans « ${dit.dossier} » sous le nom ${nomJournee(dit, cle)}.`);
           for (const l of reclasserJournee({ cle, de: ici.q, vers: dit, dossierDe: dossierDe(ici.q), dossierVers: dossierDe(dit), telechargements: DOSSIER_TELECHARGEMENTS })) console.log(`  ${l}`);
+          // la journée quitte la série de l'autre personnage : ses numéros y sont libérés
+          const ancien = lireRegistre(dossierDe(ici.q));
+          if (ancien.episodes.some((e) => e.journee === nomJournee(ici.q, cle))) {
+            ecrireRegistre(dossierDe(ici.q), { format: 1, episodes: ancien.episodes.filter((e) => e.journee !== nomJournee(ici.q, cle)) });
+          }
         }
       }
       const sortieDossier = dossierDe(p);
@@ -756,22 +822,59 @@ async function main() {
 
   // titre, description et chapitres pour YouTube, relus par l'Atelier (refaits à chaque passage)
   const site = (process.env.SITE_URL ?? "https://www.taverne-eternelle.fr").replace(/\/+$/, "");
-  const ecrireYoutube = (base: string, seance: Seance, n?: Narration, partie?: InfoPartie) => {
+  const ecrireYoutube = (base: string, seance: Seance, n?: Narration, partie?: InfoPartie, episode?: number) => {
     // chapitres tirés de la narration (ses moments couvrent toute la journée, ou toute la partie), sinon des repères de la sonde
     const parNarr = n ? chapitresNarration(n) : null;
     const chap = parNarr && parNarr.valides ? parNarr : chapitres(seance, reperes);
     const perso = personnageVideo(n?.profil);
-    const titre = titreVideo(seance, chap, partie?.numero, perso);
-    writeFileSync(`${base}.youtube.txt`, [`TITRE :`, titre, "", "DESCRIPTION :", descriptionVideo(seance, chap, site, undefined, partie, perso)].join("\n"), "utf8");
+    const titre = titreVideo(seance, chap, episode ?? partie?.numero, perso);
+    const info = partie ? { ...partie, episode } : episode ? { numero: 1, total: 1, episode } : undefined;
+    writeFileSync(`${base}.youtube.txt`, [`TITRE :`, titre, "", "DESCRIPTION :", descriptionVideo(seance, chap, site, undefined, info, perso)].join("\n"), "utf8");
     // Shorts YouTube et Reels Facebook des clips verticaux, pour le personnage de la vidéo (lus par l'Atelier)
     if (n?.clips.length) writeFileSync(`${base}.reseaux.json`, JSON.stringify(textesCourts(n, path.basename(base), titre), null, 2), "utf8");
   };
   // toutes les narrations validées rangées d'abord : la carte de fin d'une partie montre la miniature de la suivante
   if (!parNarration) for (const t of travaux) reprendreValidee(t.fichierN ?? `${sansExt(t.video)}.narration.json`, t.sources ?? null);
+  // numérotation continue de chaque personnage (19/11/2026, lib/episodes.ts) : un registre episodes.json par dossier,
+  // qui se souvient des vidéos déjà numérotées ; une vidéo rendue garde son numéro, les autres suivent l'ordre du jeu
+  const numeros = new Map<string, number>();
+  const registres = new Map<string, Registre>();
+  if (!parNarration) {
+    const parDossier = new Map<string, typeof travaux>();
+    for (const t of travaux) if (t.fichierN && t.seance) { const d = path.dirname(t.fichierN); parDossier.set(d, [...(parDossier.get(d) ?? []), t]); }
+    for (const [d, ts] of parDossier) {
+      const perso = ts[0].perso ?? personnageDuNom(ts[0].fichierN!) ?? personnageVideo();
+      const avant = lireRegistre(d);
+      const actuelles = ts.map((t) => {
+        const b = path.basename(t.fichierN!).replace(/\.narration\.json$/i, "");
+        return { base: b, journee: t.partie?.journee ?? b, debut: t.seance!.debut + Math.round((t.partie?.debut ?? 0) * 1000) };
+      });
+      const connus = new Set(avant.episodes.map((e) => e.base)), journees = new Set(actuelles.map((a) => a.journee));
+      const anciennes = episodesDuDossier(d, perso.prefixe).filter((e) => !connus.has(e.base) && !journees.has(e.journee));
+      const r = numeroter({ format: 1, episodes: [...avant.episodes, ...anciennes.map((e) => ({ ...e, numero: 0 }))] }, actuelles,
+        (b) => existsSync(path.join(d, `${b}.${perso.id}.mp4`)));
+      mkdirSync(d, { recursive: true });
+      ecrireRegistre(d, r);
+      registres.set(d, r);
+      for (const e of r.episodes) numeros.set(path.join(d, e.base), e.numero);
+      const ici = r.episodes.filter((e) => journees.has(e.journee)).map((e) => e.numero);
+      if (ici.length) console.log(`${perso.nom} : ${ici.length > 1 ? `parties ${Math.min(...ici)} à ${Math.max(...ici)}` : `partie ${ici[0]}`} de la série (${r.episodes.length} au total, registre ${path.join(d, "episodes.json")}).`);
+    }
+  }
+  /** Le numéro de la vidéo dans sa série, inscrit dans le titre (« – partie 7 »). */
+  const avecEpisode = (n: Narration, numero: number | undefined) => {
+    if (!numero || n.episode === numero) return false;
+    n.episode = numero;
+    if (/ – partie \d+/.test(n.titre)) n.titre = n.titre.replace(/ – partie \d+/, ` – partie ${numero}`);
+    else n.titre = n.titre.replace(/^(.+? · \d{1,2}(?:er)? [a-zéû]+ \d{4})/i, `$1 – partie ${numero}`);
+    return true;
+  };
   for (const { video, seance: seanceConnue, fichierN: donne, sources, partie, perso: persoRange } of travaux) {
     const fichierN = donne ?? `${sansExt(video)}.narration.json`;
     const base = sansExt(fichierN).replace(/\.narration$/, "");
     const nomCourt = path.basename(base);
+    const episode = numeros.get(base);
+    const serie = registres.has(path.dirname(fichierN)) ? { registre: registres.get(path.dirname(fichierN))!, base: nomCourt } : null;
     const travail = path.join(path.dirname(fichierN), ".incrustation", nomCourt);
     const { duree, audio } = await infos(video);
     if (!parNarration) reprendreValidee(fichierN, sources ?? null);
@@ -779,6 +882,7 @@ async function main() {
     if (existsSync(fichierN)) {
       n = JSON.parse(readFileSync(fichierN, "utf8")) as Narration;
       let changee = sortirMiniature(n, fichierN);
+      if (avecEpisode(n, episode)) changee = true;
       // partie validée sans son morceau (Atelier d'avant le 16/11) : on le rétablit d'après le découpage
       if (partie && !n.extrait) {
         n.extrait = { debut: partie.debut, duree: partie.duree };
@@ -790,7 +894,7 @@ async function main() {
       const erreurs = verifierNarration(n);
       if (erreurs.length) { console.error(`${fichierN} :\n- ${erreurs.join("\n- ")}`); process.exit(1); }
       console.log(`Narration relue : ${fichierN} (${n.moments.length} moments, ${n.clips.length} clips)`);
-      if (seanceConnue) { chargerSonde(); ecrireYoutube(base, seanceConnue, n, partie); }
+      if (seanceConnue) { chargerSonde(); ecrireYoutube(base, seanceConnue, n, partie, episode); }
       // miniature donnée par son nom : à côté de la narration
       if (n.miniature && !path.isAbsolute(n.miniature) && !/^[A-Za-z]:[\\/]/.test(n.miniature)) n.miniature = path.join(path.dirname(fichierN), n.miniature);
     } else {
@@ -803,13 +907,14 @@ async function main() {
         position: (h) => positionDans(seance, h),
         // une partie : pas de miniature voisine (celle de la journée entière ne la décrit pas), elle se choisit dans l'Atelier
         miniature: option("miniature") ?? (partie ? null : miniatureVoisine(video) ?? (seance.clips.length > 1 ? miniatureVoisine(seance.clips[0].fichier) : null)),
-        titre: titreVideo(seance, chap, partie?.numero),
+        titre: titreVideo(seance, chap, episode ?? partie?.numero),
         graine: partie ? `${path.basename(video)}#partie-${partie.numero}` : undefined,
         // le personnage du rangement (dossier, noms) ; une vidéo seule : celui de son nom, sinon demandé ou vu en jeu
         profil: persoRange?.id ?? personnageDuNom(video)?.id ?? personnageDemande(),
       });
       // titre de la série du personnage (Journal de Jobwow, Journal de Jobwow TheSham…)
-      n.titre = titreVideo(seance, chap, partie?.numero, personnageVideo(n.profil));
+      n.titre = titreVideo(seance, chap, episode ?? partie?.numero, personnageVideo(n.profil));
+      if (episode) n.episode = episode;
       if (partie) {
         n.extrait = { debut: partie.debut, duree: partie.duree };
         n.partie = { numero: partie.numero, total: partie.total, journee: partie.journee };
@@ -822,19 +927,19 @@ async function main() {
           if (partie.reprise.personnage) n.personnage = partie.reprise.personnage;
           // la relecture reprise garde son personnage : ses bulles ont été écrites pour lui
           if (partie.reprise.profil) n.profil = partie.reprise.profil; else delete n.profil;
-          n.titre = titreVideo(seance, chap, partie.numero, personnageVideo(n.profil));
+          n.titre = titreVideo(seance, chap, episode ?? partie.numero, personnageVideo(n.profil));
         }
       }
       if (n.miniature) n.miniature = path.resolve(n.miniature);
       if (sources) n.sources = sources;
       writeFileSync(fichierN, JSON.stringify(n, null, 2), "utf8");
-      ecrireYoutube(base, seance, n, partie);
+      ecrireYoutube(base, seance, n, partie, episode);
       console.log(n.relue
         ? `Narration préparée : ${fichierN} (${n.moments.length} moments et ${n.clips.length} clips repris de ta relecture). Dans l'Atelier : miniature, puis validation.`
         : `Narration préparée : ${fichierN} (${n.moments.length} moments, ${n.clips.length} clips). À relire dans l'atelier vidéo.`);
       if (!n.miniature) console.log("Miniature : elle se choisit dans l'Atelier, avec la relecture (ou --miniature <image>).");
     }
-    const etiquette = partie ? `${nomCourt} (partie ${partie.numero} sur ${partie.total}, ${horodatage(partie.duree)})` : nomCourt;
+    const etiquette = `${nomCourt}${episode ? ` · partie ${episode} de la série` : ""}${partie ? ` (morceau ${partie.numero} sur ${partie.total} de la soirée, ${horodatage(partie.duree)})` : ""}`;
     if (drapeau("preparer")) { bilan.push(`${etiquette} : narration prête, à relire et valider dans l'Atelier.`); continue; }
     // rendu au nom du personnage : « .jobwow.mp4 », « .thesham.mp4 »…
     const sortie = `${base}.${personnageVideo(n.profil).id}.mp4`;
@@ -846,7 +951,7 @@ async function main() {
       const bonneDuree = Math.abs(rendue - attendue) <= 5 || Math.abs(rendue - attendue - CARTE_FIN_SECONDES) <= 5;
       // carte de fin faite avec une image provisoire, et la miniature de la partie suivante est choisie depuis
       const provisoire = existsSync(`${base}.carte-fin.txt`) && readFileSync(`${base}.carte-fin.txt`, "utf8").trim() === "provisoire"
-        && !!partieSuivante(partie, path.dirname(fichierN))?.miniature;
+        && !!partieSuivante(partie, path.dirname(fichierN), serie)?.miniature;
       // rendue avant la carte de fin (16/11/2026) : refaite pour l'avoir, comme demandé par Jobwow
       const sansCarte = !existsSync(`${base}.carte-fin.txt`);
       if (bonneDuree && !provisoire && !sansCarte) { bilan.push(`${etiquette} : déjà rendue (${path.basename(sortie)}).`); continue; }
@@ -860,7 +965,7 @@ async function main() {
     // carte de fin : la miniature de la partie suivante, ou une image de son début en attendant ; dernière partie :
     // « au prochain épisode »
     mkdirSync(travail, { recursive: true });
-    const suivante = partieSuivante(partie, path.dirname(fichierN));
+    const suivante = partieSuivante(partie, path.dirname(fichierN), serie);
     let imageSuivante = suivante?.miniature ?? null;
     if (suivante && !imageSuivante && partie) {
       imageSuivante = path.join(travail, "image-partie-suivante.jpg");
@@ -869,7 +974,10 @@ async function main() {
       if (!existsSync(imageSuivante)) imageSuivante = null;
     }
     const carte = path.join(travail, "carte-fin.jpg");
-    await carteFin({ suivante: suivante ? imageSuivante : null, titreSuivante: suivante?.titre ?? "", site, perso: personnageVideo(n.profil) }, carte);
+    await carteFin({
+      suivante: suivante ? imageSuivante : null, titreSuivante: suivante?.titre ?? "", site, perso: personnageVideo(n.profil),
+      autre: suivante ? null : autreSerie(personnageVideo(n.profil), path.dirname(fichierN)),
+    }, carte);
     console.log(`Rendu 16:9 : ${sortie}`);
     await rendre(n, video, audio, PAYSAGE, sortie, travail, null, mini, path.dirname(fichierN), carte);
     const etatCarte = !suivante ? "fin" : suivante.miniature ? "miniature" : "provisoire";
@@ -884,6 +992,7 @@ async function main() {
     }
     bilan.push(`${etiquette} : rendue → ${path.basename(sortie)}${n.clips.length && !drapeau("sans-clips") ? ` et ${n.clips.length} clip(s)` : ""}. À envoyer sur YouTube (miniature : ${n.miniature ? path.basename(n.miniature) : "aucune"}).`);
   }
+  if (recapPersos.length) { console.log("\n— Par personnage —"); for (const l of recapPersos) console.log(`• ${l}`); }
   console.log("\n— Où en est chaque vidéo —");
   for (const b of bilan) console.log(`• ${b}`);
   console.log("L'Atelier vidéo de Jobwow montre les mêmes étapes : ouvre-y le dossier D:\\WOW.");

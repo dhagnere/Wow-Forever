@@ -171,6 +171,29 @@ une partie pas encore relue est préparée de nouveau avec ses répliques : `rec
 avant le 18/11 restent dans « Journal de Jobwow » tant que leur narration dit Jobwow. Un nouveau personnage déclaré dans
 `content/personnages.ts` a son dossier et ses noms d'office (sa carte de l'Atelier, avec son rangement, est à ajouter).
 
+**Numérotation continue** (demandée le 19/11/2026) : chaque personnage a sa série « partie 1, 2, 3… », d'une soirée
+et d'un jour à l'autre, même pour une série déposée après une autre le même jour (`lib/episodes.ts`, registre
+`episodes.json` dans le dossier du personnage, testé par `tests/episodes.test.ts`). Les vidéos se numérotent dans
+l'ordre du jeu ; une vidéo déjà rendue garde son numéro, les autres suivent ; une soirée redécoupée remplace ses
+anciennes parties ; le registre se souvient des vidéos dont les enregistrements ont quitté D:\WOW, et reprend à sa
+création les vidéos déjà rangées. Le numéro est dans le titre (« – partie 7 »), la description (« Partie 7 du Journal
+de… »), la narration (`episode`), la miniature de l'Atelier et le bilan de la commande. La carte de fin de la dernière
+vidéo d'une soirée montre la suivante de la série si sa miniature est déjà choisie ; sinon « au prochain épisode », avec
+la dernière vidéo rendue de l'autre personnage (« Découvre aussi le Journal de… »).
+
+**Moments drôles** (19/11/2026), repérés par combinaison d'événements de la sonde (`evenementsEnregistrement`) :
+hécatombe (trois morts en un quart d'heure), pas de chance (mort moins de 3 min après un niveau), téméraire (quête
+acceptée trois niveaux ou plus au-dessus du sien), jackpot (récompense d'au moins 100 pc × niveau), rafale (quatre
+quêtes rendues en trois minutes), demi-tour (pierre de foyer moins de 3 min après l'arrivée dans une zone), long trajet
+(1 min 30 ou plus à bord), égaré (six minutes sans quête, combat ni découverte). Chacun a ses répliques (12 au moins
+par personnage), son cri de BD pour TheSham et passe avant le moment ordinaire ; ils sont mis en tête des clips
+verticaux, donc des Shorts. L'avatar réagit (`REACTIONS`) : gris à la mort, doré au succès, secoué quand ça tourne mal.
+
+**Réglages de la fiche** : dans l'Atelier, taille de l'avatar (70 à 140 %, gardée dans la narration, `reglages`, et
+appliquée au rendu) et durée des bulles ; « Garder pour ce personnage » les retient pour ses prochaines narrations.
+Voix de TheSham : celle de Jobwow abaissée de trois demi-tons et plus appuyée (`voix` de `content/personnages.ts`,
+appliquée par `npm run carnet:voix`, option `--grave`) ; à écouter avant de la garder.
+
 **Shorts YouTube et Reels Facebook** (depuis le 18/11/2026, pour tous les personnages, ceux à venir compris) : à chaque
 passage, `npm run carnet` écrit `<base>.reseaux.json` à côté du `.youtube.txt`, un Short et un Reel par clip vertical
 (`<base>.clip-<n>.mp4`), au nom du personnage de la vidéo (`textesCourts`, `lib/incrustation.ts`). Short : titre
@@ -180,7 +203,8 @@ même contenu, sans nom de domaine tant que `FACEBOOK_LIENS` n'est pas à « oui
 `texteVideoCourte` (`modules/veille/reseaux/textes.ts`), comme tout texte destiné à un réseau. L'Atelier les affiche
 (bloc « Shorts YouTube et Reels Facebook », boutons Copier, cases « Short envoyé » et « Reel envoyé ») et, la vidéo
 envoyée, propose les envois qui restent. Un nouveau personnage déclaré dans `content/personnages.ts` a ses Shorts et
-Reels sans rien ajouter. L'envoi reste manuel.
+Reels sans rien ajouter. L'envoi reste manuel. Calendrier conseillé dans l'Atelier : un envoi par jour à 18 h, les
+Shorts d'abord puis les mêmes clips en Reels, et un fichier d'agenda (.ics) à importer.
 
 Répliques dans `content/repliques-jobwow.ts` (aucune classe citée : celle de Jobwow n'est jamais précisée), narration et
 graphe ffmpeg dans `lib/incrustation.ts`, images (sharp) et encodage dans `scripts/incrustation-video.ts`, contrôles dans

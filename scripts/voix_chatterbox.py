@@ -43,6 +43,8 @@ def main() -> None:
     ap.add_argument("--cfg", type=float, default=0.3)
     ap.add_argument("--graine", type=int, default=7)
     ap.add_argument("--refaire", action="store_true")
+    # voix abaissée de N demi-tons sans changer sa durée (voix d'orc de Jobwow TheSham : 3)
+    ap.add_argument("--grave", type=float, default=0.0)
     a = ap.parse_args()
 
     if not os.path.exists(a.narration):
@@ -83,6 +85,8 @@ def main() -> None:
         torch.manual_seed(a.graine)
         wav = modele.generate(texte_parle(m["bulle"]), language_id="fr", audio_prompt_path=a.reference,
                               exaggeration=a.exaggeration, cfg_weight=a.cfg)
+        if a.grave:
+            wav = ta.functional.pitch_shift(wav, modele.sr, -a.grave)
         nom = f"{sous_dossier}/{i + 1:02d}.wav"
         ta.save(os.path.join(dossier, nom), wav, modele.sr)
         duree = round(wav.shape[-1] / modele.sr, 2)

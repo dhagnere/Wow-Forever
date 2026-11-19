@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { REPLIQUES, REPLIQUES_CAPACITE, REPLIQUES_MORT_REPETEE, REPLIQUES_PALIERS, GENRES_MOMENT, listeRepliques, ordreMelange, replique } from "@/content/repliques-jobwow";
 import { PERSONNAGES, personnageDuJeu, personnageVideo } from "@/content/personnages";
-import { APPARITION, chapitresNarration, choisirClips, evenementsSonde, grapheRendu, intervallesApparition, preparerNarration, textesCourts, typographie, verifierNarration, voixAJour, type Moment } from "@/lib/incrustation";
+import { APPARITION, chapitresNarration, choisirClips, dureeEnClair, evenementsEnregistrement, evenementsSonde, grapheRendu, intervallesApparition, monnaie, preparerNarration, REACTIONS, textesCourts, typographie, verifierNarration, voixAJour, type Moment } from "@/lib/incrustation";
 import { descriptionVideo, heureLocale, lireSauvegardeSonde, positionDans, titreVideo, type Seance } from "@/lib/videoCarnet";
 
 // Jobwow incrusté dans les vidéos (npm run carnet:incrustation) : narration tirée des repères de la sonde, graphe ffmpeg.
@@ -29,13 +29,14 @@ describe("Narration d'une vidéo", () => {
   const n = preparerNarration({ video: "essai.mp4", debut: DEBUT, dureeVideo: 75, evenements: evts, miniature: "mini.jpg", titre: "Essai" });
 
   it("lit les événements de la sonde, sans répéter une zone déjà annoncée", () => {
-    expect(evts.map((e) => e.genre)).toEqual(["reprise", "zone", "niveau", "quete", "exploit", "quete", "niveau", "entraineur", "mort", "grimoire"]);
+    expect(evts.map((e) => e.genre)).toEqual(["reprise", "zone", "niveau", "quete", "exploit", "quete", "niveau", "entraineur", "mort", "malchance", "grimoire"]);
     expect(evts.find((e) => e.genre === "entraineur")?.valeurs.demons).toBe(true);
   });
 
   it("ouvre par une intro, puis un moment par repère fort, aux bonnes secondes et sans chevauchement", () => {
     expect(n.moments.map((m) => [m.seconde, m.genre])).toEqual([
-      [0, "intro"], [8, "quete"], [15, "exploit"], [30, "niveau"], [40, "entraineur"], [50, "mort"], [60, "grimoire"],
+      // mort 20 s après le niveau 4 : « pas de chance » prend la place de la mort ordinaire
+      [0, "intro"], [8, "quete"], [15, "exploit"], [30, "niveau"], [40, "entraineur"], [50, "malchance"], [60, "grimoire"],
     ]);
     expect(n.moments[0].sousTitre).toBe("Journal de Jobwow · Clairières de Tirisfal · niveau 3");
     expect(n.moments[2].bulle).toContain("Capitaine Perrine");
@@ -57,7 +58,8 @@ describe("Narration d'une vidéo", () => {
   });
 
   it("choisit des clips verticaux de 30 s autour des moments forts, dans la vidéo", () => {
-    expect(n.clips).toEqual([{ debut: 18, duree: 30, titre: "Niveau 4 atteint" }]);
+    // le moment drôle passe en premier dans les clips
+    expect(n.clips).toEqual([{ debut: 3, duree: 30, titre: "Capitaine Perrine vaincu (élite)" }, { debut: 38, duree: 30, titre: "Mort juste après le niveau 4" }]);
     const longs: Moment[] = [10, 200, 400, 600].map((s) => ({ seconde: s, duree: 5, genre: "niveau", bulle: "", sousTitre: `Niveau ${s}` }));
     const c = choisirClips(longs, 610);
     expect(c).toHaveLength(3);
@@ -289,5 +291,63 @@ describe("Shorts et Reels des clips verticaux", () => {
     expect(t.clips[0].reel).toContain("#JobwowTheSham #Reels");
     // un personnage à venir n'a rien à déclarer de plus : Jobwow par défaut
     expect(textesCourts({ ...n, profil: undefined }, "b", "e").clips[0].short.titre).toBe("Niveau 6 atteint · Jobwow #Shorts");
+  });
+});
+
+describe("Moments drôles repérés dans la sonde", () => {
+  const ev = (t: number, ...champs: (string | number)[]) => `${t}.0|${champs.join("|")}`;
+  const enr = {
+    events: [
+      ev(0, "clock", "debut", "2026-11-19 20:00:00"),
+      ev(1, "zone", "Durotar"),
+      ev(10, "accept", "101", "La grotte des Tranchecrins"), ev(11, "qniveau", "101", "9", "5", "0"),   // téméraire
+      ev(20, "level", "6|nouveau"), ev(80, "mort", "Durotar"),                                        // pas de chance
+      ev(300, "mort", "Durotar"), ev(400, "mort", "Durotar"),                                         // hécatombe (3e)
+      ev(500, "turnin", "102", "A"), ev(530, "turnin", "103", "B"), ev(560, "turnin", "104", "C"), ev(590, "turnin", "105", "D"), // rafale
+      ev(591, "gain", "105", "400", "1250"),                                                         // jackpot (≥ 600 pc au niveau 6)
+      ev(600, "obj", "106", "1", "1", "8", "monster", "1411", "0.5", "0.5"),
+      ev(1100, "obj", "106", "1", "2", "8", "monster", "1411", "0.5", "0.5"),                         // égaré (500 s sans rien)
+      ev(1200, "trajet", "debut", "Zeppelin", "Durotar", "1411", "0.5", "0.5"),
+      ev(1320, "trajet", "arrivee", "Zeppelin", "Tirisfal", "1420", "0.6", "0.6", "120"),              // long trajet
+      ev(1330, "zone", "Clairières de Tirisfal"), ev(1400, "foyer", "utilise", "Orgrimmar", "1454", "0.5", "0.5"), // demi-tour
+    ],
+  };
+  const g = evenementsEnregistrement(enr as never, "Jobwow");
+  const de = (genre: string) => g.filter((e) => e.genre === genre);
+
+  it("repère chaque combinaison drôle, avec ses valeurs", () => {
+    expect(de("temeraire")[0].valeurs).toMatchObject({ titre: "La grotte des Tranchecrins", niveau: "9" });
+    expect(de("malchance")).toHaveLength(1);
+    expect(de("malchance")[0].valeurs.niveau).toBe("6");
+    expect(de("hecatombe")[0].valeurs.nombre).toBe("3");
+    expect(de("rafale")).toHaveLength(1);
+    expect(de("jackpot")[0].valeurs.montant).toBe("12 pa 50 pc");
+    expect(de("egare")[0].valeurs.duree).toBe("8 min 20 s");
+    expect(de("attente")[0].valeurs).toMatchObject({ titre: "Zeppelin", duree: "2 min" });
+    expect(de("demitour")).toHaveLength(1);
+    expect(monnaie(10250)).toBe("1 po 2 pa 50 pc");
+    expect(dureeEnClair(45)).toBe("45 s");
+  });
+
+  it("fait passer le moment drôle avant la mort ordinaire, et le met en tête des clips", () => {
+    const debut = Date.UTC(2026, 10, 19, 20, 0, 0);
+    const n = preparerNarration({ video: "v.mp4", debut, dureeVideo: 1500, evenements: g, miniature: null, titre: "t" });
+    const genres = n.moments.map((m) => m.genre);
+    expect(genres).toEqual(expect.arrayContaining(["temeraire", "malchance", "hecatombe", "jackpot", "egare", "attente", "demitour"]));
+    expect(n.moments.filter((m) => m.genre === "mort")).toHaveLength(1);    // la 2e mort ; la 1re et la 3e sont drôles
+    for (const m of n.moments.filter((x) => x.genre !== "intro")) expect(m.bulle).not.toMatch(/\{/);
+    expect(n.moments.find((m) => m.genre === "jackpot" || m.genre === "rafale")).toBeTruthy();
+    expect(n.clips[0].titre).toMatch(/mort en un quart d'heure|Mort juste après/);
+  });
+
+  it("fait réagir l'avatar : gris, doré, secoué", () => {
+    expect(REACTIONS.mort).toContain("hecatombe");
+    expect(REACTIONS.niveau).toContain("jackpot");
+    const { graphe } = grapheRendu({
+      largeur: 1920, hauteur: 1080, audio: true, dureeJeu: 60, intro: null,
+      medaillons: { normal: "n.png", mort: "m.png", niveau: "o.png", x: 50, y: 700, hauteur: 300 },
+      etats: { parle: [], mort: [], niveau: [], secoue: [[10, 12]] }, calques: [],
+    });
+    expect(graphe).toContain("x='50+if(gt(between(t,10,12),0),9*sin(45*t),0)'");
   });
 });

@@ -7,18 +7,24 @@
 
 export const GENRES_MOMENT = [
   "intro", "zone", "niveau", "mort", "exploit", "entraineur", "grimoire", "quete", "trajet", "vol", "marqueur",
+  // moments drôles (19/11/2026), repérés par combinaison d'événements de la sonde
+  "hecatombe", "malchance", "temeraire", "jackpot", "rafale", "demitour", "attente", "egare",
 ] as const;
 export type GenreMoment = (typeof GENRES_MOMENT)[number];
 
 export const LIBELLE_GENRE: Record<GenreMoment, string> = {
   intro: "Début", zone: "Nouvelle zone", niveau: "Niveau gagné", mort: "Mort", exploit: "Élite vaincu",
   entraineur: "Entraîneur", grimoire: "Grimoire", quete: "Quête rendue", trajet: "Trajet", vol: "Vol", marqueur: "Repère",
+  hecatombe: "Hécatombe", malchance: "Pas de chance", temeraire: "Téméraire", jackpot: "Jackpot", rafale: "Rafale de quêtes",
+  demitour: "Demi-tour", attente: "Long trajet", egare: "Égaré",
 };
 
 /** Couleur du bord de la bulle : l'œil reconnaît le moment avant de lire. */
 export const COULEUR_GENRE: Record<GenreMoment, string> = {
   intro: "#7a5a2b", zone: "#4f8a5e", niveau: "#d6a840", mort: "#7d8a96", exploit: "#b5473a",
   entraineur: "#9670c8", grimoire: "#9670c8", quete: "#7a5a2b", trajet: "#3f7fa8", vol: "#3f7fa8", marqueur: "#7a5a2b",
+  hecatombe: "#5b6570", malchance: "#a0606b", temeraire: "#c8662f", jackpot: "#e0b33a", rafale: "#5a9a4a",
+  demitour: "#4f7d9c", attente: "#3f8fa0", egare: "#8c7a52",
 };
 
 export const REPLIQUES: Record<GenreMoment, string[]> = {
@@ -226,6 +232,119 @@ export const REPLIQUES: Record<GenreMoment, string[]> = {
     "Un instant à garder pour la Lettre de la semaine.",
     "Quand je raconterai ça, j'aurai été plus héroïque. Promis.",
   ],
+  // moments drôles (19/11/2026) : tirés de la sonde par evenementsEnregistrement (lib/incrustation.ts)
+  hecatombe: [
+    "Troisième mort. Je vais demander une carte de fidélité au gardien des âmes.",
+    "Encore ? Mes os connaissent le chemin du cimetière par cœur.",
+    "Je meurs plus souvent que je ne paie ma tournée. Et je ne la paie jamais.",
+    "Le gardien des âmes m'a fait un clin d'œil. C'est mauvais signe.",
+    "Hécatombe. Je vais finir par louer une chambre au cimetière.",
+    "On compte les morts : {nombre}. Les victoires, on les comptera plus tard.",
+    "Mort, encore. Quelqu'un a laissé la porte de l'au-delà ouverte ?",
+    "Je suis déjà mort une fois dans ma vie. Là, ça devient une habitude.",
+    "À ce stade, ce n'est plus de la malchance, c'est une vocation.",
+    "{nombre} morts. Je propose qu'on appelle ça de l'entraînement.",
+    "Mes réparations vont coûter plus cher que la taverne entière.",
+    "Le cimetière m'a réservé une place. Avec vue.",
+  ],
+  malchance: [
+    "Niveau gagné, vie perdue. L'équilibre de l'univers, sans doute.",
+    "Trois minutes au niveau {niveau}. Un record, dans le mauvais sens.",
+    "J'ai à peine eu le temps d'étrenner mon nouveau niveau.",
+    "Monter de niveau, puis tomber. Comme un ivrogne dans l'escalier.",
+    "On fête le niveau {niveau}… au cimetière. Ambiance.",
+    "Plus fort, plus grand, plus mort. Bravo, Jobwow.",
+    "La fierté précède la chute. Littéralement, ce coup-ci.",
+    "Le niveau {niveau} m'est monté à la tête. Ensuite, la tête est tombée.",
+    "Je voulais tester mes nouveaux points de vie. Test concluant : ils s'arrêtent.",
+    "Les bestioles du coin ont appris la nouvelle et m'ont fait une fête surprise.",
+    "Petite sieste au cimetière pour digérer le niveau {niveau}.",
+    "Un niveau de plus, une dignité de moins.",
+  ],
+  temeraire: [
+    "« {titre} », niveau {niveau}. Je n'ai pas le niveau, mais j'ai le culot.",
+    "Une quête trop grosse pour moi ? Parfait, je la prends.",
+    "Niveau {niveau} conseillé. Conseillé, pas obligatoire. Allons-y.",
+    "Je sens que « {titre} » va me coûter quelques os.",
+    "Prudence est mère de sûreté. Je suis orphelin.",
+    "Le panneau dit danger. Je ne sais pas lire, ça tombe bien.",
+    "Quête de niveau {niveau}. Je la ferai en courant. Surtout en fuyant.",
+    "Si je ne reviens pas, gardez ma chope au chaud.",
+    "Trois niveaux de trop ? À la taverne, on appelle ça un défi.",
+    "J'accepte. Le tavernier a toujours eu les yeux plus gros que le ventre.",
+    "On verra bien. Au pire, on verra le cimetière.",
+    "Ambitieux, moi ? Juste mal renseigné.",
+  ],
+  jackpot: [
+    "{montant} ! La taverne pourra enfin changer ses chaises.",
+    "Ça, c'est une paie. Je vais pouvoir rembourser mes ardoises. Ou pas.",
+    "{montant} d'un coup. Je ne compte pas, je soupèse.",
+    "Ma bourse fait un bruit que je n'avais jamais entendu.",
+    "Jackpot ! Tournée générale. Enfin, une petite tournée.",
+    "{montant}. Je sens que je vais me faire des amis, d'un coup.",
+    "Avec ça, je m'offre une nouvelle mâchoire. En or.",
+    "On ne parlera pas de cet argent au percepteur, d'accord ?",
+    "Le donneur de quête était généreux. Ou distrait.",
+    "{montant} dans la poche. Une poche trouée, mais une poche.",
+    "Je vais encadrer cette pièce. Les autres, je les bois.",
+    "Riche ! Bon, riche pour un mort-vivant. Ça reste modeste.",
+  ],
+  rafale: [
+    "{nombre} quêtes rendues d'un coup. Les donneurs n'en reviennent pas.",
+    "Livraison groupée ! Signez ici, et ici, et là aussi.",
+    "Je rends les quêtes comme je sers les chopes : à la chaîne.",
+    "Avalanche de récompenses. Mon sac crie grâce.",
+    "Tout le village me remercie en même temps. Je rougis. Enfin, je pourrais.",
+    "Quête, quête, quête, quête. Ça sonne presque comme une chanson.",
+    "Le guichet des récompenses va devoir embaucher.",
+    "{nombre} quêtes en trois minutes. Les bardes en parleront. Peut-être.",
+    "Je fais le tour des PNJ comme un facteur pressé.",
+    "Ça, c'est du rendement. La taverne devrait prendre exemple.",
+    "Pluie d'expérience ! Sortez les seaux.",
+    "Un sourire, une bourse, au suivant !",
+  ],
+  demitour: [
+    "{zone} ? Vu. Visité. On rentre.",
+    "Trois minutes ici et déjà la pierre de foyer. Le tourisme, très peu pour moi.",
+    "J'ai oublié d'éteindre la cheminée de la taverne. Demi-tour !",
+    "Je suis arrivé, j'ai regardé, je suis reparti. Voyage réussi.",
+    "La pierre de foyer, c'est mon bouton « annuler ».",
+    "Pas le temps de poser mes valises. Je n'ai pas de valises, remarquez.",
+    "{zone} m'a fait peur. Je rentre chercher du courage. Et une chope.",
+    "Aller-retour éclair. Le maître de vol va croire que je le boude.",
+    "Je crois que je me suis trompé de porte.",
+    "Pouf ! Et me revoilà à l'auberge. Personne n'a rien vu.",
+    "Le paysage était joli. De loin. De très loin, maintenant.",
+    "On dira que c'était une visite de repérage.",
+  ],
+  attente: [
+    "{duree} de trajet. J'aurais dû prendre un livre. Ou une chope.",
+    "Toujours en route… Le capitaine connaît le chemin, au moins ?",
+    "Pendant ce temps-là, à la taverne, quelqu'un boit ma bière.",
+    "Le voyage forme la jeunesse. Moi, il me déforme le dos.",
+    "On arrive bientôt ? On arrive bientôt ? On arrive bientôt ?",
+    "Admirons le paysage. Toujours le même paysage.",
+    "Si je m'endors, réveillez-moi à l'arrivée. Ou au prochain siècle.",
+    "Ce trajet dure plus longtemps que ma dernière vie.",
+    "Je compte les nuages. J'en suis à quatre cent douze.",
+    "{duree} à ne rien faire. Enfin un vrai jour de repos.",
+    "Le mal des transports ? Je n'ai plus d'estomac. Un avantage, pour une fois.",
+    "Quelqu'un a pensé aux cartes ? On a le temps d'une belote.",
+  ],
+  egare: [
+    "Je cherche mon chemin. Ou mon chemin me cherche, je ne sais plus.",
+    "Personne n'a vu passer un tavernier perdu ? Il me ressemble.",
+    "C'est calme… trop calme. Je crois qu'on tourne en rond.",
+    "La carte dit par là. Mon instinct dit par là. Ils ne sont pas d'accord.",
+    "Petite promenade digestive de {duree}. Sans rien digérer.",
+    "Je ne suis pas perdu, je découvre {zone} en profondeur.",
+    "Si vous voyez une quête, faites-moi signe.",
+    "Moment contemplatif. Ou panne d'inspiration. Ou les deux.",
+    "J'ai suivi un papillon. C'était une erreur.",
+    "Les arbres ici se ressemblent tous. Surtout celui-là.",
+    "On fait une pause ? Je crois qu'on fait une pause.",
+    "Toujours là ! Le spectacle reprend dans un instant.",
+  ],
 };
 
 /** Paliers de niveau : leur propre réplique, qui dit ce que le palier change. */
@@ -298,11 +417,15 @@ export function listeRepliques(genre: GenreMoment, c: ContexteReplique = {}, jeu
 }
 
 /** Remplace {zone}, {niveau}, {nom}. */
-export function remplir(brut: string, valeurs: { zone?: string; niveau?: string | number; nom?: string } = {}): string {
+export function remplir(brut: string, valeurs: { zone?: string; niveau?: string | number; nom?: string; titre?: string; montant?: string; nombre?: string | number; duree?: string } = {}): string {
   return brut
     .replace(/\{zone\}/g, valeurs.zone ?? "Cette zone")
     .replace(/\{niveau\}/g, String(valeurs.niveau ?? "?"))
-    .replace(/\{nom\}/g, valeurs.nom ?? "Ce gros dur");
+    .replace(/\{nom\}/g, valeurs.nom ?? "Ce gros dur")
+    .replace(/\{titre\}/g, valeurs.titre ?? "cette quête")
+    .replace(/\{montant\}/g, valeurs.montant ?? "Une bourse pleine")
+    .replace(/\{nombre\}/g, String(valeurs.nombre ?? "Plusieurs"))
+    .replace(/\{duree\}/g, valeurs.duree ?? "Un bon moment");
 }
 
 /** Ordre de passage d'une liste propre à chaque vidéo (graine) : pas de redite avant d'avoir tout servi. */
