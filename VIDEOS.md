@@ -189,6 +189,35 @@ quêtes rendues en trois minutes), demi-tour (pierre de foyer moins de 3 min apr
 par personnage), son cri de BD pour TheSham et passe avant le moment ordinaire ; ils sont mis en tête des clips
 verticaux, donc des Shorts. L'avatar réagit (`REACTIONS`) : gris à la mort, doré au succès, secoué quand ça tourne mal.
 
+**Moments lus dans l'image** (depuis le 19/11/2026, à la demande de Jobwow) : `npm run carnet` ne s'appuie plus sur la
+sonde pour les moments, il regarde les enregistrements eux-mêmes (`scripts/analyse-video.ts`, règles dans
+`lib/analyseVideo.ts`, zones de l'écran dans `config/analyse-video.ts`, testé par `tests/analyse-video.test.ts`).
+ffmpeg ne décode que les images clés (une par seconde chez Warcraft Recorder) ; à chacune, la reconnaissance de texte
+(tesseract.js, données française et anglaise installées par `npm install`, rien n'est envoyé sur Internet) lit le lieu
+au-dessus de la minicarte, le chiffre du médaillon de niveau et le nom du personnage sur son cadre ; la couleur du centre
+de l'image et la barre de vie de la cible se mesurent sans lecture. Un texte n'est relu que si sa zone a changé : compter
+environ une minute d'analyse par vingt minutes de vidéo. On en tire :
+- lieu nouveau : nom stable trois secondes, jamais vu dans la soirée, au plus un toutes les 90 s ; une zone du jeu
+  s'écrit comme le jeu (« Durotar »), un nom coupé (« Terres des Tranchec… ») est complété par le nom entier vu ailleurs ;
+- niveau : chiffre lu deux fois de suite, en hausse d'un ou deux ;
+- mort : le monde passe au gris (fantôme) au moins 5 s ; une scène de nuit reste au-dessus du seuil (mesuré le 19/11 sur
+  les soirées des 17 et 18 : 0,14 au plus sombre, seuil à 0,08) ;
+- égaré : six minutes sans cible, sans lieu nouveau, niveau ni mort ; hécatombe et pas de chance comme avec la sonde ;
+- le personnage : le nom le plus souvent lu, rapproché de `nomsEnJeu` (« Jobwow Thesham » lu → Jobwow TheSham) ; il
+  décide du dossier de rangement.
+Lieux, niveaux et morts servent aussi aux coupes des parties et aux chapitres YouTube. Analyse gardée dans le dossier
+temporaire du PC (`taverne-eternelle/analyse`) : un enregistrement n'est lu qu'une fois. Les quêtes, l'or, les trajets et
+les élites ne se voient pas à l'image : `npm run carnet -- --sonde` (ou `sonde` seul sous PowerShell, ou
+`--sonde <fichier>`) revient aux repères de la sonde, plus riches quand elle a bien tout noté. L'interface doit garder la
+disposition de Jobwow (lieu en haut à droite, cadre du personnage au centre bas) : sinon, revoir les zones de
+`config/analyse-video.ts`.
+
+**Enregistrements rangés dans « Bruts »** (19/11/2026) : quand toutes les vidéos d'une journée sont rendues (narration
+validée, carte de fin définitive), `npm run carnet` déplace ses enregistrements de D:\WOW dans le sous-dossier `Bruts`
+de son personnage (`D:\WOW\Journal de Jobwow TheSham\Bruts`…) ; D:\WOW reste vide, prêt pour la soirée suivante. Un
+rendu refait plus tard les y retrouve seul. Pour refaire une journée de zéro : remettre ses enregistrements dans D:\WOW.
+`--garder-bruts` les laisse en place.
+
 **Réglages de la fiche** : dans l'Atelier, taille de l'avatar (70 à 140 %, gardée dans la narration, `reglages`, et
 appliquée au rendu) et durée des bulles ; « Garder pour ce personnage » les retient pour ses prochaines narrations.
 Voix de TheSham : celle de Jobwow abaissée de trois demi-tons et plus appuyée (`voix` de `content/personnages.ts`,

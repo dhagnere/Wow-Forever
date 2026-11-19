@@ -2,7 +2,12 @@
  * Jobwow incrusté dans les vidéos du Journal, sur le PC de Jobwow (jamais sur le serveur du site) :
  *
  *   npm run carnet:incrustation -- "<vidéo, dossier de vidéos ou fichier .narration.json>" \
- *     [--miniature <image>] [--sonde <EternalProbe.lua>] [--preparer] [--sans-clips] [--sortie <dossier>] [--ecart 30] [--par-fichier]
+ *     [--miniature <image>] [--sonde [<EternalProbe.lua>]] [--preparer] [--sans-clips] [--sortie <dossier>] [--ecart 30] [--par-fichier]
+ *     [--garder-bruts]
+ *
+ * Moments (depuis le 19/11/2026, à la demande de Jobwow) : lus dans l'image de chaque enregistrement (lieu, niveau, nom
+ * du personnage, mort, cible : scripts/analyse-video.ts, lib/analyseVideo.ts), plus dans la sonde ; --sonde revient à la
+ * sonde. Une journée entièrement rendue envoie ses enregistrements dans « Bruts » de son personnage (sauf --garder-bruts).
  *
  * Un dossier (celui de Warcraft Recorder) : les vidéos sont rangées par séance comme pour carnet:video (plus de 30 minutes
  * d'écart, nouvelle séance) et assemblées sans réencodage dans le dossier du personnage (« Journal de Jobwow »,
@@ -47,12 +52,16 @@ import {
   type Calque, type Evenement, type Moment, type Narration,
 } from "@/lib/incrustation";
 import { chapitres, descriptionVideo, heureLocale, horodatage, lireSauvegardeSonde, positionDans, reperesRouteProbe, seances, SONDES, titreVideo, DOSSIER_VIDEOS, type Clip, type Repere, type Seance } from "@/lib/videoCarnet";
+import { evenementsDepuisAnalyse, reperesDepuisAnalyse, signauxDepuisEvenements } from "@/lib/analyseVideo";
+import { analyserEnregistrement, fermerLecteurs } from "./analyse-video";
 import {
   choisirParties, coupesPossibles, coupesProposees, memesBornes, nomPartie, PARTIE_MAX, repriseDansPartie, seanceDePartie, signauxSonde, verifierDecoupage,
   type Decoupage, type Signal,
 } from "@/lib/parties";
 
 const COMPTES_WOW = "C:\\WOW\\world of Warcraft\\_forever_\\WTF\\Account";
+/** Sous-dossier de chaque personnage où vont les enregistrements d'une journée entièrement rendue (19/11/2026). */
+const DOSSIER_BRUTS = "Bruts";
 const EXTENSIONS = new Set([".mp4", ".mkv", ".mov"]);
 const avatarDe = (p: PersonnageVideo) => path.join(process.cwd(), p.avatar);
 // bulles façon bande dessinée (personnage « evenements ») : polices libres (OFL) livrées avec le dépôt, pour un
@@ -65,7 +74,7 @@ const POLICE_ST = "Segoe UI Semibold, Inter SemiBold, DejaVu Sans Bold, sans-ser
 const option = (nom: string) => { const i = process.argv.indexOf(`--${nom}`); return i > 0 ? process.argv[i + 1] : undefined; };
 // PowerShell retire souvent le « -- » de npm run, et npm garde alors les options pour lui : « preparer » sans tirets
 // et la variable npm_config_<nom> valent aussi
-const MOTS = ["preparer", "sans-clips", "par-fichier", "sans-parties", "decouper", ...Object.keys(PERSONNAGES)];
+const MOTS = ["preparer", "sans-clips", "par-fichier", "sans-parties", "decouper", "sonde", "garder-bruts", ...Object.keys(PERSONNAGES)];
 /** Personnage demandé pour les narrations à préparer : --personnage thesham, ou « thesham » seul (PowerShell). */
 function personnageDemande(): string | null {
   const env = process.env.npm_config_personnage;
@@ -89,11 +98,12 @@ function encoder(args: string[]): Promise<void> {
   });
 }
 
-async function infos(video: string): Promise<{ duree: number; audio: boolean }> {
+async function infos(video: string): Promise<{ duree: number; audio: boolean; largeur: number; hauteur: number }> {
   const j = await journalFfmpeg(["-hide_banner", "-i", video]);
   const m = /Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)/.exec(j);
   if (!m) throw new Error(`Durée illisible : ${video}`);
-  return { duree: +m[1] * 3600 + +m[2] * 60 + +m[3], audio: /Stream #.*Audio:/.test(j) };
+  const t = /Stream #.*Video:.*?\b(\d{3,5})x(\d{3,5})\b/.exec(j);
+  return { duree: +m[1] * 3600 + +m[2] * 60 + +m[3], audio: /Stream #.*Audio:/.test(j), largeur: t ? +t[1] : 2560, hauteur: t ? +t[2] : 1080 };
 }
 
 function debutDe(video: string, duree: number): number {
@@ -105,7 +115,7 @@ function debutDe(video: string, duree: number): number {
 
 function sauvegardesSonde(): string[] {
   const donnee = option("sonde");
-  if (donnee) return [donnee];
+  if (donnee && !donnee.startsWith("--") && existsSync(donnee)) return [donnee];
   if (!existsSync(COMPTES_WOW)) return [];
   return readdirSync(COMPTES_WOW)
     .flatMap((c) => SONDES.map((s) => path.join(COMPTES_WOW, c, "SavedVariables", s.fichier)))
@@ -489,7 +499,8 @@ async function rendre(n: Narration, video: string, audio: boolean, g: Gabarit, s
 function listeMorceau(n: Narration, dossierNarration: string, debut: number, duree: number, sortie: string): string | null {
   const fichiers = (n.sources ?? []).map((s) => s.split("|")).filter((x) => x.length === 2 && /\.(mp4|mkv|mov)$/i.test(x[0]) && Number(x[1]) > 0);
   if (!fichiers.length) return null;
-  const dossiers = [path.dirname(dossierNarration), dossierNarration, DOSSIER_VIDEOS];
+  // enregistrements d'origine : dans D:\WOW, ou déjà rangés dans « Bruts » du personnage après le rendu
+  const dossiers = [path.dirname(dossierNarration), dossierNarration, path.join(dossierNarration, DOSSIER_BRUTS), DOSSIER_VIDEOS];
   const lignes: string[] = [];
   let avant = 0;
   for (const [nom, d] of fichiers) {
@@ -621,7 +632,7 @@ async function main() {
   // sans cible donnée : le dossier D:\WOW, où se font toutes les opérations vidéo
   const premier = process.argv[2];
   const cible = premier && !premier.startsWith("--") && !MOTS.includes(premier) ? premier : DOSSIER_VIDEOS;
-  const usage = 'Usage : npm run carnet:incrustation [-- "<vidéo, dossier ou .narration.json, D:\\WOW par défaut>"] [--miniature <image>] [--sonde <fichier>] [--preparer] [--sans-clips]';
+  const usage = 'Usage : npm run carnet:incrustation [-- "<vidéo, dossier ou .narration.json, D:\\WOW par défaut>"] [--miniature <image>] [--sonde [<fichier>]] [--preparer] [--sans-clips] [--garder-bruts]';
   if (!cible || cible.startsWith("--") || !existsSync(cible)) { console.error(`${cible ? `Introuvable : « ${cible} ».\n` : ""}${usage}`); process.exit(1); }
 
   let evenements: Evenement[] | null = null;
@@ -642,13 +653,49 @@ async function main() {
     signaux = signaux.sort((a, b) => a.heure - b.heure);
     if (!evenements.length) console.log("Aucun repère de sonde : seule l'intro sera commentée (/reload en jeu pour sauvegarder, ou --sonde <fichier>).");
   };
+  /**
+   * Moments tirés de l'image (19/11/2026, demandé par Jobwow) : lieu, niveau, nom du personnage, mort et cible lus
+   * dans chaque enregistrement (scripts/analyse-video.ts, lib/analyseVideo.ts). La sonde ne sert plus qu'avec --sonde.
+   * Analyse gardée dans le dossier temporaire du PC : un enregistrement n'est lu qu'une fois, même rangé dans « Bruts ».
+   */
+  const parSonde = drapeau("sonde") || process.env.CARNET_MOMENTS === "sonde";
+  const analyses = new Set<string>();
+  const lieuxVus = new Map<string, Set<string>>();
+  const cacheAnalyse = path.join(os.tmpdir(), "taverne-eternelle", "analyse");
+  const chargerMoments = async (clips: Clip[]) => {
+    if (parSonde) return chargerSonde();
+    const nouveaux = clips.filter((c) => !analyses.has(path.resolve(c.fichier))).sort((a, b) => a.debut - b.debut);
+    if (!evenements) evenements = [];
+    if (!nouveaux.length) return;
+    for (const c of nouveaux) {
+      analyses.add(path.resolve(c.fichier));
+      const { largeur, hauteur } = await infos(c.fichier);
+      const a = await analyserEnregistrement(c.fichier, cacheAnalyse, { largeur, hauteur, duree: c.duree });
+      const jour = new Date(c.debut).toISOString().slice(0, 10);
+      const vus = lieuxVus.get(jour) ?? new Set<string>();
+      lieuxVus.set(jour, vus);
+      const ev = evenementsDepuisAnalyse(a, c.debut, vus);
+      (evenements as Evenement[]).push(...ev);
+      reperes.push(...reperesDepuisAnalyse(a, c.debut, ev));
+      signaux.push(...signauxDepuisEvenements(ev));
+      const compte = (g: string) => ev.filter((x) => x.genre === g).length;
+      console.log(`  ${path.basename(c.fichier)} : ${ev[0]?.personnage ?? "?"}, ${compte("zone")} lieux, ${compte("niveau")} niveaux, ${compte("mort")} morts, ${compte("egare")} égarements.`);
+    }
+    await fermerLecteurs();
+    (evenements as Evenement[]).sort((a, b) => a.heure - b.heure);
+    reperes = reperes.sort((a, b) => a.heure - b.heure);
+    signaux = signaux.sort((a, b) => a.heure - b.heure);
+  };
+  /** Moments d'une seule vidéo (fichier ou narration donnés) : ses enregistrements d'origine, sinon elle-même. */
+  const momentsDe = async (video: string, seance: Seance | null, duree: number) =>
+    chargerMoments(seance?.clips ?? [{ fichier: video, debut: debutDe(video, duree), duree }]);
 
   /**
    * Découpage d'une longue soirée : repris de l'Atelier (Téléchargements) s'il a été déplacé, relu s'il porte sur les
    * mêmes vidéos, sinon calculé d'après la sonde. Une partie dont les bornes ont changé repart d'une narration neuve.
    */
   const partiesDeLaJournee = async (nom: string, video: string, s: Seance, sources: string[], dossier: string) => {
-    chargerSonde();
+    await chargerMoments(s.clips);
     const fichierD = path.join(dossier, `${nom}.parties.json`);
     const memesSources = (d: Partial<Decoupage>) => !d.sources || JSON.stringify(d.sources) === JSON.stringify(sources);
     const ailleurs = plusRecentAilleurs(fichierD, ".parties.json");
@@ -723,9 +770,13 @@ async function main() {
   const parNarration = cible.endsWith(".narration.json");
   const bilan: string[] = [];
   const recapPersos: string[] = [];
+  // journées du dossier D:\WOW : leurs enregistrements partent dans « Bruts » une fois toutes leurs vidéos rendues
+  const journees: { nom: string; dossier: string; perso: PersonnageVideo; enregistrements: string[] }[] = [];
   if (parNarration) {
     const n = JSON.parse(readFileSync(cible, "utf8")) as Narration;
-    travaux.push({ video: path.resolve(path.dirname(cible), n.video), seance: null, fichierN: cible });
+    const v = path.resolve(path.dirname(cible), n.video);
+    const rangee = path.join(path.dirname(cible), DOSSIER_BRUTS, path.basename(n.video));
+    travaux.push({ video: existsSync(v) || !existsSync(rangee) ? v : rangee, seance: null, fichierN: cible });
   } else if (statSync(cible).isDirectory()) {
     // rangement par personnage (18/11/2026) : son dossier dans D:\WOW et ses noms de fichiers (content/personnages.ts)
     const dossierDe = (p: PersonnageVideo) => option("sortie") ?? path.join(cible, p.dossier);
@@ -737,7 +788,8 @@ async function main() {
     for (const f of fichiers) { const { duree } = await infos(f); clips.push({ fichier: f, debut: debutDe(f, duree), duree }); }
     // personnage de chaque enregistrement : demandé, sinon vu en jeu par la sonde, sinon celui du plus proche du même jour
     const forcer = personnageDemande();
-    if (!forcer) chargerSonde();
+    if (parSonde) { if (!forcer) chargerSonde(); }
+    else if (clips.length) { console.log(`Lecture de l'image de ${clips.length} enregistrement${clips.length > 1 ? "s" : ""} (moments, lieux, niveaux, personnage)…`); await chargerMoments(clips); }
     const persos = personnagesDesEnregistrements(clips, (evenements as Evenement[] | null) ?? [], forcer);
     // récapitulatif par personnage, pour repérer d'un coup d'œil un enregistrement mal attribué
     for (const p of tousLesPersonnages()) {
@@ -783,6 +835,7 @@ async function main() {
       const sortieDossier = dossierDe(p);
       mkdirSync(sortieDossier, { recursive: true });
       const nom = nomJournee(p, cle);
+      journees.push({ nom, dossier: sortieDossier, perso: p, enregistrements: s.clips.map((c) => c.fichier) });
       const sources = s.clips.map((c) => `${path.basename(c.fichier)}|${c.duree.toFixed(1)}`);
       const fichierN = path.join(sortieDossier, `${nom}.narration.json`);
       let change = false;
@@ -894,11 +947,11 @@ async function main() {
       const erreurs = verifierNarration(n);
       if (erreurs.length) { console.error(`${fichierN} :\n- ${erreurs.join("\n- ")}`); process.exit(1); }
       console.log(`Narration relue : ${fichierN} (${n.moments.length} moments, ${n.clips.length} clips)`);
-      if (seanceConnue) { chargerSonde(); ecrireYoutube(base, seanceConnue, n, partie, episode); }
+      if (seanceConnue) { await momentsDe(video, seanceConnue, duree); ecrireYoutube(base, seanceConnue, n, partie, episode); }
       // miniature donnée par son nom : à côté de la narration
       if (n.miniature && !path.isAbsolute(n.miniature) && !/^[A-Za-z]:[\\/]/.test(n.miniature)) n.miniature = path.join(path.dirname(fichierN), n.miniature);
     } else {
-      chargerSonde();
+      await momentsDe(video, seanceConnue, duree);
       const debut = seanceConnue?.debut ?? debutDe(video, duree);
       const seance: Seance = seanceConnue ?? { clips: [{ fichier: video, debut, duree }], debut, fin: debut + duree * 1000, duree };
       const chap = chapitres(seance, reperes);
@@ -992,7 +1045,36 @@ async function main() {
     }
     bilan.push(`${etiquette} : rendue → ${path.basename(sortie)}${n.clips.length && !drapeau("sans-clips") ? ` et ${n.clips.length} clip(s)` : ""}. À envoyer sur YouTube (miniature : ${n.miniature ? path.basename(n.miniature) : "aucune"}).`);
   }
+  // rangement des enregistrements d'origine (19/11/2026, proposé à Jobwow) : une journée dont toutes les vidéos sont
+  // rendues, carte de fin définitive comprise, envoie ses enregistrements dans « Bruts » du personnage ; D:\WOW reste
+  // vide, prêt pour la soirée suivante. --garder-bruts les laisse en place. Pour refaire une journée : les remettre dans D:\WOW.
+  const ranges: string[] = [];
+  if (!drapeau("garder-bruts") && !drapeau("preparer")) {
+    for (const j of journees) {
+      const bases = travaux.filter((t) => t.fichierN && path.dirname(t.fichierN) === j.dossier && (t.partie?.journee ?? path.basename(t.fichierN).replace(/\.narration\.json$/i, "")) === j.nom)
+        .map((t) => t.fichierN!.replace(/\.narration\.json$/i, ""));
+      const fini = bases.length > 0 && bases.every((b) => {
+        const rendu = `${b}.${j.perso.id}.mp4`, carte = `${b}.carte-fin.txt`;
+        return existsSync(rendu) && existsSync(`${b}.narration.json`) && statSync(rendu).mtimeMs > statSync(`${b}.narration.json`).mtimeMs
+          && existsSync(carte) && readFileSync(carte, "utf8").trim() !== "provisoire"
+          && (() => { try { return !!(JSON.parse(readFileSync(`${b}.narration.json`, "utf8")) as Narration).valide; } catch { return false; } })();
+      });
+      if (!fini) continue;
+      const bruts = path.join(j.dossier, DOSSIER_BRUTS);
+      const aRanger = j.enregistrements.filter((f) => existsSync(f) && path.dirname(path.resolve(f)) !== path.resolve(bruts));
+      if (!aRanger.length) continue;
+      mkdirSync(bruts, { recursive: true });
+      let n = 0;
+      for (const f of aRanger) {
+        const dest = path.join(bruts, path.basename(f));
+        if (existsSync(dest)) { console.log(`Déjà dans « ${DOSSIER_BRUTS} », laissé en place : ${f}`); continue; }
+        try { renameSync(f, dest); n++; } catch (e) { console.log(`Impossible de ranger ${path.basename(f)} (${e instanceof Error ? e.message : e}) : laissé dans D:\\WOW.`); }
+      }
+      if (n) ranges.push(`${j.nom} : ${n} enregistrement${n > 1 ? "s" : ""} rangé${n > 1 ? "s" : ""} dans ${bruts}`);
+    }
+  }
   if (recapPersos.length) { console.log("\n— Par personnage —"); for (const l of recapPersos) console.log(`• ${l}`); }
+  if (ranges.length) { console.log("\n— Enregistrements rangés (journées rendues) —"); for (const l of ranges) console.log(`• ${l}`); }
   console.log("\n— Où en est chaque vidéo —");
   for (const b of bilan) console.log(`• ${b}`);
   console.log("L'Atelier vidéo de Jobwow montre les mêmes étapes : ouvre-y le dossier D:\\WOW.");
