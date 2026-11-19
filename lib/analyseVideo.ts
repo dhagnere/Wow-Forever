@@ -82,16 +82,70 @@ export function personnageDeLAnalyse(a: Analyse): string | null {
 
 /** Nom de zone du jeu quand le lieu en est une (« Durotar »), pour l'écrire comme le jeu. */
 const ZONES = Object.values(CARTES_JEU).map((c) => c.nom);
-function nomCanonique(lieu: string, connus: string[]): string {
-  const zone = ZONES.find((z) => semblables(z, lieu));
-  if (zone) return zone;
-  // nom coupé (« Terres des Tranchec… ») : complété par un nom entier vu ailleurs dans la soirée
-  if (lieu.endsWith("…")) {
-    const debut = cle(lieu.slice(0, -1));
-    const entier = connus.find((c) => !c.endsWith("…") && cle(c).startsWith(debut));
-    if (entier) return entier;
+/**
+ * Lexique des lieux : ramène une lecture (souvent abîmée par le décor derrière le texte : « Tranchecoiline »,
+ * « Ites de l'Ecto ») au nom exact, ou l'écarte (null). Deux sources (19/11/2026, après la première soirée relue) :
+ * - les noms du jeu (table AreaTable des fichiers de Forever, lue par le PC de Jobwow : scripts/analyse-video.ts) ;
+ * - à défaut, la soirée elle-même : la lecture la plus fréquente d'un groupe de lectures voisines l'emporte, une lecture
+ *   trop rare (moins de 6 s dans la soirée) est écartée.
+ */
+export type Lexique = (lu: string) => string | null;
+
+const proche = (a: string, b: string, part: number) => {
+  const x = cle(a), y = cle(b);
+  if (!x || !y) return false;
+  return distance(x, y) <= Math.max(2, Math.round(part * Math.max(x.length, y.length)));
+};
+/** Le nom coupé (« Terres des Tranchec… ») qui commence comme un nom entier. */
+const debutDe = (lu: string, nom: string) => {
+  const d = cle(lu.slice(0, -1));
+  return d.length >= 5 && distance(d, cle(nom).slice(0, d.length)) <= Math.max(1, Math.round(d.length / 6));
+};
+
+/** Lexique tiré des noms du jeu : le nom le plus proche, assez proche. */
+export function lexiqueDepuisNoms(noms: string[]): Lexique {
+  const liste = [...new Set([...noms, ...ZONES])].filter((n) => cle(n).length >= 3);
+  const memo = new Map<string, string | null>();
+  return (lu) => {
+    if (memo.has(lu)) return memo.get(lu)!;
+    let meilleur: { nom: string; d: number } | null = null;
+    if (lu.endsWith("…")) {
+      const c = liste.filter((n) => debutDe(lu, n));
+      if (c.length === 1) meilleur = { nom: c[0], d: 0 };
+    } else {
+      const x = cle(lu);
+      for (const n of liste) {
+        const y = cle(n);
+        if (Math.abs(x.length - y.length) > Math.max(3, y.length / 3)) continue;
+        const d = distance(x, y) / Math.max(x.length, y.length);
+        if (!meilleur || d < meilleur.d) meilleur = { nom: n, d };
+      }
+      if (meilleur && meilleur.d > 0.3) meilleur = null;
+    }
+    memo.set(lu, meilleur?.nom ?? null);
+    return meilleur?.nom ?? null;
+  };
+}
+
+/** Lexique tiré des lectures d'une soirée (sans les noms du jeu). */
+export function lexiqueDepuisLectures(lectures: (string | null)[], minimum = 6): Lexique {
+  const compte = new Map<string, number>();
+  for (const l of lectures) if (l && !l.endsWith("…")) compte.set(l, (compte.get(l) ?? 0) + 1);
+  const ordre = [...compte.entries()].sort((a, b) => b[1] - a[1]);
+  const canon = new Map<string, string>();
+  const tetes: { nom: string; total: number }[] = [];
+  for (const [l, n] of ordre) {
+    const zone = ZONES.find((z) => semblables(z, l));
+    const tete = tetes.find((t) => (zone ? t.nom === zone : proche(t.nom, l, 0.34)));
+    if (tete) { tete.total += n; canon.set(l, tete.nom); }
+    else { const t = { nom: zone ?? l, total: n }; tetes.push(t); canon.set(l, t.nom); }
   }
-  return lieu;
+  const surs = new Set(tetes.filter((t) => t.total >= minimum).map((t) => t.nom));
+  return (lu) => {
+    if (lu.endsWith("…")) { const t = tetes.find((x) => surs.has(x.nom) && debutDe(lu, x.nom)); return t?.nom ?? null; }
+    const c = canon.get(lu) ?? tetes.find((t) => proche(t.nom, lu, 0.34))?.nom;
+    return c && surs.has(c) ? c : null;
+  };
 }
 
 /** Valeur gardée quand elle est lue `n` fois de suite (une lecture isolée est souvent une erreur). */
@@ -113,7 +167,7 @@ function stables<T>(valeurs: (T | null)[], egal: (a: T, b: T) => boolean, n: num
  * du personnage lu à l'image. `lieuxDejaVus` : les lieux déjà annoncés plus tôt dans la soirée (enregistrements
  * précédents), complété au fil de l'eau.
  */
-export function evenementsDepuisAnalyse(a: Analyse, debut: number, lieuxDejaVus: Set<string> = new Set(), lieuxConnus: string[] = []): Evenement[] {
+export function evenementsDepuisAnalyse(a: Analyse, debut: number, lieuxDejaVus: Set<string> = new Set(), lexique?: Lexique): Evenement[] {
   const personnage = personnageDeLAnalyse(a) ?? "?";
   const ech = [...a.echantillons].sort((x, y) => x.t - y.t);
   const out: Evenement[] = [];
@@ -121,14 +175,15 @@ export function evenementsDepuisAnalyse(a: Analyse, debut: number, lieuxDejaVus:
   out.push({ heure: debut, genre: "reprise", valeurs: {}, personnage });
 
   // lieux et niveaux stables
-  const connus = [...lieuxConnus, ...ech.map((x) => x.lieu).filter((x): x is string => !!x && !x.endsWith("…"))];
-  const lieux = stables(ech.map((x) => (x.lieu ? nomCanonique(x.lieu, connus) : null)), semblables, 3);
+  const lex = lexique ?? lexiqueDepuisLectures(ech.map((x) => x.lieu));
+  // un lieu tenu au moins 4 s (lectures déjà ramenées au nom exact)
+  const lieux = stables(ech.map((x) => (x.lieu ? lex(x.lieu) : null)), (p, q) => p === q, 4);
   const niveaux = stables(ech.map((x) => x.niveau && x.niveau >= 1 && x.niveau <= 60 ? x.niveau : null), (x, y) => x === y, 2);
   let lieu: string | null = null, niveau: number | null = null, dernierLieu = -Infinity;
   const lieuA: (string | undefined)[] = [];   // lieu courant à chaque relevé (pour situer une mort, un égarement)
   ech.forEach((x, i) => {
     const l = lieux[i];
-    if (l && (!lieu || !semblables(l, lieu))) {
+    if (l && l !== lieu) {
       lieu = l;
       const k = cle(l);
       // un lieu nouveau dans la soirée, au plus un toutes les 90 s
@@ -190,10 +245,11 @@ export function signauxDepuisEvenements(evts: Evenement[]): Signal[] {
 }
 
 /** Repères pour les chapitres YouTube : l'état au début de l'enregistrement (lieu|niveau), puis lieux et niveaux. */
-export function reperesDepuisAnalyse(a: Analyse, debut: number, evts: Evenement[]): Repere[] {
+export function reperesDepuisAnalyse(a: Analyse, debut: number, evts: Evenement[], lexique?: Lexique): Repere[] {
   const personnage = personnageDeLAnalyse(a) ?? "?";
+  const lex = lexique ?? lexiqueDepuisLectures(a.echantillons.map((x) => x.lieu));
   const premiers = a.echantillons.filter((x) => x.t <= 60);
-  const lieu = premiers.find((x) => x.lieu && !x.lieu.endsWith("…"))?.lieu ?? "";
+  const lieu = premiers.map((x) => (x.lieu ? lex(x.lieu) : null)).find((x) => !!x) ?? "";
   const niveau = premiers.find((x) => x.niveau)?.niveau ?? "";
   const out: Repere[] = [{ heure: debut, type: "etat", texte: `${lieu}|${niveau}`, personnage }];
   for (const x of evts) {

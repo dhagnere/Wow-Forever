@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  evenementsDepuisAnalyse, nettoyerLieu, nettoyerNom, personnageDeLAnalyse, reperesDepuisAnalyse, semblables, signauxDepuisEvenements,
+  evenementsDepuisAnalyse, lexiqueDepuisLectures, lexiqueDepuisNoms, nettoyerLieu, nettoyerNom, personnageDeLAnalyse, reperesDepuisAnalyse, semblables, signauxDepuisEvenements,
   VERSION_ANALYSE, type Analyse, type Echantillon,
 } from "@/lib/analyseVideo";
 import { zoneALEchelle, ANALYSE_VIDEO } from "@/config/analyse-video";
@@ -94,5 +94,36 @@ describe("découpage et chapitres", () => {
     const r = reperesDepuisAnalyse(a, DEBUT, evenementsDepuisAnalyse(a, DEBUT));
     expect(r[0]).toMatchObject({ type: "etat", texte: "Durotar|8", personnage: "Jobwow TheSham" });
     expect(r.some((x) => x.type === "niveau" && x.texte === "9")).toBe(true);
+  });
+});
+
+describe("lexique des lieux (lectures abîmées de la soirée du 17/11)", () => {
+  const noms = ["Tranchecolline", "Îles de l'Écho", "Donjon de Tiragarde", "Grève des Sombrelances", "Vallée des Épreuves", "Village de Sen'jin", "Terres des Tranchecollines", "Côte des Naufrages"];
+  const lex = lexiqueDepuisNoms(noms);
+  it("ramène une lecture abîmée au nom exact du jeu", () => {
+    expect(lex("Tranchecoiline")).toBe("Tranchecolline");
+    expect(lex("Tranchecoltine")).toBe("Tranchecolline");
+    expect(lex("Ites de l'Ecto")).toBe("Îles de l'Écho");
+    expect(lex("lies de f'Echo")).toBe("Îles de l'Écho");
+    expect(lex("Dorjon de Tiragarde")).toBe("Donjon de Tiragarde");
+    expect(lex("Vailée des épreuves")).toBe("Vallée des Épreuves");
+    expect(lex("Durotar")).toBe("Durotar");
+  });
+  it("complète un nom coupé, écarte une lecture méconnaissable", () => {
+    expect(lex("Terres des Tranchec…")).toBe("Terres des Tranchecollines");
+    expect(lex("Ueve des Uä xipéai")).toBeNull();
+    expect(lex("Durotar LS Ce")).toBeNull();
+  });
+  it("sans les noms du jeu, la lecture la plus fréquente de la soirée l'emporte et une lecture rare est écartée", () => {
+    const lectures = [...Array(40).fill("Tranchecolline"), ...Array(5).fill("Tranchecoiline"), "Tranchecoltine", ...Array(3).fill("Cute des nautistes")];
+    const l = lexiqueDepuisLectures(lectures);
+    expect(l("Tranchecoiline")).toBe("Tranchecolline");
+    expect(l("Tranchecoltine")).toBe("Tranchecolline");
+    expect(l("Cute des nautistes")).toBeNull();
+  });
+  it("un lieu relu avec des fautes n'est pas annoncé deux fois", () => {
+    const a = analyse(200, (t) => ({ lieu: t < 100 ? "Durotar" : ["Tranchecolline", "Tranchecoiline", "Tranchecoltine"][t % 3] }));
+    const zones = evenementsDepuisAnalyse(a, DEBUT, new Set(), lex).filter((e) => e.genre === "zone").map((e) => e.valeurs.zone);
+    expect(zones).toEqual(["Durotar", "Tranchecolline"]);
   });
 });

@@ -205,7 +205,11 @@ environ une minute d'analyse par vingt minutes de vidéo. On en tire :
 - égaré : six minutes sans cible, sans lieu nouveau, niveau ni mort ; hécatombe et pas de chance comme avec la sonde ;
 - le personnage : le nom le plus souvent lu, rapproché de `nomsEnJeu` (« Jobwow Thesham » lu → Jobwow TheSham) ; il
   décide du dossier de rangement.
-Lieux, niveaux et morts servent aussi aux coupes des parties et aux chapitres YouTube. Analyse gardée dans le dossier
+Le texte lu se brouille souvent sur un décor chargé (« Tranchecoiline », « Ites de l'Ecto ») : chaque lecture est
+ramenée au nom exact d'un lieu du jeu (table AreaTable de Forever, lue une fois par mois sur wago.tools et gardée dans le
+dossier temporaire du PC), ou écartée si elle n'en approche aucun ; sans Internet, la lecture la plus fréquente de la
+soirée l'emporte et une lecture vue moins de 6 s est écartée. Lieux, niveaux et morts servent aussi aux coupes des
+parties et aux chapitres YouTube. Analyse gardée dans le dossier
 temporaire du PC (`taverne-eternelle/analyse`) : un enregistrement n'est lu qu'une fois. Les quêtes, l'or, les trajets et
 les élites ne se voient pas à l'image : `npm run carnet -- --sonde` (ou `sonde` seul sous PowerShell, ou
 `--sonde <fichier>`) revient aux repères de la sonde, plus riches quand elle a bien tout noté. L'interface doit garder la

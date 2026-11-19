@@ -52,8 +52,8 @@ import {
   type Calque, type Evenement, type Moment, type Narration,
 } from "@/lib/incrustation";
 import { chapitres, descriptionVideo, heureLocale, horodatage, lireSauvegardeSonde, positionDans, reperesRouteProbe, seances, SONDES, titreVideo, DOSSIER_VIDEOS, type Clip, type Repere, type Seance } from "@/lib/videoCarnet";
-import { evenementsDepuisAnalyse, reperesDepuisAnalyse, signauxDepuisEvenements } from "@/lib/analyseVideo";
-import { analyserEnregistrement, fermerLecteurs } from "./analyse-video";
+import { evenementsDepuisAnalyse, lexiqueDepuisLectures, lexiqueDepuisNoms, reperesDepuisAnalyse, signauxDepuisEvenements, type Analyse, type Lexique } from "@/lib/analyseVideo";
+import { analyserEnregistrement, fermerLecteurs, lieuxDuJeu } from "./analyse-video";
 import {
   choisirParties, coupesPossibles, coupesProposees, memesBornes, nomPartie, PARTIE_MAX, repriseDansPartie, seanceDePartie, signauxSonde, verifierDecoupage,
   type Decoupage, type Signal,
@@ -662,26 +662,39 @@ async function main() {
   const analyses = new Set<string>();
   const lieuxVus = new Map<string, Set<string>>();
   const cacheAnalyse = path.join(os.tmpdir(), "taverne-eternelle", "analyse");
+  let nomsDuJeu: string[] | null = null;
   const chargerMoments = async (clips: Clip[]) => {
     if (parSonde) return chargerSonde();
     const nouveaux = clips.filter((c) => !analyses.has(path.resolve(c.fichier))).sort((a, b) => a.debut - b.debut);
     if (!evenements) evenements = [];
     if (!nouveaux.length) return;
+    nomsDuJeu ??= await lieuxDuJeu(path.join(path.dirname(cacheAnalyse), "lieux-jeu.json"));
+    // toutes les images d'abord : sans les noms du jeu, la soirée entière sert à reconnaître les lieux
+    const lues: { c: Clip; a: Analyse }[] = [];
     for (const c of nouveaux) {
       analyses.add(path.resolve(c.fichier));
       const { largeur, hauteur } = await infos(c.fichier);
-      const a = await analyserEnregistrement(c.fichier, cacheAnalyse, { largeur, hauteur, duree: c.duree });
-      const jour = new Date(c.debut).toISOString().slice(0, 10);
+      lues.push({ c, a: await analyserEnregistrement(c.fichier, cacheAnalyse, { largeur, hauteur, duree: c.duree }) });
+    }
+    await fermerLecteurs();
+    const jourDe = (c: Clip) => new Date(c.debut).toISOString().slice(0, 10);
+    const lexiques = new Map<string, Lexique>();
+    const lexiqueDu = (jour: string) => {
+      if (!lexiques.has(jour)) lexiques.set(jour, nomsDuJeu!.length ? lexiqueDepuisNoms(nomsDuJeu!)
+        : lexiqueDepuisLectures(lues.filter((x) => jourDe(x.c) === jour).flatMap((x) => x.a.echantillons.map((e) => e.lieu))));
+      return lexiques.get(jour)!;
+    };
+    for (const { c, a } of lues) {
+      const jour = jourDe(c), lex = lexiqueDu(jour);
       const vus = lieuxVus.get(jour) ?? new Set<string>();
       lieuxVus.set(jour, vus);
-      const ev = evenementsDepuisAnalyse(a, c.debut, vus);
+      const ev = evenementsDepuisAnalyse(a, c.debut, vus, lex);
       (evenements as Evenement[]).push(...ev);
-      reperes.push(...reperesDepuisAnalyse(a, c.debut, ev));
+      reperes.push(...reperesDepuisAnalyse(a, c.debut, ev, lex));
       signaux.push(...signauxDepuisEvenements(ev));
       const compte = (g: string) => ev.filter((x) => x.genre === g).length;
       console.log(`  ${path.basename(c.fichier)} : ${ev[0]?.personnage ?? "?"}, ${compte("zone")} lieux, ${compte("niveau")} niveaux, ${compte("mort")} morts, ${compte("egare")} égarements.`);
     }
-    await fermerLecteurs();
     (evenements as Evenement[]).sort((a, b) => a.heure - b.heure);
     reperes = reperes.sort((a, b) => a.heure - b.heure);
     signaux = signaux.sort((a, b) => a.heure - b.heure);
