@@ -33,6 +33,7 @@
     "veille:lettres-en": "tsx scripts/traduire-lettres.ts",
     "veille:horaire": "npm run veille:traduire; npm run veille:lettres-en; npm run veille:lettre",
     "base:butin": "tsx modules/veille/scripts/butin.ts",
+    "base:donjons": "tsx modules/veille/scripts/donjons.ts",
     "sorts:jeu": "tsx modules/veille/scripts/sorts-jeu.ts",
     "base:quetes": "tsx modules/veille/scripts/quetes.ts",
     "base:quetes:en": "tsx modules/veille/scripts/quetes.ts --en",

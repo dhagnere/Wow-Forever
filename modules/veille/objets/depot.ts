@@ -259,6 +259,16 @@ export async function chercherObjets(f: FiltresObjets, langue: LangueObjets = "f
   return { objets: rows.map(versResume), total: compte[0]?.n ?? 0 };
 }
 
+/** Objets d'une liste d'identifiants (butin d'un boss…), dans l'ordre demandé ; un identifiant absent de la base
+ *  (objet absent de Forever ou interne) est simplement omis. */
+export async function objetsParIds(ids: number[], langue: LangueObjets = "fr"): Promise<ObjetResume[]> {
+  const liste = [...new Set(ids.filter((i) => Number.isInteger(i) && i > 0))].slice(0, 2000);
+  if (!liste.length) return [];
+  const { rows } = await pool().query<LigneResume>(`${selectResume(langue)} WHERE o.id = ANY($1::int[])`, [liste]);
+  const parId = new Map(rows.map((l) => [l.id, versResume(l)]));
+  return liste.map((i) => parId.get(i)).filter((o): o is ObjetResume => !!o);
+}
+
 export async function lireObjet(id: number, langue: LangueObjets = "fr"): Promise<Objet | null> {
   if (!Number.isSafeInteger(id) || id <= 0) return null;
   const { rows } = await pool().query<LigneResume & {

@@ -20,6 +20,7 @@ describe("version anglaise", () => {
       "/zones/", "/donjons/", "/races/skyborne/", "/guides/bien-demarrer/", "/guides/zones-de-depart/", "/guides/zones-par-niveau/",
       "/guides/liste-des-donjons/", "/guides/quetes-de-classe/",
       ...ZONES.map((z) => `/zones/${z.slug}/`), ...DONJONS.map((d) => `/donjons/${d.slug}/`),
+      ...DONJONS_ORIGINE.map((d) => `/donjons/${d.slug}/`),
       ...CLASSES.map((c) => `/guides/quetes-de-classe/${c.slug}/`),
       ...tousLesLieux().map((l) => `/cartes/${l}/`),
     ];

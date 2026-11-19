@@ -97,6 +97,8 @@ export function dansTranche(min: number, [a, b]: [number, number]): boolean {
 }
 
 export interface DonjonReference {
+  /** Adresse de la fiche : /donjons/<slug>/ ; même clé que content/donjons-jeu.json (npm run base:donjons). */
+  slug: string;
   nom: string;
   min: number;
   max: number;
@@ -106,25 +108,25 @@ export interface DonjonReference {
 }
 
 export const DONJONS_ORIGINE: DonjonReference[] = [
-  { nom: "Gouffre de Ragefeu", min: 13, max: 18, zone: "Orgrimmar", continent: "Kalimdor" },
-  { nom: "Les Mortemines", min: 17, max: 26, zone: "Marche de l'Ouest", continent: "Royaumes de l'Est" },
-  { nom: "Cavernes des Lamentations", min: 17, max: 24, zone: "Les Tarides", continent: "Kalimdor" },
-  { nom: "Donjon d'Ombrecroc", min: 22, max: 30, zone: "Forêt des Pins-Argentés", continent: "Royaumes de l'Est" },
-  { nom: "Profondeurs de Brassenoire", min: 24, max: 32, zone: "Ashenvale", continent: "Kalimdor" },
-  { nom: "La Prison", min: 24, max: 32, zone: "Hurlevent", continent: "Royaumes de l'Est" },
-  { nom: "Gnomeregan", min: 29, max: 38, zone: "Dun Morogh", continent: "Royaumes de l'Est" },
-  { nom: "Kraal de Tranchebauge", min: 29, max: 38, zone: "Les Tarides", continent: "Kalimdor" },
-  { nom: "Monastère écarlate", min: 34, max: 45, zone: "Clairières de Tirisfal", continent: "Royaumes de l'Est" },
-  { nom: "Souilles de Tranchebauge", min: 37, max: 46, zone: "Les Tarides", continent: "Kalimdor" },
-  { nom: "Uldaman", min: 41, max: 51, zone: "Terres ingrates", continent: "Royaumes de l'Est" },
-  { nom: "Zul'Farrak", min: 44, max: 54, zone: "Tanaris", continent: "Kalimdor" },
-  { nom: "Maraudon", min: 46, max: 55, zone: "Désolace", continent: "Kalimdor" },
-  { nom: "Temple d'Atal'Hakkar", min: 50, max: 56, zone: "Marais des Chagrins", continent: "Royaumes de l'Est" },
-  { nom: "Profondeurs de Rochenoire", min: 52, max: 60, zone: "Mont Rochenoire", continent: "Royaumes de l'Est" },
-  { nom: "Pic de Rochenoire (inférieur et supérieur)", min: 55, max: 60, zone: "Mont Rochenoire", continent: "Royaumes de l'Est" },
-  { nom: "Hache-Tripes", min: 55, max: 60, zone: "Féralas", continent: "Kalimdor" },
-  { nom: "Scholomance", min: 58, max: 60, zone: "Maleterres de l'Ouest", continent: "Royaumes de l'Est" },
-  { nom: "Stratholme", min: 58, max: 60, zone: "Maleterres de l'Est", continent: "Royaumes de l'Est" },
+  { slug: "gouffre-de-ragefeu", nom: "Gouffre de Ragefeu", min: 13, max: 18, zone: "Orgrimmar", continent: "Kalimdor" },
+  { slug: "mortemines", nom: "Les Mortemines", min: 17, max: 26, zone: "Marche de l'Ouest", continent: "Royaumes de l'Est" },
+  { slug: "cavernes-des-lamentations", nom: "Cavernes des Lamentations", min: 17, max: 24, zone: "Les Tarides", continent: "Kalimdor" },
+  { slug: "donjon-d-ombrecroc", nom: "Donjon d'Ombrecroc", min: 22, max: 30, zone: "Forêt des Pins-Argentés", continent: "Royaumes de l'Est" },
+  { slug: "profondeurs-de-brassenoire", nom: "Profondeurs de Brassenoire", min: 24, max: 32, zone: "Ashenvale", continent: "Kalimdor" },
+  { slug: "prison", nom: "La Prison", min: 24, max: 32, zone: "Hurlevent", continent: "Royaumes de l'Est" },
+  { slug: "gnomeregan", nom: "Gnomeregan", min: 29, max: 38, zone: "Dun Morogh", continent: "Royaumes de l'Est" },
+  { slug: "kraal-de-tranchebauge", nom: "Kraal de Tranchebauge", min: 29, max: 38, zone: "Les Tarides", continent: "Kalimdor" },
+  { slug: "monastere-ecarlate", nom: "Monastère écarlate", min: 34, max: 45, zone: "Clairières de Tirisfal", continent: "Royaumes de l'Est" },
+  { slug: "souilles-de-tranchebauge", nom: "Souilles de Tranchebauge", min: 37, max: 46, zone: "Les Tarides", continent: "Kalimdor" },
+  { slug: "uldaman", nom: "Uldaman", min: 41, max: 51, zone: "Terres ingrates", continent: "Royaumes de l'Est" },
+  { slug: "zul-farrak", nom: "Zul'Farrak", min: 44, max: 54, zone: "Tanaris", continent: "Kalimdor" },
+  { slug: "maraudon", nom: "Maraudon", min: 46, max: 55, zone: "Désolace", continent: "Kalimdor" },
+  { slug: "temple-englouti", nom: "Temple d'Atal'Hakkar", min: 50, max: 56, zone: "Marais des Chagrins", continent: "Royaumes de l'Est" },
+  { slug: "profondeurs-de-rochenoire", nom: "Profondeurs de Rochenoire", min: 52, max: 60, zone: "Mont Rochenoire", continent: "Royaumes de l'Est" },
+  { slug: "pic-de-rochenoire", nom: "Pic de Rochenoire (inférieur et supérieur)", min: 55, max: 60, zone: "Mont Rochenoire", continent: "Royaumes de l'Est" },
+  { slug: "hache-tripes", nom: "Hache-Tripes", min: 55, max: 60, zone: "Féralas", continent: "Kalimdor" },
+  { slug: "scholomance", nom: "Scholomance", min: 58, max: 60, zone: "Maleterres de l'Ouest", continent: "Royaumes de l'Est" },
+  { slug: "stratholme", nom: "Stratholme", min: 58, max: 60, zone: "Maleterres de l'Est", continent: "Royaumes de l'Est" },
 ];
 
 export interface RaidReference {

@@ -60,9 +60,9 @@ export default function MentionsLegales() {
           à <a href="https://wago.tools" rel="noopener noreferrer">wago.tools</a>. Ils restent la propriété de Blizzard Entertainment.
         </p>
         <p>
-          « Où le trouver » (monstres, taux de butin, marchands, coffres, quêtes et emplacements), quêtes de classe et parcours de 1 à 60 : données de l&apos;Azeroth d&apos;origine tirées des bases
+          « Où le trouver » (monstres, taux de butin, marchands, coffres, quêtes et emplacements), fiches des donjons (boss, butin, entrées et quêtes), quêtes de classe et parcours de 1 à 60 : données de l&apos;Azeroth d&apos;origine tirées des bases
           communautaires libres <a href="https://github.com/cmangos/classic-db" rel="noopener noreferrer">CMaNGOS classic-db</a> (licence GPL v3) et{" "}
-          <a href="https://github.com/azerothcore/azerothcore-wotlk" rel="noopener noreferrer">AzerothCore</a> pour les noms français (licence GPL v2).
+          <a href="https://github.com/azerothcore/azerothcore-wotlk" rel="noopener noreferrer">AzerothCore</a> pour les noms français, les rencontres et les entrées des donjons (licence GPL v2).
           Elles peuvent différer dans WoW Forever. Les quêtes ajoutées par Forever viennent des relevés faits en jeu par les joueurs de{" "}
           <a href="https://github.com/Questie/QuestieDB" rel="noopener noreferrer">Questie (QuestieDB)</a>, sous licence GPL v3.
           Les guides de quêtes n&apos;en reprennent que les titres, les noms et les positions ; les objectifs

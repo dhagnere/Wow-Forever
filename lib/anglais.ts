@@ -6,6 +6,7 @@
 import { CARTES_EN, DONJONS_EN } from "@/content/lieux-en";
 import { DONJONS_TEXTE_EN, ZONES_EN, ZONES_HORS_CARTE_EN } from "@/content/monde-en";
 import { lieuParNom } from "./cartes";
+import { DONJONS_ORIGINE } from "@/content/reference";
 
 /** Menu de la version anglaise. */
 export const MENU_EN: { href: string; label: string }[] = [
@@ -90,6 +91,11 @@ export function nomDonjonEn(nom: string): string | null {
   return DONJONS_EN[ALIAS_DONJONS[cle] ?? cle] ?? null;
 }
 
+/** Donjons de l'Azeroth d'origine : slug français → slug anglais, tiré de leur nom anglais en jeu (« mortemines » → « deadmines »). */
+export const DONJONS_ORIGINE_EN: Record<string, string> = Object.fromEntries(
+  DONJONS_ORIGINE.map((d) => [d.slug, slug(nomDonjonEn(d.nom) ?? d.nom)]),
+);
+
 /** Nom anglais d'une zone citée par son nom français dans les guides (carte du jeu, sinon table des repères). */
 export function nomZoneEn(nom: string): string {
   const slug = lieuParNom(nom);
@@ -101,11 +107,15 @@ export const joueursEn = (j: string) => j.replace(/^(\d+)( dans l'Azeroth d'orig
 
 /** Fiches Forever : zones et nouveaux donjons, slug français ↔ slug anglais. */
 const ZONES_FR = Object.fromEntries(Object.entries(ZONES_EN).map(([fr, z]) => [z.slug, fr]));
-const DONJONS_FR = Object.fromEntries(Object.entries(DONJONS_TEXTE_EN).map(([fr, d]) => [d.slug, fr]));
+const DONJONS_FR: Record<string, string> = {
+  ...Object.fromEntries(Object.entries(DONJONS_TEXTE_EN).map(([fr, d]) => [d.slug, fr])),
+  ...Object.fromEntries(Object.entries(DONJONS_ORIGINE_EN).map(([fr, en]) => [en, fr])),
+};
 export const zoneDepuisEn = (s: string): string | undefined => ZONES_FR[s];
 export const donjonDepuisEn = (s: string): string | undefined => DONJONS_FR[s];
 export const pageZoneEn = (fr: string) => (ZONES_EN[fr] ? `/en/zones/${ZONES_EN[fr].slug}/` : `/zones/${fr}/`);
-export const pageDonjonEn = (fr: string) => (DONJONS_TEXTE_EN[fr] ? `/en/dungeons/${DONJONS_TEXTE_EN[fr].slug}/` : `/donjons/${fr}/`);
+export const pageDonjonEn = (fr: string) =>
+  DONJONS_TEXTE_EN[fr] ? `/en/dungeons/${DONJONS_TEXTE_EN[fr].slug}/` : DONJONS_ORIGINE_EN[fr] ? `/en/dungeons/${DONJONS_ORIGINE_EN[fr]}/` : `/donjons/${fr}/`;
 /** Adresse anglaise d'un lien des repères (« /zones/mont-hyjal/ »). */
 export const lienEn = (lien: string) => cheminAnglais(lien) ?? lien;
 
@@ -186,7 +196,7 @@ export function cheminAnglais(chemin: string): string | null {
   let z = /^\/zones\/([a-z0-9-]+)\/$/.exec(c);
   if (z && ZONES_EN[z[1]]) return `/en/zones/${ZONES_EN[z[1]].slug}/`;
   z = /^\/donjons\/([a-z0-9-]+)\/$/.exec(c);
-  if (z && DONJONS_TEXTE_EN[z[1]]) return `/en/dungeons/${DONJONS_TEXTE_EN[z[1]].slug}/`;
+  if (z && (DONJONS_TEXTE_EN[z[1]] || DONJONS_ORIGINE_EN[z[1]])) return pageDonjonEn(z[1]);
   z = /^\/guides\/quetes-de-classe\/([a-z]+)\/$/.exec(c);
   if (z && CLASSES_EN[z[1]]) return `/en/guides/class-quests/${CLASSES_EN[z[1]].slug}/`;
   if (c === "/base-de-donnees/") return "/en/item-database/";
