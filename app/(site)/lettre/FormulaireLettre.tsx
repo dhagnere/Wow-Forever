@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useId } from "react";
 import { sInscrire, type EtatLettre } from "./actions";
 
 const TXT = {
@@ -16,26 +16,28 @@ const TXT = {
   },
 } as const;
 
-export function FormulaireLettre({ langue = "fr" }: { langue?: "fr" | "en" }) {
+/** `cta` : nom de mesure du bouton (par défaut, celui de la page de la Lettre). */
+export function FormulaireLettre({ langue = "fr", cta }: { langue?: "fr" | "en"; cta?: string }) {
   const [etat, action, enCours] = useActionState<EtatLettre, FormData>(sInscrire, null);
   const t = TXT[langue];
+  const id = useId();
   return (
     <form action={action} className="formulaire-lettre">
       <input type="hidden" name="langue" value={langue} />
       <div className="champ">
-        <label htmlFor="courriel">{t.courriel}</label>
-        <input id="courriel" name="courriel" type="email" autoComplete="email" required maxLength={254} placeholder={t.exemple} defaultValue={etat?.courriel} />
+        <label htmlFor={`${id}-courriel`}>{t.courriel}</label>
+        <input id={`${id}-courriel`} name="courriel" type="email" autoComplete="email" required maxLength={254} placeholder={t.exemple} defaultValue={etat?.courriel} />
       </div>
       <div className="piege" aria-hidden="true">
-        <label htmlFor="site_web">{t.piege}</label>
-        <input id="site_web" name="site_web" type="text" tabIndex={-1} autoComplete="off" />
+        <label htmlFor={`${id}-site`}>{t.piege}</label>
+        <input id={`${id}-site`} name="site_web" type="text" tabIndex={-1} autoComplete="off" />
       </div>
       <label className="case">
         <input type="checkbox" name="accord" value="oui" required />
         <span>{t.accord}</span>
       </label>
       {etat ? <p className="alerte" role="alert">{etat.message}</p> : null}
-      <button type="submit" className="btn btn-or" disabled={enCours} data-cta={langue === "en" ? "lettre-page-en" : "lettre-page"}>
+      <button type="submit" className="btn btn-or" disabled={enCours} data-cta={cta ?? (langue === "en" ? "lettre-page-en" : "lettre-page")}>
         {enCours ? t.envoi : t.bouton}
       </button>
     </form>

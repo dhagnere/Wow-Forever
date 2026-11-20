@@ -7,29 +7,18 @@ import { useEffect, useRef } from "react";
 /** `fr` : page encore en français seulement, signalée dans le menu anglais. */
 interface Lien { href: string; label: string; detail?: string; fr?: boolean }
 interface Groupe { label: string; prefixe: string[]; liens: Lien[] }
-type Entree = (Lien & { prefixe: string[]; silfax?: boolean }) | Groupe;
+type Entree = (Lien & { prefixe: string[]; silfax?: boolean; classe?: string }) | Groupe;
 
 const MENU: Entree[] = [
-  { href: "/", label: "Accueil", prefixe: [] },
-  {
-    label: "Le Comptoir",
-    prefixe: ["/actualites", "/articles", "/rubriques", "/recherche", "/calendrier", "/lettre", "/communaute", "/guildes"],
-    liens: [
-      { href: "/actualites/", label: "Actualités", detail: "Nouvelles du jour, correctifs, annonces" },
-      { href: "/calendrier/", label: "Calendrier", detail: "Sortie, raids, Hardcore, été 2027" },
-      { href: "/lettre/", label: "La Lettre de la Taverne", detail: "Chaque dimanche à 10 h" },
-      { href: "/guildes/", label: "Tableau des guildes", detail: "Les guildes francophones qui recrutent" },
-      { href: "/communaute/", label: "Communauté", detail: "Discord, Page Facebook" },
-    ],
-  },
+  { href: "/", label: "Accueil", prefixe: [], classe: "nav-accueil" },
   {
     label: "Guides",
     prefixe: ["/guides"],
     liens: [
+      { href: "/guides/parcours/", label: "Guide de 1 à 60", detail: "Quête par quête, pour votre race et votre classe" },
       { href: "/guides/bien-demarrer/", label: "Bien débuter", detail: "Race, classe, zone, premiers métiers" },
       { href: "/guides/zones-de-depart/", label: "Zones de départ", detail: "Où commence chaque race" },
       { href: "/guides/zones-par-niveau/", label: "Zones par niveau", detail: "Toutes les zones, de 1 à 60" },
-      { href: "/guides/parcours/", label: "Parcours de 1 à 60", detail: "La route de l'Alliance et de la Horde" },
       { href: "/guides/quetes-de-classe/", label: "Quêtes de classe", detail: "Chaînes, donneurs et récompenses" },
       { href: "/guides/liste-des-donjons/", label: "Liste des donjons", detail: "Donjons et raids par niveau" },
     ],
@@ -38,12 +27,24 @@ const MENU: Entree[] = [
     label: "Explorer",
     prefixe: ["/classes", "/races", "/zones", "/donjons", "/base-de-donnees", "/cartes"],
     liens: [
-      { href: "/classes/", label: "L'Armurerie · Classes", detail: "Rôles, races possibles, conseils" },
-      { href: "/races/", label: "Le Registre · Races", detail: "Dont les Skyborne" },
+      { href: "/classes/", label: "L'Armurerie · Classes", detail: "Sorts, talents et calculateur" },
+      { href: "/races/", label: "Le Registre · Races", detail: "Traits raciaux, combinaisons" },
+      { href: "/races/skyborne/", label: "Skyborne", detail: "La nouvelle race jouable" },
       { href: "/zones/", label: "La Salle des cartes · Zones", detail: "Les nouvelles terres de Forever" },
       { href: "/cartes/", label: "Cartes du monde", detail: "Kalimdor, Royaumes de l'Est, Zéphras" },
-      { href: "/donjons/", label: "La Cave · Donjons et raids", detail: "Repérés en bêta, annoncés" },
-      { href: "/base-de-donnees/", label: "Base de données", detail: "Tous les objets du jeu, en français" },
+      { href: "/donjons/", label: "La Cave · Donjons et raids", detail: "Boss, butin, entrées" },
+      { href: "/base-de-donnees/", label: "Base d'objets", detail: "Tous les objets du jeu, en français" },
+    ],
+  },
+  {
+    label: "Le Comptoir",
+    prefixe: ["/actualites", "/articles", "/rubriques", "/recherche", "/calendrier", "/lettre", "/communaute", "/guildes"],
+    liens: [
+      { href: "/actualites/", label: "Actualités", detail: "Nouvelles du jour, correctifs, annonces" },
+      { href: "/calendrier/", label: "Calendrier", detail: "Raids, Hardcore, été 2027" },
+      { href: "/lettre/", label: "La Lettre de la Taverne", detail: "Chaque dimanche à 10 h" },
+      { href: "/guildes/", label: "Tableau des guildes", detail: "Les guildes francophones qui recrutent" },
+      { href: "/communaute/", label: "Communauté", detail: "Discord, Page Facebook" },
     ],
   },
   { href: "/carnet/", label: "Le Carnet de Jobwow", prefixe: ["/carnet"], silfax: true },
@@ -51,18 +52,7 @@ const MENU: Entree[] = [
 
 /** Menu de la version anglaise : mêmes rubriques ; les pages pas encore traduites mènent au site français. */
 const MENU_EN: Entree[] = [
-  { href: "/en/", label: "Home", prefixe: [] },
-  {
-    label: "The Bar",
-    prefixe: ["/en/news", "/en/topics", "/en/articles", "/en/newsletter", "/en/guilds", "/en/calendar", "/en/community"],
-    liens: [
-      { href: "/en/news/", label: "News", detail: "Daily news, patches, announcements" },
-      { href: "/en/calendar/", label: "Calendar", detail: "Launch, raids, Hardcore, summer 2027" },
-      { href: "/en/newsletter/", label: "The Tavern's newsletter", detail: "Every Sunday at 10 am" },
-      { href: "/en/guilds/", label: "Guild board", detail: "French-speaking guilds recruiting" },
-      { href: "/en/community/", label: "Community", detail: "Discord, Facebook page" },
-    ],
-  },
+  { href: "/en/", label: "Home", prefixe: [], classe: "nav-accueil" },
   {
     label: "Guides",
     prefixe: ["/en/leveling-guide", "/en/guides"],
@@ -85,8 +75,19 @@ const MENU_EN: Entree[] = [
       { href: "/en/races/skyborne/", label: "Skyborne", detail: "The new playable race" },
       { href: "/en/zones/", label: "The Map Room · Zones", detail: "Forever's new lands" },
       { href: "/en/maps/", label: "World maps", detail: "Kalimdor, Eastern Kingdoms, Zephras Isle" },
-      { href: "/en/dungeons/", label: "The Cellar · Dungeons and raids", detail: "Spotted in beta, announced" },
+      { href: "/en/dungeons/", label: "The Cellar · Dungeons and raids", detail: "Bosses, loot, entrances" },
       { href: "/en/item-database/", label: "Item database", detail: "Every item in the game" },
+    ],
+  },
+  {
+    label: "The Bar",
+    prefixe: ["/en/news", "/en/topics", "/en/articles", "/en/newsletter", "/en/guilds", "/en/calendar", "/en/community"],
+    liens: [
+      { href: "/en/news/", label: "News", detail: "Daily news, patches, announcements" },
+      { href: "/en/calendar/", label: "Calendar", detail: "Raids, Hardcore, summer 2027" },
+      { href: "/en/newsletter/", label: "The Tavern's newsletter", detail: "Every Sunday at 10 am" },
+      { href: "/en/guilds/", label: "Guild board", detail: "French-speaking guilds recruiting" },
+      { href: "/en/community/", label: "Community", detail: "Discord, Facebook page" },
     ],
   },
   { href: "/en/notebook/", label: "Jobwow's notebook", prefixe: ["/en/notebook"], silfax: true },
@@ -147,7 +148,7 @@ export function NavPrincipale({ langue = "fr" }: { langue?: "fr" | "en" }) {
             </div>
           </details>
         ) : (
-          <Link key={e.href} href={e.href} aria-current={actif(chemin, e.prefixe, e.href) ? "page" : undefined} className={e.silfax ? "nav-silfax" : undefined} hrefLang={e.fr && langue === "en" ? "fr" : undefined}>
+          <Link key={e.href} href={e.href} aria-current={actif(chemin, e.prefixe, e.href) ? "page" : undefined} className={[e.silfax ? "nav-silfax" : "", e.classe ?? ""].filter(Boolean).join(" ") || undefined} hrefLang={e.fr && langue === "en" ? "fr" : undefined}>
             {e.label}
           </Link>
         ),
