@@ -13,9 +13,10 @@ const MENU: Entree[] = [
   { href: "/", label: "Accueil", prefixe: [], classe: "nav-accueil" },
   {
     label: "Guides",
-    prefixe: ["/guides"],
+    prefixe: ["/guides", "/addon"],
     liens: [
       { href: "/guides/parcours/", label: "Guide de 1 à 60", detail: "Quête par quête, pour votre race et votre classe" },
+      { href: "/addon/", label: "Addon TaverneRoutes", detail: "Le guide dans le jeu, sur demande" },
       { href: "/guides/bien-demarrer/", label: "Bien débuter", detail: "Race, classe, zone, premiers métiers" },
       { href: "/guides/zones-de-depart/", label: "Zones de départ", detail: "Où commence chaque race" },
       { href: "/guides/zones-par-niveau/", label: "Zones par niveau", detail: "Toutes les zones, de 1 à 60" },
@@ -55,9 +56,10 @@ const MENU_EN: Entree[] = [
   { href: "/en/", label: "Home", prefixe: [], classe: "nav-accueil" },
   {
     label: "Guides",
-    prefixe: ["/en/leveling-guide", "/en/guides"],
+    prefixe: ["/en/leveling-guide", "/en/guides", "/en/addon"],
     liens: [
       { href: "/en/leveling-guide/", label: "Leveling guide 1-60", detail: "Quest by quest, for your race and class" },
+      { href: "/en/addon/", label: "TaverneRoutes addon", detail: "The guide in the game, on request" },
       { href: "/en/leveling-guide/#alliance", label: "Alliance and Horde routes", detail: "Zones in order, from 1 to 60" },
       { href: "/en/guides/getting-started/", label: "Getting started", detail: "Launch, subscription, class, race" },
       { href: "/en/guides/starting-zones/", label: "Starting zones", detail: "Where each race begins" },

@@ -42,6 +42,7 @@ describe("version anglaise", () => {
     expect(cheminAnglais("/classes/inconnue/")).toBeNull();
     expect(languesDe("/guildes/modifier/abc/")).toBeUndefined();
     expect(cheminAnglais("/soutenir/")).toBe("/en/support/");
+    expect(cheminAnglais("/addon/")).toBe("/en/addon/");
     expect(cheminAnglais("/a-propos/")).toBe("/en/about/");
     expect(cheminAnglais("/plan-du-site/")).toBe("/en/sitemap/");
     expect(cheminAnglais("/recherche/")).toBe("/en/search/");

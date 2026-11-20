@@ -155,6 +155,7 @@ const GUIDES: [string, string][] = [
   ["/communaute/", "/en/community/"],
   ["/contact/", "/en/contact/"],
   ["/soutenir/", "/en/support/"],
+  ["/addon/", "/en/addon/"],
   ["/a-propos/", "/en/about/"],
   ["/plan-du-site/", "/en/sitemap/"],
   ["/recherche/", "/en/search/"],

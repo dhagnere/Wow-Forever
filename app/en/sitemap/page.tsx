@@ -31,7 +31,7 @@ export default function SitemapEn() {
     {
       titre: "Guides",
       liens: [
-        ["/en/leveling-guide/", "Leveling guide 1-60"], ["/en/guides/getting-started/", "Getting started"], ["/en/guides/starting-zones/", "Starting zones"],
+        ["/en/leveling-guide/", "Leveling guide 1-60"], ["/en/addon/", "TaverneRoutes addon"], ["/en/guides/getting-started/", "Getting started"], ["/en/guides/starting-zones/", "Starting zones"],
         ["/en/guides/zones-by-level/", "Zones by level"], ["/en/guides/class-quests/", "Class quests"], ["/en/guides/dungeon-list/", "Dungeon list"], ...rubriques("guides"),
       ],
     },
