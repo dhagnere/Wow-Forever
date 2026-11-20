@@ -413,3 +413,28 @@ CREATE TABLE IF NOT EXISTS probe_guides (
   decide_le     TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS probe_guides_etat_idx ON probe_guides (etat, recu_le DESC);
+
+-- Butin relevé en jeu par l'addon TaverneTrace (/admin/butin) : texte de /tt butin collé dans l'administration.
+-- Une série par relevé de l'addon : un nouvel import de la même série remplace ses chiffres, les séries s'additionnent.
+-- creature : identifiant de la créature, ou « g<identifiant> » pour un coffre (objet du décor).
+CREATE TABLE IF NOT EXISTS butin_releve_creatures (
+  serie      TEXT NOT NULL,
+  creature   TEXT NOT NULL,
+  carte      INTEGER,
+  instance   TEXT NOT NULL DEFAULT '',
+  nom        TEXT NOT NULL DEFAULT '',
+  victoires  INTEGER NOT NULL DEFAULT 0 CHECK (victoires >= 0),
+  maj_le     TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (serie, creature)
+);
+CREATE INDEX IF NOT EXISTS butin_releve_creatures_creature_idx ON butin_releve_creatures (creature);
+CREATE TABLE IF NOT EXISTS butin_releve_objets (
+  serie      TEXT NOT NULL,
+  creature   TEXT NOT NULL,
+  objet      INTEGER NOT NULL,
+  nom        TEXT NOT NULL DEFAULT '',
+  qualite    SMALLINT NOT NULL DEFAULT 0,
+  vus        INTEGER NOT NULL DEFAULT 0 CHECK (vus >= 0),
+  PRIMARY KEY (serie, creature, objet),
+  FOREIGN KEY (serie, creature) REFERENCES butin_releve_creatures (serie, creature) ON DELETE CASCADE
+);

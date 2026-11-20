@@ -3,7 +3,7 @@ import Link from "next/link";
 import { RUBRIQUES } from "@/config/taxonomie";
 import { CLASSES } from "@/content/classes";
 import { ZONES, DONJONS } from "@/content/monde";
-import { DONJONS_ORIGINE } from "@/content/reference";
+import { FICHES_ORIGINE } from "@/content/reference";
 import { ZONES_EN } from "@/content/monde-en";
 import { Ariane } from "@/components/Ariane";
 import { fondBandeau } from "@/lib/ecrans";
@@ -24,7 +24,7 @@ export default function SitemapEn() {
       titre: "World",
       liens: [
         ["/en/zones/", "Zones"], ...ZONES.map((z) => [pageZoneEn(z.slug), ZONES_EN[z.slug]?.nom ?? z.nom] as [string, string]),
-        ["/en/dungeons/", "Dungeons and raids"], ...DONJONS.map((d) => [pageDonjonEn(d.slug), nomDonjonEn(d.nom) ?? d.nom] as [string, string]), ...DONJONS_ORIGINE.map((d) => [pageDonjonEn(d.slug), nomDonjonEn(d.nom) ?? d.nom] as [string, string]),
+        ["/en/dungeons/", "Dungeons and raids"], ...DONJONS.map((d) => [pageDonjonEn(d.slug), nomDonjonEn(d.nom) ?? d.nom] as [string, string]), ...FICHES_ORIGINE.map((d) => [pageDonjonEn(d.slug), nomDonjonEn(d.nom) ?? d.nom] as [string, string]),
         ["/en/item-database/", "Item database"], ["/en/maps/", "World maps"],
       ],
     },

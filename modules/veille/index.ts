@@ -126,3 +126,7 @@ export type { EtatFlux } from "./youtube/chaine";
 // Guides à valider de Probe (/admin/probe) : codes de /ep export, publiés dans le guide de 1 à 60 sans déploiement.
 export type { EtatProbe, LigneProbe, PorteeProbe, ReleveProbe } from "./probe/depot";
 export { deposerGuideProbe, guidesProbe, lireGuideProbe, majGuideProbe, publierGuideProbe, decliner as declinerGuideProbe, parcoursProbePublies } from "./probe/depot";
+
+// Butin relevé en jeu par TaverneTrace (/admin/butin) : remplace le butin de l'Azeroth d'origine sur les fiches des donjons.
+export type { CreatureReleve, ObjetReleve, ReleveButin, SerieButin } from "./butin/releve";
+export { butinReleve, butinReleveInstance, enregistrerReleveButin, lireReleveButin, seriesButin, supprimerSerieButin } from "./butin/releve";

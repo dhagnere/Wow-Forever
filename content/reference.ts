@@ -135,16 +135,35 @@ export interface RaidReference {
   zone: string;
   statut: string;
   lien?: string;
+  /** Raid de l'Azeroth d'origine qui a sa fiche (/donjons/<slug>/, RAIDS_ORIGINE). */
+  slug?: string;
 }
 
 export const RAIDS: RaidReference[] = [
   { nom: "[Raid à 10 joueurs : Barrow Deeps en anglais, nom français à confirmer]", joueurs: "10", zone: "[À confirmer]", statut: "Annoncé dans Forever, ouverture le 9 décembre 2026" },
   { nom: "[Raid du Mont Hyjal : Hyjal Summit en anglais, nom français à confirmer]", joueurs: "20", zone: "Mont Hyjal", statut: "Annoncé dans Forever, ouverture le 9 décembre 2026", lien: "/zones/mont-hyjal/" },
-  { nom: "Repaire d'Onyxia", joueurs: "40", zone: "Marécage d'Âprefange", statut: "Annoncé dans Forever, ouverture le 9 décembre 2026" },
-  { nom: "Cœur du Magma", joueurs: "40 dans l'Azeroth d'origine", zone: "Mont Rochenoire", statut: "Présence dans Forever non confirmée" },
-  { nom: "Repaire de l'Aile noire", joueurs: "40 dans l'Azeroth d'origine", zone: "Mont Rochenoire", statut: "Présence dans Forever non confirmée" },
-  { nom: "Zul'Gurub", joueurs: "20 dans l'Azeroth d'origine", zone: "Vallée de Strangleronce", statut: "Présence dans Forever non confirmée" },
-  { nom: "Ruines d'Ahn'Qiraj", joueurs: "20 dans l'Azeroth d'origine", zone: "Silithus", statut: "Présence dans Forever non confirmée" },
-  { nom: "Temple d'Ahn'Qiraj", joueurs: "40 dans l'Azeroth d'origine", zone: "Silithus", statut: "Présence dans Forever non confirmée" },
-  { nom: "Naxxramas", joueurs: "40 dans l'Azeroth d'origine", zone: "Maleterres de l'Est", statut: "Présence dans Forever non confirmée" },
+  { slug: "repaire-d-onyxia", nom: "Repaire d'Onyxia", joueurs: "40", zone: "Marécage d'Âprefange", statut: "Annoncé dans Forever, ouverture le 9 décembre 2026" },
+  { slug: "coeur-du-magma", nom: "Cœur du Magma", joueurs: "40 dans l'Azeroth d'origine", zone: "Mont Rochenoire", statut: "Présence dans Forever non confirmée" },
+  { slug: "repaire-de-l-aile-noire", nom: "Repaire de l'Aile noire", joueurs: "40 dans l'Azeroth d'origine", zone: "Mont Rochenoire", statut: "Présence dans Forever non confirmée" },
+  { slug: "zul-gurub", nom: "Zul'Gurub", joueurs: "20 dans l'Azeroth d'origine", zone: "Vallée de Strangleronce", statut: "Présence dans Forever non confirmée" },
+  { slug: "ruines-d-ahn-qiraj", nom: "Ruines d'Ahn'Qiraj", joueurs: "20 dans l'Azeroth d'origine", zone: "Silithus", statut: "Présence dans Forever non confirmée" },
+  { slug: "temple-d-ahn-qiraj", nom: "Temple d'Ahn'Qiraj", joueurs: "40 dans l'Azeroth d'origine", zone: "Silithus", statut: "Présence dans Forever non confirmée" },
+  { slug: "naxxramas", nom: "Naxxramas", joueurs: "40 dans l'Azeroth d'origine", zone: "Maleterres de l'Est", statut: "Présence dans Forever non confirmée" },
 ];
+
+/** Raids de l'Azeroth d'origine qui ont leur fiche (boss, butin d'origine, entrée, quêtes), mêmes données que les donjons. */
+export const RAIDS_ORIGINE: (DonjonReference & { joueurs: string })[] = [
+  { slug: "zul-gurub", nom: "Zul'Gurub", min: 60, max: 60, zone: "Vallée de Strangleronce", continent: "Royaumes de l'Est", joueurs: "20" },
+  { slug: "ruines-d-ahn-qiraj", nom: "Ruines d'Ahn'Qiraj", min: 60, max: 60, zone: "Silithus", continent: "Kalimdor", joueurs: "20" },
+  { slug: "repaire-d-onyxia", nom: "Repaire d'Onyxia", min: 60, max: 60, zone: "Marécage d'Âprefange", continent: "Kalimdor", joueurs: "40" },
+  { slug: "coeur-du-magma", nom: "Cœur du Magma", min: 60, max: 60, zone: "Mont Rochenoire", continent: "Royaumes de l'Est", joueurs: "40" },
+  { slug: "repaire-de-l-aile-noire", nom: "Repaire de l'Aile noire", min: 60, max: 60, zone: "Mont Rochenoire", continent: "Royaumes de l'Est", joueurs: "40" },
+  { slug: "temple-d-ahn-qiraj", nom: "Temple d'Ahn'Qiraj", min: 60, max: 60, zone: "Silithus", continent: "Kalimdor", joueurs: "40" },
+  { slug: "naxxramas", nom: "Naxxramas", min: 60, max: 60, zone: "Maleterres de l'Est", continent: "Royaumes de l'Est", joueurs: "40" },
+];
+
+/** Toutes les fiches de l'Azeroth d'origine : donjons puis raids. */
+export const FICHES_ORIGINE: DonjonReference[] = [...DONJONS_ORIGINE, ...RAIDS_ORIGINE];
+
+/** Raid de l'Azeroth d'origine (fiche) ou undefined pour un donjon. */
+export const raidOrigine = (slug: string) => RAIDS_ORIGINE.find((r) => r.slug === slug);

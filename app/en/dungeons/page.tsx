@@ -89,7 +89,7 @@ export default function DonjonsEn() {
             <h2 id="t-raids" style={{ margin: "0 0 8px", fontSize: 22 }}>Raids</h2>
             <p className="doux" style={{ margin: "0 0 12px" }}>
               Blizzard announces raids for 10 and 20 players, including a 20-player raid on <Link href={pageZoneEn("mont-hyjal")}>Mount Hyjal</Link>, opening announced for December.
-              Bosses, loot and strategies will be added here as soon as they open.
+              The raids of original Azeroth already have their page: bosses in order and original loot, to be confirmed in game.
             </p>
             <div className="tableau-boite">
               <table>
@@ -97,7 +97,7 @@ export default function DonjonsEn() {
                 <tbody>
                   {RAIDS.map((r) => (
                     <tr key={r.nom}>
-                      <td style={{ fontWeight: 600 }}><span className="lien-icone"><Vignette nom={r.nom} />{r.lien ? <Link href={lienEn(r.lien)}>{nomRaid(r.nom)}</Link> : nomRaid(r.nom)}</span></td>
+                      <td style={{ fontWeight: 600 }}><span className="lien-icone"><Vignette nom={r.nom} />{r.slug ? <Link href={pageDonjonEn(r.slug)}>{nomRaid(r.nom)}</Link> : r.lien ? <Link href={lienEn(r.lien)}>{nomRaid(r.nom)}</Link> : nomRaid(r.nom)}</span></td>
                       <td>{joueursEn(r.joueurs)}</td>
                       <td className="masque-mobile">{nomZoneEn(r.zone)}</td>
                       <td className="doux">{STATUTS_RAIDS_EN[r.statut] ?? r.statut}</td>

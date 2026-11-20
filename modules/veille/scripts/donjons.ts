@@ -17,9 +17,11 @@ import { derniereVersion, tableCsv } from "../objets/wago";
  * AzerothCore (GPL v2) pour les rencontres de chaque donjon (instance_encounters), les entrées (areatrigger) et les noms
  * français. Les positions des entrées sont converties sur les cartes des zones d'après les monstres dont on connaît à la
  * fois la position dans le monde (CMaNGOS) et sur la carte (modules/veille/objets/donnees/butin.json.gz) : aucune autre
- * source n'est lue. Les objets ne sont gardés que par leur identifiant : la page les lit dans la base d'objets du site
- * (fichiers de Forever), et un objet absent de Forever n'y est donc jamais affiché. Les quêtes sont filtrées sur les
- * fichiers de Forever (table QuestV2 de wago.tools) quand wago.tools répond ; sinon elles sont marquées « à vérifier ».
+ * source n'est lue. Le butin est celui de l'Azeroth d'origine : la page lit chaque objet dans la base d'objets du site
+ * (fichiers de Forever) et, pour ceux que Forever ne décrit pas, affiche le nom et la qualité gardés ici (« objets »),
+ * signalés comme à confirmer ; un relevé en jeu (TaverneTrace) le remplace boss par boss. Les quêtes sont filtrées sur
+ * les fichiers de Forever (table QuestV2 de wago.tools) quand wago.tools répond ; sinon un donjon déjà filtré garde sa
+ * liste précédente et les autres sont marquées « à vérifier ».
  * Résultat : content/donjons-jeu.json (noms français et anglais).
  */
 
@@ -44,6 +46,14 @@ const DONJONS: { slug: string; carte: number; zones: string[]; aire: number[] }[
   { slug: "hache-tripes", carte: 429, zones: ["feralas"], aire: [2557] },
   { slug: "scholomance", carte: 289, zones: ["maleterres-de-l-ouest"], aire: [2057] },
   { slug: "stratholme", carte: 329, zones: ["maleterres-de-l-est"], aire: [2017] },
+  // raids de l'Azeroth d'origine (l'entrée du Cœur du Magma et du Repaire de l'Aile noire est dans une autre instance)
+  { slug: "coeur-du-magma", carte: 409, zones: [], aire: [2717] },
+  { slug: "repaire-d-onyxia", carte: 249, zones: ["marecage-d-aprefange"], aire: [2159] },
+  { slug: "repaire-de-l-aile-noire", carte: 469, zones: [], aire: [2677] },
+  { slug: "zul-gurub", carte: 309, zones: ["vallee-de-strangleronce"], aire: [1977] },
+  { slug: "ruines-d-ahn-qiraj", carte: 509, zones: ["silithus"], aire: [3429] },
+  { slug: "temple-d-ahn-qiraj", carte: 531, zones: ["silithus"], aire: [3428] },
+  { slug: "naxxramas", carte: 533, zones: ["maleterres-de-l-est"], aire: [3456] },
 ];
 
 /** Butin gardé : objets d'au moins 1 % de chance (les objets de quête à 100 % comptent). */
@@ -63,7 +73,7 @@ function argumentsDonjons(args: string[]): { fichierDump: string; dossierLocales
     fichierDump = path.join(dossier, dump);
   }
   dossierLocales ??= path.join(sources, "azerothcore-wotlk", "data", "sql", "base", "db_world");
-  for (const f of ["instance_encounters.sql", "areatrigger.sql", "areatrigger_teleport.sql", "creature_template_locale.sql", "quest_template_locale.sql"]) {
+  for (const f of ["instance_encounters.sql", "areatrigger.sql", "areatrigger_teleport.sql", "creature_template_locale.sql", "quest_template_locale.sql", "item_template_locale.sql"]) {
     if (!existsSync(path.join(dossierLocales, f))) throw new Error(`${f} absent de ${dossierLocales}. Dans le clone d'AzerothCore : git sparse-checkout set data/sql/base/db_world`);
   }
   console.log(`Dump : ${fichierDump}\nAzerothCore : ${dossierLocales}`);
@@ -149,9 +159,17 @@ lancer("base:donjons", async () => {
     }
     return res;
   }
-  // Qualité des objets (CMaNGOS) : le butin gris et blanc n'est pas listé.
+  // Objets (CMaNGOS, noms français d'AzerothCore) : le butin gris et blanc n'est pas listé. Nom, qualité et emplacement
+  // sont gardés pour les objets que la base du site (fichiers de Forever) ne décrit pas.
   const qualite = new Map<number, number>();
-  for (const l of lignes(sql, "item_template")) qualite.set(n(l.entry), n(l.Quality));
+  const objetsOrigine = new Map<number, { en: string; q: number; c: number; sc: number; s: number; nv: number; req: number }>();
+  for (const l of lignes(sql, "item_template")) {
+    const id = n(l.entry);
+    qualite.set(id, n(l.Quality));
+    objetsOrigine.set(id, { en: String(l.name ?? ""), q: n(l.Quality), c: n(l.class), sc: n(l.subclass), s: n(l.InventoryType), nv: n(l.ItemLevel), req: n(l.RequiredLevel) });
+  }
+  const objetsFr = new Map<number, string>();
+  for (const l of lignes(await ac("item_template_locale.sql"), "item_template_locale")) if (l.locale === "frFR" && l.Name) objetsFr.set(n(l.ID), String(l.Name));
   const butinDe = (creature: number) => {
     const c = creatures.get(creature);
     if (!c?.loot) return [];
@@ -162,13 +180,33 @@ lancer("base:donjons", async () => {
   };
 
   // --- Rencontres de chaque donjon, dans l'ordre (AzerothCore, d'après DungeonEncounter.dbc).
+  // Une rencontre créditée par un sort porte le nom du boss dans son commentaire ; un boss invoqué (sans apparition
+  // fixe, comme Ragnaros) prend la carte d'une rencontre voisine. Les versions 10 et 25 joueurs ne comptent qu'une fois.
+  const parNomEn = new Map<string, number>();
+  for (const [id, c] of creatures) if (c.rang === 3 || !parNomEn.has(c.en)) parNomEn.set(c.en, id);
   const parCarte = new Map<number, number[]>();
-  for (const l of lignes(await ac("instance_encounters.sql"), "instance_encounters")) {
-    if (n(l.creditType) !== 0) continue;
-    const id = n(l.creditEntry);
-    const carte = spawns.get(id)?.[0]?.carte;
-    if (carte === undefined) continue;
-    parCarte.set(carte, [...(parCarte.get(carte) ?? []), id]);
+  const rencontres = [...lignes(await ac("instance_encounters.sql"), "instance_encounters")]
+    .map((l) => {
+      const id = n(l.creditType) === 0 ? n(l.creditEntry) : parNomEn.get(String(l.comment ?? "").trim()) ?? 0;
+      return { entry: n(l.entry), id, carte: spawns.get(id)?.[0]?.carte as number | undefined, derniere: n(l.lastEncounterDungeon) > 0 };
+    })
+    .sort((a, b) => a.entry - b.entry);
+  // boss sans apparition fixe : carte de la rencontre voisine du même donjon (la dernière rencontre d'un donjon ferme le bloc)
+  for (let change = true; change; ) {
+    change = false;
+    for (let k = 0; k < rencontres.length; k++) {
+      const r = rencontres[k];
+      if (r.carte !== undefined || !creatures.has(r.id)) continue;
+      const avant = rencontres[k - 1], apres = rencontres[k + 1];
+      if (avant && avant.entry === r.entry - 1 && !avant.derniere && avant.carte !== undefined) r.carte = avant.carte;
+      else if (apres && apres.entry === r.entry + 1 && !r.derniere && apres.carte !== undefined) r.carte = apres.carte;
+      if (r.carte !== undefined) change = true;
+    }
+  }
+  for (const r of rencontres) {
+    if (r.carte === undefined) continue;
+    const liste = parCarte.get(r.carte) ?? [];
+    if (!liste.includes(r.id)) parCarte.set(r.carte, [...liste, r.id]);
   }
 
   // --- Conversion des positions du monde vers la carte d'une zone, d'après les monstres situés des deux façons.
@@ -213,7 +251,21 @@ lancer("base:donjons", async () => {
     questsForever = new Set(lireCsv(await tableCsv("QuestV2", version)).map((l) => Number(l.ID)));
     console.log(`${questsForever.size} quêtes dans les fichiers de Forever (wago.tools ${version}).`);
   } catch (e) {
-    console.log(`wago.tools injoignable (${e instanceof Error ? e.message : e}) : quêtes gardées, marquées à vérifier.`);
+    console.log(`wago.tools injoignable (${e instanceof Error ? e.message : e}) : quêtes déjà vérifiées reprises du fichier précédent, les autres marquées à vérifier.`);
+  }
+  // Sans wago.tools, un donjon dont les quêtes ont déjà été filtrées sur Forever garde ce filtre (liste du fichier précédent).
+  const dejaVerifiees = new Map<string, Set<number>>();
+  if (!questsForever) {
+    try {
+      const avant = JSON.parse(await readFile(path.join(process.cwd(), "content/donjons-jeu.json"), "utf8")) as {
+        quetesVerifiees?: boolean; donjons?: Record<string, { qv?: boolean; quetes?: { id: number }[] }>;
+      };
+      for (const [slug, d] of Object.entries(avant.donjons ?? {})) {
+        if (d.qv ?? avant.quetesVerifiees) dejaVerifiees.set(slug, new Set((d.quetes ?? []).map((q) => q.id)));
+      }
+    } catch {
+      // premier passage : rien à reprendre
+    }
   }
   const lootVersCreatures = new Map<number, number[]>();
   for (const [id, c] of creatures) if (c.loot) lootVersCreatures.set(c.loot, [...(lootVersCreatures.get(c.loot) ?? []), id]);
@@ -256,6 +308,8 @@ lancer("base:donjons", async () => {
     return { id, n: nomsFr.get(id) ?? c.en, en: c.en, nv: [c.min, c.max] as [number, number], r: c.rang, butin: butinDe(id) };
   };
   const sortie: Record<string, unknown> = {};
+  const utilises = new Set<number>();
+  let toutesVerifiees = true;
   for (const d of DONJONS) {
     const boss = (parCarte.get(d.carte) ?? []).filter((id) => creatures.has(id));
     const dejaBoss = new Set(boss);
@@ -281,7 +335,12 @@ lancer("base:donjons", async () => {
         if (p) { entrees.push({ zone: z, x: p[0], y: p[1] }); break; }
       }
     }
-    const quetes = [...new Map((quetesParCarte.get(d.carte) ?? []).map((q) => [q.id, q])).values()].sort((a, b) => a.nv - b.nv || a.id - b.id);
+    const filtre = dejaVerifiees.get(d.slug);
+    const qv = !!questsForever || !!filtre;
+    const quetes = [...new Map((quetesParCarte.get(d.carte) ?? []).map((q) => [q.id, q])).values()]
+      .filter((q) => !filtre || filtre.has(q.id))
+      .sort((a, b) => a.nv - b.nv || a.id - b.id);
+    for (const b of [...boss, ...rares.map((r) => r.id)]) for (const x of butinDe(b)) utilises.add(x.i);
     sortie[d.slug] = {
       carte: d.carte,
       niveaux: max ? [min, max] : null,
@@ -289,16 +348,23 @@ lancer("base:donjons", async () => {
       boss: boss.map(fiche),
       rares,
       quetes,
+      qv,
     };
+    if (!qv) toutesVerifiees = false;
     console.log(`${d.slug} : ${boss.length} boss, ${rares.length} rares, ${entrees.length} entrée(s), ${quetes.length} quêtes, monstres ${min}-${max}.`);
   }
   const donnees = {
     version: {
       source: "CMaNGOS classic-db (GPL v3), AzerothCore (GPL v2) : rencontres, entrées et noms français",
-      quetes: questsForever ? "filtrées sur les fichiers de Forever" : "Azeroth d'origine, présence dans Forever à vérifier",
+      quetes: toutesVerifiees ? "filtrées sur les fichiers de Forever" : "en partie de l'Azeroth d'origine, présence dans Forever à vérifier",
     },
-    quetesVerifiees: !!questsForever,
+    quetesVerifiees: toutesVerifiees,
     donjons: sortie,
+    // objets du butin tels que les bases libres les décrivent (n : nom français, q : qualité, c/sc : classe, s : emplacement)
+    objets: Object.fromEntries([...utilises].sort((a, b) => a - b).map((id) => {
+      const o = objetsOrigine.get(id);
+      return [id, o ? { n: objetsFr.get(id) ?? o.en, ...o } : { n: String(id), en: String(id), q: 1, c: 0, sc: 0, s: 0, nv: 0, req: 0 }];
+    })),
   };
   await writeFile(path.join(process.cwd(), "content/donjons-jeu.json"), JSON.stringify(donnees, null, 1) + "\n");
   console.log("content/donjons-jeu.json écrit.");

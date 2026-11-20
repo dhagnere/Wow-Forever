@@ -88,7 +88,7 @@ export default async function Donjons() {
               <p className="surtitre">10 et 20 joueurs</p>
               <h2 id="t-raids" style={{ margin: "0 0 8px", fontSize: 22 }}>Raids</h2>
               <p className="doux" style={{ margin: "0 0 12px" }}>
-                Blizzard annonce des raids à 10 et 20 joueurs, dont un raid à 20 au <Link href="/zones/mont-hyjal/">Mont Hyjal</Link>, ouverture annoncée pour décembre. Boss, butin et stratégies seront ajoutés ici dès leur ouverture.
+                Blizzard annonce des raids à 10 et 20 joueurs, dont un raid à 20 au <Link href="/zones/mont-hyjal/">Mont Hyjal</Link>, ouverture annoncée pour décembre. Les raids de l'Azeroth d'origine ont déjà leur fiche : boss dans l'ordre et butin d'origine, à confirmer en jeu.
               </p>
               <div className="tableau-boite">
                 <table>
@@ -96,7 +96,7 @@ export default async function Donjons() {
                   <tbody>
                     {RAIDS.map((r) => (
                       <tr key={r.nom}>
-                        <td style={{ fontWeight: 600 }}><span className="lien-icone"><Vignette nom={r.nom} />{r.lien ? <Link href={r.lien}>{r.nom}</Link> : r.nom}</span></td>
+                        <td style={{ fontWeight: 600 }}><span className="lien-icone"><Vignette nom={r.nom} />{r.slug ? <Link href={`/donjons/${r.slug}/`}>{r.nom}</Link> : r.lien ? <Link href={r.lien}>{r.nom}</Link> : r.nom}</span></td>
                         <td>{r.joueurs}</td>
                         <td className="masque-mobile">{r.zone}</td>
                         <td className="doux">{r.statut}</td>
