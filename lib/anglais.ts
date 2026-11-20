@@ -6,7 +6,7 @@
 import { CARTES_EN, DONJONS_EN } from "@/content/lieux-en";
 import { DONJONS_TEXTE_EN, ZONES_EN, ZONES_HORS_CARTE_EN } from "@/content/monde-en";
 import { lieuParNom } from "./cartes";
-import { DONJONS_ORIGINE } from "@/content/reference";
+import { FICHES_ORIGINE } from "@/content/reference";
 
 /** Menu de la version anglaise. */
 export const MENU_EN: { href: string; label: string }[] = [
@@ -93,7 +93,7 @@ export function nomDonjonEn(nom: string): string | null {
 
 /** Donjons de l'Azeroth d'origine : slug français → slug anglais, tiré de leur nom anglais en jeu (« mortemines » → « deadmines »). */
 export const DONJONS_ORIGINE_EN: Record<string, string> = Object.fromEntries(
-  DONJONS_ORIGINE.map((d) => [d.slug, slug(nomDonjonEn(d.nom) ?? d.nom)]),
+  FICHES_ORIGINE.map((d) => [d.slug, slug(nomDonjonEn(d.nom) ?? d.nom)]),
 );
 
 /** Nom anglais d'une zone citée par son nom français dans les guides (carte du jeu, sinon table des repères). */

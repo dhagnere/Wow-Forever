@@ -7,10 +7,10 @@ import { Ariane } from "@/components/Ariane";
 import { IllustrationEcran } from "@/components/Visuels";
 import { ECRAN_DONJON, fondBandeau } from "@/lib/ecrans";
 import { CONTINENTS_EN, donjonDepuisEn, nomDonjonEn, nomZoneEn, pageDonjonEn } from "@/lib/anglais";
-import { DONJONS_ORIGINE } from "@/content/reference";
-import { objetsParIds, type ObjetResume } from "@/modules/veille";
-import { donjonOrigine, donneesDonjon, objetsDuDonjon, quetesDonjonsVerifiees, sourceDonjons } from "@/lib/donjons";
-import { FicheDonjon } from "@/components/FicheDonjon";
+import { DONJONS_ORIGINE, RAIDS_ORIGINE, raidOrigine } from "@/content/reference";
+import { butinReleveInstance, objetsParIds, type CreatureReleve, type ObjetResume } from "@/modules/veille";
+import { donjonOrigine, donneesDonjon, niveaux, objetsDuDonjon, quetesDonjonsVerifiees, sourceDonjons } from "@/lib/donjons";
+import { ButinReleveInstance, FicheDonjon } from "@/components/FicheDonjon";
 import { ecranParNom } from "@/lib/ecrans";
 
 export const dynamic = "force-dynamic";
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const en = pageDonjonEn(o.slug);
     return {
       title: `${nomEn} — bosses, loot and entrance · WoW Forever`,
-      description: `${nomEn} (levels ${o.min}-${o.max}, ${nomZoneEn(o.zone)}): ${donnees ? `${donnees.boss.length} bosses in order, ` : ""}their loot in Forever, the entrance on the map and the dungeon quests.`,
+      description: `${nomEn} (levels ${o.min}-${o.max}, ${nomZoneEn(o.zone)}): ${donnees ? `${donnees.boss.length} bosses in order, ` : ""}their loot, the entrance on the map and the quests.`,
       alternates: { canonical: en, languages: { fr, en, "x-default": fr } },
     };
   }
@@ -55,23 +55,36 @@ async function objetsDe(ids: number[]): Promise<{ objets: Map<number, ObjetResum
   }
 }
 
+/** Butin relevé en jeu dans l'instance (TaverneTrace) ; une base injoignable donne un relevé vide. */
+async function releveDe(carte: number | null, nom: string): Promise<Map<string, CreatureReleve>> {
+  try {
+    return new Map((await butinReleveInstance(carte, nom)).map((c) => [c.cle, c]));
+  } catch (e) {
+    console.error("[dungeons] relevé :", e instanceof Error ? e.message : e);
+    return new Map();
+  }
+}
+
 /** Page of a dungeon of original Azeroth: same content as the French page, from the same data. */
 async function DonjonOrigineEn({ slug }: { slug: string }) {
   const o = donjonOrigine(slug)!;
   const nomEn = nomDonjonEn(o.nom) ?? o.nom;
   const donnees = donneesDonjon(slug);
-  const { objets, lu } = donnees ? await objetsDe(objetsDuDonjon(donnees)) : { objets: new Map(), lu: true };
+  const releve = donnees ? await releveDe(donnees.carte, o.nom) : new Map<string, CreatureReleve>();
+  const idsReleves = [...releve.values()].flatMap((c) => c.objets.map((x) => x.id));
+  const { objets, lu } = donnees ? await objetsDe([...objetsDuDonjon(donnees), ...idsReleves]) : { objets: new Map(), lu: true };
   const ecran = ecranParNom(o.nom);
-  const memeTranche = DONJONS_ORIGINE.filter((x) => x.slug !== o.slug && Math.abs(x.min - o.min) <= 8);
+  const raid = raidOrigine(o.slug);
+  const memeTranche = raid ? RAIDS_ORIGINE.filter((x) => x.slug !== o.slug) : DONJONS_ORIGINE.filter((x) => x.slug !== o.slug && Math.abs(x.min - o.min) <= 8);
   return (
     <>
       <section className="bandeau-page" style={fondBandeau(ecran ?? "profondeurs-de-rochenoire")}>
         <div className="wrap">
           <Ariane langue="en" etapes={[{ nom: "Dungeons and raids", href: "/en/dungeons/" }, { nom: nomEn }]} />
-          <p className="surtitre">Dungeon of original Azeroth · levels {o.min}-{o.max}</p>
+          <p className="surtitre">{raid ? `Raid of original Azeroth · ${raid.joueurs} players · level ${o.max}` : `Dungeon of original Azeroth · levels ${o.min}-${o.max}`}</p>
           <h1>{nomEn}</h1>
           <p className="chapo">
-            {nomZoneEn(o.zone)}, {CONTINENTS_EN[o.continent] ?? o.continent}.{donnees ? ` ${donnees.boss.length} bosses to defeat, their loot in Forever, the entrance on the map and the quests to pick up before going.` : ""}
+            {nomZoneEn(o.zone)}, {CONTINENTS_EN[o.continent] ?? o.continent}.{donnees ? ` ${donnees.boss.length} bosses to defeat, their loot${donnees.entrees.length ? ", the entrance on the map" : ""} and the quests to pick up before going.` : ""}
           </p>
         </div>
       </section>
@@ -79,7 +92,7 @@ async function DonjonOrigineEn({ slug }: { slug: string }) {
         <div className="colonnes">
           <div className="colonne-principale">
             {ecran ? <IllustrationEcran ecran={ecran} langue="en" /> : null}
-            <FicheDonjon donjon={o} d={donnees} objets={objets} butinLu={lu} quetesVerifiees={quetesDonjonsVerifiees()} source={sourceDonjons()} langue="en" />
+            <FicheDonjon donjon={o} d={donnees} objets={objets} butinLu={lu} quetesVerifiees={quetesDonjonsVerifiees(o.slug)} source={sourceDonjons()} releve={releve} langue="en" />
           </div>
           <aside className="colonne-laterale">
             {donnees && donnees.boss.length ? (
@@ -93,7 +106,7 @@ async function DonjonOrigineEn({ slug }: { slug: string }) {
             <div className="encadre cadre">
               <h2>Also for your level</h2>
               <ul style={{ margin: 0, paddingLeft: 20, fontSize: 15 }}>
-                {memeTranche.map((x) => <li key={x.slug}><Link href={pageDonjonEn(x.slug)}>{nomDonjonEn(x.nom) ?? x.nom}</Link> <span className="doux">— {x.min}-{x.max}</span></li>)}
+                {memeTranche.map((x) => <li key={x.slug}><Link href={pageDonjonEn(x.slug)}>{nomDonjonEn(x.nom) ?? x.nom}</Link> <span className="doux">— {niveaux([x.min, x.max])}</span></li>)}
               </ul>
               <p style={{ margin: "10px 0 0", fontSize: 15 }}><Link href="/en/dungeons/">All dungeons and raids</Link></p>
             </div>
@@ -112,6 +125,9 @@ export default async function DonjonEn({ params }: Props) {
     if (fr && donjonOrigine(fr)) return <DonjonOrigineEn slug={fr} />;
     notFound();
   }
+  const releve = [...(await releveDe(null, d.nom)).values()];
+  const { objets } = await objetsDe(releve.flatMap((c) => c.objets.map((x) => x.id)));
+  const releveUtile = releve.some((c) => c.victoires > 0 && c.objets.length);
   return (
     <>
       <section className="bandeau-page" style={fondBandeau(ECRAN_DONJON[d.slug] ?? "salle-des-thanes")}>
@@ -132,7 +148,14 @@ export default async function DonjonEn({ params }: Props) {
             </section>
             <section aria-labelledby="t-boss">
               <h2 id="t-boss" className="section-titre" style={{ fontSize: 26 }}>Bosses and loot</h2>
-              <p className="doux">[List of bosses, abilities to know and notable items.]</p>
+              {releveUtile ? (
+                <>
+                  <p className="doux" style={{ marginTop: 0 }}>Loot recorded in game, creature by creature, with the observed chance. This dungeon is new in Forever: the page fills in as records come in.</p>
+                  <ButinReleveInstance releve={releve} objets={objets} langue="en" />
+                </>
+              ) : (
+                <p className="doux">[List of bosses, abilities to know and notable items.]</p>
+              )}
             </section>
             <p className="doux" style={{ fontSize: 15 }}>{NOTE_DONJONS_EN}</p>
           </div>

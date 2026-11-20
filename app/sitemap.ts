@@ -4,7 +4,7 @@ import { RUBRIQUES } from "@/config/taxonomie";
 import { CLASSES } from "@/content/classes";
 import { combinaisons } from "@/lib/guide";
 import { ZONES, DONJONS } from "@/content/monde";
-import { DONJONS_ORIGINE } from "@/content/reference";
+import { FICHES_ORIGINE } from "@/content/reference";
 import { SITE } from "@/lib/site";
 import { cheminAnglais } from "@/lib/anglais";
 import { tousLesLieux } from "@/lib/cartes";
@@ -35,7 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...combinaisons().map((c) => `/guides/parcours/${c.race.slug}/${c.classe.slug}/`),
     ...ZONES.map((z) => `/zones/${z.slug}/`),
     ...DONJONS.map((d) => `/donjons/${d.slug}/`),
-    ...DONJONS_ORIGINE.map((d) => `/donjons/${d.slug}/`),
+    ...FICHES_ORIGINE.map((d) => `/donjons/${d.slug}/`),
   ].flatMap((chemin) => avecTraduction(chemin));
   // Articles : la version anglaise n'est annoncée que si elle existe.
   const traduits = new Map((await listerTraduitsPourPlan().catch(() => [])).map((a) => [a.slug, a.modifieLe]));

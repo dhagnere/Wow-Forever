@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DONJONS, NOTE_DONJONS } from "@/content/monde";
-import { DONJONS_ORIGINE } from "@/content/reference";
+import { DONJONS_ORIGINE, RAIDS_ORIGINE, raidOrigine } from "@/content/reference";
 import { estPilier } from "@/config/taxonomie";
-import { objetsParIds, type ObjetResume } from "@/modules/veille";
+import { butinReleveInstance, objetsParIds, type CreatureReleve, type ObjetResume } from "@/modules/veille";
 import { languesDe } from "@/lib/anglais";
-import { donjonOrigine, donneesDonjon, objetsDuDonjon, quetesDonjonsVerifiees, sourceDonjons } from "@/lib/donjons";
+import { donjonOrigine, donneesDonjon, niveaux, objetsDuDonjon, quetesDonjonsVerifiees, sourceDonjons } from "@/lib/donjons";
 import { Ariane } from "@/components/Ariane";
 import { ArticlesLies } from "@/components/ArticlesLies";
-import { FicheDonjon } from "@/components/FicheDonjon";
+import { ButinReleveInstance, FicheDonjon } from "@/components/FicheDonjon";
 import { ECRAN_DONJON, ecranParNom, fondBandeau } from "@/lib/ecrans";
 import { IllustrationEcran } from "@/components/Visuels";
 
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const donnees = donneesDonjon(slug);
   return {
     title: `${o.nom} — boss, butin et entrée · WoW Forever`,
-    description: `${o.nom} (niveaux ${o.min}-${o.max}, ${o.zone}) : ${donnees ? `${donnees.boss.length} boss dans l'ordre, ` : ""}leur butin dans Forever, l'entrée sur la carte et les quêtes du donjon.`,
+    description: `${o.nom} (niveaux ${o.min}-${o.max}, ${o.zone}) : ${donnees ? `${donnees.boss.length} boss dans l'ordre, ` : ""}leur butin, l'entrée sur la carte et les quêtes.`,
     alternates: { canonical: `/donjons/${o.slug}/`, languages: languesDe(`/donjons/${o.slug}/`) },
   };
 }
@@ -42,26 +42,43 @@ async function objetsDe(ids: number[]): Promise<{ objets: Map<number, ObjetResum
   }
 }
 
+/** Butin relevé en jeu dans l'instance (TaverneTrace) ; une base injoignable donne un relevé vide. */
+async function releveDe(carte: number | null, nom: string): Promise<Map<string, CreatureReleve>> {
+  try {
+    return new Map((await butinReleveInstance(carte, nom)).map((c) => [c.cle, c]));
+  } catch (e) {
+    console.error("[donjons] relevé :", e instanceof Error ? e.message : e);
+    return new Map();
+  }
+}
+
 export default async function PageDonjon({ params }: Props) {
   const slug = (await params).slug;
   const nouveau = DONJONS.find((x) => x.slug === slug);
-  if (nouveau) return <NouveauDonjon d={nouveau} />;
+  if (nouveau) {
+    const releve = [...(await releveDe(null, nouveau.nom)).values()];
+    const { objets } = await objetsDe(releve.flatMap((c) => c.objets.map((x) => x.id)));
+    return <NouveauDonjon d={nouveau} releve={releve} objets={objets} />;
+  }
   const o = donjonOrigine(slug);
   if (!o) notFound();
   const donnees = donneesDonjon(slug);
-  const { objets, lu } = donnees ? await objetsDe(objetsDuDonjon(donnees)) : { objets: new Map(), lu: true };
+  const releve = donnees ? await releveDe(donnees.carte, o.nom) : new Map<string, CreatureReleve>();
+  const idsReleves = [...releve.values()].flatMap((c) => c.objets.map((x) => x.id));
+  const { objets, lu } = donnees ? await objetsDe([...objetsDuDonjon(donnees), ...idsReleves]) : { objets: new Map(), lu: true };
   const ecran = ecranParNom(o.nom);
   const pilier = `donjons/${o.slug}`;
-  const memeTranche = DONJONS_ORIGINE.filter((x) => x.slug !== o.slug && Math.abs(x.min - o.min) <= 8);
+  const raid = raidOrigine(o.slug);
+  const memeTranche = raid ? RAIDS_ORIGINE.filter((x) => x.slug !== o.slug) : DONJONS_ORIGINE.filter((x) => x.slug !== o.slug && Math.abs(x.min - o.min) <= 8);
   return (
     <>
       <section className="bandeau-page" style={fondBandeau(ecran ?? "profondeurs-de-rochenoire")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Donjons et raids", href: "/donjons/" }, { nom: o.nom }]} />
-          <p className="surtitre">Donjon de l&apos;Azeroth d&apos;origine · niveaux {o.min}-{o.max}</p>
+          <p className="surtitre">{raid ? `Raid de l'Azeroth d'origine · ${raid.joueurs} joueurs · niveau ${o.max}` : `Donjon de l'Azeroth d'origine · niveaux ${o.min}-${o.max}`}</p>
           <h1>{o.nom}</h1>
           <p className="chapo">
-            {o.zone}, {o.continent}.{donnees ? ` ${donnees.boss.length} boss à vaincre, leur butin dans Forever, l'entrée sur la carte et les quêtes à prendre avant d'y aller.` : ""}
+            {o.zone}, {o.continent}.{donnees ? ` ${donnees.boss.length} boss à vaincre, leur butin${donnees.entrees.length ? ", l'entrée sur la carte" : ""} et les quêtes à prendre avant d'y aller.` : ""}
           </p>
         </div>
       </section>
@@ -69,7 +86,7 @@ export default async function PageDonjon({ params }: Props) {
         <div className="colonnes">
           <div className="colonne-principale">
             {ecran ? <IllustrationEcran ecran={ecran} /> : null}
-            <FicheDonjon donjon={o} d={donnees} objets={objets} butinLu={lu} quetesVerifiees={quetesDonjonsVerifiees()} source={sourceDonjons()} />
+            <FicheDonjon donjon={o} d={donnees} objets={objets} butinLu={lu} quetesVerifiees={quetesDonjonsVerifiees(o.slug)} source={sourceDonjons()} releve={releve} />
             {estPilier(pilier) ? <ArticlesLies pilier={pilier} /> : null}
           </div>
           <aside className="colonne-laterale">
@@ -84,7 +101,7 @@ export default async function PageDonjon({ params }: Props) {
             <div className="encadre cadre">
               <h2>À votre niveau aussi</h2>
               <ul style={{ margin: 0, paddingLeft: 20, fontSize: 15 }}>
-                {memeTranche.map((x) => <li key={x.slug}><Link href={`/donjons/${x.slug}/`}>{x.nom}</Link> <span className="doux">— {x.min}-{x.max}</span></li>)}
+                {memeTranche.map((x) => <li key={x.slug}><Link href={`/donjons/${x.slug}/`}>{x.nom}</Link> <span className="doux">— {niveaux([x.min, x.max])}</span></li>)}
               </ul>
               <p style={{ margin: "10px 0 0", fontSize: 15 }}><Link href="/donjons/">Tous les donjons et raids</Link></p>
             </div>
@@ -95,7 +112,8 @@ export default async function PageDonjon({ params }: Props) {
   );
 }
 
-function NouveauDonjon({ d }: { d: (typeof DONJONS)[number] }) {
+function NouveauDonjon({ d, releve, objets }: { d: (typeof DONJONS)[number]; releve: CreatureReleve[]; objets: Map<number, ObjetResume> }) {
+  const releveUtile = releve.some((c) => c.victoires > 0 && c.objets.length);
   const pilier = `donjons/${d.slug}`;
   return (
     <>
@@ -117,7 +135,14 @@ function NouveauDonjon({ d }: { d: (typeof DONJONS)[number] }) {
             </section>
             <section aria-labelledby="t-boss">
               <h2 id="t-boss" className="section-titre" style={{ fontSize: 26 }}>Boss et butin</h2>
-              <p className="doux">[Liste des boss, techniques à connaître et objets notables. Ce donjon est propre à Forever : les bases libres de l&apos;Azeroth d&apos;origine ne le connaissent pas, la fiche se remplira au fil des relevés en jeu.]</p>
+              {releveUtile ? (
+                <>
+                  <p className="doux" style={{ marginTop: 0 }}>Butin relevé en jeu, créature par créature, avec la chance observée. Ce donjon est propre à Forever : la fiche se complète au fil des relevés.</p>
+                  <ButinReleveInstance releve={releve} objets={objets} />
+                </>
+              ) : (
+                <p className="doux">[Liste des boss, techniques à connaître et objets notables. Ce donjon est propre à Forever : les bases libres de l&apos;Azeroth d&apos;origine ne le connaissent pas, la fiche se remplira au fil des relevés en jeu.]</p>
+              )}
             </section>
             <p className="doux" style={{ fontSize: 15 }}>{NOTE_DONJONS}</p>
             {estPilier(pilier) ? <ArticlesLies pilier={pilier} /> : null}
