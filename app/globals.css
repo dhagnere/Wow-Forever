@@ -348,7 +348,7 @@ textarea.grand { min-height: 420px; font-family: ui-monospace, SFMono-Regular, M
   .une-grand { grid-column: span 2; grid-row: auto; }
 }
 @media (max-width: 600px) {
-  .wrap { padding: 0 16px; }
+  .wrap { padding-left: 16px; padding-right: 16px; }
   .g2, .g3, .g4, .une { grid-template-columns: minmax(0, 1fr); }
   .g9 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .une-grand { grid-column: auto; }
@@ -828,3 +828,86 @@ label.ligne-action { cursor: pointer; }
 .image-proposee span { display: flex; flex-direction: column; font-size: 14px; }
 .image-proposee.image-choisie { border-color: var(--or); box-shadow: 0 0 0 2px rgba(224, 162, 59, 0.35); }
 .image-aucune { justify-content: center; min-height: 90px; padding-left: 40px; }
+
+/* ===== Refonte de l'accueil (novembre 2026) ===== */
+.heros-carte h1 .accent { color: var(--or-clair); white-space: nowrap; }
+.heros-surtitre { font-size: 14px; letter-spacing: 0.22em; margin-bottom: 14px; }
+.heros-carte .heros-garanties { margin: 18px 0 0; font-size: 13px; letter-spacing: 0.02em; color: var(--texte-doux); }
+.heros-accueil .heros-carte { max-width: 480px; backdrop-filter: blur(2px); }
+.heros-accueil .wrap { padding-bottom: 136px; }
+
+/* Accès rapides : six tuiles qui chevauchent le bas du héros */
+.acces-rapides { position: relative; z-index: 2; margin-top: -64px; margin-bottom: 8px; }
+.acces-rapides ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.acces-rapides a { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; height: 100%; padding: 16px 16px 18px; background: rgba(43, 29, 20, 0.96); border: 1px solid var(--bordure); border-top: 2px solid var(--or); border-radius: 6px; text-decoration: none; color: var(--texte); box-shadow: 0 14px 28px rgba(0, 0, 0, 0.45); transition: transform 0.15s ease, border-color 0.15s ease; }
+.acces-rapides a:hover, .acces-rapides a:focus-visible { transform: translateY(-3px); border-color: var(--bordure-vive); color: var(--texte-titre); }
+.acces-icone { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; color: var(--or-clair); background: rgba(224, 162, 59, 0.12); border: 1px solid rgba(224, 162, 59, 0.4); }
+.acces-rapides strong { display: block; font-family: var(--police-titre); font-size: 15px; line-height: 1.25; color: var(--texte-titre); }
+.acces-rapides small { display: block; margin-top: 2px; font-size: 13px; line-height: 1.35; color: var(--texte-doux); }
+@media (prefers-reduced-motion: reduce) { .acces-rapides a { transition: none; } .acces-rapides a:hover { transform: none; } }
+@media (max-width: 1080px) { .acces-rapides ul { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+  .acces-rapides { margin-top: -44px; }
+  .acces-rapides ul { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .acces-rapides a { flex-direction: row; align-items: center; gap: 10px; padding: 12px; }
+  .acces-icone { width: 36px; height: 36px; flex: none; }
+  .acces-icone svg { width: 22px; height: 22px; }
+  .acces-rapides small { display: none; }
+  .acces-rapides strong { font-size: 13px; }
+  .heros-accueil .wrap { padding-bottom: 96px; }
+}
+
+/* Choix du guide : sur mobile, les classes défilent à l'horizontale au lieu d'empiler 2 000 pixels */
+.accueil-guide-glisser { display: none; font-weight: 400; color: var(--texte-doux); font-size: 14px; }
+@media (max-width: 700px) {
+  .accueil-guide .choix-classes { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; margin: 0 -16px; padding: 4px 16px 14px; scrollbar-width: thin; }
+  .accueil-guide .choix-classe { flex: 0 0 82%; scroll-snap-align: start; }
+  .accueil-guide-glisser { display: block; margin-top: 2px; }
+}
+
+/* Têtes de section avec lien « voir tout » aligné à droite */
+.section-tete { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 20px; margin-bottom: 20px; }
+.section-tete .section-titre { margin: 0; }
+.lien-suite { font-weight: 700; text-decoration: none; white-space: nowrap; }
+.lien-suite::after { content: " →"; }
+.lien-suite:hover { text-decoration: underline; }
+
+/* Encart vidéo de l'accueil */
+.carnet-accueil-video { display: block; margin: 0 0 14px; text-decoration: none; color: var(--texte-titre); font-weight: 700; line-height: 1.35; }
+.carnet-accueil-video img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 4px; border: 1px solid var(--bordure); margin-bottom: 10px; }
+.carnet-accueil-video:hover img { border-color: var(--or); }
+.carnet-accueil-video:hover span { color: var(--or-pale); }
+
+/* Chiffres clés : deux par ligne sur mobile */
+@media (max-width: 600px) { .chiffres .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; } .chiffre { font-size: 28px; } }
+
+/* Rejoindre la Taverne : Lettre, YouTube, Facebook */
+.rejoindre-grille { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+.rejoindre-carte { display: flex; flex-direction: column; align-items: flex-start; padding: 26px 26px 28px; background: var(--surface); border: 1px solid var(--bordure); border-radius: 6px; }
+.rejoindre-carte h3 { margin: 0 0 8px; font-family: var(--police-titre); font-size: 21px; color: var(--or-clair); }
+.rejoindre-carte > p { margin: 0 0 18px; color: var(--texte-chaud); flex: 1 0 auto; }
+.rejoindre-lettre { border-color: var(--bordure-vive); background: var(--surface-chaude); }
+.rejoindre-lettre > p { flex: 0 0 auto; }
+.rejoindre-lettre form { width: 100%; }
+.btn-youtube { background: #c4302b; color: #fff; font-family: var(--police-texte); letter-spacing: 0; }
+.btn-youtube:hover { color: #fff; filter: brightness(1.1); }
+@media (max-width: 960px) { .rejoindre-grille { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rejoindre-lettre { grid-column: 1 / -1; } }
+@media (max-width: 600px) { .rejoindre-grille { grid-template-columns: minmax(0, 1fr); } }
+
+/* Pied de page en colonnes */
+.pied-colonnes { display: grid; grid-template-columns: minmax(0, 1.3fr) repeat(4, minmax(0, 1fr)); gap: 28px 32px; padding-top: 28px; padding-bottom: 28px; }
+.pied-colonnes h2 { margin: 0 0 10px; font-family: var(--police-titre); font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--or-clair); }
+.pied-colonnes ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pied-colonnes ul a, .pied-colonnes ul button { text-decoration: none; font-weight: 600; }
+.pied-social { display: flex; gap: 10px; margin-top: 16px; }
+.pied-social a { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 1px solid rgba(217, 169, 74, 0.4); border-radius: 50%; }
+.pied-social a:hover { border-color: var(--or-clair); }
+@media (max-width: 960px) { .pied-colonnes { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pied-colonnes .pied-marque { grid-column: 1 / -1; } }
+
+/* Menu : sur petit écran, le logo mène à l'accueil, l'entrée « Accueil » laisse la place aux rubriques */
+@media (max-width: 600px) { .nav > a.nav-accueil { display: none; } }
+.heros-accueil .heros-credit { top: 10px; bottom: auto; }
+@media (max-width: 600px) {
+  .heros-surtitre { letter-spacing: 0.14em; font-size: 12px; }
+  .heros-accueil + .acces-rapides + .accueil-guide { padding-top: 28px; }
+}

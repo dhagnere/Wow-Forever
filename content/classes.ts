@@ -30,8 +30,6 @@ function races(liste: [string, string][], skyborne?: string, nouvelles: [string,
   return lignes;
 }
 
-const A_COMPLETER = "[Conseil de Jobwow à compléter après les premières heures de jeu.]";
-
 export const CLASSES: Classe[] = [
   {
     slug: "guerrier", nom: "Guerrier", couleur: "#c69b6d", roles: ["Tank", "Dégâts"],
@@ -45,7 +43,7 @@ export const CLASSES: Classe[] = [
     ],
     races: races([["Humain", "Alliance"], ["Nain", "Alliance"], ["Elfe de la nuit", "Alliance"], ["Gnome", "Alliance"], ["Orc", "Horde"], ["Mort-vivant", "Horde"], ["Tauren", "Horde"], ["Troll", "Horde"]], "Alliance ou Horde"),
     debuter: [
-      { titre: "Soigner son arme avant son armure.", texte: A_COMPLETER },
+      { titre: "Ne jamais tirer deux groupes à la fois.", texte: "Seul, le guerrier souffre : prenez le secourisme tôt et choisissez vos combats. En donjon, c'est lui qu'on attend." },
       { titre: "Apprendre les postures tôt.", texte: "Combat, défense, berserker : chaque posture débloque ses propres techniques." },
       { titre: "Prévoir de quoi récupérer.", texte: "Gardez toujours de la nourriture et des bandages sur vous." },
     ],
@@ -63,7 +61,7 @@ export const CLASSES: Classe[] = [
     ],
     races: races([["Humain", "Alliance"], ["Nain", "Alliance"]], undefined, [["Mort-vivant", "Horde"]]),
     debuter: [
-      { titre: "Choisir sa voie de talents.", texte: A_COMPLETER },
+      { titre: "Garder ses soins pour la fin du combat.", texte: "Lent mais increvable. Gardez vos bénédictions sur le groupe et vos soins pour la fin du combat, pas pour le début." },
       { titre: "Garder la bonne bénédiction active.", texte: "Elle dure plusieurs minutes : pensez à la renouveler avant un combat." },
       { titre: "Se soigner entre les combats.", texte: "Une pause courte vaut mieux qu'une mort coûteuse en réparations." },
     ],
@@ -83,7 +81,7 @@ export const CLASSES: Classe[] = [
     debuter: [
       { titre: "Apprivoiser un familier dès le niveau 10.", texte: "La quête de classe est disponible auprès de votre maître des chasseurs." },
       { titre: "Garder des munitions d'avance.", texte: "Flèches ou balles s'épuisent vite : prévoyez large." },
-      { titre: "Nourrir son familier.", texte: A_COMPLETER },
+      { titre: "Nourrir son familier.", texte: "Le familier encaisse, vous tirez. Nourrissez-le régulièrement et apprenez-lui de nouvelles techniques dès que vous le pouvez." },
     ],
     misAJour: "2026-11-05",
   },
@@ -101,7 +99,7 @@ export const CLASSES: Classe[] = [
     debuter: [
       { titre: "Obtenir les poisons au niveau 20.", texte: "Une quête de classe les débloque : un gain de dégâts net." },
       { titre: "Ne pas négliger les bandages.", texte: "Le secourisme compense l'absence de soins." },
-      { titre: "Choisir ses combats.", texte: A_COMPLETER },
+      { titre: "Choisir ses combats.", texte: "La furtivité sert autant à éviter les ennuis qu'à les provoquer. Les poisons changent tout, ne les oubliez pas." },
     ],
     misAJour: "2026-10-31",
   },
@@ -117,7 +115,7 @@ export const CLASSES: Classe[] = [
     ],
     races: races([["Humain", "Alliance"], ["Nain", "Alliance"], ["Elfe de la nuit", "Alliance"], ["Mort-vivant", "Horde"], ["Troll", "Horde"]], undefined, [["Gnome", "Alliance"]]),
     debuter: [
-      { titre: "Monter de niveau en Ombre.", texte: A_COMPLETER },
+      { titre: "Ménager sa mana.", texte: "La mana est votre vraie barre de vie. Buvez entre les combats, et le bouclier avant le soin." },
       { titre: "Utiliser la baguette.", texte: "Elle économise la mana pour finir les combats." },
       { titre: "Garder le mot de pouvoir : Bouclier.", texte: "Il évite bien des interruptions pendant les soins." },
     ],
@@ -136,7 +134,7 @@ export const CLASSES: Classe[] = [
     races: races([["Orc", "Horde"], ["Tauren", "Horde"], ["Troll", "Horde"]], "Horde (ordre des vents)", [["Nain", "Alliance"]]),
     debuter: [
       { titre: "Récupérer chaque totem par sa quête.", texte: "Terre, feu, eau et air s'obtiennent par des quêtes de classe." },
-      { titre: "Choisir son arme.", texte: A_COMPLETER },
+      { titre: "Poser les bons totems.", texte: "Chaque totem compte : posez ceux qui servent au combat en cours, pas toute la panoplie. Polyvalent, le chaman soigne aussi bien qu'il frappe." },
       { titre: "Adapter ses totems au combat.", texte: "Un totem bien choisi vaut mieux que quatre posés au hasard." },
     ],
     misAJour: "2026-11-05",
@@ -153,7 +151,7 @@ export const CLASSES: Classe[] = [
     ],
     races: races([["Humain", "Alliance"], ["Gnome", "Alliance"], ["Mort-vivant", "Horde"], ["Troll", "Horde"]], "Alliance (ordre des savants)", [["Orc", "Horde"]]),
     debuter: [
-      { titre: "Monter en Givre.", texte: A_COMPLETER },
+      { titre: "Nourrir le groupe.", texte: "Invoquez eau et nourriture pour tout le monde : c'est le meilleur moyen d'être réinvité. En difficulté, gelez, reculez, recommencez." },
       { titre: "Conjurer sa nourriture et son eau.", texte: "Aucune dépense, et de quoi dépanner le groupe." },
       { titre: "Garder ses distances.", texte: "Le tissu protège peu : ralentissez, puis reculez." },
     ],
@@ -173,7 +171,7 @@ export const CLASSES: Classe[] = [
     debuter: [
       { titre: "Obtenir le marcheur du Vide au niveau 10.", texte: "Une quête de classe le débloque : votre meilleur allié pour progresser." },
       { titre: "Gérer ses fragments d'âme.", texte: "Gardez-en toujours quelques-uns en réserve." },
-      { titre: "Utiliser Connexion.", texte: A_COMPLETER },
+      { titre: "Laisser le démon tenir la ligne.", texte: "Votre démon encaisse pendant que vos sorts font le travail dans la durée. Un démoniste qui court est un démoniste mal organisé." },
     ],
     misAJour: "2026-11-05",
   },
@@ -189,7 +187,7 @@ export const CLASSES: Classe[] = [
     ],
     races: races([["Elfe de la nuit", "Alliance"], ["Tauren", "Horde"]], "Alliance ou Horde"),
     debuter: [
-      { titre: "Choisir une voie pour monter de niveau.", texte: "[Conseil de Jobwow : forme et branche de talents recommandées pour les niveaux 1 à 60.]" },
+      { titre: "Changer de forme selon le combat.", texte: "Plusieurs rôles dans un seul personnage : ours pour encaisser, chat pour frapper, soins entre deux. De quoi se passer d'attendre un groupe." },
       { titre: "Récupérer chaque forme au bon moment.", texte: "Dans l'Azeroth d'origine, les formes s'obtiennent par des quêtes de classe. [Niveaux exacts dans Forever : à vérifier en jeu.]" },
       { titre: "Garder de la mana pour se soigner.", texte: "[Astuce de rotation hors combat, tirée du carnet de Jobwow.]" },
     ],

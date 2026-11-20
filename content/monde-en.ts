@@ -22,57 +22,72 @@ export interface ZoneEn {
 export const ZONES_EN: Record<string, ZoneEn> = {
   "mont-hyjal": {
     slug: "mount-hyjal", nom: "Mount Hyjal", continent: "Kalimdor", niveau: "60", statut: "Contested",
-    acces: "[Entry point to be confirmed]",
+    acces: "From southern Winterspring, through Darkwhisper Gorge",
     resume: "Kalimdor's sacred mountain finally opens to players of original Azeroth. A zone built for characters who have reached the level cap.",
     paragraphes: [
-      "Mount Hyjal is one of the four zones added by Forever, along with Riverglades, Zephras Isle and Shen'dralar. Unlike the other three, it is not a leveling zone: it comes with the endgame content, alongside dungeons and raids.",
-      "[Jobwow's account of a first visit: atmosphere, first quests, enemies met.]",
+      "Mount Hyjal is one of the four zones added by Forever, along with Riverglades, Zephras Isle and Shen'dralas. Unlike the other three, it is not a leveling zone: it comes with the endgame content, alongside dungeons and raids.",
+      "Mount Hyjal is reached from southern Winterspring. The mountain is healing after Archimonde's fall; its quests are aimed at level 60 characters, and two raids open there on 9 December. Jobwow's own account will come once his characters climb up there.",
     ],
     activites: [
       { titre: "Quests", texte: "[Main quest chains and rewards: to be recorded in game.]" },
       { titre: "Reputation", texte: "[Faction tied to the zone, if any: to be confirmed.]" },
-      { titre: "Raid", texte: "A 20-player raid, Hyjal Summit, opens on 9 December 2026, the same day as Barrow Deeps (10 players) and Onyxia's Lair (40 players)." },
+      { titre: "Raids", texte: "Hyjal Summit (20 players, 13 bosses), near Nordrassil, opens on 9 December 2026, along with Barrow Deeps (10 players, 8 bosses), which has an entrance on the mountain, and Onyxia's Lair (40 players)." },
     ],
-    fiabilite: "Continent and status recorded during the beta. Level and raid from the roadmap published by Blizzard. Page reviewed when the servers open.",
+    fiabilite: "Continent and status recorded during the beta. Level, access and raids from Blizzard and specialist press (Icy Veins, Warcraft Tavern).",
   },
   "rives-claires": {
-    slug: "riverglades", nom: "Riverglades", continent: "Eastern Kingdoms (game map)", niveau: "About 35 to 45", statut: "[To be confirmed]",
-    acces: "[To be confirmed]",
-    resume: "A new Forever leveling zone, for characters in the middle of their journey.",
-    paragraphes: ["Riverglades is one of the four zones added by Forever. This page will be completed as soon as the servers open."],
-    activites: [{ titre: "Quests", texte: "[To be recorded in game.]" }],
-    fiabilite: "Level range recorded during the beta, subject to change.",
+    slug: "riverglades", nom: "Riverglades", continent: "Eastern Kingdoms (game map)", niveau: "35 to 45", statut: "[To be confirmed]",
+    acces: "North of Redridge Mountains: turn right just before Burning Steppes",
+    resume: "A new Forever leveling zone for levels 35 to 45, between Redridge Mountains and Burning Steppes.",
+    paragraphes: [
+      "Riverglades is one of the four zones added by Forever. It lies between Redridge Mountains and Burning Steppes and holds more than 150 quests.",
+      "The zone is home to Krol'dok Stronghold, an open-air ogre fortress and one of the nine new dungeons (levels 40 to 45).",
+    ],
+    activites: [
+      { titre: "Quests", texte: "[Main quest chains and rewards: to be recorded in game.]" },
+      { titre: "Dungeon", texte: "Krol'dok Stronghold, levels 40 to 45." },
+    ],
+    fiabilite: "Levels and access from specialist press (Icy Veins, eXputer); dungeon from Blizzard.",
   },
   "ile-de-zephras": {
-    slug: "zephras-isle", nom: "Zephras Isle", continent: "Island away from the continents (game map)", niveau: "Starting zone", statut: "One version per faction",
+    slug: "zephras-isle", nom: "Zephras Isle", continent: "Island away from the continents (game map)", niveau: "1 to 12", statut: "One version per faction",
     acces: "Skyborne starting zone",
     resume: "Homeland of the Skyborne: they all begin their adventure here, in the village of Thendal.",
     paragraphes: [
       "Zephras Isle is the homeland of the Skyborne. Each faction has its own version of the zone.",
-      "[Jobwow's account of discovering the island.]",
+      "Zephras floats in the Elemental Plane of Air and is coming apart: its wind spirits have vanished and its pylons are failing one by one. Skyborne spend their first twelve levels there, then reach Stormwind or Orgrimmar by way of Dalaran. Neither Jobwow nor Jobwow TheSham has set foot there yet.",
+      "No quest is required to leave the island: at the Valanaar docks, in the south, take the crossing to Dalaran, then a portal to Stormwind (Alliance) or Orgrimmar (Horde).",
     ],
     activites: [{ titre: "Starting quests", texte: "[To be recorded in game.]" }],
-    fiabilite: "Information recorded during the beta.",
+    fiabilite: "Information recorded during the beta; levels from Blizzard; leaving the island from Blizzard Watch.",
   },
   shendralar: {
-    slug: "shendralar", nom: "Shen'dralar", continent: "Kalimdor (game map)", niveau: "Still uncertain", statut: "[To be confirmed]",
-    acces: "[To be confirmed]",
-    resume: "Forever's fourth new zone, whose levels remain uncertain.",
-    paragraphes: ["This page will be completed as soon as Blizzard or the first players say more."],
-    activites: [{ titre: "Quests", texte: "[To be recorded in game.]" }],
-    fiabilite: "Levels still uncertain.",
+    slug: "shendralar", nom: "Shen'dralas", continent: "Kalimdor (game map)", niveau: "Still uncertain", statut: "Contested",
+    acces: "Between Mulgore and Desolace",
+    resume: "Forever's fourth new zone, land of the Shen'dralar, between Mulgore and Desolace.",
+    paragraphes: [
+      "Shen'dralas tells the story of the Shen'dralar, Highborne tied to Eldre'Thalas and Dire Maul, and continues that of the Gelkis and Magram centaurs.",
+      "Its quests also lead to Maraudon and Razorfen Downs. Published level ranges do not agree yet (40 to 45 for some, 45 to 53 for others): to be checked in game.",
+    ],
+    activites: [{ titre: "Quests", texte: "[Main quest chains and rewards: to be recorded in game.]" }],
+    fiabilite: "Location and story from Blizzard; status and dungeon quests from specialist press (Icy Veins); levels still uncertain.",
   },
 };
 
-/** Nouveaux donjons : par slug français, adresse anglaise /en/dungeons/<slug>/. */
-export const DONJONS_TEXTE_EN: Record<string, { slug: string; resume: (niveau: number) => string }> = {
-  "salle-des-thanes": { slug: "hall-of-thanes", resume: (n) => `New dungeon spotted in the beta, open from level ${n}.` },
-  "ruines-de-lordaeron": { slug: "ruins-of-lordaeron", resume: (n) => `New dungeon spotted in the beta, open from level ${n}.` },
-  "excavations-les-paluns": { slug: "excavation-site-wetlands", resume: (n) => `New dungeon spotted in the beta, open from level ${n}.` },
-  "cite-de-dalaran": { slug: "city-of-dalaran", resume: (n) => `New dungeon spotted in the beta, open from level ${n}.` },
+/** Nouveaux donjons : par slug français, adresse anglaise /en/dungeons/<slug>/, emplacement et résumé (annonce de Blizzard). */
+export const DONJONS_TEXTE_EN: Record<string, { slug: string; zone: string; resume: (niveau: number, max: number) => string }> = {
+  "salle-des-thanes": { slug: "hall-of-thanes", zone: "Beneath Ironforge, Dun Morogh", resume: (n, m) => `A dwarven dungeon dug beneath Ironforge, for levels ${n} to ${m}.` },
+  "ruines-de-lordaeron": { slug: "ruins-of-lordaeron", zone: "Ruins above the Undercity, Tirisfal Glades", resume: (n, m) => `The ruins above the Undercity, for levels ${n} to ${m}.` },
+  "excavations-les-paluns": { slug: "excavation-site-wetlands", zone: "Above Whelgar's Excavation Site, Wetlands", resume: (n, m) => `A dig site above Whelgar's Excavation, for levels ${n} to ${m}.` },
+  "cite-de-dalaran": { slug: "city-of-dalaran", zone: "Alterac Mountains", resume: (n, m) => `The city of mages, its barrier down, not yet under the Kirin Tor's control; you enter through the sewers, for levels ${n} to ${m}.` },
+  "cite-submergee": { slug: "the-drowned-city", zone: "Off the coast of Stranglethorn Vale", resume: (n, m) => `An ancient troll ruin risen from the sea, open to the sky; the rain builds into a storm before the final fight. Levels ${n} to ${m}.` },
+  "bastion-kroldok": { slug: "kroldok-stronghold", zone: "Riverglades", resume: (n, m) => `An open-air ogre fortress of workshops and camps, behind kidnappings and strange chanting at night. Levels ${n} to ${m}.` },
+  "prison-d-alcaz": { slug: "alcaz-prison", zone: "Alcaz Island, Dustwallow Marsh", resume: (n, m) => `The mysterious island finally becomes a dungeon: the Defias and naga fight inside. Levels ${n} to ${m}.` },
+  "repaire-des-noiregueules": { slug: "blackmaw-hold", zone: "Azshara, behind the northern furbolg gates", resume: (n, m) => `A great furbolg city threatened by corruption; its tunnels lead towards Barrow Deeps. Levels ${n} to ${m}.` },
+  "terrasse-du-faconneur": { slug: "shapers-terrace", zone: "Northern hills of Un'Goro Crater", resume: (n, m) => `The end-of-journey dungeon, tied to the titans, in Un'Goro Crater. Levels ${n} to ${m}.` },
 };
 
-export const NOTE_DONJONS_EN = "Recorded in beta version 1.60.1. Levels may still change at launch.";
+export const NOTE_DONJONS_EN = "Names, levels and locations from Blizzard's announcement (September 2026); to be confirmed in game.";
 
 export const SKYBORNE_EN = {
   nom: "The Skyborne",
@@ -114,14 +129,15 @@ export const LIEUX_DEPART_EN: Record<string, string> = {
 export const ZONES_HORS_CARTE_EN: Record<string, string> = {
   "Mont Rochenoire": "Blackrock Mountain",
   "Île de Zéphras (une version par faction)": "Zephras Isle (one version per faction)",
-  "Shen'dralar": "Shen'dralar",
+  "Valanaar (île de Zéphras)": "Valanaar (Zephras Isle)",
+  "Shen'dralas": "Shen'dralas",
   "[À confirmer]": "[To be confirmed]",
 };
 
-/** Noms anglais des raids de Forever dont le nom français n'est pas encore connu. */
+/** Noms anglais des raids propres à Forever (nom français de Blizzard → nom anglais). */
 export const RAIDS_FOREVER_EN: Record<string, string> = {
-  "[Raid du Mont Hyjal : Hyjal Summit en anglais, nom français à confirmer]": "Hyjal Summit",
-  "[Raid à 10 joueurs : Barrow Deeps en anglais, nom français à confirmer]": "Barrow Deeps",
+  "Sommet d'Hyjal": "Hyjal Summit",
+  "Les profondeurs des Saisons": "Barrow Deeps",
 };
 
 /** Statut des raids. */

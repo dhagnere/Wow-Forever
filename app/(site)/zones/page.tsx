@@ -9,7 +9,7 @@ import { ECRAN_ZONE } from "@/lib/ecrans";
 
 export const metadata: Metadata = {
   title: "Les zones de WoW Forever",
-  description: "Mont Hyjal, Rives Claires, île de Zéphras, Shen'dralar : les nouvelles zones de World of Warcraft: Forever.",
+  description: "Mont Hyjal, Rives Claires, île de Zéphras, Shen'dralas : les nouvelles zones de World of Warcraft: Forever.",
   alternates: { canonical: "/zones/", languages: languesDe("/zones/") },
 };
 

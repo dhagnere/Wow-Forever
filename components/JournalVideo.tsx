@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { VideoChaine } from "@/modules/veille";
-import { miniatureDe } from "@/lib/miniatureVideo";
+import { miniatureDe, titreAffichable } from "@/lib/miniatureVideo";
 import { SITE } from "@/lib/site";
 
 const FORMATS = {
@@ -49,14 +49,14 @@ export function JournalVideo({ langue = "fr", videos = [] }: { langue?: "fr" | "
           {miniature ? (
             <a href={derniere.lien} rel="noopener noreferrer" data-cta={`video-carnet-image${suffixe}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={miniature} width={1280} height={720} alt={`${t.miniature} : ${derniere.titre}`} loading="lazy" />
+              <img src={miniature} width={1280} height={720} alt={`${t.miniature} : ${titreAffichable(derniere.titre)}`} loading="lazy" />
             </a>
           ) : null}
           <div>
             <p className="surtitre" style={{ margin: 0 }}>
               {t.derniere}{derniere.publieLe ? ` · ${FORMATS[langue].format(new Date(derniere.publieLe))}` : ""}
             </p>
-            <h3><a href={derniere.lien} rel="noopener noreferrer" data-cta={`video-carnet-titre${suffixe}`}>{derniere.titre}</a></h3>
+            <h3><a href={derniere.lien} rel="noopener noreferrer" data-cta={`video-carnet-titre${suffixe}`}>{titreAffichable(derniere.titre)}</a></h3>
             {derniere.resume ? <p className="doux" style={{ margin: "0 0 12px" }}>{derniere.resume}</p> : null}
             <a href={derniere.lien} className="btn btn-or" rel="noopener noreferrer" data-cta={`video-carnet${suffixe}`}>▶ {t.regarder}</a>
           </div>

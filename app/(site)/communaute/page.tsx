@@ -28,19 +28,22 @@ export default function Communaute() {
           <Ariane etapes={[{ nom: "Le Comptoir", href: "/actualites/" }, { nom: "Communauté" }]} />
           <p className="surtitre">Entre joueurs</p>
           <h1>La communauté de <span className="accent">la Taverne</span></h1>
-          <p className="chapo">Les nouvelles se lisent sur le site ; elles se discutent au Discord. Tirez une chaise.</p>
+          <p className="chapo">
+            {SITE.discord
+              ? "Les nouvelles se lisent sur le site ; elles se discutent au Discord. Tirez une chaise."
+              : "Les nouvelles se lisent sur le site ; elles se discutent sur la Page Facebook, en attendant le Discord de la Taverne."}
+          </p>
           <div className="actions-bandeau">
             {SITE.discord ? (
               <a href={SITE.discord} className="btn btn-or" rel="noopener noreferrer" data-cta="discord-communaute">Rejoindre le Discord</a>
-            ) : (
-              <span className="btn btn-or" aria-disabled="true">Discord : ouverture imminente</span>
-            )}
-            <a href={SITE.facebook} className="btn btn-contour" rel="noopener noreferrer" data-cta="facebook-communaute">Suivre la Page Facebook</a>
+            ) : null}
+            <a href={SITE.facebook} className={SITE.discord ? "btn btn-contour" : "btn btn-or"} rel="noopener noreferrer" data-cta="facebook-communaute">Suivre la Page Facebook</a>
+            {SITE.discord ? null : <Link href="/lettre/" className="btn btn-contour" data-cta="lettre-communaute">Recevoir la Lettre</Link>}
           </div>
         </div>
       </section>
       <div className="wrap contenu article corps">
-        <h2>Les salons</h2>
+        <h2>{SITE.discord ? "Les salons" : "Les salons du futur Discord"}</h2>
         <ul>
           {SALONS.map(([nom, role]) => <li key={nom}><strong>{nom}</strong> : {role}.</li>)}
         </ul>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { NavPrincipale } from "./NavPrincipale";
 import { SITE } from "@/lib/site";
-import { GererCookies } from "./BandeauCookies";
+import { PiedColonnes } from "./PiedColonnes";
 import { Decompte } from "./Decompte";
 import { ChoixLangue, SuggestionAnglais } from "./ChoixLangue";
 
@@ -56,27 +56,6 @@ export function Entete() {
   );
 }
 
-const LIENS_PIED: [string, string][] = [
-  ["/actualites/", "Actualités"],
-  ["/calendrier/", "Calendrier"],
-  ["/guides/bien-demarrer/", "Guides"],
-  ["/classes/", "Classes"],
-  ["/races/", "Races"],
-  ["/zones/", "Zones"],
-  ["/guides/liste-des-donjons/", "Donjons"],
-  ["/carnet/", "Carnet de Jobwow"],
-  ["/recherche/", "Recherche"],
-  ["/plan-du-site/", "Plan du site"],
-  ["/lettre/", "La Lettre"],
-  ["/guildes/", "Tableau des guildes"],
-  ["/communaute/", "Communauté"],
-  ["/soutenir/", "Soutenir la Taverne"],
-  ["/a-propos/", "Qui est Jobwow ?"],
-  ["/contact/", "Contact"],
-  ["/mentions-legales/", "Mentions légales"],
-  ["/confidentialite/", "Confidentialité"],
-];
-
 export function Pied() {
   return (
     <>
@@ -85,27 +64,22 @@ export function Pied() {
         <div className="wrap pied-ornement" aria-hidden="true">
           <Medaillon taille={40} />
         </div>
-        <div className="wrap pied-corps">
-          <div className="pied-marque">
-            <p className="logo" style={{ fontSize: 20, margin: 0 }}>
-              <NomSite />
-            </p>
-            <p>{SITE.signature}.</p>
-          </div>
-          <nav aria-label="Pied de page" className="pied-liens">
-            {LIENS_PIED.map(([href, nom]) => <Link key={href} href={href}>{nom}</Link>)}
-            <a href={SITE.facebook} rel="noopener noreferrer">Page Facebook</a>
-            {SITE.youtube ? <a href={SITE.youtube} rel="noopener noreferrer" data-cta="youtube-pied">Chaîne YouTube</a> : null}
-            {SITE.discord ? <a href={SITE.discord} rel="noopener noreferrer">Discord</a> : null}
-            {SITE.gtmId ? <GererCookies /> : null}
-          </nav>
-        </div>
+        <PiedColonnes
+          marque={
+            <>
+              <p className="logo" style={{ fontSize: 20, margin: 0 }}>
+                <NomSite />
+              </p>
+              <p>{SITE.signature}. Guide de 1 à 60, classes, donjons et base d&apos;objets, en français.</p>
+            </>
+          }
+        />
         <div className="wrap pied-bas">
           <p>
             {SITE.mentionBlizzard} Les captures d&apos;écran du jeu restent la propriété de Blizzard Entertainment. Certains liens
             sont affiliés : ils peuvent rapporter une commission au site, sans surcoût pour vous.
           </p>
-          <p className="pied-devise">Écrit par un joueur, pour les joueurs ✦ <a href="/rss.xml">Flux RSS</a></p>
+          <p className="pied-devise">Écrit par un joueur, pour les joueurs ✦</p>
         </div>
       </footer>
     </>

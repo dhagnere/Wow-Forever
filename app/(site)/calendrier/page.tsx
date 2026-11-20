@@ -8,8 +8,8 @@ import { fondBandeau } from "@/lib/ecrans";
 import { HeureLocale } from "@/components/HeureLocale";
 
 export const metadata: Metadata = {
-  title: "WoW Forever : date et heure de sortie, raids, Hardcore",
-  description: "Sortie de WoW Forever le 5 novembre à minuit (heure de Paris), ouverture des raids le 9 décembre, mode Hardcore et contenus de l'été 2027.",
+  title: "Calendrier de WoW Forever : raids, Hardcore, prochaines dates",
+  description: "Les dates clés de WoW Forever : ouverture des raids le 9 décembre, mode Hardcore, contenus de l'été 2027, et la sortie du 5 novembre à minuit (heure de Paris).",
   alternates: { canonical: "/calendrier/", languages: languesDe("/calendrier/") },
 };
 

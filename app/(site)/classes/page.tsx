@@ -13,8 +13,8 @@ import { fondBandeau } from "@/lib/ecrans";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Les classes de WoW Forever",
-  description: "Les neuf classes de World of Warcraft: Forever : rôles, armure, races possibles et conseils pour bien débuter avec chacune.",
+  title: "Classes de WoW Forever : sorts, talents et calculateur",
+  description: "Les neuf classes de World of Warcraft: Forever : rôles, armure, races possibles, sorts par spécialisation, arbres de talents et calculateur pour chacune.",
   alternates: { canonical: "/classes/", languages: languesDe("/classes/") },
 };
 

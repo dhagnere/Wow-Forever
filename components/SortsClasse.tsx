@@ -1,14 +1,15 @@
 import Link from "next/link";
 import type { Sort, Specialisation, Talent } from "@/modules/veille";
-import { iconeSort } from "@/lib/sorts";
+import { iconeSortPresente } from "@/lib/sorts";
 import { OngletsSpe } from "./OngletsSpe";
 
 /** Sorts et talents d'une classe, un onglet par spécialisation (données des fichiers du jeu). */
 
 export function IconeSort({ fichier, taille = 40 }: { fichier: number; taille?: number }) {
-  if (!fichier) return <span className="icone-sort icone-vide" style={{ width: taille, height: taille }} aria-hidden="true" />;
+  const src = iconeSortPresente(fichier);
+  if (!src) return <span className="icone-sort icone-vide" style={{ width: taille, height: taille }} aria-hidden="true" />;
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={iconeSort(fichier)} alt="" width={taille} height={taille} loading="lazy" className="icone-sort icone-jeu" />;
+  return <img src={src} alt="" width={taille} height={taille} loading="lazy" className="icone-sort icone-jeu" />;
 }
 
 export type Langue = "fr" | "en";
@@ -155,7 +156,7 @@ export function SortsClasse({ slugClasse, nomClasse, version, specialisations, l
         Chaque onglet regroupe les sorts appris chez le maître des {nomClasse.toLowerCase()}s, par école, puis l&apos;arbre de talents de la spécialisation.
         Pour répartir vos points, ouvrez le <Link href={lienCalculateur}>calculateur de talents</Link>.
       </p>}
-      <OngletsSpe langue={langue} onglets={specialisations.map((s) => ({ slug: s.slug, nom: s.nom, icone: s.icone ? iconeSort(s.icone) : "" }))}>
+      <OngletsSpe langue={langue} onglets={specialisations.map((s) => ({ slug: s.slug, nom: s.nom, icone: iconeSortPresente(s.icone) }))}>
         {specialisations.map((s) => <Panneau key={s.slug} spe={s} lienCalculateur={lienCalculateur} langue={langue} />)}
       </OngletsSpe>
       {en ? (

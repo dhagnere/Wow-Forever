@@ -11,8 +11,8 @@ import { IconeClasse } from "@/components/IconeClasse";
 import { IconeRace } from "@/components/IconeRace";
 
 export const metadata: Metadata = {
-  title: "Parcours de montée en niveau de 1 à 60 sur WoW Forever",
-  description: "La route de l'Alliance et celle de la Horde, zone par zone, du niveau 1 au niveau 60 : fourchette de niveaux, nombre de quêtes et principaux donneurs.",
+  title: "Guide de leveling WoW Forever de 1 à 60 : routes Alliance et Horde",
+  description: "La route de l'Alliance et celle de la Horde, zone par zone, du niveau 1 au niveau 60, puis le guide quête par quête pour votre race et votre classe : niveaux, quêtes et donneurs.",
   alternates: { canonical: "/guides/parcours/", languages: languesDe("/guides/parcours/") },
 };
 

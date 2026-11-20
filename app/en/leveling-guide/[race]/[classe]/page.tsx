@@ -15,7 +15,7 @@ import { cleGuide, combinaisons, guidePour, ordreDuGuide, raceGuide, versionGuid
 import { CLASSES_EN, classeDepuisEn, lienGuideEn, nomClasseEn, nomRaceEn, pageLieuEn, raceDepuisEn, RACES_EN } from "@/lib/anglais";
 import { LIEUX_ZEPHRAS } from "@/content/zephras-jeu";
 import { LIEUX_ZEPHRAS_EN } from "@/content/lieux-en";
-import { SORTIE_ZEPHRAS } from "@/content/zephras";
+import { SORTIE_ZEPHRAS_EN } from "@/content/zephras";
 
 type Props = { params: Promise<{ race: string; classe: string }> };
 
@@ -56,7 +56,7 @@ export default async function GuideRaceClasseEn({ params }: Props) {
     arrets: ordreDuGuide(z, c.race, c.classe.slug, parcours),
     ...(z.lieu === ZEPHRAS ? { lieux: LIEUX_ZEPHRAS.map((l) => ({ ...l, nom: LIEUX_ZEPHRAS_EN[l.nom] ?? l.nom })) } : {}),
     ...(z.lieu === ZEPHRAS && !z.etapes.length ? {
-      note: `The island's quests are not in the game files yet: Jobwow will record them at launch and add them here, with their NPCs and targets on the map. Meanwhile, the map shows the island's places. Start from the village of Thendal, do the island's quests until it is complete, then take the road ${SORTIE_ZEPHRAS[c.race.faction] ? `to ${SORTIE_ZEPHRAS[c.race.faction]}` : "of your faction [arrival point to be confirmed at launch]"}: the guide picks up again at level 10.`,
+      note: `The island's quests are not in the game files yet: Jobwow will record them in game and add them here, with their NPCs and targets on the map. Meanwhile, the map shows the island's places. Start from the village of Thendal, do the island's quests until about level 12, then take the road ${SORTIE_ZEPHRAS_EN[c.race.faction] ? `to ${SORTIE_ZEPHRAS_EN[c.race.faction]}` : "of your faction [arrival point to be confirmed at launch]"}: the guide picks up again with your faction's route.`,
     } : {}),
   }));
   if (!zones.length) notFound();

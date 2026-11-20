@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!fr) return {};
   const r = RUBRIQUES_EN[fr];
   return {
-    title: `${r.nom} — WoW Forever`,
+    title: `${r.nom}: WoW Forever news in English`,
     description: r.description,
     alternates: { canonical: `/en/topics/${r.slug}/`, languages: { fr: `/rubriques/${fr}/`, en: `/en/topics/${r.slug}/`, "x-default": `/rubriques/${fr}/` } },
   };

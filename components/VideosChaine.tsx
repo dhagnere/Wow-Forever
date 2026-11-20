@@ -1,6 +1,6 @@
 import type { VideoChaine } from "@/modules/veille";
 import { SITE } from "@/lib/site";
-import { miniatureDe } from "@/lib/miniatureVideo";
+import { miniatureDe, titreAffichable } from "@/lib/miniatureVideo";
 
 const FORMATS = {
   fr: new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" }),
@@ -39,7 +39,7 @@ export function VideosChaine({ videos, langue = "fr" }: { videos: VideoChaine[];
               </a>
               {v.publieLe ? <p className="surtitre" style={{ margin: 0 }}>{FORMATS[langue].format(new Date(v.publieLe))}</p> : null}
               <h2 style={{ margin: "4px 0 6px", fontSize: 21 }}>
-                <a href={v.lien} rel="noopener noreferrer" data-cta="video-youtube">{v.titre}</a>
+                <a href={v.lien} rel="noopener noreferrer" data-cta="video-youtube">{titreAffichable(v.titre)}</a>
               </h2>
               {v.resume ? <p className="doux" style={{ margin: "0 0 12px" }}>{v.resume}</p> : null}
               <a href={v.lien} className="btn btn-contour" rel="noopener noreferrer" data-cta="video-youtube-bouton">▶ {t.regarder}</a>

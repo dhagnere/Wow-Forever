@@ -32,8 +32,18 @@ export interface QueteZephras {
 
 export const QUETES_ZEPHRAS: QueteZephras[] = [];
 
-/** Niveaux de l'île : [À confirmer] au lancement (null tant que ce n'est pas relevé en jeu). */
-export const NIVEAUX_ZEPHRAS: [number, number] | null = null;
+/** Niveaux de l'île, d'après Blizzard (fiche des Skyborne) : 1 à 12. */
+export const NIVEAUX_ZEPHRAS: [number, number] | null = [1, 12];
 
-/** Où mène la route en quittant l'île, pour chaque faction : [À confirmer] au lancement. */
-export const SORTIE_ZEPHRAS: Record<"alliance" | "horde", string | null> = { alliance: null, horde: null };
+/**
+ * Où mène la route en quittant l'île, pour chaque faction (Blizzard Watch, 14/10/2026) : aucune quête requise ; quais de
+ * Valanaar, traversée vers Dalaran, puis portail vers la capitale de la faction.
+ */
+export const SORTIE_ZEPHRAS: Record<"alliance" | "horde", string | null> = {
+  alliance: "Hurlevent (traversée de Valanaar à Dalaran, puis portail)",
+  horde: "Orgrimmar (traversée de Valanaar à Dalaran, puis portail)",
+};
+export const SORTIE_ZEPHRAS_EN: Record<"alliance" | "horde", string | null> = {
+  alliance: "Stormwind (crossing from Valanaar to Dalaran, then a portal)",
+  horde: "Orgrimmar (crossing from Valanaar to Dalaran, then a portal)",
+};

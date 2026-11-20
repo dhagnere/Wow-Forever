@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DONJONS } from "@/content/monde";
-import { NOTE_DONJONS_EN, RAIDS_FOREVER_EN, STATUTS_RAIDS_EN } from "@/content/monde-en";
+import { DONJONS_TEXTE_EN, NOTE_DONJONS_EN, RAIDS_FOREVER_EN, STATUTS_RAIDS_EN } from "@/content/monde-en";
 import { DONJONS_ORIGINE, RAIDS } from "@/content/reference";
 import { Ariane } from "@/components/Ariane";
 import { AvertissementReferenceEn } from "@/components/AvertissementReferenceEn";
@@ -41,12 +41,11 @@ export default function DungeonList() {
               <p className="doux" style={{ marginTop: 0 }}>{NOTE_DONJONS_EN}</p>
               <div className="tableau-boite">
                 <table>
-                  <thead><tr><th scope="col">Dungeon</th><th scope="col">From level</th><th scope="col">Zone</th></tr></thead>
+                  <thead><tr><th scope="col">Dungeon</th><th scope="col">Levels</th><th scope="col">Zone</th></tr></thead>
                   <tbody>
                     {DONJONS.map((d) => (
-                      <tr key={d.slug}><td style={{ fontWeight: 600 }}><span className="lien-icone">{ECRAN_DONJON[d.slug] ? <Vignette ecran={ECRAN_DONJON[d.slug]} /> : null}<Link href={pageDonjonEn(d.slug)}>{nom(d.nom)}</Link></span></td><td>{d.niveau}</td><td className="doux">[To be confirmed]</td></tr>
+                      <tr key={d.slug}><td style={{ fontWeight: 600 }}><span className="lien-icone">{ECRAN_DONJON[d.slug] ? <Vignette ecran={ECRAN_DONJON[d.slug]} /> : null}<Link href={pageDonjonEn(d.slug)}>{nom(d.nom)}</Link></span></td><td>{d.niveau}–{d.max}</td><td>{DONJONS_TEXTE_EN[d.slug]?.zone ?? "[To be confirmed]"}</td></tr>
                     ))}
-                    <tr><td colSpan={3} className="doux">[Five other announced dungeons: names and levels to be completed at launch]</td></tr>
                   </tbody>
                 </table>
               </div>

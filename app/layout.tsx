@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
 import { SITE } from "@/lib/site";
+import { IMAGE_PARTAGE } from "@/lib/referencement";
 import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
-  title: { default: `${SITE.nom} — ${SITE.signature}`, template: `%s · ${SITE.nom}` },
+  title: { default: `${SITE.nom} — WoW Forever en français, de 1 à 60`, template: `%s · ${SITE.nom}` },
   description:
-    "L'actualité de WoW Forever en français, servie chaque matin par Jobwow : nouvelles vérifiées, guides de classes, zones et donjons, de 1 à 60.",
-  openGraph: { siteName: SITE.nom, locale: "fr_FR", type: "website" },
+    "WoW Forever en français : guide de 1 à 60 quête par quête, classes et talents, donjons, base d'objets et actualité du jeu servie chaque matin par Jobwow.",
+  applicationName: SITE.nom,
+  // Image de partage par défaut ; une page qui déclare la sienne (article, vidéo) la remplace.
+  openGraph: { siteName: SITE.nom, locale: "fr_FR", type: "website", images: [IMAGE_PARTAGE] },
+  twitter: { card: "summary_large_image", images: [IMAGE_PARTAGE.url] },
   alternates: { canonical: "/", types: { "application/rss+xml": [{ url: "/rss.xml", title: "La Taverne Éternelle" }] } },
   // Condition pour apparaître dans Google Discover avec une grande image.
   robots: { index: true, follow: true, "max-image-preview": "large", googleBot: { index: true, follow: true, "max-image-preview": "large" } },

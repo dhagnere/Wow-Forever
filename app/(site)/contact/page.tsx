@@ -4,7 +4,7 @@ import { Ariane } from "@/components/Ariane";
 import { SITE } from "@/lib/site";
 import { fondBandeau } from "@/lib/ecrans";
 
-export const metadata: Metadata = { title: "Contact", alternates: { canonical: "/contact/", languages: languesDe("/contact/") } };
+export const metadata: Metadata = { title: "Contact", description: "Écrire à Jobwow et à la Taverne Éternelle : une erreur dans un guide, une info sur WoW Forever, une proposition de partenariat.", alternates: { canonical: "/contact/", languages: languesDe("/contact/") } };
 
 export default function Contact() {
   const sujet = encodeURIComponent("Message pour la Taverne Éternelle");

@@ -10,7 +10,7 @@ import { donjonOrigine, donneesDonjon, niveaux, objetsDuDonjon, quetesDonjonsVer
 import { Ariane } from "@/components/Ariane";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { ButinReleveInstance, FicheDonjon } from "@/components/FicheDonjon";
-import { ECRAN_DONJON, ecranParNom, fondBandeau } from "@/lib/ecrans";
+import { ECRAN_DONJON, ECRAN_FOND_DONJON, ecranParNom, fondBandeau } from "@/lib/ecrans";
 import { IllustrationEcran } from "@/components/Visuels";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +20,7 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const slug = (await params).slug;
   const d = DONJONS.find((x) => x.slug === slug);
-  if (d) return { title: `${d.nom} — donjon de WoW Forever`, description: `${d.nom}, nouveau donjon de WoW Forever accessible dès le niveau ${d.niveau} : accès, boss et butin.`, alternates: { canonical: `/donjons/${d.slug}/`, languages: languesDe(`/donjons/${d.slug}/`) } };
+  if (d) return { title: `${d.nom} — donjon de WoW Forever`, description: `${d.nom}, nouveau donjon de WoW Forever pour les niveaux ${d.niveau} à ${d.max} (${d.zone}) : accès, boss et butin.`, alternates: { canonical: `/donjons/${d.slug}/`, languages: languesDe(`/donjons/${d.slug}/`) } };
   const o = donjonOrigine(slug);
   if (!o) return {};
   const donnees = donneesDonjon(slug);
@@ -117,10 +117,10 @@ function NouveauDonjon({ d, releve, objets }: { d: (typeof DONJONS)[number]; rel
   const pilier = `donjons/${d.slug}`;
   return (
     <>
-      <section className="bandeau-page" style={fondBandeau(ECRAN_DONJON[d.slug] ?? "salle-des-thanes")}>
+      <section className="bandeau-page" style={fondBandeau(ECRAN_DONJON[d.slug] ?? ECRAN_FOND_DONJON[d.slug] ?? "salle-des-thanes")}>
         <div className="wrap">
           <Ariane etapes={[{ nom: "Donjons et raids", href: "/donjons/" }, { nom: d.nom }]} />
-          <p className="surtitre">Nouveau donjon · dès le niveau {d.niveau}</p>
+          <p className="surtitre">Nouveau donjon · niveaux {d.niveau} à {d.max} · {d.zone}</p>
           <h1>{d.nom}</h1>
           <p className="chapo">{d.resume}</p>
         </div>

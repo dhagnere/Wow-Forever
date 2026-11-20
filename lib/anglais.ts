@@ -84,11 +84,26 @@ export const CONTINENTS_EN: Record<string, string> = {
 /** Noms des guides qui diffèrent du nom du donjon en jeu. */
 const ALIAS_DONJONS: Record<string, string> = { prison: "prison-de-hurlevent", "pic-de-rochenoire": "pic-rochenoire", "temple-d-atal-hakkar": "temple-englouti" };
 
+/**
+ * Nouveaux donjons de Forever absents des fichiers du jeu lus par `npm run lieux:en` : noms anglais officiels de l'annonce
+ * de Blizzard (news.blizzard.com, septembre 2026), par clé du nom français.
+ */
+const DONJONS_FOREVER_EN: Record<string, string> = {
+  "cite-submergee": "The Drowned City",
+  "bastion-krol-dok": "Krol'dok Stronghold",
+  "prison-d-alcaz": "Alcaz Prison",
+  "repaire-des-noiregueules": "Blackmaw Hold",
+  "terrasse-du-faconneur": "Shaper's Terrace",
+  // Raids de Forever (annonce des raids, octobre 2026)
+  "profondeurs-des-saisons": "Barrow Deeps",
+  "sommet-d-hyjal": "Hyjal Summit",
+};
+
 /** Nom anglais d'un donjon ou d'un raid (nom français des guides), lu dans les fichiers du jeu ; null si inconnu. */
 export function nomDonjonEn(nom: string): string | null {
   const cle = nom.replace(/\(.*?\)/g, "").toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").replace(/[’']/g, "-")
     .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").replace(/^(les?|la|l)-/, "");
-  return DONJONS_EN[ALIAS_DONJONS[cle] ?? cle] ?? null;
+  return DONJONS_EN[ALIAS_DONJONS[cle] ?? cle] ?? DONJONS_FOREVER_EN[cle] ?? null;
 }
 
 /** Donjons de l'Azeroth d'origine : slug français → slug anglais, tiré de leur nom anglais en jeu (« mortemines » → « deadmines »). */

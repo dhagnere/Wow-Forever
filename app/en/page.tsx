@@ -8,6 +8,9 @@ import { JsonLd } from "@/components/JsonLd";
 import { ChoixGuideParClasseEn } from "@/components/ChoixGuideEn";
 import { CLASSES_EN } from "@/lib/anglais";
 import { SITE } from "@/lib/site";
+import { AccesRapides } from "@/components/AccesRapides";
+import { RejoindreTaverne } from "@/components/RejoindreTaverne";
+import { donneesOrganisation } from "@/lib/referencement";
 
 export const metadata: Metadata = {
   title: { absolute: `WoW Forever leveling guide 1-60, classes and talents · ${SITE.nom}` },
@@ -21,8 +24,16 @@ export default async function AccueilAnglais() {
   const nouvelles = await listerPubliesEn({ limite: 3 }).catch(() => []);
   return (
     <>
-      <JsonLd donnees={{ "@context": "https://schema.org", "@type": "WebSite", name: SITE.nom, url: `${SITE.url}/en/`, inLanguage: "en" }} />
-      <section className="heros">
+      <JsonLd
+        donnees={{
+          "@context": "https://schema.org",
+          "@graph": [
+            donneesOrganisation(),
+            { "@type": "WebSite", "@id": `${SITE.url}/en/#site`, name: SITE.nom, url: `${SITE.url}/en/`, inLanguage: "en", publisher: { "@id": `${SITE.url}/#organisation` } },
+          ],
+        }}
+      />
+      <section className="heros heros-accueil">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           className="heros-image"
@@ -35,17 +46,20 @@ export default async function AccueilAnglais() {
         <p className="heros-credit">Screenshot by Jobwow · © Blizzard Entertainment</p>
         <div className="wrap">
           <div className="heros-carte cadre">
-            <p className="surtitre" style={{ fontSize: 15, letterSpacing: "0.22em", marginBottom: 14 }}>WoW Forever</p>
-            <h1>Original Azeroth is back</h1>
+            <p className="surtitre heros-surtitre">WoW Forever leveling guide</p>
+            <h1>Your road through Azeroth, <span className="accent">from 1 to 60</span></h1>
             <span className="ornement" aria-hidden="true" />
             <p>A leveling guide from 1 to 60 for your race and class, quest by quest, with every NPC and monster on the map. Spells, talents and a talent calculator for all nine classes.</p>
             <div className="boutons">
-              <a href="#guide-1-60" className="btn btn-or" data-cta="guide-heros-en">Follow the 1-60 guide</a>
+              <a href="#guide-1-60" className="btn btn-or" data-cta="guide-heros-en">Pick my guide</a>
               <Link href="/en/classes/" className="btn btn-contour" data-cta="classes-heros-en">Classes and talents</Link>
             </div>
+            <p className="heros-garanties">Free · Progress saved · English game names</p>
           </div>
         </div>
       </section>
+
+      <AccesRapides langue="en" />
 
       <section id="guide-1-60" className="accueil-guide" aria-labelledby="t-guide-accueil">
         <div className="wrap">
@@ -64,7 +78,9 @@ export default async function AccueilAnglais() {
               <li><strong>Progress</strong> ticked and saved</li>
             </ul>
           </div>
-          <p className="accueil-guide-consigne">Pick your class, then your race:</p>
+          <p className="accueil-guide-consigne">
+            Pick your class, then your race:<span className="accueil-guide-glisser" aria-hidden="true"> swipe to see all nine classes →</span>
+          </p>
           <ChoixGuideParClasseEn />
           <p className="doux" style={{ margin: "16px 0 0", fontSize: 14 }}>
             Or browse <Link href="/en/leveling-guide/">the Alliance and Horde routes</Link>.
@@ -107,6 +123,8 @@ export default async function AccueilAnglais() {
             are translated from the French edition, usually within an hour of publication.
           </p>
         </section>
+
+        <RejoindreTaverne langue="en" />
       </div>
     </>
   );

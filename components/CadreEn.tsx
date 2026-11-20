@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { SITE } from "@/lib/site";
-import { GererCookies } from "./BandeauCookies";
+import { PiedColonnes } from "./PiedColonnes";
 import { Medaillon, NomSite } from "./Cadre";
 import { ChoixLangue } from "./ChoixLangue";
 import { Decompte } from "./Decompte";
 import { NavPrincipale } from "./NavPrincipale";
-import { MENU_EN } from "@/lib/anglais";
 
 /** Cadre de la version anglaise (/en/) : en-tête, menu et pied de page en anglais. */
 
@@ -56,29 +55,17 @@ function Pied() {
         <div className="wrap pied-ornement" aria-hidden="true">
           <Medaillon taille={40} />
         </div>
-        <div className="wrap pied-corps">
-          <div className="pied-marque">
-            <p className="logo" style={{ fontSize: 20, margin: 0 }}>
-              <NomSite />
-            </p>
-            <p>A fan site about WoW Forever, run by Jobwow: daily news translated from the French edition, the 1-60 leveling guide, classes, items and maps.</p>
-          </div>
-          <nav aria-label="Footer" className="pied-liens">
-            {MENU_EN.map((m) => <Link key={m.href} href={m.href}>{m.label}</Link>)}
-            <Link href="/en/account/">My account</Link>
-            <Link href="/en/guilds/">Guild board</Link>
-            <Link href="/en/legal-notice/">Legal notice</Link>
-            <Link href="/en/privacy/">Privacy policy</Link>
-            <Link href="/en/calendar/">Calendar</Link>
-            <Link href="/en/community/">Community</Link>
-            <Link href="/en/contact/">Contact</Link>
-            <Link href="/en/about/">Who is Jobwow?</Link>
-            <Link href="/en/support/">Support the Tavern</Link>
-            {SITE.youtube ? <a href={SITE.youtube} rel="noopener noreferrer" data-cta="youtube-pied-en">YouTube channel</a> : null}
-            {SITE.gtmId ? <GererCookies langue="en" /> : null}
-            <Link href="/en/sitemap/">Site map</Link>
-          </nav>
-        </div>
+        <PiedColonnes
+          langue="en"
+          marque={
+            <>
+              <p className="logo" style={{ fontSize: 20, margin: 0 }}>
+                <NomSite />
+              </p>
+              <p>A fan site about WoW Forever, run by Jobwow: the 1-60 leveling guide, classes, items, maps and daily news translated from the French edition.</p>
+            </>
+          }
+        />
         <div className="wrap pied-bas">
           <p>
             Independent fan site, not affiliated with Blizzard Entertainment. World of Warcraft and Warcraft are trademarks of Blizzard Entertainment.

@@ -36,8 +36,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const c = lire(await params);
   if (!c) return {};
   return {
-    title: `Guide de 1 à 60 : ${c.race.nom} ${c.classe.nom.toLowerCase()} sur WoW Forever`,
-    description: `La route de 1 à 60 du ${c.race.nom.toLowerCase()} ${c.classe.nom.toLowerCase()} sur WoW Forever : zones dans l'ordre, chaque quête avec ses PNJ sur la carte, quêtes de classe comprises, et progression à cocher.`,
+    title: `Guide de 1 à 60 : ${nomRace(c.race)} ${c.classe.nom.toLowerCase()} sur WoW Forever`,
+    description: `La route de 1 à 60 du ${c.race.skyborne ? `Skyborne ${c.classe.nom.toLowerCase()} (${c.race.faction === "alliance" ? "Alliance" : "Horde"})` : `${c.race.nom.toLowerCase()} ${c.classe.nom.toLowerCase()}`} sur WoW Forever : zones dans l'ordre, chaque quête avec ses PNJ sur la carte, quêtes de classe comprises, et progression à cocher.`,
     alternates: { canonical: `/guides/parcours/${c.race.slug}/${c.classe.slug}/`, languages: languesDe(`/guides/parcours/${c.race.slug}/${c.classe.slug}/`) },
   };
 }
@@ -52,7 +52,7 @@ export default async function GuideRaceClasse({ params }: Props) {
     arrets: ordreDuGuide(z, c.race, c.classe.slug, parcours),
     ...(z.lieu === ZEPHRAS ? { lieux: LIEUX_ZEPHRAS } : {}),
     ...(z.lieu === ZEPHRAS && !z.etapes.length ? {
-      note: `Les quêtes de l'île ne figurent pas encore dans les fichiers du jeu : Jobwow les relève au lancement et les ajoute ici, avec leurs PNJ et leurs cibles sur la carte. En attendant, la carte montre les lieux de l'île. Partez du village de Thendal, faites les quêtes de l'île jusqu'à ce qu'elle soit terminée, puis prenez la route ${SORTIE_ZEPHRAS[c.race.faction] ? `vers ${SORTIE_ZEPHRAS[c.race.faction]}` : "de votre faction [point d'arrivée à confirmer au lancement]"} : la suite du guide reprend au niveau 10.`,
+      note: `Les quêtes de l'île ne figurent pas dans les fichiers du jeu : Jobwow les relèvera en jeu et les ajoutera ici, avec leurs PNJ et leurs cibles sur la carte. En attendant, la carte montre les lieux de l'île. Partez du village de Thendal, faites les quêtes de l'île jusqu'au niveau 12 environ, puis prenez la route ${SORTIE_ZEPHRAS[c.race.faction] ? `vers ${SORTIE_ZEPHRAS[c.race.faction]}` : "de votre faction [point d'arrivée à confirmer au lancement]"} : la suite du guide reprend avec la route de votre faction.`,
     } : {}),
   }));
   if (!zones.length) notFound();

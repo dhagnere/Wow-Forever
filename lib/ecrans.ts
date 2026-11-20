@@ -36,6 +36,15 @@ export const ECRAN_DONJON: Record<string, SlugEcran> = {
   "cite-de-dalaran": "cite-de-dalaran",
 };
 
+/** Nouveaux donjons sans écran de chargement propre : fond du bandeau pris dans l'écran du continent (pas d'illustration). */
+export const ECRAN_FOND_DONJON: Record<string, SlugEcran> = {
+  "cite-submergee": "royaumes-de-l-est",
+  "bastion-kroldok": "royaumes-de-l-est",
+  "prison-d-alcaz": "kalimdor",
+  "repaire-des-noiregueules": "kalimdor",
+  "terrasse-du-faconneur": "kalimdor",
+};
+
 /** Donjons et raids de l'Azeroth d'origine, par leur nom affiché dans content/reference.ts. */
 const ECRAN_PAR_NOM: Record<string, SlugEcran> = {
   "Gouffre de Ragefeu": "gouffre-de-ragefeu",

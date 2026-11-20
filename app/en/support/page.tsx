@@ -50,12 +50,16 @@ export default function SupportEn() {
           <li>No promised reward the Tavern could not deliver.</li>
         </ul>
 
-        <h2>Good to know</h2>
-        <p>
-          Donations go through {SITE.plateformeDon || "[donation platform]"}, which handles the payment: the Tavern never sees your bank
-          details. They are made to a private individual and give no right to a tax reduction. A monthly donation stops in one click from your
-          account on the platform.
-        </p>
+        {ouvert ? (
+          <>
+            <h2>Good to know</h2>
+            <p>
+              Donations go through {SITE.plateformeDon || "the donation platform"}, which handles the payment: the Tavern never sees your bank
+              details. They are made to a private individual and give no right to a tax reduction. A monthly donation stops in one click from your
+              account on the platform.
+            </p>
+          </>
+        ) : null}
 
         <h2>Help without paying</h2>
         <ul>

@@ -9,7 +9,7 @@ import { pageZoneEn } from "@/lib/anglais";
 
 export const metadata: Metadata = {
   title: "WoW Forever zones",
-  description: "Mount Hyjal, Riverglades, Zephras Isle, Shen'dralar: the new zones of World of Warcraft: Forever.",
+  description: "Mount Hyjal, Riverglades, Zephras Isle, Shen'dralas: the new zones of World of Warcraft: Forever.",
   alternates: { canonical: "/en/zones/", languages: { fr: "/zones/", en: "/en/zones/", "x-default": "/zones/" } },
 };
 

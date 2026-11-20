@@ -4,7 +4,7 @@ import { SITE } from "@/lib/site";
 import { fondBandeau } from "@/lib/ecrans";
 
 export const metadata: Metadata = {
-  title: "Contact",
+  title: "Contact the Tavern",
   alternates: { canonical: "/en/contact/", languages: { fr: "/contact/", en: "/en/contact/", "x-default": "/contact/" } },
 };
 

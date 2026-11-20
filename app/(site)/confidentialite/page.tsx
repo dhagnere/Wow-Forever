@@ -5,7 +5,7 @@ import { Ariane } from "@/components/Ariane";
 import { SITE } from "@/lib/site";
 import { fondBandeau } from "@/lib/ecrans";
 
-export const metadata: Metadata = { title: "Politique de confidentialité", alternates: { canonical: "/confidentialite/", languages: languesDe("/confidentialite/") } };
+export const metadata: Metadata = { title: "Politique de confidentialité", description: "Ce que la Taverne Éternelle enregistre, pourquoi et pour combien de temps : mesure d'audience, cookies soumis à votre accord, comptes joueurs, Lettre, vos droits.", alternates: { canonical: "/confidentialite/", languages: languesDe("/confidentialite/") } };
 
 export default function Confidentialite() {
   return (

@@ -24,6 +24,8 @@
     "base:explorer": "tsx scripts/explorer-wago.ts",
     "base:importer": "tsx modules/veille/scripts/objets.ts",
     "visuels:generer": "node scripts/generer-visuels.mjs",
+    "visuels:partage": "node scripts/generer-partage.mjs",
+    "verifier:liens": "node scripts/verifier-liens.mjs",
     "icones:jeu": "tsx modules/veille/scripts/icones-jeu.ts",
     "ecrans:jeu": "tsx modules/veille/scripts/ecrans-jeu.ts",
     "cartes:jeu": "tsx modules/veille/scripts/cartes-jeu.ts",
