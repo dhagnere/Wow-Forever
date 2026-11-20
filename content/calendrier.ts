@@ -18,7 +18,7 @@ export interface Echeance {
   en: { titre: string; description: string; periode?: string };
 }
 
-export const MAJ_CALENDRIER = "2026-11-05";
+export const MAJ_CALENDRIER = "2026-11-20";
 
 export const ECHEANCES: Echeance[] = [
   {
@@ -33,26 +33,35 @@ export const ECHEANCES: Echeance[] = [
     id: "raids",
     titre: "Ouverture des premiers raids",
     debut: "2026-12-09",
-    description: "Trois raids ouvrent : un raid à 10 joueurs (Barrow Deeps en anglais), le raid du Mont Hyjal à 20 joueurs (Hyjal Summit) et le Repaire d'Onyxia à 40. Les guides paraissent avant l'ouverture.",
+    description: "Trois raids ouvrent au niveau 60 : les profondeurs des Saisons (10 joueurs, 8 boss), le sommet d'Hyjal (20 joueurs, 13 boss) et le repaire d'Onyxia (40 joueurs). Pour entrer au repaire d'Onyxia, chacun doit avoir l'amulette drakefeu dans son sac. Les guides paraissent avant l'ouverture.",
     lien: "/donjons/#raids",
-    en: { titre: "First raids open", description: "Three raids open: Barrow Deeps (10 players), Hyjal Summit (20 players) and Onyxia's Lair (40 players). Guides are published before the opening." },
+    en: { titre: "First raids open", description: "Three level 60 raids open: Barrow Deeps (10 players, 8 bosses), Hyjal Summit (20 players, 13 bosses) and Onyxia's Lair (40 players). To enter Onyxia's Lair, every raid member needs the Drakefire Amulet in their bags. Guides are published before the opening." },
   },
   {
     id: "hardcore",
     titre: "Mode Hardcore",
     debut: null,
     periode: "Hiver 2026-2027",
-    description: "Annoncé pour l'hiver, peu après l'ouverture des raids d'après la feuille de route, sans date précise. La date sera ajoutée ici et dans l'agenda dès son annonce.",
+    description: "Annoncé pour l'hiver d'après la feuille de route, sans date précise, sur des royaumes Hardcore officiels, à part des autres. La date sera ajoutée ici et dans l'agenda dès son annonce.",
     lien: "/actualites/",
-    en: { titre: "Hardcore mode", periode: "Winter 2026-2027", description: "Announced for the winter, shortly after the raids open according to the roadmap, without a precise date. The date will be added here and to the calendar as soon as it is announced." },
+    en: { titre: "Hardcore mode", periode: "Winter 2026-2027", description: "Announced for the winter according to the roadmap, without a precise date, on official Hardcore realms separate from the others. The date will be added here and to the calendar as soon as it is announced." },
+  },
+  {
+    id: "printemps-2027",
+    titre: "Mise à jour du printemps 2027",
+    debut: null,
+    periode: "Printemps 2027",
+    description: "Deux nouveaux raids (10 et 20 joueurs), deux donjons, de nouvelles quêtes et une nouvelle zone, une chaîne de quêtes légendaire et une nouvelle saison JcJ, d'après la feuille de route. Pas encore de date.",
+    lien: "/actualites/",
+    en: { titre: "Spring 2027 update", periode: "Spring 2027", description: "Two new raids (10 and 20 players), two dungeons, new quests and a new zone, a legendary questline and a new PvP season, according to the roadmap. No date yet." },
   },
   {
     id: "ete-2027",
-    titre: "Nouveaux contenus",
+    titre: "Mise à jour de l'été 2027",
     debut: null,
     periode: "Été 2027",
-    description: "Blizzard annonce de nouveaux contenus pour l'été 2027, sans date ni détail pour l'instant.",
+    description: "Un raid emblématique remanié, un nouveau raid, du contenu dans le monde, deux donjons, une nouvelle saison JcJ et des mises à jour des métiers et du système d'héritage, d'après la feuille de route. Pas encore de date.",
     lien: "/actualites/",
-    en: { titre: "New content", periode: "Summer 2027", description: "Blizzard announces new content for summer 2027, with no date or details yet." },
+    en: { titre: "Summer 2027 update", periode: "Summer 2027", description: "A revamped iconic raid, a new raid, more world content, two dungeons, a new PvP season and updates to professions and the Legacy system, according to the roadmap. No date yet." },
   },
 ];

@@ -40,12 +40,11 @@ export default function ListeDesDonjons() {
               <p className="doux" style={{ marginTop: 0 }}>{NOTE_DONJONS}</p>
               <div className="tableau-boite">
                 <table>
-                  <thead><tr><th scope="col">Donjon</th><th scope="col">Dès le niveau</th><th scope="col">Zone</th></tr></thead>
+                  <thead><tr><th scope="col">Donjon</th><th scope="col">Niveaux</th><th scope="col">Zone</th></tr></thead>
                   <tbody>
                     {DONJONS.map((d) => (
-                      <tr key={d.slug}><td style={{ fontWeight: 600 }}><span className="lien-icone">{ECRAN_DONJON[d.slug] ? <Vignette ecran={ECRAN_DONJON[d.slug]} /> : null}<Link href={`/donjons/${d.slug}/`}>{d.nom}</Link></span></td><td>{d.niveau}</td><td className="doux">[À confirmer]</td></tr>
+                      <tr key={d.slug}><td style={{ fontWeight: 600 }}><span className="lien-icone">{ECRAN_DONJON[d.slug] ? <Vignette ecran={ECRAN_DONJON[d.slug]} /> : null}<Link href={`/donjons/${d.slug}/`}>{d.nom}</Link></span></td><td>{d.niveau} à {d.max}</td><td>{d.zone}</td></tr>
                     ))}
-                    <tr><td colSpan={3} className="doux">[Cinq autres donjons annoncés : noms et niveaux à compléter au lancement]</td></tr>
                   </tbody>
                 </table>
               </div>

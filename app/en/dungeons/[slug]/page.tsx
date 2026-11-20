@@ -5,7 +5,7 @@ import { DONJONS } from "@/content/monde";
 import { DONJONS_TEXTE_EN, NOTE_DONJONS_EN } from "@/content/monde-en";
 import { Ariane } from "@/components/Ariane";
 import { IllustrationEcran } from "@/components/Visuels";
-import { ECRAN_DONJON, fondBandeau } from "@/lib/ecrans";
+import { ECRAN_DONJON, ECRAN_FOND_DONJON, fondBandeau } from "@/lib/ecrans";
 import { CONTINENTS_EN, donjonDepuisEn, nomDonjonEn, nomZoneEn, pageDonjonEn } from "@/lib/anglais";
 import { DONJONS_ORIGINE, RAIDS_ORIGINE, raidOrigine } from "@/content/reference";
 import { butinReleveInstance, objetsParIds, type CreatureReleve, type ObjetResume } from "@/modules/veille";
@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const en = pageDonjonEn(d.slug);
   return {
     title: `${nom(d)} — WoW Forever dungeon`,
-    description: `${nom(d)}, a new WoW Forever dungeon open from level ${d.niveau}: access, bosses and loot.`,
+    description: `${nom(d)}, a new WoW Forever dungeon for levels ${d.niveau} to ${d.max} (${DONJONS_TEXTE_EN[d.slug].zone}): access, bosses and loot.`,
     alternates: { canonical: en, languages: { fr, en, "x-default": fr } },
   };
 }
@@ -130,12 +130,12 @@ export default async function DonjonEn({ params }: Props) {
   const releveUtile = releve.some((c) => c.victoires > 0 && c.objets.length);
   return (
     <>
-      <section className="bandeau-page" style={fondBandeau(ECRAN_DONJON[d.slug] ?? "salle-des-thanes")}>
+      <section className="bandeau-page" style={fondBandeau(ECRAN_DONJON[d.slug] ?? ECRAN_FOND_DONJON[d.slug] ?? "salle-des-thanes")}>
         <div className="wrap">
           <Ariane langue="en" etapes={[{ nom: "Dungeons and raids", href: "/en/dungeons/" }, { nom: nom(d) }]} />
-          <p className="surtitre">New dungeon · from level {d.niveau}</p>
+          <p className="surtitre">New dungeon · levels {d.niveau}–{d.max} · {DONJONS_TEXTE_EN[d.slug].zone}</p>
           <h1>{nom(d)}</h1>
-          <p className="chapo">{DONJONS_TEXTE_EN[d.slug].resume(d.niveau)}</p>
+          <p className="chapo">{DONJONS_TEXTE_EN[d.slug].resume(d.niveau, d.max)}</p>
         </div>
       </section>
       <div className="wrap contenu">

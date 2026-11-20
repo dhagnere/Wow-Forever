@@ -5,7 +5,7 @@
  * Les éléments propres à Forever reprennent les informations déjà publiées sur le site (bêta 1.60.1).
  */
 
-export const MISE_A_JOUR_REFERENCE = "2026-11-01";
+export const MISE_A_JOUR_REFERENCE = "2026-11-20";
 
 export type Continent = "Royaumes de l'Est" | "Kalimdor" | "Hors des continents" | "[À confirmer]";
 
@@ -27,7 +27,7 @@ export const ZONES_DEPART: ZoneDepart[] = [
   { races: "Orcs et Trolls", faction: "Horde", lieu: "Vallée des Épreuves", zone: "Durotar", capitale: "Orgrimmar", continent: "Kalimdor" },
   { races: "Taurens", faction: "Horde", lieu: "Camp Narache", zone: "Mulgore", capitale: "Les Pitons-du-Tonnerre", continent: "Kalimdor" },
   { races: "Morts-vivants", faction: "Horde", lieu: "Le Glas (Deathknell)", zone: "Clairières de Tirisfal", capitale: "Fossoyeuse", continent: "Royaumes de l'Est" },
-  { races: "Skyborne", faction: "Alliance ou Horde", lieu: "Village de Thendal", zone: "Île de Zéphras (une version par faction)", capitale: "[À confirmer]", continent: "Hors des continents", lien: "/zones/ile-de-zephras/", forever: true },
+  { races: "Skyborne", faction: "Alliance ou Horde", lieu: "Village de Thendal", zone: "Île de Zéphras (une version par faction)", capitale: "Valanaar (île de Zéphras)", continent: "Hors des continents", lien: "/zones/ile-de-zephras/", forever: true },
 ];
 
 export interface ZoneNiveau {
@@ -48,7 +48,7 @@ export const ZONES_NIVEAUX: ZoneNiveau[] = [
   { nom: "Teldrassil", min: 1, max: 10, continent: "Kalimdor" },
   { nom: "Durotar", min: 1, max: 10, continent: "Kalimdor" },
   { nom: "Mulgore", min: 1, max: 10, continent: "Kalimdor" },
-  { nom: "Île de Zéphras", min: 1, max: 10, continent: "Hors des continents", lien: "/zones/ile-de-zephras/", forever: true, incertain: true },
+  { nom: "Île de Zéphras", min: 1, max: 12, continent: "Hors des continents", lien: "/zones/ile-de-zephras/", forever: true },
   { nom: "Marche de l'Ouest", min: 10, max: 20, continent: "Royaumes de l'Est" },
   { nom: "Loch Modan", min: 10, max: 20, continent: "Royaumes de l'Est" },
   { nom: "Forêt des Pins-Argentés", min: 10, max: 20, continent: "Royaumes de l'Est" },
@@ -87,7 +87,7 @@ export const ZONES_NIVEAUX: ZoneNiveau[] = [
 ];
 
 /** Zones dont les niveaux ne sont pas encore connus. */
-export const ZONES_SANS_NIVEAU: { nom: string; lien: string }[] = [{ nom: "Shen'dralar", lien: "/zones/shendralar/" }];
+export const ZONES_SANS_NIVEAU: { nom: string; lien: string }[] = [{ nom: "Shen'dralas", lien: "/zones/shendralar/" }];
 
 export const TRANCHES: [number, number][] = [[1, 10], [10, 20], [20, 30], [30, 40], [40, 50], [50, 60]];
 
@@ -140,8 +140,8 @@ export interface RaidReference {
 }
 
 export const RAIDS: RaidReference[] = [
-  { nom: "[Raid à 10 joueurs : Barrow Deeps en anglais, nom français à confirmer]", joueurs: "10", zone: "[À confirmer]", statut: "Annoncé dans Forever, ouverture le 9 décembre 2026" },
-  { nom: "[Raid du Mont Hyjal : Hyjal Summit en anglais, nom français à confirmer]", joueurs: "20", zone: "Mont Hyjal", statut: "Annoncé dans Forever, ouverture le 9 décembre 2026", lien: "/zones/mont-hyjal/" },
+  { nom: "Les profondeurs des Saisons", joueurs: "10", zone: "Mont Hyjal", statut: "Annoncé dans Forever, ouverture le 9 décembre 2026", lien: "/zones/mont-hyjal/" },
+  { nom: "Sommet d'Hyjal", joueurs: "20", zone: "Mont Hyjal", statut: "Annoncé dans Forever, ouverture le 9 décembre 2026", lien: "/zones/mont-hyjal/" },
   { slug: "repaire-d-onyxia", nom: "Repaire d'Onyxia", joueurs: "40", zone: "Marécage d'Âprefange", statut: "Annoncé dans Forever, ouverture le 9 décembre 2026" },
   { slug: "coeur-du-magma", nom: "Cœur du Magma", joueurs: "40 dans l'Azeroth d'origine", zone: "Mont Rochenoire", statut: "Présence dans Forever non confirmée" },
   { slug: "repaire-de-l-aile-noire", nom: "Repaire de l'Aile noire", joueurs: "40 dans l'Azeroth d'origine", zone: "Mont Rochenoire", statut: "Présence dans Forever non confirmée" },

@@ -69,16 +69,15 @@ export default function DonjonsEn() {
             <p className="doux" style={{ marginTop: 0 }}>{NOTE_DONJONS_EN}</p>
             <div className="tableau-boite">
               <table>
-                <thead><tr><th scope="col">Dungeon</th><th scope="col">Open from level</th><th scope="col">Page</th></tr></thead>
+                <thead><tr><th scope="col">Dungeon</th><th scope="col">Levels</th><th scope="col">Page</th></tr></thead>
                 <tbody>
                   {DONJONS.map((d) => (
                     <tr key={d.slug}>
                       <td style={{ fontWeight: 600 }}><span className="lien-icone">{ECRAN_DONJON[d.slug] ? <Vignette ecran={ECRAN_DONJON[d.slug]} /> : null}{nomDonjonEn(d.nom) ?? d.nom}</span></td>
-                      <td>{d.niveau}</td>
+                      <td>{d.niveau}–{d.max}</td>
                       <td><Link href={pageDonjonEn(d.slug)}>Read</Link></td>
                     </tr>
                   ))}
-                  <tr><td colSpan={3} className="doux">[Five other announced dungeons: names and levels to be completed at launch]</td></tr>
                 </tbody>
               </table>
             </div>
