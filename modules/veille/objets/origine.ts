@@ -12,11 +12,24 @@ import { lignes } from "./conversion";
 import { iconeFichier } from "./depot";
 import { derniereVersion, produitOrigine, tableCsv } from "./wago";
 
-/** Objets que l'on peut lâcher d'après les bases libres (clés de `objets` dans butin.json.gz). */
+/**
+ * Objets de l'Azeroth d'origine connus des bases libres : butin des donjons et raids (content/donjons-jeu.json, npm run base:donjons)
+ * et objets de « Où le trouver » (butin.json.gz).
+ */
 export function idsButinOrigine(): number[] {
-  const brut = gunzipSync(readFileSync(path.join(process.cwd(), "modules/veille/objets/donnees", "butin.json.gz"))).toString("utf8");
-  const donnees = JSON.parse(brut) as { objets?: Record<string, unknown> };
-  return Object.keys(donnees.objets ?? {}).map(Number).filter((n) => Number.isSafeInteger(n) && n > 0);
+  const ids = new Set<number>();
+  const lire = (fichier: string, gz: boolean) => {
+    try {
+      const brut = readFileSync(path.join(process.cwd(), fichier));
+      const donnees = JSON.parse((gz ? gunzipSync(brut) : brut).toString("utf8")) as { objets?: Record<string, unknown> };
+      for (const k of Object.keys(donnees.objets ?? {})) ids.add(Number(k));
+    } catch {
+      // Fichier absent : l'autre suffit.
+    }
+  };
+  lire("content/donjons-jeu.json", false);
+  lire("modules/veille/objets/donnees/butin.json.gz", true);
+  return [...ids].filter((n) => Number.isSafeInteger(n) && n > 0);
 }
 
 export interface BilanIconesOrigine {

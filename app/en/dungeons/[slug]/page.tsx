@@ -8,8 +8,8 @@ import { IllustrationEcran } from "@/components/Visuels";
 import { ECRAN_DONJON, ECRAN_FOND_DONJON, fondBandeau } from "@/lib/ecrans";
 import { CONTINENTS_EN, donjonDepuisEn, nomDonjonEn, nomZoneEn, pageDonjonEn } from "@/lib/anglais";
 import { DONJONS_ORIGINE, RAIDS_ORIGINE, raidOrigine } from "@/content/reference";
-import { butinReleveInstance, objetsParIds, type CreatureReleve, type ObjetResume } from "@/modules/veille";
-import { donjonOrigine, donneesDonjon, niveaux, objetsDuDonjon, quetesDonjonsVerifiees, sourceDonjons } from "@/lib/donjons";
+import { butinReleveInstance, type CreatureReleve, type ObjetResume } from "@/modules/veille";
+import { donjonOrigine, donneesDonjon, objetsButinDonjon, niveaux, objetsDuDonjon, quetesDonjonsVerifiees, sourceDonjons } from "@/lib/donjons";
 import { ButinReleveInstance, FicheDonjon } from "@/components/FicheDonjon";
 import { ecranParNom } from "@/lib/ecrans";
 
@@ -47,8 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 async function objetsDe(ids: number[]): Promise<{ objets: Map<number, ObjetResume>; lu: boolean }> {
   try {
-    const liste = await objetsParIds(ids, "en");
-    return { objets: new Map(liste.map((o) => [o.id, o])), lu: true };
+    return { objets: await objetsButinDonjon(ids, "en"), lu: true };
   } catch (e) {
     console.error("[dungeons] loot:", e instanceof Error ? e.message : e);
     return { objets: new Map(), lu: false };

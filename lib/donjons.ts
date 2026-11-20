@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { FICHES_ORIGINE, type DonjonReference } from "@/content/reference";
+import { objetsParIds, objetsParNoms, type ObjetResume } from "@/modules/veille";
 
 /**
  * Donjons et raids de l'Azeroth d'origine : boss dans l'ordre des rencontres, butin, rares, entrées et quêtes, lus dans
@@ -87,4 +88,21 @@ export const niveaux = ([a, b]: [number, number]) => (a === b ? String(a) : `${a
 export function nombreDeBoss(slug: string): number | null {
   const d = donneesDonjon(slug);
   return d ? d.boss.length : null;
+}
+
+/**
+ * Butin d'un donjon lu dans la base d'objets du site : par identifiant d'abord, puis, pour un objet d'origine que Forever a
+ * renuméroté, par son nom et sa qualité (objetsParNoms). La carte rend l'objet de Forever sous l'identifiant d'origine.
+ */
+export async function objetsButinDonjon(ids: number[], langue: "fr" | "en" = "fr"): Promise<Map<number, ObjetResume>> {
+  const objets = new Map((await objetsParIds(ids, langue)).map((o) => [o.id, o]));
+  const manquants = [...new Set(ids)]
+    .filter((id) => !objets.has(id))
+    .map((id) => {
+      const o = objetOrigine(id);
+      return o ? { id, n: o.n, en: o.en, q: o.q } : null;
+    })
+    .filter((e): e is { id: number; n: string; en: string; q: number } => !!e);
+  for (const [id, o] of await objetsParNoms(manquants, langue)) objets.set(id, o);
+  return objets;
 }

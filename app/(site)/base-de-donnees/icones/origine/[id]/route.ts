@@ -19,7 +19,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   return new Response(new Uint8Array(image), {
     headers: {
       "Content-Type": "image/png",
-      "Cache-Control": png ? "public, max-age=2592000, immutable" : "public, max-age=3600",
+      "Cache-Control": png ? "public, max-age=2592000, immutable" : "public, max-age=300",
     },
   });
 }
