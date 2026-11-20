@@ -4,7 +4,7 @@ import { normaliser } from "../collecte/texte";
 import { decoderBlp } from "./blp";
 import { convertirCategories, convertirEnsembles, convertirObjets, convertirRecettes, type LigneObjet } from "./conversion";
 import { preparerTables, TABLES_CARACTERISTIQUES, type Caracteristique } from "./caracteristiques";
-import { derniereVersion, fichierBrut, tableCsv } from "./wago";
+import { derniereVersion, fichierBrut, produitOrigine, tableCsv } from "./wago";
 
 /** Base d'objets de WoW Forever : import depuis wago.tools, lecture pour le site, icônes en cache. */
 
@@ -316,13 +316,44 @@ export async function iconeObjet(id: number): Promise<Buffer | null> {
   const { rows } = await pool().query<{ png: Buffer }>("SELECT png FROM objets_icones WHERE id = $1", [id]);
   if (rows[0]) return rows[0].png;
   // Seules les icônes d'objets connus sont demandées à wago.tools : pas de relais ouvert vers leurs fichiers.
-  const { rows: connue } = await pool().query("SELECT 1 FROM objets WHERE icone = $1 LIMIT 1", [id]);
+  // Connus = objets de la base, ou objets du butin d'origine dont l'icône a été notée (objets_origine_icones).
+  const { rows: connue } = await pool().query(
+    "SELECT 1 FROM objets WHERE icone = $1 UNION ALL SELECT 1 FROM objets_origine_icones WHERE icone = $1 LIMIT 1",
+    [id],
+  );
   if (!connue.length) return null;
+  return iconeFichier(id);
+}
+
+/**
+ * Lit, convertit et garde en cache une icône du jeu par son identifiant de fichier, sans contrôle : l'appelant vérifie que
+ * l'identifiant fait partie d'une liste connue (objets, butin d'origine, sorts des classes). Fichier cherché dans la version de
+ * Forever, puis dans celle de Classic Era (icônes d'objets que Forever ne livre plus).
+ */
+export async function iconeFichier(id: number): Promise<Buffer | null> {
+  if (!Number.isSafeInteger(id) || id <= 0) return null;
+  const { rows } = await pool().query<{ png: Buffer }>("SELECT png FROM objets_icones WHERE id = $1", [id]);
+  if (rows[0]) return rows[0].png;
+  const versions: string[] = [];
   const etat = await etatBase();
-  if (!etat) return null;
-  const png = await convertirIcone(await fichierBrut(id, etat.version));
-  await pool().query("INSERT INTO objets_icones (id, png) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING", [id, png]);
-  return png;
+  if (etat) versions.push(etat.version);
+  try {
+    versions.push(await derniereVersion(produitOrigine()));
+  } catch {
+    // Classic Era injoignable : la version de Forever suffit le plus souvent.
+  }
+  let erreur: unknown = null;
+  for (const v of versions) {
+    try {
+      const png = await convertirIcone(await fichierBrut(id, v));
+      await pool().query("INSERT INTO objets_icones (id, png) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING", [id, png]);
+      return png;
+    } catch (e) {
+      erreur = e;
+    }
+  }
+  if (erreur) throw erreur;
+  return null;
 }
 
 export async function convertirIcone(blp: Buffer): Promise<Buffer> {
@@ -336,7 +367,8 @@ export async function convertirIcone(blp: Buffer): Promise<Buffer> {
 /** Remplit le cache des icônes manquantes, quelques téléchargements à la fois. */
 export async function prechargerIcones(simultanes = 4): Promise<{ ajoutees: number; echecs: number }> {
   const { rows } = await pool().query<{ icone: number }>(
-    "SELECT DISTINCT o.icone FROM objets o LEFT JOIN objets_icones i ON i.id = o.icone WHERE i.id IS NULL AND o.icone > 0",
+    `SELECT DISTINCT c.icone FROM (SELECT icone FROM objets UNION SELECT icone FROM objets_origine_icones) c
+       LEFT JOIN objets_icones i ON i.id = c.icone WHERE i.id IS NULL AND c.icone > 0`,
   );
   let ajoutees = 0;
   let echecs = 0;

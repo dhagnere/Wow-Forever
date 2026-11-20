@@ -164,6 +164,14 @@ CREATE TABLE IF NOT EXISTS objets_icones (
   cree_le  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Icône des objets de l'Azeroth d'origine absents des fichiers de Forever (butin des donjons et raids) :
+-- identifiant de fichier lu dans la table Item des fichiers de Classic Era (wago.tools), objet par objet.
+CREATE TABLE IF NOT EXISTS objets_origine_icones (
+  id       INTEGER PRIMARY KEY,
+  icone    INTEGER NOT NULL,
+  maj_le   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 -- Mesure d'audience sans cookie (module statistiques). Le visiteur est un code recalculé chaque jour
 -- (empreinte salée de l'adresse IP et du navigateur) : ni adresse IP ni identifiant durable ne sont conservés.
 CREATE TABLE IF NOT EXISTS stats_vues (

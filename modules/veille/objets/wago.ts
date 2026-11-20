@@ -10,6 +10,11 @@ export function produit(): string {
   return process.env.OBJETS_PRODUIT?.trim() || "wowf";
 }
 
+/** Produit des fichiers de l'Azeroth d'origine (icônes des objets que Forever ne décrit plus) ; OBJETS_PRODUIT_ORIGINE le remplace. */
+export function produitOrigine(): string {
+  return process.env.OBJETS_PRODUIT_ORIGINE?.trim() || "wow_classic_era";
+}
+
 async function lire(chemin: string, delaiMs = 120_000): Promise<Response> {
   const r = await fetch(`${BASE}${chemin}`, { headers: { "User-Agent": AGENT }, signal: AbortSignal.timeout(delaiMs) });
   if (!r.ok) throw new Error(`wago.tools ${chemin.split("?")[0]} : HTTP ${r.status}`);
@@ -17,10 +22,10 @@ async function lire(chemin: string, delaiMs = 120_000): Promise<Response> {
 }
 
 /** Dernière version publiée du produit suivi, par exemple « 1.60.1.70707 ». */
-export async function derniereVersion(): Promise<string> {
+export async function derniereVersion(nomProduit: string = produit()): Promise<string> {
   const json = (await (await lire("/api/builds", 30_000)).json()) as Record<string, { version?: string; created_at?: string }[]>;
-  const builds = json?.[produit()];
-  if (!Array.isArray(builds) || !builds.length) throw new Error(`Produit « ${produit()} » introuvable sur wago.tools.`);
+  const builds = json?.[nomProduit];
+  if (!Array.isArray(builds) || !builds.length) throw new Error(`Produit « ${nomProduit} » introuvable sur wago.tools.`);
   const tries = [...builds].sort((a, b) => String(b.created_at ?? "").localeCompare(String(a.created_at ?? "")));
   const v = tries[0]?.version;
   if (!v || !/^[\d.]+$/.test(v)) throw new Error("Version illisible sur wago.tools.");

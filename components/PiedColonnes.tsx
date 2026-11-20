@@ -12,6 +12,7 @@ const COLONNES: Record<"fr" | "en", Colonne[]> = {
       titre: "Guides",
       liens: [
         ["/guides/parcours/", "Guide de 1 à 60"],
+        ["/addon/", "Addon TaverneRoutes"],
         ["/guides/bien-demarrer/", "Bien débuter"],
         ["/guides/zones-de-depart/", "Zones de départ"],
         ["/guides/zones-par-niveau/", "Zones par niveau"],
@@ -62,6 +63,7 @@ const COLONNES: Record<"fr" | "en", Colonne[]> = {
       titre: "Guides",
       liens: [
         ["/en/leveling-guide/", "Leveling guide 1-60"],
+        ["/en/addon/", "TaverneRoutes addon"],
         ["/en/guides/getting-started/", "Getting started"],
         ["/en/guides/starting-zones/", "Starting zones"],
         ["/en/guides/zones-by-level/", "Zones by level"],

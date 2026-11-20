@@ -62,5 +62,19 @@ const ICONES_PRESENTES = new Map<number, boolean>();
 export function iconeSortPresente(fichier: number): string {
   if (!fichier) return "";
   if (!ICONES_PRESENTES.has(fichier)) ICONES_PRESENTES.set(fichier, existsSync(path.join(process.cwd(), "public", "images", "jeu", "sorts", `${fichier}.png`)));
-  return ICONES_PRESENTES.get(fichier) ? iconeSort(fichier) : "";
+  // Icône absente du dossier (sort ajouté après le dernier `npm run sorts:jeu`) : servie par le site depuis les fichiers du jeu.
+  return ICONES_PRESENTES.get(fichier) ? iconeSort(fichier) : `/jeu/icones-sorts/${fichier}/`;
+}
+
+let iconesConnues: Set<number> | null = null;
+/** Identifiants des icônes citées par les sorts, talents, familiers et traits (français et anglais) : seules celles-là sont servies. */
+export function iconeSortConnue(fichier: number): boolean {
+  if (!iconesConnues) {
+    iconesConnues = new Set();
+    for (const langue of ["fr", "en"] as const) {
+      const texte = readFileSync(path.join(process.cwd(), `content/sorts-jeu${suffixe(langue)}.json`), "utf8");
+      for (const m of texte.matchAll(/"icone":(\d+)/g)) iconesConnues.add(Number(m[1]));
+    }
+  }
+  return fichier > 0 && iconesConnues.has(fichier);
 }

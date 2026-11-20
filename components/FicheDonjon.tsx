@@ -49,10 +49,14 @@ const TXT = {
   },
 };
 
-/** Case d'icône d'un objet que la base du site ne connaît pas : bordure de la couleur de sa qualité. */
-function IconeInconnue({ q }: { q: number }) {
+/**
+ * Icône d'un objet que la base du site ne connaît pas (butin d'origine absent de Forever) : l'image est servie par
+ * /base-de-donnees/icones/origine/<id>/ (icône des fichiers de Classic Era une fois notée, sinon un « ? »), bordure de la couleur de sa qualité.
+ */
+function IconeInconnue({ q, id }: { q: number; id: number }) {
   return (
-    <span className="icone-objet" aria-hidden="true" style={{ width: 36, height: 36, borderColor: qualite(q).couleur, display: "grid", placeItems: "center", color: "var(--texte-doux, #8a7f6c)", fontSize: 16 }}>?</span>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img className="icone-objet" src={`/base-de-donnees/icones/origine/${id}/`} alt="" width={36} height={36} loading="lazy" style={{ borderColor: qualite(q).couleur }} />
   );
 }
 
@@ -79,7 +83,7 @@ function TableauButin({ boss, objets, langue }: { boss: BossDonjon; objets: Map<
                     <span className="cellule-objet"><IconeObjet objet={o} /><NomObjet objet={o} langue={langue} />{b.q ? <span className="doux" style={{ fontSize: 13 }}> · {t.quete}</span> : null}</span>
                   ) : (
                     <span className="cellule-objet">
-                      <IconeInconnue q={orig!.q} />
+                      <IconeInconnue q={orig!.q} id={b.i} />
                       <span>
                         <span className="nom-objet" style={{ color: qualite(orig!.q).couleur }}>{en ? orig!.en : orig!.n}</span>
                         <span className="doux" style={{ fontSize: 13, display: "block" }}>{[place, b.q ? t.quete : null, t.horsForever].filter(Boolean).join(" · ")}</span>
@@ -119,7 +123,7 @@ export function TableauReleve({ releve, objets, langue }: { releve: CreatureRele
                     <span className="cellule-objet"><IconeObjet objet={o} /><NomObjet objet={o} langue={langue} /></span>
                   ) : (
                     <span className="cellule-objet">
-                      <IconeInconnue q={x.qualite} />
+                      <IconeInconnue q={x.qualite} id={x.id} />
                       <span className="nom-objet" style={{ color: qualite(x.qualite).couleur }}>{x.nom || `#${x.id}`}</span>
                     </span>
                   )}
