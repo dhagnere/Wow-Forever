@@ -6,7 +6,7 @@ import { languesDe } from "@/lib/anglais";
 import { Ariane } from "@/components/Ariane";
 import { IconeClasse } from "@/components/IconeClasse";
 import { CalculateurTalents, type ArbreVue } from "@/components/CalculateurTalents";
-import { iconeSort, sortsDeClasse } from "@/lib/sorts";
+import { iconeSortPresente, sortsDeClasse } from "@/lib/sorts";
 import { ECRAN_CLASSE, fondBandeau } from "@/lib/ecrans";
 import { POINTS_MAX } from "@/lib/calculateur";
 
@@ -34,9 +34,9 @@ export default async function PageCalculateur({ params }: Props) {
   const arbres: ArbreVue[] = sorts.specialisations.map((s) => ({
     slug: s.slug,
     nom: s.nom,
-    icone: s.icone ? iconeSort(s.icone) : "",
+    icone: iconeSortPresente(s.icone),
     talents: s.talents.map((t) => ({
-      id: t.id, nom: t.nom, icone: t.icone ? iconeSort(t.icone) : "", palier: t.palier, colonne: t.colonne, rangs: t.rangs, niveau: t.niveau,
+      id: t.id, nom: t.nom, icone: iconeSortPresente(t.icone), palier: t.palier, colonne: t.colonne, rangs: t.rangs, niveau: t.niveau,
       description: t.premier, descriptions: t.descriptions ?? [t.premier], prerequisId: t.prerequisId, prerequis: t.prerequis, actif: t.actif,
     })),
   }));

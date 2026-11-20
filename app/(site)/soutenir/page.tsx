@@ -52,12 +52,16 @@ export default function Soutenir() {
           <li>Pas de contrepartie promise que la Taverne ne pourrait pas tenir.</li>
         </ul>
 
-        <h2>Bon à savoir</h2>
-        <p>
-          Les dons sont versés par {SITE.plateformeDon || "[plateforme de dons]"}, qui encaisse le paiement : la Taverne ne voit jamais vos
-          coordonnées bancaires. Ils sont faits à un particulier et ne donnent pas droit à une réduction d&apos;impôt. Un don mensuel s&apos;arrête
-          en un clic depuis votre compte sur la plateforme.
-        </p>
+        {ouvert ? (
+          <>
+            <h2>Bon à savoir</h2>
+            <p>
+              Les dons sont versés par {SITE.plateformeDon || "la plateforme de dons"}, qui encaisse le paiement : la Taverne ne voit jamais vos
+              coordonnées bancaires. Ils sont faits à un particulier et ne donnent pas droit à une réduction d&apos;impôt. Un don mensuel s&apos;arrête
+              en un clic depuis votre compte sur la plateforme.
+            </p>
+          </>
+        ) : null}
 
         <h2>Aider sans payer</h2>
         <ul>

@@ -119,6 +119,7 @@ npm run base:donjons    # sans chemin : bases du dossier « sources » voisin ; 
 npm run base:quetes     # sans chemin : bases du dossier « sources » voisin du projet (classic-db, azerothcore-wotlk, QuestieDB pris d'office) ; npm run base:quetes:en pour l'anglais ; ou npm run base:quetes -- <dump CMaNGOS> <db_world AzerothCore> --questie <clone QuestieDB> : quêtes de classe et parcours de 1 à 60, quêtes de Forever comprises → content/quetes-jeu.json (fichier versionné ; chemins réels, sans chevrons, entre guillemets sous PowerShell)
 npm run base:quetes -- <dump CMaNGOS> <db_world AzerothCore> --questie <clone QuestieDB> --en  # même chose en anglais → content/quetes-jeu.en.json, content/guide-jeu.en.json
 npm run visuels:generer  # PNG de l'enseigne, de l'icône du site et de l'avatar de Jobwow, depuis visuels/
+npm run verifier:liens   # site lancé en local (npm start) : explore tous les liens internes, ancres, canonical, hreflang, titres doublons, pages orphelines → verifier-liens.json
 npm run visuels:partage  # image de partage par défaut (Open Graph, 1200 × 630) → public/images/partage-taverne-1200x630.jpg (IMAGE_PARTAGE de lib/referencement.ts)
 npm run cartes:jeu       # cartes du monde (continents, zones, Zéphras) assemblées depuis les tuiles du jeu → public/images/jeu/cartes/
 npm run ecrans:jeu       # écrans de chargement du jeu (config/ecrans.ts) → public/images/jeu/ecrans/, en 1600 et 800 pixels

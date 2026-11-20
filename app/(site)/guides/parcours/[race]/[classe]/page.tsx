@@ -36,8 +36,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const c = lire(await params);
   if (!c) return {};
   return {
-    title: `Guide de 1 à 60 : ${c.race.nom} ${c.classe.nom.toLowerCase()} sur WoW Forever`,
-    description: `La route de 1 à 60 du ${c.race.nom.toLowerCase()} ${c.classe.nom.toLowerCase()} sur WoW Forever : zones dans l'ordre, chaque quête avec ses PNJ sur la carte, quêtes de classe comprises, et progression à cocher.`,
+    title: `Guide de 1 à 60 : ${nomRace(c.race)} ${c.classe.nom.toLowerCase()} sur WoW Forever`,
+    description: `La route de 1 à 60 du ${c.race.skyborne ? `Skyborne ${c.classe.nom.toLowerCase()} (${c.race.faction === "alliance" ? "Alliance" : "Horde"})` : `${c.race.nom.toLowerCase()} ${c.classe.nom.toLowerCase()}`} sur WoW Forever : zones dans l'ordre, chaque quête avec ses PNJ sur la carte, quêtes de classe comprises, et progression à cocher.`,
     alternates: { canonical: `/guides/parcours/${c.race.slug}/${c.classe.slug}/`, languages: languesDe(`/guides/parcours/${c.race.slug}/${c.classe.slug}/`) },
   };
 }

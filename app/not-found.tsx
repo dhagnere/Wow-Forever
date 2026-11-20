@@ -14,9 +14,13 @@ export default function Introuvable() {
         <h1 className="titre" style={{ fontSize: 40 }}>Vous vous êtes égaré dans les Rives claires</h1>
         <p className="doux">Cette page n&apos;existe pas, ou plus. Jobwow vous raccompagne au comptoir.</p>
         <div className="actions-bandeau" style={{ justifyContent: "center" }}>
-          <Link href="/actualites/" className="btn btn-or" data-cta="retour-404">Retour au Comptoir</Link>
+          <Link href="/" className="btn btn-or" data-cta="retour-404">Retour à l&apos;accueil</Link>
           <Link href="/recherche/" className="btn btn-contour" data-cta="recherche-404">Chercher un article</Link>
         </div>
+        <p className="doux" style={{ marginTop: 24 }}>
+          Ou filez droit vers <Link href="/guides/parcours/">le guide de 1 à 60</Link>, <Link href="/classes/">les classes et talents</Link>,{" "}
+          <Link href="/base-de-donnees/">la base d&apos;objets</Link> ou <Link href="/actualites/">l&apos;actualité</Link>.
+        </p>
       </div>
       <Mesure />
       {SITE.gtmId ? (

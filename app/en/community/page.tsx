@@ -28,20 +28,23 @@ export default function CommunityEn() {
           <Ariane langue="en" etapes={[{ nom: "News", href: "/en/news/" }, { nom: "Community" }]} />
           <p className="surtitre">Among players</p>
           <h1>The <span className="accent">Tavern</span> community</h1>
-          <p className="chapo">The news is read on the site; it is discussed on Discord. Pull up a chair.</p>
+          <p className="chapo">
+            {SITE.discord
+              ? "The news is read on the site; it is discussed on Discord. Pull up a chair."
+              : "The news is read on the site; it is discussed on the Facebook page until the Tavern's Discord opens."}
+          </p>
           <div className="actions-bandeau">
             {SITE.discord ? (
               <a href={SITE.discord} className="btn btn-or" rel="noopener noreferrer" data-cta="discord-communaute-en">Join the Discord</a>
-            ) : (
-              <span className="btn btn-or" aria-disabled="true">Discord: opening soon</span>
-            )}
-            <a href={SITE.facebook} className="btn btn-contour" rel="noopener noreferrer" data-cta="facebook-communaute-en">Follow the Facebook page</a>
+            ) : null}
+            <a href={SITE.facebook} className={SITE.discord ? "btn btn-contour" : "btn btn-or"} rel="noopener noreferrer" data-cta="facebook-communaute-en">Follow the Facebook page</a>
+            {SITE.discord ? null : <Link href="/en/newsletter/" className="btn btn-contour" data-cta="lettre-communaute-en">Get the newsletter</Link>}
           </div>
         </div>
       </section>
       <div className="wrap contenu article corps">
         <p>The Tavern&apos;s Discord is mostly French-speaking: English-speaking players are welcome, and the channels keep their French names.</p>
-        <h2>The channels</h2>
+        <h2>{SITE.discord ? "The channels" : "Channels of the upcoming Discord"}</h2>
         <ul>
           {SALONS.map(([nom, role]) => <li key={nom}><strong>{nom}</strong>: {role}.</li>)}
         </ul>

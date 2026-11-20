@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import type { Familiers, Specialisation, TraitRacial } from "@/modules/veille";
 import { suffixe, type Langue } from "./langue";
@@ -53,3 +53,14 @@ export function familiersDeClasse(slug: string, langue: Langue = "fr"): Familier
 }
 
 export const iconeSort = (fichier: number) => `/images/jeu/sorts/${fichier}.png`;
+
+const ICONES_PRESENTES = new Map<number, boolean>();
+/**
+ * Adresse de l'icône d'un sort si son fichier est bien dans public/images/jeu/sorts/, sinon chaîne vide
+ * (case vide à l'affichage plutôt qu'une image cassée : une donnée anglaise peut citer une icône que `npm run sorts:jeu` n'a pas encore téléchargée).
+ */
+export function iconeSortPresente(fichier: number): string {
+  if (!fichier) return "";
+  if (!ICONES_PRESENTES.has(fichier)) ICONES_PRESENTES.set(fichier, existsSync(path.join(process.cwd(), "public", "images", "jeu", "sorts", `${fichier}.png`)));
+  return ICONES_PRESENTES.get(fichier) ? iconeSort(fichier) : "";
+}

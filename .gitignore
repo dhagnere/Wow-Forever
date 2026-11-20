@@ -157,3 +157,4 @@ next-env.d.ts
 
 # Environnement Python de la voix de Jobwow (npm run voix:installer)
 .voix/
+verifier-liens.json
