@@ -4,9 +4,9 @@ import { notFound } from "next/navigation";
 import { DONJONS, NOTE_DONJONS } from "@/content/monde";
 import { DONJONS_ORIGINE, RAIDS_ORIGINE, raidOrigine } from "@/content/reference";
 import { estPilier } from "@/config/taxonomie";
-import { butinReleveInstance, objetsParIds, type CreatureReleve, type ObjetResume } from "@/modules/veille";
+import { butinReleveInstance, type CreatureReleve, type ObjetResume } from "@/modules/veille";
 import { languesDe } from "@/lib/anglais";
-import { donjonOrigine, donneesDonjon, niveaux, objetsDuDonjon, quetesDonjonsVerifiees, sourceDonjons } from "@/lib/donjons";
+import { donjonOrigine, donneesDonjon, objetsButinDonjon, niveaux, objetsDuDonjon, quetesDonjonsVerifiees, sourceDonjons } from "@/lib/donjons";
 import { Ariane } from "@/components/Ariane";
 import { ArticlesLies } from "@/components/ArticlesLies";
 import { ButinReleveInstance, FicheDonjon } from "@/components/FicheDonjon";
@@ -34,8 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /** Butin d'un donjon lu dans la base d'objets ; une base injoignable donne un butin vide, sans casser la page. */
 async function objetsDe(ids: number[]): Promise<{ objets: Map<number, ObjetResume>; lu: boolean }> {
   try {
-    const liste = await objetsParIds(ids);
-    return { objets: new Map(liste.map((o) => [o.id, o])), lu: true };
+    return { objets: await objetsButinDonjon(ids), lu: true };
   } catch (e) {
     console.error("[donjons] butin :", e instanceof Error ? e.message : e);
     return { objets: new Map(), lu: false };

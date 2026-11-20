@@ -269,6 +269,34 @@ export async function objetsParIds(ids: number[], langue: LangueObjets = "fr"): 
   return liste.map((i) => parId.get(i)).filter((o): o is ObjetResume => !!o);
 }
 
+/** Objet de l'Azeroth d'origine décrit par les bases libres : identifiant d'origine, nom français, nom anglais, qualité. */
+export interface ObjetDOrigine { id: number; n: string; en: string; q: number }
+
+/**
+ * Objets d'origine absents de la base sous leur identifiant, retrouvés dans les fichiers de Forever par leur nom (français ou
+ * anglais, comparé sous sa forme de recherche) et leur qualité : Forever a renuméroté une partie du butin. Identifiant d'origine →
+ * objet de Forever ; un nom porté par plusieurs objets de même qualité prend le plus petit identifiant.
+ */
+export async function objetsParNoms(entrees: ObjetDOrigine[], langue: LangueObjets = "fr"): Promise<Map<number, ObjetResume>> {
+  const propres = entrees.filter((e) => Number.isSafeInteger(e.id) && e.id > 0 && (e.n || e.en)).slice(0, 2000);
+  if (!propres.length) return new Map();
+  const { rows } = await pool().query<{ origine: number; id: number }>(
+    `SELECT DISTINCT ON (e.origine) e.origine, o.id
+       FROM UNNEST($1::int[], $2::text[], $3::text[], $4::int[]) AS e(origine, nf, ne, q)
+       JOIN objets o ON o.qualite = e.q AND ((e.nf <> '' AND o.nom_recherche = e.nf) OR (e.ne <> '' AND o.nom_recherche_en = e.ne))
+      ORDER BY e.origine, o.id`,
+    [propres.map((e) => e.id), propres.map((e) => (e.n ? normaliser(e.n) : "")), propres.map((e) => (e.en ? normaliser(e.en) : "")), propres.map((e) => e.q)],
+  );
+  if (!rows.length) return new Map();
+  const parId = new Map((await objetsParIds(rows.map((r) => r.id), langue)).map((o) => [o.id, o]));
+  const resultat = new Map<number, ObjetResume>();
+  for (const r of rows) {
+    const o = parId.get(r.id);
+    if (o) resultat.set(r.origine, o);
+  }
+  return resultat;
+}
+
 export async function lireObjet(id: number, langue: LangueObjets = "fr"): Promise<Objet | null> {
   if (!Number.isSafeInteger(id) || id <= 0) return null;
   const { rows } = await pool().query<LigneResume & {
