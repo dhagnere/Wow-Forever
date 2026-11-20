@@ -47,7 +47,7 @@ function nomLisible(nom: string, sousCategorie: boolean, en = false): string {
   return sousCategorie ? "Autres" : "Autres objets";
 }
 
-function lignes(csv: string): Ligne[] {
+export function lignes(csv: string): Ligne[] {
   return parse(csv, { columns: true, skip_empty_lines: true, relax_column_count: true, bom: true }) as Ligne[];
 }
 

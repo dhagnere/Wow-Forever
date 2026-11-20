@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { enregistrerReleveButin, lireReleveButin, supprimerSerieButin } from "@/modules/veille";
+import { enregistrerReleveButin, lireReleveButin, majIconesOrigine, supprimerSerieButin } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
 
 const PAGE = "/admin/butin/";
@@ -25,4 +25,17 @@ export async function supprimerSerie(f: FormData): Promise<void> {
   const serie = String(f.get("serie") ?? "");
   if (serie) await supprimerSerieButin(serie);
   redirect(`${PAGE}?supprime=${encodeURIComponent(serie)}`);
+}
+
+/** Relit dans les fichiers de Classic Era l'icône des objets du butin d'origine absents de Forever (aussi fait chaque nuit). */
+export async function majIcones(): Promise<void> {
+  await exigerAdmin();
+  let message: string;
+  try {
+    const b = await majIconesOrigine();
+    message = `${b.trouves} icônes notées pour ${b.cherches} objets du butin d'origine absents de Forever (fichiers ${b.version}).`;
+  } catch (e) {
+    redirect(`${PAGE}?erreur=${encodeURIComponent(`Icônes non relues : ${e instanceof Error ? e.message : String(e)}`)}`);
+  }
+  redirect(`${PAGE}?icones=${encodeURIComponent(message)}`);
 }

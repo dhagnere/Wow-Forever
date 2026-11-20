@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { seriesButin } from "@/modules/veille";
 import { exigerAdmin } from "@/lib/admin";
 import { dateLongue } from "@/lib/site";
-import { importer, supprimerSerie } from "./actions";
+import { importer, majIcones, supprimerSerie } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Butin relevé" };
 
-type Props = { searchParams: Promise<{ erreur?: string; ok?: string; supprime?: string }> };
+type Props = { searchParams: Promise<{ erreur?: string; ok?: string; supprime?: string; icones?: string }> };
 
 export default async function AdminButin({ searchParams }: Props) {
   await exigerAdmin();
@@ -24,6 +24,14 @@ export default async function AdminButin({ searchParams }: Props) {
       {q.erreur && <p className="info" role="alert" style={{ borderColor: "#ff8d7a", color: "#ffd2c9", background: "rgba(255,141,122,0.08)" }}>{q.erreur}</p>}
       {q.ok && <p className="succes" role="status">Relevé enregistré : {q.ok}. Les fiches des donjons l&apos;affichent tout de suite.</p>}
       {q.supprime && <p className="succes" role="status">Série {q.supprime} supprimée.</p>}
+      {q.icones && <p className="succes" role="status">{q.icones} Les images se chargent à la première visite de chaque fiche.</p>}
+
+      <form action={majIcones} style={{ maxWidth: 820, marginBottom: 24, display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <button type="submit" className="btn btn-contour">Mettre à jour les icônes du butin</button>
+        <span className="doux" style={{ fontSize: 14 }}>
+          Objets d&apos;origine absents de Forever : l&apos;icône est relue dans les fichiers de Classic Era (wago.tools). Fait aussi chaque nuit par l&apos;import de la base.
+        </span>
+      </form>
 
       <form action={importer} className="formulaire" style={{ maxWidth: 820, marginBottom: 32 }}>
         <div className="champ">
