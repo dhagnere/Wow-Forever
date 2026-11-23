@@ -1,7 +1,7 @@
 # TaverneMacros
 
 Les macros de votre classe, créées en un clic, pour les neuf classes : des macros de base, cochées d'office, et des
-macros au choix. Addon de La Taverne Éternelle.
+macros au choix ; une macro raciale par race et des macros communes à toutes les classes. Addon de La Taverne Éternelle.
 
 ## Commandes
 
@@ -25,7 +25,7 @@ l'installation : la macro servira dès qu'il sera connu. Identifiants et noms de
 Touches : **Maj**, **Ctrl** et **Alt** choisissent une variante en appuyant sur la macro. « Survol » : la cible sous la souris
 passe avant votre cible, puis vous-même pour un soin ou un renfort.
 
-## Guerrier (9 de base, 11 au choix)
+## Guerrier (9 de base, 18 au choix)
 
 | Macro | Effet | |
 |---|---|---|
@@ -49,8 +49,15 @@ passe avant votre cible, puis vous-même pour un soin ou un renfort.
 | Victoire | Ivresse de la victoire après une victime | au choix |
 | Coup de talent | Frappe mortelle, Sanguinaire ou Heurt de bouclier : celui de vos talents | au choix |
 | Moquerie | Coup railleur (passe en posture de combat si besoin) | au choix |
+| Désarmer | Désarmement (passe en posture défensive si besoin) | au choix |
+| Hurlement | Hurlement perçant, ralentit les ennemis proches | au choix |
+| Dernier rempart | Dernier rempart | au choix |
+| Circulaires | Attaques circulaires (passe en posture de combat si besoin) | au choix |
+| Souhait mortel | Souhait mortel | au choix |
+| Heurtoir | Heurtoir, attaque en continu | au choix |
+| Bourrasque | Bourrasque, étourdit la cible | au choix |
 
-## Paladin (8 de base, 11 au choix)
+## Paladin (8 de base, 18 au choix)
 
 | Macro | Effet | |
 |---|---|---|
@@ -73,8 +80,15 @@ passe avant votre cible, puis vous-même pour un soin ou un renfort.
 | Frappe sacrée | Frappe sacrée, attaque en continu | au choix |
 | Renvoi | Renvoi des morts-vivants sur la cible survolée, sinon votre cible | au choix |
 | Grandes bénéd. | Bénédiction supérieure de puissance · Maj : de sagesse · Ctrl : des rois | au choix |
+| Sacrifice | Bénédiction de sacrifice sur l'allié survolé, sinon votre cible | au choix |
+| Sceaux 2 | Sceau de sagesse · Maj : de lumière · Ctrl : d'autorité | au choix |
+| Horion sacré | Horion sacré : soigne l'allié survolé ou ciblé, frappe l'ennemi ciblé | au choix |
+| Repentir | Repentir (survol, sinon cible) | au choix |
+| Bouclier sacré | Bouclier sacré | au choix |
+| Rois | Bénédiction des rois (cible amie, sinon vous) | au choix |
+| Auras résist. | Aura de résistance à l'Ombre · Maj : au Givre · Ctrl : au Feu | au choix |
 
-## Chasseur (12 de base, 10 au choix)
+## Chasseur (12 de base, 17 au choix)
 
 | Macro | Effet | |
 |---|---|---|
@@ -100,8 +114,15 @@ passe avant votre cible, puis vous-même pour un soin ou un renfort.
 | Pistage | Pister les bêtes · Maj : humanoïdes · Ctrl : camouflés | au choix |
 | Dompter | Apprivoiser une bête | au choix |
 | Pièges 2 | Piège de givre · Maj : Piège explosif | au choix |
+| Contre-attaque | Contre-attaque après une parade | au choix |
+| Intimidation | Intimidation : le familier étourdit sa cible | au choix |
+| Courroux | Courroux bestial du familier | au choix |
+| Aspects 2 | Aspect de la meute · Maj : de la nature | au choix |
+| Tranquilliser | Tir tranquillisant, calme une cible enragée | au choix |
+| Bête | Connaissance des bêtes · Maj : Renvoyer le familier | au choix |
+| Précision | Aura de précision | au choix |
 
-## Voleur (9 de base, 10 au choix)
+## Voleur (9 de base, 14 au choix)
 
 | Macro | Effet | |
 |---|---|---|
@@ -124,8 +145,12 @@ passe avant votre cible, puis vous-même pour un soin ou un renfort.
 | Déluge | Déluge de lames | au choix |
 | Mutilation | Mutilation, attaque en continu | au choix |
 | Hémorragie | Hémorragie, attaque en continu | au choix |
+| Préméditation | Préméditation (en camouflage) | au choix |
+| Désarmer piège | Désarmement de piège | au choix |
+| Débiter | Débiter | au choix |
+| Sprint | Sprint | au choix |
 
-## Prêtre (8 de base, 11 au choix)
+## Prêtre (8 de base, 19 au choix)
 
 | Macro | Effet | |
 |---|---|---|
@@ -148,8 +173,16 @@ passe avant votre cible, puis vous-même pour un soin ou un renfort.
 | Prière soins | Prière de soins pour le groupe | au choix |
 | Ombre | Peste dévorante · Maj : Étreinte vampirique | au choix |
 | Lévitation | Lévitation (cible amie, sinon vous) | au choix |
+| Infusion | Infusion de puissance (survol, cible, vous) | au choix |
+| Contrôle | Contrôle mental (survol, sinon cible) | au choix |
+| Apaisement | Apaisement (survol, sinon cible) | au choix |
+| Maladies | Abolir maladie (survol, cible, vous) | au choix |
+| Prières | Prière de robustesse · Maj : Prière d'Esprit | au choix |
+| Protections | Protection contre l'Ombre · Maj : Gardien de peur · Ctrl : Esprit divin (cible amie, sinon vous) | au choix |
+| Désespoir | Prière du désespoir | au choix |
+| Puits | Puits de lumière | au choix |
 
-## Chaman (9 de base, 10 au choix)
+## Chaman (9 de base, 16 au choix)
 
 | Macro | Effet | |
 |---|---|---|
@@ -172,8 +205,14 @@ passe avant votre cible, puis vous-même pour un soin ou un renfort.
 | Rappel astral | Rappel astral | au choix |
 | Frappe tempête | Frappe-tempête, attaque en continu | au choix |
 | Arme Furie | Arme Furie-des-vents | au choix |
+| Eau | Marche sur l'eau · Maj : Respiration aquatique (cible amie, sinon vous) | au choix |
+| Vague de mana | Totem de Vague de mana | au choix |
+| Rapidité | Rapidité de la nature | au choix |
+| Totems résist. | Totem de résistance au Givre · Maj : au Feu · Ctrl : à la Nature | au choix |
+| Totems utiles | Totem de Purification des maladies · Maj : Sentinelle · Ctrl : Mur des vents | au choix |
+| Langue de feu | Totem Langue de feu | au choix |
 
-## Mage (10 de base, 13 au choix)
+## Mage (10 de base, 21 au choix)
 
 | Macro | Effet | |
 |---|---|---|
@@ -200,8 +239,16 @@ passe avant votre cible, puis vous-même pour un soin ou un renfort.
 | Portail | Portail : Orgrimmar · Maj : Fossoyeuse · Ctrl : Thunder Bluff | au choix · Horde |
 | Téléport | Téléportation : Hurlevent · Maj : Forgefer · Ctrl : Darnassus | au choix · Alliance |
 | Portail | Portail : Hurlevent · Maj : Forgefer · Ctrl : Darnassus | au choix · Alliance |
+| Chute lente | Chute lente (cible amie, sinon vous) | au choix |
+| Magie | Amplification de la magie · Maj : Atténuation (cible amie, sinon vous) | au choix |
+| Vague | Vague explosive | au choix |
+| Pyro | Explosion pyrotechnique · Maj : précédée de Présence spirituelle | au choix |
+| Recharges | Pouvoir des arcanes · Maj : Combustion · Ctrl : Morsure du froid | au choix |
+| Gemme | Invocation d'une agate de mana · Maj : d'une jade | au choix |
+| Illumination | Illumination des arcanes, pour le groupe | au choix |
+| Armure mage | Armure du mage | au choix |
 
-## Démoniste (9 de base, 11 au choix)
+## Démoniste (9 de base, 19 au choix)
 
 | Macro | Effet | |
 |---|---|---|
@@ -225,8 +272,16 @@ passe avant votre cible, puis vous-même pour un soin ou un renfort.
 | Drain mana | Drain de mana | au choix |
 | Rituel | Rituel d'invocation | au choix |
 | Asservir | Asservir démon (survol, sinon cible) | au choix |
+| Brûlure | Brûlure de l'ombre | au choix |
+| Conflagration | Conflagration | au choix |
+| Siphon | Siphon de vie | au choix |
+| Gardien ombre | Gardien de l'ombre | au choix |
+| Respiration | Respiration interminable · Maj : Détection de l'invisibilité (cible amie, sinon vous) | au choix |
+| Inferno | Inferno à l'endroit du curseur | au choix |
+| Lien | Lien spirituel | au choix |
+| Pierre de sort | Création de Pierre de sort | au choix |
 
-## Druide (9 de base, 12 au choix)
+## Druide (9 de base, 26 au choix)
 
 | Macro | Effet | |
 |---|---|---|
@@ -251,3 +306,46 @@ passe avant votre cible, puis vous-même pour un soin ou un renfort.
 | Hibernation | Hibernation (survol, sinon cible) | au choix |
 | Écorce | Écorce | au choix |
 | Purif. druide | Délivrance de la malédiction (survol, cible, vous) · Maj : Abolir le poison | au choix |
+| Emprise | Emprise de la nature | au choix |
+| Ouragan | Ouragan · Maj : Tranquillité | au choix |
+| Prompte | Prompte guérison (survol, cible, vous) · Maj : Croissance sauvage | au choix |
+| Rapidité | Rapidité de la nature | au choix |
+| Célérité | Célérité (passe en forme de félin si besoin) | au choix |
+| Morsure | Morsure féroce en forme de félin | au choix |
+| Traquenard | Traquenard en félin camouflé, sinon Rôder | au choix |
+| Charge ours | Charge farouche en forme d'ours | au choix |
+| Ours défense | Régénération frénétique · Maj : Rugissement provocateur · Ctrl : Enrager (forme d'ours) | au choix |
+| Balayage | Balayage en forme d'ours | au choix |
+| Sélénien | Forme de sélénien | au choix |
+| Don du fauve | Don du fauve, pour le groupe | au choix |
+| Reflet-de-Lune | Téléportation : Reflet-de-Lune | au choix |
+| Aquatique | Forme aquatique | au choix |
+
+## Macro raciale (toutes les classes, cochée d'office)
+
+Une macro « Raciale » par race, avec les capacités raciales de Forever (lues dans les fichiers du jeu). Pour une race que le jeu nomme autrement, l'addon reconnaît la race à la capacité que le personnage connaît.
+
+| Race | Macro « Raciale » |
+|---|---|
+| Humain | Volonté de survie (étourdissements) · Maj : Perception |
+| Nain | Forme de pierre · Maj : Découverte de trésors |
+| Elfe de la nuit | Camouflage dans l'ombre · Maj : Lumière d'Élune |
+| Gnome | Maître de l'évasion · Maj : Eurêka ! |
+| Orc | Fureur sanguinaire · Maj : Bris de malédictions |
+| Mort-vivant | Volonté des Réprouvés (peur, charme, sommeil) · Maj : Cannibalisme |
+| Tauren | Choc martial · Maj : Culture |
+| Troll | Berserker · Maj : Régénération rapide |
+| Skyborne | Lecture des lignes telluriques · Maj : Marche sur l'air · Ctrl : Vue céleste |
+
+## Macros communes (toutes les classes, au choix)
+
+Les objets sont pris du meilleur au moins bon : le premier présent dans vos sacs sert.
+
+| Macro | Effet | |
+|---|---|---|
+| Foyer | Pierre de foyer | au choix |
+| Potion | la meilleure potion de soins de vos sacs | au choix |
+| Bandage | le meilleur bandage de vos sacs, sur vous | au choix |
+| Cible | cible l'ennemi le plus proche quand vous n'avez pas d'ennemi vivant ciblé | au choix |
+| Assistance | prend la cible de l'allié survolé, sinon de votre cible | au choix |
+| Crâne | pose le crâne sur votre cible | au choix |

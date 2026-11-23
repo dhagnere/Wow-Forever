@@ -84,6 +84,39 @@ return n1 .. " " .. tostring(MACROS_JEU["Tourbillon"] ~= nil) .. " " .. tostring
     expect(r).toBe("9 true true true");
   });
 
+  it("ajoute la macro raciale du personnage (cochée d'office) et les macros communes à toutes les classes", () => {
+    const r = executer(JEU, MACROS, ADDON, `
+local res = {}
+-- race connue du jeu
+JOUEUR.classe = "PRIEST"
+function UnitRace() return "Orc", "Orc" end
+local _, macros = TaverneMacros.Classe()
+local raciale, communes = nil, 0
+for _, m in ipairs(macros) do
+  if m.nom == "Raciale" then raciale = m end
+  if m.genre == "commune" then communes = communes + 1 end
+end
+res[#res + 1] = tostring(raciale and raciale.base) .. ":" .. TaverneMacros.CorpsDe(raciale) .. ":" .. communes
+-- race que la table ne connaît pas : reconnue à la capacité raciale apprise (Skyborne)
+function UnitRace() return "Célestien", "Inconnue" end
+function IsPlayerSpell(id) return id == 1259705 end
+local _, m2 = TaverneMacros.Classe()
+for _, m in ipairs(m2) do if m.nom == "Raciale" then res[#res + 1] = TaverneMacros.CorpsDe(m) end end
+-- installation : la macro raciale part avec les macros de base
+function UnitRace() return "Humain", "Human" end
+IsPlayerSpell = nil
+TaverneMacros.Installer(false)
+res[#res + 1] = tostring(MACROS_JEU["Raciale"] ~= nil) .. ":" .. tostring(MACROS_JEU["Foyer"] == nil)
+return table.concat(res, "|")`);
+    const [orc, skyborne, installe] = r.split("|");
+    expect(orc).toMatch(/^true:/);
+    expect(orc).toContain("Fureur sanguinaire");
+    expect(orc).toContain("Bris de malédictions");
+    expect(orc.endsWith(":6")).toBe(true);
+    expect(skyborne).toContain("Lecture des lignes telluriques");
+    expect(installe).toBe("true:true");
+  });
+
   it("garde les téléportations de mage à la faction du personnage", () => {
     const r = executer(JEU, MACROS, ADDON, `
 JOUEUR.classe, JOUEUR.faction = "MAGE", "Alliance"

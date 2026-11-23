@@ -11,7 +11,9 @@
       /tm nourriture <nom>   chasseur : nourriture utilisée par la macro « Nourrir »
       /tm retirer            supprime toutes les macros créées par l'addon
 
-    Chaque classe a ses macros de base (cochées d'office) et des macros au choix (Macros.lua).
+    Chaque classe a ses macros de base (cochées d'office) et des macros au choix (Macros.lua). S'y ajoutent
+    la macro raciale du personnage (cochée d'office) et des macros communes à toutes les classes (au choix :
+    pierre de foyer, potion, bandage, cible, assistance, crâne).
     Le personnage n'a que 18 places de macros : la fenêtre compte celles qui restent.
     Les noms des sorts viennent du jeu (GetSpellInfo, d'après leur identifiant) : les macros
     marchent avec un client français comme anglais. Une macro dont le sort n'est pas encore
@@ -52,7 +54,34 @@ local function DB()
     return TaverneMacrosDB
 end
 
---- Macros de la classe du personnage, celles de l'autre faction écartées.
+local function Connu(id)
+    if not id then return false end
+    if IsPlayerSpell and IsPlayerSpell(id) then return true end
+    return IsSpellKnown and IsSpellKnown(id) or false
+end
+
+--- Vrai si le personnage connaît l'un des sorts cités par la macro (pour reconnaître sa race).
+local function SortConnu(m)
+    for cle in m.modele:gmatch("{([^}]+)}") do
+        local s = ns.SORTS[cle]
+        if s and Connu(s[1]) then return true end
+    end
+    return false
+end
+
+--- Macros raciales du personnage : d'après la race du jeu, sinon (race inconnue de la table, comme une
+--- race propre à Forever) d'après la capacité raciale que le personnage connaît.
+local function Raciales()
+    local races = ns.MACROS_RACES or {}
+    local race = UnitRace and select(2, UnitRace("player"))
+    if race and races[race] then return races[race] end
+    for _, liste in pairs(races) do
+        if liste[1] and SortConnu(liste[1]) then return liste end
+    end
+    return {}
+end
+
+--- Macros du personnage : celles de sa classe (l'autre faction écartée), sa macro raciale, puis les communes.
 local function Classe()
     local classe = select(2, UnitClass("player"))
     local toutes = ns.MACROS[classe or ""]
@@ -62,6 +91,8 @@ local function Classe()
     for _, m in ipairs(toutes) do
         if not m.faction or not faction or m.faction == faction then out[#out + 1] = m end
     end
+    for _, m in ipairs(Raciales()) do m.genre = "raciale"; out[#out + 1] = m end
+    for _, m in ipairs(ns.MACROS_COMMUNES or {}) do m.genre = "commune"; out[#out + 1] = m end
     return classe, out
 end
 
@@ -272,7 +303,8 @@ local function CreerFenetre()
             c:SetChecked(Choisie(m))
             local index = GetMacroIndexByName(m.nom)
             local etat = (index and index > 0) and " |cff80ff80(installée)|r" or ""
-            c.libelle:SetText(m.nom .. (m.base and "" or " |cffaaaaaa· au choix|r") .. etat)
+            local genre = m.genre == "raciale" and " |cffaaaaaa· raciale|r" or m.genre == "commune" and " |cffaaaaaa· toutes classes|r" or ""
+            c.libelle:SetText(m.nom .. genre .. (m.base and "" or " |cffaaaaaa· au choix|r") .. etat)
             c.aide:SetText(m.aide)
             c:ClearAllPoints()
             c:SetPoint("TOPLEFT", 4, -y)
@@ -324,4 +356,4 @@ end
 
 -- API pour les tests
 _G.TaverneMacros = { Corps = Corps, CorpsDe = CorpsDe, Installer = Installer, Retirer = Retirer, Choisie = Choisie,
-    Choisir = Choisir, Classe = Classe, ns = ns }
+    Choisir = Choisir, Classe = Classe, Raciales = Raciales, ns = ns }
