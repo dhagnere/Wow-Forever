@@ -95,7 +95,8 @@ local function RefreshQuestLog()
             end
         end
         if not title and GetQuestLogTitle then
-            title, _, _, isHeader = GetQuestLogTitle(i)
+            local _
+            title, _, _, isHeader = GetQuestLogTitle(i) -- « _ » local : écrire la globale « _ » peut contaminer l'interface
         end
         if title and not isHeader then
             questLogNames[NormalizeName(title)] = true

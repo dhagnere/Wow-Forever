@@ -221,7 +221,9 @@ local function Creer()
         ecoule = ecoule + dt
         if ecoule < 0.25 then return end
         ecoule = 0
-        local _, dist = Window.Direction and Window.Direction(self.etape)
+        -- « a and f() » ne garde que la première valeur de f : la distance (deuxième valeur) était toujours perdue.
+        local dist
+        if Window.Direction then dist = select(2, Window.Direction(self.etape)) end
         local t = self.lieuBase or ""
         if dist then t = (t ~= "" and (t .. " · ") or "") .. L.DIST:format(math.floor(dist + 0.5)) end
         if t ~= self.lieuTexte then self.lieuTexte = t; self.lieu:SetText(t) end
